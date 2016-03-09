@@ -4,10 +4,13 @@ from math import sin
 from math import radians
 
 class Robot():
-    def __init__(self,x,y, theta):
+    def __init__(self,x,y,theta):
         self.x = x
         self.y = y
         self.theta = radians(theta)
+        self.new_x = x
+        self.new_y = y
+
 
     def draw_robot(self):
         pygame.draw.circle(screen,(0,0,0),(self.x ,self.y),22,0)
@@ -17,13 +20,16 @@ class Robot():
         pygame.draw.line(screen,(0,0,0),(self.x ,self.y),(x_theta+self.x ,y_theta+self.y),3)
         font = pygame.font.Font(None, 20)
         text = font.render("B1", 1, (10, 10, 10))
-        textpos = (self.x -5, self.y-40)
-        #tela.blit(robot,(x,y))
+        textpos = (self.x - 5, self.y - 40)
         screen.blit(text, textpos)
 
-    def movement(self,front,rotate):
-        self.x = int(self.x + cos(radians(rotate))*front)
-        self.y = int(self.y + sin(radians(rotate))*front)
+
+    def motion_model(self,front,rotate):
+        self.new_x += cos(radians(rotate))*front
+        self.new_y += sin(radians(rotate))*front
+
+        self.x = int(self.new_x)
+        self.y = int(self.new_y)
 
         if self.x > 1040:
            self.x = 1040

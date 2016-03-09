@@ -29,9 +29,9 @@ while 1:
 
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
-            rotate += 45 % 360
+            rotate = (rotate + 45) % 360
         if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
-            rotate -= 45 % 360
+            rotate = (rotate - 45) % 360
 
         if event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
             front = 1
@@ -60,8 +60,8 @@ while 1:
     if not robots:
         pass
     else:
-        print 'no empty'
-        robots[0].movement(front, rotate)
+        robots[0].motion_model(front, rotate)
+
 
 
     pygame.display.flip()
