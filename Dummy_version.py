@@ -1,126 +1,194 @@
-#local
-from robot import *
-from collisions import *
+"""
+Show the proper way to organize a game using the a game class.
 
-#python
-from math import cos
+Sample Python/Pygame Programs
+Simpson College Computer Science
+http://programarcadegames.com/
+http://simpson.edu/computer-science/
 
-import sys
+Explanation video: http://youtu.be/O4Y5KrNgP_c
+"""
 
-def update_mouse_pos():
-    mx, my = pygame.mouse.get_pos()
-    return mx, my
+import pygame
+import random
 
+# --- Global constants ---
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+GREEN = (0, 255, 0)
+RED = (255, 0, 0)
 
-def draw_ball(x,y):
-    pygame.draw.circle(screen,(255,255,255),(x,y),10,0)
+SCREEN_WIDTH = 700
+SCREEN_HEIGHT = 500
 
-rotate = 0
-ball = False
-x_ball, y_ball = -10, -10
-front = 0
-x,y = 0, 0
-robots = [0]
-robot_index_control = 0
-rotate_control = 0
-
-while 1:
-
-    mx, my = pygame.mouse.get_pos()
-    #print mx, my
-
-    for event in pygame.event.get():
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
-            rotate_control = 1
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
-            rotate_control = -1
-
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
-            front = 1
-
-        if event.type == pygame.KEYUP and event.key == pygame.K_UP:
-            front = 0
-
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
-            front = -1
-
-        if event.type == pygame.KEYUP and event.key == pygame.K_DOWN:
-            front = 0
-
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
-            robot = Robot(mx,my,0)
-            robots.append(robot)
-
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_0:
-            robot_index_control = 0
-
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_1:
-            robot_index_control = 1
-
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_2:
-            robot_index_control = 2
-
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_3:
-            robot_index_control = 3
-
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_4:
-            robot_index_control = 4
-
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_5:
-            robot_index_control = 5
-
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_6:
-            robot_index_control = 6
-
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_7:
-            robot_index_control = 7
-
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_8:
-            robot_index_control = 8
-
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_9:
-            robot_index_control = 9
+# --- Classes ---
 
 
-        #if event.type == pygame.KEYDOWN and event.key == pygame.K_a:
-        #    robot = pygame.transform.rotate(robot,45)
+class Block(pygame.sprite.Sprite):
+    """ This class represents a simple block the player collects. """
 
-        if event.type == pygame.QUIT:
-            sys.exit()
+    def __init__(self):
+        """ Constructor, create the image of the block. """
+        super(Block,self).__init__()
+        self.image = pygame.Surface([40, 40])
+        self.image.fill(BLACK)
+        self.image.set_colorkey(BLACK)
+        pygame.draw.circle(self.image,(0,150,0),(20,20),20,0)
+        self.rect = self.image.get_rect()
 
-    draw_soccer_field()
+    def reset_pos(self):
+        """ Called when the block is 'collected' or falls off
+            the screen. """
+        self.rect.y = random.randrange(-300, -20)
+        self.rect.x = random.randrange(SCREEN_WIDTH)
 
+    def update(self):
+        """ Automatically called when we need to move the block. """
+        self.rect.y += 1
 
-    rotate = 0
-
-    if rotate_control == 1:
-        rotate = 15
-        rotate_control = 0
-
-
-    elif rotate_control == -1:
-        rotate = -15
-        rotate_control = 0
-
-    if robot_index_control == 0:
-        for robot_index in range(1,len(robots)):
-          robots[robot_index].motion_model(front, rotate)
-    else:
-        robots[robot_index_control].motion_model(front, rotate)
-        if len(robots) > 3:
-            if collide(robots[1], robots[2]):
-                print 'colidiu'
+        if self.rect.y > SCREEN_HEIGHT + self.rect.height:
+            self.reset_pos()
 
 
-    if robots:
-        for robot_index in range(1,len(robots)):
-            robots[robot_index].draw_robot(robot_index)
+class Player(pygame.sprite.Sprite):
+    """ This class represents the player. """
+    def __init__(self):
+        super(Player, self).__init__()
+        self.image = pygame.Surface([40, 40])
+        self.image.fill(WHITE)
+        self.image.set_colorkey(WHITE)
+        pygame.draw.circle(self.image,(150,0,0),(20,20),20,0)
+        self.rect = self.image.get_rect()
+
+    def update(self):
+        """ Update the player location. """
+        pos = pygame.mouse.get_pos()
+        self.rect.x = pos[0]
+        self.rect.y = pos[1]
 
 
+class Game(object):
+    """ This class represents an instance of the game. If we need to
+        reset the game we'd just need to create a new instance of this
+        class. """
+
+    def __init__(self):
+        """ Constructor. Create all our attributes and initialize
+        the game. """
+
+        self.score = 0
+        self.game_over = False
+
+        # Create sprite lists
+        self.block_list = pygame.sprite.Group()
+        self.all_sprites_list = pygame.sprite.Group()
+
+        # Create the block sprites
+        for i in range(50):
+            block = Block()
+
+            block.rect.x = random.randrange(SCREEN_WIDTH)
+            block.rect.y = random.randrange(-300, SCREEN_HEIGHT)
+
+            self.block_list.add(block)
+            self.all_sprites_list.add(block)
+
+        # Create the player
+        self.player = Player()
+        self.all_sprites_list.add(self.player)
+
+    def process_events(self):
+        """ Process all of the events. Return a "True" if we need
+            to close the window. """
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return True
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if self.game_over:
+                    self.__init__()
+
+        return False
+
+    def run_logic(self):
+        """
+        This method is run each time through the frame. It
+        updates positions and checks for collisions.
+        """
+        if not self.game_over:
+            # Move all the sprites
+            self.all_sprites_list.update()
+
+            # See if the player block has collided with anything.
+            for bloco in self.block_list:
+                if pygame.sprite.collide_circle(bloco, self.player):
+                    print 'colidiu'
+
+            blocks_hit_list = [1,2]
+            # Check the list of collisions.
+            for block in blocks_hit_list:
+                self.score += 1
+                #print(self.score)
+                # You can do something with "block" here.
+
+            if len(self.block_list) == 0:
+                self.game_over = True
+
+    def display_frame(self, screen):
+        """ Display everything to the screen for the game. """
+        screen.fill(WHITE)
+
+        if self.game_over:
+            # font = pygame.font.Font("Serif", 25)
+            font = pygame.font.SysFont("serif", 25)
+            text = font.render("Game Over, click to restart", True, BLACK)
+            center_x = (SCREEN_WIDTH // 2) - (text.get_width() // 2)
+            center_y = (SCREEN_HEIGHT // 2) - (text.get_height() // 2)
+            screen.blit(text, [center_x, center_y])
+
+        if not self.game_over:
+            self.all_sprites_list.draw(screen)
+
+        pygame.display.flip()
 
 
-    pygame.display.flip()
+def main():
+    """ Main program function. """
+    # Initialize Pygame and set up the window
+    pygame.init()
 
-    clock.tick(60)
+    size = [SCREEN_WIDTH, SCREEN_HEIGHT]
+    screen = pygame.display.set_mode(size)
 
+    pygame.display.set_caption("My Game")
+    pygame.mouse.set_visible(False)
+
+    # Create our objects and set the data
+    done = False
+    clock = pygame.time.Clock()
+
+    # Create an instance of the Game class
+    game = Game()
+
+    # Main game loop
+    while not done:
+
+        # Process events (keystrokes, mouse clicks, etc)
+        done = game.process_events()
+
+        # Update object positions, check for collisions
+        game.run_logic()
+
+        # Draw the current frame
+        game.display_frame(screen)
+
+        # Pause for the next frame
+        clock.tick(60)
+
+    # Close window and exit
+    pygame.quit()
+
+# Call the main function, start up the game
+if __name__ == "__main__":
+    main()
 
