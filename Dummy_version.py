@@ -128,9 +128,6 @@ while 1:
     for i in range(0,len(robots)):
         robots[i].draw_robot(i)
 
-
-
-
     robots_group.draw(screen)
 
     pygame.display.flip()

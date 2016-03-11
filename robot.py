@@ -68,6 +68,8 @@ class Robot(pygame.sprite.Sprite):
         elif self.y_updated < 0:
             self.y_updated = 0
 
+        self.collision = False
+
 
 
 
