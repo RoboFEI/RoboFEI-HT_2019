@@ -2,8 +2,11 @@ from World import *
 from math import cos
 from math import sin
 from math import radians
+from math import sqrt
+from math import atan2
+from math import pi
+from math import exp
 import time
-
 
 class Robot(pygame.sprite.Sprite):
     def __init__(self,x,y):
@@ -40,14 +43,12 @@ class Robot(pygame.sprite.Sprite):
         self.image.blit(text, textpos)
 
 
-
-
     def update(self,front,rotate):
         self.front = front
         if self.collision and self.front == 1:
-            self.front = -2
+                self.front = -1
         elif self.collision and self.front == -1:
-            self.front = 2
+            self.front = 1
         self.rotate = (self.rotate + rotate) % 360
         self.new_x += cos(radians(self.rotate))*self.front
         self.new_y -= sin(radians(self.rotate))*self.front
@@ -69,6 +70,13 @@ class Robot(pygame.sprite.Sprite):
             self.y_updated = 0
 
         self.collision = False
+
+
+    def kick(self, ball):
+        d = sqrt(((self.rect.x + self.r) - ball.x)**2+((self.rect.y + self.r) - ball.y)**2)
+        r = atan2((ball.y-(self.rect.y + self.r)), (ball.x-(self.rect.x + self.r)))*180/pi
+        force = 10 * exp(-2.3/ball.radius*d+2.3/ball.radius*(self.r+ball.radius))
+        ball.put_in_motion(force, r)
 
 
 

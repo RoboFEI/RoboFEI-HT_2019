@@ -1,4 +1,6 @@
 from robot import *
+from ball import *
+from collisions import *
 
 
 #python
@@ -15,7 +17,6 @@ def draw_ball(x,y):
     pygame.draw.circle(screen,(255,255,255),(x,y),10,0)
 
 rotate = 0
-ball = False
 x_ball, y_ball = -10, -10
 front = 0
 x,y = 0, 0
@@ -24,7 +25,7 @@ robot_index_control = 'all'
 rotate_control = 0
 index = 0
 collision = []
-
+ball = Ball(0,0,0)
 
 while 1:
 
@@ -53,6 +54,9 @@ while 1:
             robot = Robot(mx,my)
             robots.append(robot)
             robots_group.add(robot)
+
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_b:
+            ball = Ball(mx, my, 0.95)
 
         if event.type == pygame.KEYDOWN and event.key == pygame.K_0:
             robot_index_control = 'all'
@@ -91,6 +95,12 @@ while 1:
             else:
                 robots[robot_index_control].kill()
 
+        if event.type == pygame.KEYUP and event.key == pygame.K_y:
+            bola.put_in_motion(10, -45)
+
+        if event.type == pygame.KEYUP and event.key == pygame.K_SPACE:
+            robots[robot_index_control].kick(ball)
+
 
         #if event.type == pygame.KEYDOWN and event.key == pygame.K_a:
         #    robot = pygame.transform.rotate(robot,45)
@@ -99,6 +109,7 @@ while 1:
             sys.exit()
 
     draw_soccer_field()
+
 
 
     rotate = 0
@@ -117,7 +128,8 @@ while 1:
     for i in range(0,len(robots)):
         for j in range(0,len(robots)):
             if i!=j and pygame.sprite.collide_circle(robots[i],robots[j]):
-                robots[i].collision = True
+                #robots[i].collision = True
+                collision_robot(robots[i],robots[j])
 
 
     if robot_index_control == 'all':
@@ -125,10 +137,17 @@ while 1:
     else:
         robots[robot_index_control].update(front, rotate)
 
+
     for i in range(0,len(robots)):
         robots[i].draw_robot(i)
+        collide(robots[i], ball)
 
     robots_group.draw(screen)
+
+    ball.motion_model()
+
+    if ball.x != 0 and ball.y != 0 and ball.friction != 0:
+        ball.draw_ball()
 
     pygame.display.flip()
 
