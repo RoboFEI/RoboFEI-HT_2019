@@ -12,9 +12,35 @@ def update_mouse_pos():
     mx, my = pygame.mouse.get_pos()
     return mx, my
 
+def view_left(view_rot):
+    view_rot = (view_rot - 45) % 360
+    diff = abs(view_rot-rotate)
+    if diff == 315:
+        diff = 45
+    elif diff == 270:
+        diff = 90
+    if diff > 90:
+        view_rot = (view_rot + 45) % 360
+    return view_rot
 
-def draw_ball(x,y):
-    pygame.draw.circle(screen,(255,255,255),(x,y),10,0)
+def view_right(view_rot):
+    view_rot = (view_rot + 45) % 360
+    diff = abs(view_rot-rotate)
+    if diff == 315:
+        diff = 45
+    elif diff == 270:
+        diff = 90
+    if diff > 90:
+        view_rot = (view_rot - 45) % 360
+    return view_rot
+
+
+def search(view_rot):
+    while view_left(view_rot) <= 90:
+        view_rot = view_right(view_rot)
+    while view_left(view_rot) <= 90:
+        view_rot = view_right(view_rot)
+    return view_rot
 
 rotate = 0
 x_ball, y_ball = -10, -10
@@ -24,8 +50,8 @@ robots = []
 robot_index_control = 'all'
 rotate_control = 0
 index = 0
-collision = []
 ball = Ball(0,0,0)
+view_rot = 0
 
 while 1:
 
@@ -34,9 +60,16 @@ while 1:
 
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
-            rotate_control = 1
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
             rotate_control = -1
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
+            rotate_control = 1
+
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_PAGEDOWN:
+            view_rot = view_left(view_rot)
+
+
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_PAGEUP:
+            view_rot = view_right(view_rot)
 
         if event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
             front = 1
@@ -53,7 +86,6 @@ while 1:
         if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
             robot = Robot(mx,my)
             robots.append(robot)
-            robots_group.add(robot)
 
         if event.type == pygame.KEYDOWN and event.key == pygame.K_b:
             ball = Ball(mx, my, 0.95)
@@ -96,7 +128,7 @@ while 1:
                 robots[robot_index_control].kill()
 
         if event.type == pygame.KEYUP and event.key == pygame.K_y:
-            bola.put_in_motion(10, -45)
+            ball.put_in_motion(10, -45)
 
         if event.type == pygame.KEYUP and event.key == pygame.K_SPACE:
             robots[robot_index_control].kick(ball)
@@ -108,41 +140,46 @@ while 1:
         if event.type == pygame.QUIT:
             sys.exit()
 
-    draw_soccer_field()
-
+    field = SoccerField()
+    field.draw_soccer_field(screen)
 
 
     rotate = 0
 
-    if rotate_control == 1:
+    if rotate_control == -1:
         rotate = -45
         rotate_control = 0
+        view_rot = (view_rot - 45) % 360
 
 
-    elif rotate_control == -1:
+    elif rotate_control == 1:
         rotate = 45
         rotate_control = 0
+        view_rot = (view_rot + 45) % 360
 
+    #desenha robos
+    if robots:
+        for robot in range(0,len(robots)):
+            robots[robot].draw_robot(robot)
+            robots[robot].draw_vision(view_rot)
+            robots[robot].view_obj(550,350,view_rot)
+            collide(robots[robot],ball)
+            if len(robots) > 1:
+                for other_robot in range(0,len(robots)):
+                    if robot != other_robot:
+                        if collision(robots[robot], robots[other_robot]):
+                            robots[robot].collision = True
+                            robots[other_robot].collision = True
+                            print 'collision'
 
-
-    for i in range(0,len(robots)):
-        for j in range(0,len(robots)):
-            if i!=j and pygame.sprite.collide_circle(robots[i],robots[j]):
-                #robots[i].collision = True
-                collision_robot(robots[i],robots[j])
 
 
     if robot_index_control == 'all':
-        robots_group.update(front,rotate)
+        for robot_index in range(0,len(robots)):
+          robots[robot_index].motion_model(front, rotate)
     else:
-        robots[robot_index_control].update(front, rotate)
+        robots[robot_index_control].motion_model(front, rotate)
 
-
-    for i in range(0,len(robots)):
-        robots[i].draw_robot(i)
-        collide(robots[i], ball)
-
-    robots_group.draw(screen)
 
     ball.motion_model()
 

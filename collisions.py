@@ -1,27 +1,31 @@
+from init import *
+from math import cos
+from math import sin
+from math import radians
 from math import sqrt
 from math import atan2
 from math import pi
-from ball import *
-from robot import *
+from math import exp
 
-def collide(robot, ball):
-    d = sqrt(((robot.rect.x + robot.r) - ball.x)**2 + ((robot.rect.y + robot.r) - ball.y)**2)
+def collide_ball(robot, ball):
+    d = sqrt((robot.x - ball.x)**2 + (robot.y - ball.y)**2)
 
-    if d > (robot.r + ball.radius):
+    if d > robot.radius + ball.radius:
         return False
 
-    r = atan2((ball.y - (robot.rect.y + robot.r)), (ball.x-(robot.rect.x + robot.r)))
+    r = atan2((ball.y-robot.y), (ball.x-robot.x))
     ball.put_in_motion(1, r*180/pi)
     return True
 
-def collision_robot(fst_robot, snd_robot):
-    d = sqrt(((fst_robot.rect.x + fst_robot.r) - (snd_robot.rect.x + snd_robot.r))**2) #+ ((fst_robot.rect.y + fst_robot.r) - (snd_robot.rect.y + snd_robot.r)**2))
-    print d
-    if d > (fst_robot.r + snd_robot.r):
+def collide_robot(fst_robot, snd_robot):
+    d = sqrt((fst_robot.x - snd_robot.x)**2 + (fst_robot.y - snd_robot.y)**2)
+
+    if d > fst_robot.radius + snd_robot.radius:
         return False
     else:
-        fst_r = atan2(((fst_robot.rect.y + fst_robot.r) - (snd_robot.rect.y + fst_robot.r)), ((fst_robot.rect.x + fst_robot.r) - (snd_robot.rect.x + fst_robot.r)))
-        scn_r = atan2(((fst_robot.rect.y - fst_robot.r) - (snd_robot.rect.y - fst_robot.r)), ((fst_robot.rect.x - fst_robot.r) - (snd_robot.rect.x - fst_robot.r)))
-        print fst_r
-        print scn_r
+        return True
+
+    #fst_r = atan2((fst_robot.y-snd_robot.y), (fst_robot.x-snd_robot.x))
+    #scn_r = atan2((snd_robot.y-fst_robot.y), (snd_robot.x-fst_robot.x))
+    #print fst_r, scn_r
 

@@ -6,14 +6,13 @@ WHITE = (255, 255, 255)
 GREEN = (0, 150, 0)
 BLUE = (0, 0, 200)
 
+
 pygame.init()
 
 screen_width = 1040
 screen_height = 740
 
 dimension = screen_width, screen_height
-
-robots_group = pygame.sprite.Group()
 
 screen = pygame.display.set_mode(dimension)
 pygame.display.set_caption('RoboFEI-HT- Soccer Simulator')
