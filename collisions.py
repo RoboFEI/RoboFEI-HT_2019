@@ -1,11 +1,7 @@
-
-from math import cos
-from math import sin
-from math import radians
 from math import sqrt
 from math import atan2
 from math import pi
-from math import exp
+
 
 def collide_ball(robot, ball):
     d = sqrt((robot.x - ball.x)**2 + (robot.y - ball.y)**2)

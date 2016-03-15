@@ -10,7 +10,6 @@ from math import exp
 
 class Robot():
     def __init__(self,x,y):
-        #self.screen = Screen()
         self.x = x
         self.y = y
         self.new_x = x

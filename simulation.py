@@ -1,9 +1,7 @@
-# local
 from robot import *
 from ball import *
 from collisions import *
 import sys
-
 
 class Simulation():
     def __init__(self, screen):
@@ -90,7 +88,7 @@ class Simulation():
                 self.ball.put_in_motion(10, -45)
 
             if event.type == pygame.KEYUP and event.key == pygame.K_SPACE:
-                self.robots[self.robot_index_control].kick(ball)
+                self.robots[self.robot_index_control].kick(self.ball)
 
             if event.type == pygame.QUIT:
                 sys.exit()
@@ -136,6 +134,6 @@ class Simulation():
                 self.robots[robot].draw_robot(robot, self.screen)
 
         if self.ball.x != 0 and self.ball.y != 0 and self.ball.friction != 0:
-            self.ball.draw_ball()
+            self.ball.draw_ball(self.screen)
 
         pygame.display.flip()

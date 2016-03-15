@@ -6,7 +6,6 @@ from math import radians
 
 class Ball():
     def __init__(self, x, y, friction):
-        self.screen = Screen()
         self.x = x
         self.y = y
         self.friction = friction
@@ -32,5 +31,5 @@ class Ball():
         self.x += self.speed_x
         self.y += self.speed_y
 
-    def draw_ball(self):
-        pygame.draw.circle(self.screen.background, self.screen.WHITE, (int(self.x), int(self.y)), self.radius, 0)
+    def draw_ball(self, screen):
+        pygame.draw.circle(screen.background, screen.WHITE, (int(self.x), int(self.y)), self.radius, 0)

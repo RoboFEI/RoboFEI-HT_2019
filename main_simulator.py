@@ -6,7 +6,6 @@ def main():
     screen = Screen()
     screen.start_simulation()
 
-
     simul = Simulation(screen)
 
     field = SoccerField(screen)
