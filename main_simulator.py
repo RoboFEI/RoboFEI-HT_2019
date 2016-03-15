@@ -3,14 +3,18 @@ from simulation import *
 
 def main():
 
-    simul = Simulation()
+    screen = Screen()
+    screen.start_simulation()
 
-    field = SoccerField()
+
+    simul = Simulation(screen)
+
+    field = SoccerField(screen)
     pygame.display.set_icon(field.robofei_logo_scaled)
 
 
     #Main loop
-    while 1:
+    while True:
 
         #Process events
         simul.perform_events()
@@ -28,7 +32,7 @@ def main():
         simul.display_update()
 
         #Pause for the next frame
-        clock.tick(60)
+        screen.clock.tick(60)
 
     #Close window and exit
     #pygame.quit()

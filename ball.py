@@ -1,14 +1,12 @@
-from init import *
+from screen import *
 from math import cos
 from math import sin
 from math import radians
-from math import sqrt
-from math import atan2
-from math import pi
-from math import exp
+
 
 class Ball():
     def __init__(self, x, y, friction):
+        self.screen = Screen()
         self.x = x
         self.y = y
         self.friction = friction
@@ -35,4 +33,4 @@ class Ball():
         self.y += self.speed_y
 
     def draw_ball(self):
-        pygame.draw.circle(screen, WHITE, (int(self.x), int(self.y)), self.radius, 0)
+        pygame.draw.circle(self.screen.background, self.screen.WHITE, (int(self.x), int(self.y)), self.radius, 0)

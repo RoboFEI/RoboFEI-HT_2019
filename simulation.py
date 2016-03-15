@@ -6,7 +6,7 @@ import sys
 
 
 class Simulation():
-    def __init__(self):
+    def __init__(self, screen):
         self.rotate_control = 0
         self.front = 0
         self.rotate = 0
@@ -15,6 +15,7 @@ class Simulation():
         self.ball = Ball(0, 0, 0)
         self.mx = 0
         self.my = 0
+        self.screen = screen
 
     def update_mouse_pos(self):
         self.mx, self.my = pygame.mouse.get_pos()
@@ -40,11 +41,12 @@ class Simulation():
                 self.front = 0
 
             if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
-                print self.update_mouse_pos()
+                self.update_mouse_pos()
                 robot = Robot(self.mx, self.my)
                 self.robots.append(robot)
 
             if event.type == pygame.KEYDOWN and event.key == pygame.K_b:
+                self.update_mouse_pos()
                 self.ball = Ball(self.mx, self.my, 0.95)
 
             if event.type == pygame.KEYDOWN and event.key == pygame.K_0:
@@ -131,7 +133,7 @@ class Simulation():
     def display_update(self):
         if self.robots:
             for robot in range(0, len(self.robots)):
-                self.robots[robot].draw_robot(robot)
+                self.robots[robot].draw_robot(robot, self.screen)
 
         if self.ball.x != 0 and self.ball.y != 0 and self.ball.friction != 0:
             self.ball.draw_ball()

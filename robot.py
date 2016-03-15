@@ -1,4 +1,4 @@
-import init
+from screen import *
 import pygame
 from math import cos
 from math import sin
@@ -10,6 +10,7 @@ from math import exp
 
 class Robot():
     def __init__(self,x,y):
+        #self.screen = Screen()
         self.x = x
         self.y = y
         self.new_x = x
@@ -22,18 +23,18 @@ class Robot():
         self.rotate = 0
         self.collision = False
 
-    def draw_robot(self,robot_index):
-        pygame.draw.circle(init.screen,init.BLACK,(self.x ,self.y),self.radius,0)
-        pygame.draw.circle(init.screen,init.BLUE,(self.x ,self.y),self.radius-2,0)
+    def draw_robot(self,robot_index, screen):
+        pygame.draw.circle(screen.background,screen.BLACK,(self.x ,self.y),self.radius,0)
+        pygame.draw.circle(screen.background,screen.BLUE,(self.x ,self.y),self.radius-2,0)
         x_theta = cos(radians(self.rotate))*(self.radius-2)
         y_theta = sin(radians(self.rotate))*(self.radius-2)
-        pygame.draw.line(init.screen,init.BLACK,(self.x ,self.y),(self.x + x_theta, self.y - y_theta),3)
+        pygame.draw.line(screen.background,screen.BLACK,(self.x ,self.y),(self.x + x_theta, self.y - y_theta),3)
         font = pygame.font.Font(None, 20)
         self.index = robot_index + 1
         robot_name = "B" + str(self.index)
         text = font.render(robot_name, 1, (10, 10, 10))
         textpos = (self.x - 5, self.y - 40)
-        init.screen.blit(text, textpos)
+        screen.background.blit(text, textpos)
 
     def motion_model(self,front,rotate):
         self.front = front
