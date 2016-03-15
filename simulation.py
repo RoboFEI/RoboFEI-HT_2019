@@ -6,8 +6,9 @@ import sys
 class Simulation():
     def __init__(self, screen):
         self.rotate_control = 0
-        self.front = 0
+        '''self.front = 0
         self.rotate = 0
+        self.drift = 0'''
         self.robot_index_control = -1
         self.robots = []
         self.ball = Ball(0, 0, 0)
@@ -20,23 +21,42 @@ class Simulation():
 
     def perform_events(self):
         for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
-                self.rotate_control = -1
-
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
-                self.rotate_control = 1
-
             if event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
-                self.front = 1
-
-            if event.type == pygame.KEYUP and event.key == pygame.K_UP:
-                self.front = 0
+                self.robots[self.robot_index_control].control.action_select(8)
 
             if event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
-                self.front = -1
+                self.robots[self.robot_index_control].control.action_select(18)
 
-            if event.type == pygame.KEYUP and event.key == pygame.K_DOWN:
-                self.front = 0
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
+                self.robots[self.robot_index_control].control.action_select(2)
+
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
+                self.robots[self.robot_index_control].control.action_select(3)
+
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_w:
+                self.robots[self.robot_index_control].control.action_select(1)
+
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_s:
+                self.robots[self.robot_index_control].control.action_select(17)
+
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_a:
+                self.robots[self.robot_index_control].control.action_select(6)
+
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_d:
+                self.robots[self.robot_index_control].control.action_select(7)
+
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
+                self.robots[self.robot_index_control].control.action_select(9)
+
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_e:
+                self.robots[self.robot_index_control].control.action_select(14)
+
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_f:
+                self.robots[self.robot_index_control].control.action_select(0)
+
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_g:
+                self.robots[self.robot_index_control].control.action_select(11)
+
 
             if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
                 self.update_mouse_pos()
@@ -84,11 +104,8 @@ class Simulation():
                 else:
                     self.robots[self.robot_index_control].kill()
 
-            if event.type == pygame.KEYUP and event.key == pygame.K_y:
-                self.ball.put_in_motion(10, -45)
-
             if event.type == pygame.KEYUP and event.key == pygame.K_SPACE:
-                self.robots[self.robot_index_control].kick(self.ball)
+                self.robots[self.robot_index_control].right_kick(self.ball)
 
             if event.type == pygame.QUIT:
                 sys.exit()
@@ -97,21 +114,8 @@ class Simulation():
     def update_pos(self):
         # robots
 
-        self.rotate = 0
-
-        if self.rotate_control == -1:
-            self.rotate = -45
-            self.rotate_control = 0
-
-        elif self.rotate_control == 1:
-            self.rotate = 45
-            self.rotate_control = 0
-
-        if self.robot_index_control == -1:
-            for self.robot_index in range(0, len(self.robots)):
-                self.robots[self.robot_index].motion_model(self.front, self.rotate)
-        else:
-            self.robots[self.robot_index_control].motion_model(self.front, self.rotate)
+        for robot in self.robots:
+            robot.motion_model()
 
         # ball
         self.ball.motion_model()

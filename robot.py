@@ -1,8 +1,10 @@
 from screen import *
+from control import *
 import pygame
 from math import cos
 from math import sin
 from math import radians
+from math import degrees
 from math import sqrt
 from math import atan2
 from math import pi
@@ -18,9 +20,13 @@ class Robot():
         self.rotate = 0
         self.index = 0
         self.radius = 22
+
         self.front = 0
-        self.rotate = 0
+        self.turn = 0
+        self.drift = 0
         self.collision = False
+
+        self.control = CONTROL(self)
 
     def draw_robot(self,robot_index, screen):
         pygame.draw.circle(screen.background,screen.BLACK,(self.x ,self.y),self.radius,0)
@@ -35,17 +41,24 @@ class Robot():
         textpos = (self.x - 5, self.y - 40)
         screen.background.blit(text, textpos)
 
-    def motion_model(self,front,rotate):
+    def motion_vars(self, front, rotate, drift):
         self.front = front
-        self.rotate = (self.rotate + rotate) % 360
+        self.turn = rotate
+        self.drift = drift
 
+    def motion_model(self):
         if self.collision and self.front == 1:
             self.front = -1
         elif self.collision and self.front == -1:
             self.front = 1
 
+        self.rotate = (self.rotate + self.turn) % 360
+
         self.new_x += cos(radians(self.rotate))*self.front
         self.new_y -= sin(radians(self.rotate))*self.front
+
+        self.new_x -= sin(radians(self.rotate))*self.drift
+        self.new_y -= cos(radians(self.rotate))*self.drift
 
         self.x = int(self.new_x)
         self.y = int(self.new_y)
@@ -66,12 +79,20 @@ class Robot():
 
         self.collision = False
 
-    def kick(self, ball):
+    def right_kick(self, ball):
+        pass
+        '''
+        r = degrees(atan2((self.y-ball.y), (ball.x-self.x)))
+        r += 180
+
+        if not self.compAng(r, self.rotate):
+            return False
+
+        print 'this shit'
         d = sqrt((self.x - ball.x)**2+(self.y - ball.y)**2)
-        r = atan2((ball.y-self.y), (ball.x-self.x))*180/pi
         force = 10 * exp(-2.3/ball.radius*d+2.3/ball.radius*(self.radius+ball.radius))
         ball.put_in_motion(force, r)
-
+        '''
 
     def draw_vision(self,rotate):
         field_of_view = 101.75
@@ -131,13 +152,13 @@ class Robot():
 
     def compAng(self, ang, base):
         angrange = 35
-        if(base > 180-angrange or base < -180+angrange):
+        base = -base
+        if(base > 180 - angrange or base < -180 + angrange):
             if(ang > 0 and base < 0):
                 return (ang < base + 360 + angrange) and (ang > base + 360 - angrange)
             elif (ang < 0 and base > 0):
                 return (ang < base - 360 + angrange) and (ang > base - 360 - angrange)
         return (ang < base + angrange) and (ang > base - angrange)
-
 
     def view_obj(self,x,y,rotate):
         field_of_view = 100
@@ -152,12 +173,4 @@ class Robot():
             print 'Inside'
         else:
             print 'Outside'
-
-
-
-
-
-
-
-
 
