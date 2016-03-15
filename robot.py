@@ -8,8 +8,11 @@ from math import atan2
 from math import pi
 from math import exp
 
-class Robot():
+class Robot(pygame.sprite.Sprite):
     def __init__(self,x,y):
+        super(Robot,self).__init__()
+        self.robot_width = 26
+        self.robot_height = 26
         self.x = x
         self.y = y
         self.new_x = x
@@ -17,17 +20,60 @@ class Robot():
         self.front = 0
         self.rotate = 0
         self.index = 0
-        self.radius = 22
+        self.radius = 10
         self.front = 0
         self.rotate = 0
         self.collision = False
+        self.image = pygame.Surface(26, 26)
+        self.rect = self.image.get_rect()
+        #self.saved_image = self.image
+        self.front = 0
+        self.rotate = 0
+        self.rect.x = x
+        self.rect.y = y
 
     def draw_robot(self,robot_index, screen):
-        pygame.draw.circle(screen.background,screen.BLACK,(self.x ,self.y),self.radius,0)
-        pygame.draw.circle(screen.background,screen.BLUE,(self.x ,self.y),self.radius-2,0)
-        x_theta = cos(radians(self.rotate))*(self.radius-2)
-        y_theta = sin(radians(self.rotate))*(self.radius-2)
-        pygame.draw.line(screen.background,screen.BLACK,(self.x ,self.y),(self.x + x_theta, self.y - y_theta),3)
+        self.image.fill(screen.GREEN)
+        self.image.set_colorkey(screen.GREEN)
+
+        self.rect.x = self.x - 8
+        self.rect.y = self.y -13
+
+        pygame.draw.rect(self.image, screen.BLUE, (0, 0, 16, 26), 0)
+
+        pygame.draw.rect(self.image, screen.BLACK, (16, 2, 5, 10), 0)
+        pygame.draw.rect(self.image, screen.BLACK, (16, 14, 5, 10), 0)
+
+        self.image = pygame.transform.rotate(self.image, self.rotate)
+
+
+
+
+
+        #pygame.draw.circle(self.image,screen.BLACK,(13,13),self.radius,0)
+        #robot_points = [(self.x - 7, self.y + 12),(self.x - 7, self.y - 12), (self.x + 7, self.y - 12), (self.x + 7, self.y + 12)]
+        #pygame.draw.polygon(self.image, screen.BLUE, robot_points, 0)
+
+
+        #screen.background.blit(self.image,(100,100))
+
+        #robot_points = [(self.x - 7, self.y + 12),(self.x - 7, self.y - 12), (self.x + 7, self.y - 12), (self.x + 7, self.y + 12)]
+        #pygame.draw.polygon(screen.background, screen.BLUE, robot_points, 0)
+
+        #pygame.draw.circle(screen.background,screen.BLACK,(self.x ,self.y),self.radius,0)
+        #pygame.draw.circle(screen.background,screen.BLUE,(self.x ,self.y),self.radius-2,0)
+
+        #x_theta = cos(radians(self.rotate))*8
+        #y_theta = cos(radians(self.rotate))*13
+
+
+         #body
+        #pygame.draw.rect(screen.background, screen.BLUE, (x_left + x_theta, y_top - y_theta, 16, 26), 0)
+
+        #feet
+        #pygame.draw.rect(screen.background, screen.BLACK, (x_right, y_top + 2, 10, 10), 0)
+        #pygame.draw.rect(screen.background, screen.BLACK, (x_right, y_top + 14, 10, 10), 0)
+
         font = pygame.font.Font(None, 20)
         self.index = robot_index + 1
         robot_name = "B" + str(self.index)

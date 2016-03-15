@@ -11,7 +11,7 @@ class Ball():
         self.friction = friction
         self.speed_x = 0
         self.speed_y = 0
-        self.radius = 7
+        self.radius = 10
 
     def put_in_motion(self, speed, angle):
         self.speed_x += speed * cos(radians(angle))
@@ -32,4 +32,9 @@ class Ball():
         self.y += self.speed_y
 
     def draw_ball(self, screen):
-        pygame.draw.circle(screen.background, screen.WHITE, (int(self.x), int(self.y)), self.radius, 0)
+        #cirle
+        x = int(self.x)
+        y = int(self.y)
+        r = int(self.radius/2.9)
+        r2 = int(self.radius/3)
+        pygame.draw.circle(screen.background, screen.WHITE, (x,y), self.radius, 0)

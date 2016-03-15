@@ -14,6 +14,7 @@ class Simulation():
         self.mx = 0
         self.my = 0
         self.screen = screen
+        self.group_robots = pygame.sprite.Group()
 
     def update_mouse_pos(self):
         self.mx, self.my = pygame.mouse.get_pos()
@@ -42,6 +43,7 @@ class Simulation():
                 self.update_mouse_pos()
                 robot = Robot(self.mx, self.my)
                 self.robots.append(robot)
+                self.group_robots.add(robot)
 
             if event.type == pygame.KEYDOWN and event.key == pygame.K_b:
                 self.update_mouse_pos()
@@ -134,5 +136,7 @@ class Simulation():
 
         if self.ball.x != 0 and self.ball.y != 0 and self.ball.friction != 0:
             self.ball.draw_ball(self.screen)
+
+        self.group_robots.draw(self.screen.background)
 
         pygame.display.flip()
