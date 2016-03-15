@@ -80,19 +80,26 @@ class Robot():
         self.collision = False
 
     def right_kick(self, ball):
-        pass
-        '''
-        r = degrees(atan2((self.y-ball.y), (ball.x-self.x)))
-        r += 180
-
-        if not self.compAng(r, self.rotate):
-            return False
-
-        print 'this shit'
+        R = degrees(atan2((self.y-ball.y), (ball.x-self.x)))
         d = sqrt((self.x - ball.x)**2+(self.y - ball.y)**2)
-        force = 10 * exp(-2.3/ball.radius*d+2.3/ball.radius*(self.radius+ball.radius))
-        ball.put_in_motion(force, r)
-        '''
+        force = 10 * exp(-2.3/ball.radius*d + 2.3/ball.radius*(self.radius+ball.radius))
+
+        r = R
+        if R < 0: r = R + 360
+
+        if self.rotate < 30 and (r < self.rotate or r > 330 + self.rotate) or r < self.rotate and r > self.rotate - 30:
+            ball.put_in_motion(force, R)
+
+    def left_kick(self, ball):
+        R = degrees(atan2((self.y-ball.y), (ball.x-self.x)))
+        d = sqrt((self.x - ball.x)**2+(self.y - ball.y)**2)
+        force = 10 * exp(-2.3/ball.radius*d + 2.3/ball.radius*(self.radius+ball.radius))
+
+        r = R
+        if R < 0: r = R + 360
+
+        if self.rotate > 330 and (r > self.rotate or r < self.rotate - 330) or r > self.rotate and r < self.rotate + 30:
+            ball.put_in_motion(force, R)
 
     def draw_vision(self,rotate):
         field_of_view = 101.75

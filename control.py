@@ -87,7 +87,7 @@ class CONTROL():
         print self.action_state
 
         if flag in self.action_exceptions:
-            pass
+            pass#if flag == 4: self.robot.right_kick(self)
         else:
             walk_speed = self.action_errors[0] + self.action_vars[flag][0]
             turn_speed = self.action_errors[1] + self.action_vars[flag][1]

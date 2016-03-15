@@ -105,7 +105,7 @@ class Simulation():
                     self.robots[self.robot_index_control].kill()
 
             if event.type == pygame.KEYUP and event.key == pygame.K_SPACE:
-                self.robots[self.robot_index_control].right_kick(self.ball)
+                self.robots[self.robot_index_control].left_kick(self.ball)
 
             if event.type == pygame.QUIT:
                 sys.exit()

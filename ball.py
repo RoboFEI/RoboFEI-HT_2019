@@ -15,7 +15,7 @@ class Ball():
 
     def put_in_motion(self, speed, angle):
         self.speed_x += speed * cos(radians(angle))
-        self.speed_y += speed * sin(radians(angle))
+        self.speed_y -= speed * sin(radians(angle))
 
     def motion_model(self):
         # print "Motion"
