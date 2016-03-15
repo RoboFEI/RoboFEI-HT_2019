@@ -48,7 +48,7 @@ class Simulation():
                 self.ball = Ball(self.mx, self.my, 0.95)
 
             if event.type == pygame.KEYDOWN and event.key == pygame.K_0:
-                self.robot_index_control = 'all'
+                self.robot_index_control = -1
 
             if event.type == pygame.KEYDOWN and event.key == pygame.K_1:
                 self.robot_index_control = 0
@@ -78,7 +78,7 @@ class Simulation():
                 self.robot_index_control = 8
 
             if event.type == pygame.KEYDOWN and event.key == pygame.K_DELETE:
-                if self.robot_index_control == 'all':
+                if self.robot_index_control == -1:
                     for each_robot in self.robots:
                         each_robot.kill()
                 else:
@@ -126,7 +126,6 @@ class Simulation():
                             if collide_robot(self.robots[robot], self.robots[other_robot]):
                                 self.robots[robot].collision = True
                                 self.robots[other_robot].collision = True
-                                print 'collision'
 
     def display_update(self):
         if self.robots:
