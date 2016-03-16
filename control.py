@@ -20,20 +20,6 @@ class CONTROL():
         self.drift_speed = 0.2
         self.turn_speed = 0.3 # Degrees
 
-        # Errors - TODO
-        self.errors_on = False # error_variance should not be 0
-        self.walk_error_mean = 0
-        self.walk_error_variance = 0
-        self.drift_error_mean = 0
-        self.drift_error_variance = 0
-        self.turn_error_mean = 0
-        self.turn_error_variance = 0
-
-        # IMU - TODO
-        self.orientation = 0
-        self.imu_error_mean = 0
-        self.imu_error_variance = 0
-
         # Actions
         self.action_array = {   0: "Stop",\
                                 11: "Gait",\
@@ -51,13 +37,6 @@ class CONTROL():
                                 4: "Right kick",\
                                 12: "Pass to the left",\
                                 13: "Pass to the right"}
-
-        if self.errors_on:
-            self.action_errors = (gauss(self.walk_error_mean, self.walk_error_variance),
-                                  gauss(self.turn_error_mean, self.turn_error_variance),
-                                  gauss(self.drift_error_mean, self.drift_error_variance))
-        else:
-            self.action_errors = (0, 0, 0)
 
         self.action_vars = {
                 0: (0, 0, 0),\
@@ -87,9 +66,11 @@ class CONTROL():
         print self.action_state
 
         if flag in self.action_exceptions:
-            pass#if flag == 4: self.robot.right_kick(self)
+            if flag == 4: self.robot.right_kick()
+            if flag == 5: self.robot.left_kick()
+            if flag == 12: self.robot.pass_left()
+            if flag == 13: self.robot.pass_right()
         else:
-            walk_speed = self.action_errors[0] + self.action_vars[flag][0]
-            turn_speed = self.action_errors[1] + self.action_vars[flag][1]
-            drift_speed = self.action_errors[2] + self.action_vars[flag][2]
-            self.robot.motion_vars(walk_speed, turn_speed, drift_speed)
+            self.robot.motion_vars(self.action_vars[flag][0],
+                                   self.action_vars[flag][1],
+                                   self.action_vars[flag][2])

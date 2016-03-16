@@ -27,6 +27,25 @@ class Robot():
         self.collision = False
 
         self.control = CONTROL(self)
+        self.ball = None
+
+        # Errors - TODO movement errors
+        self.errors_on = False # if True *_error_variance can not be 0
+        self.walk_error_mean = 0
+        self.walk_error_variance = 0
+        self.drift_error_mean = 0
+        self.drift_error_variance = 0
+        self.turn_error_mean = 0
+        self.turn_error_variance = 0
+
+        self.kick_error_angle_mean = 0
+        self.kick_error_angle_variance = 0
+        self.kick_error_force_mean = 0
+        self.kick_error_force_variance = 0
+
+        # IMU - TODO imu errors
+        self.imu_error_mean = 0
+        self.imu_error_variance = 0
 
     def draw_robot(self,robot_index, screen):
         pygame.draw.circle(screen.background,screen.BLACK,(self.x ,self.y),self.radius,0)
@@ -34,6 +53,9 @@ class Robot():
         x_theta = cos(radians(self.rotate))*(self.radius-2)
         y_theta = sin(radians(self.rotate))*(self.radius-2)
         pygame.draw.line(screen.background,screen.BLACK,(self.x ,self.y),(self.x + x_theta, self.y - y_theta),3)
+
+        pygame.draw.line(screen.background,screen.BLACK,(self.x ,self.y),(self.x + x_theta, self.y - y_theta),1)
+
         font = pygame.font.Font(None, 20)
         self.index = robot_index + 1
         robot_name = "B" + str(self.index)
@@ -79,27 +101,57 @@ class Robot():
 
         self.collision = False
 
-    def right_kick(self, ball):
-        R = degrees(atan2((self.y-ball.y), (ball.x-self.x)))
-        d = sqrt((self.x - ball.x)**2+(self.y - ball.y)**2)
-        force = 10 * exp(-2.3/ball.radius*d + 2.3/ball.radius*(self.radius+ball.radius))
+    def right_kick(self):
+        R = degrees(atan2((self.y-self.ball.y), (self.ball.x-self.x)))
+        d = sqrt((self.x - self.ball.x)**2+(self.y - self.ball.y)**2)
+        force = 15 * exp(-2.3/self.ball.radius*d + 2.3/self.ball.radius*(self.radius+self.ball.radius))
 
         r = R
         if R < 0: r = R + 360
 
         if self.rotate < 30 and (r < self.rotate or r > 330 + self.rotate) or r < self.rotate and r > self.rotate - 30:
-            ball.put_in_motion(force, R)
+            self.ball.put_in_motion(force, self.rotate)
 
-    def left_kick(self, ball):
-        R = degrees(atan2((self.y-ball.y), (ball.x-self.x)))
-        d = sqrt((self.x - ball.x)**2+(self.y - ball.y)**2)
-        force = 10 * exp(-2.3/ball.radius*d + 2.3/ball.radius*(self.radius+ball.radius))
+    def left_kick(self):
+        R = degrees(atan2((self.y-self.ball.y), (self.ball.x-self.x)))
+        d = sqrt((self.x - self.ball.x)**2+(self.y - self.ball.y)**2)
+        force = 15 * exp(-2.3/self.ball.radius*d + 2.3/self.ball.radius*(self.radius+self.ball.radius))
 
         r = R
         if R < 0: r = R + 360
 
         if self.rotate > 330 and (r > self.rotate or r < self.rotate - 330) or r > self.rotate and r < self.rotate + 30:
-            ball.put_in_motion(force, R)
+            self.ball.put_in_motion(force, self.rotate)
+
+    def get_orientation(self):
+        # TODO implement IMU cumulative error
+        return self.rotate
+
+    def pass_left(self):
+        R = degrees(atan2((self.y-self.ball.y), (self.ball.x-self.x)))
+        d = sqrt((self.x - self.ball.x)**2+(self.y - self.ball.y)**2)
+        force = 15 * exp(-2.3/self.ball.radius*d + 2.3/self.ball.radius*(self.radius+self.ball.radius))
+
+        r = R
+        if R < 0: r = R + 360
+
+        if (self.rotate < 15 and (r < self.rotate + 15 or r > self.rotate + 345) or
+            self.rotate > 345 and (r > self.rotate - 15 or r < self.rotate - 345) or
+            r < self.rotate + 15 and r > self.rotate - 15):
+            self.ball.put_in_motion(force, self.rotate + 90)
+
+    def pass_right(self):
+        R = degrees(atan2((self.y-self.ball.y), (self.ball.x-self.x)))
+        d = sqrt((self.x - self.ball.x)**2+(self.y - self.ball.y)**2)
+        force = 15 * exp(-2.3/self.ball.radius*d + 2.3/self.ball.radius*(self.radius+self.ball.radius))
+
+        r = R
+        if R < 0: r = R + 360
+
+        if (self.rotate < 15 and (r < self.rotate + 15 or r > self.rotate + 345) or
+            self.rotate > 345 and (r > self.rotate - 15 or r < self.rotate - 345) or
+            r < self.rotate + 15 and r > self.rotate - 15):
+            self.ball.put_in_motion(force, self.rotate - 90)
 
     def draw_vision(self,rotate):
         field_of_view = 101.75

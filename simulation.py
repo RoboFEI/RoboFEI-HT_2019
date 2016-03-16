@@ -57,6 +57,18 @@ class Simulation():
             if event.type == pygame.KEYDOWN and event.key == pygame.K_g:
                 self.robots[self.robot_index_control].control.action_select(11)
 
+            if event.type == pygame.KEYUP and event.key == pygame.K_x:
+                self.robots[self.robot_index_control].control.action_select(5)
+
+            if event.type == pygame.KEYUP and event.key == pygame.K_c:
+                self.robots[self.robot_index_control].control.action_select(4)
+
+            if event.type == pygame.KEYUP and event.key == pygame.K_z:
+                self.robots[self.robot_index_control].control.action_select(12)
+
+            if event.type == pygame.KEYUP and event.key == pygame.K_v:
+                self.robots[self.robot_index_control].control.action_select(13)
+
 
             if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
                 self.update_mouse_pos()
@@ -66,6 +78,8 @@ class Simulation():
             if event.type == pygame.KEYDOWN and event.key == pygame.K_b:
                 self.update_mouse_pos()
                 self.ball = Ball(self.mx, self.my, 0.95)
+                for robot in self.robots:
+                    robot.ball = self.ball
 
             if event.type == pygame.KEYDOWN and event.key == pygame.K_0:
                 self.robot_index_control = 'all'
@@ -105,7 +119,7 @@ class Simulation():
                     self.robots[self.robot_index_control].kill()
 
             if event.type == pygame.KEYUP and event.key == pygame.K_SPACE:
-                self.robots[self.robot_index_control].left_kick(self.ball)
+                self.robots[self.robot_index_control].control.action_select(5)
 
             if event.type == pygame.QUIT:
                 sys.exit()
