@@ -19,10 +19,13 @@ def main():
         simul.perform_events()
 
         #Update object positions
-        simul.update_pos()
+        simul.update_pos(False)
 
         #check for collisions
         simul.check_collision()
+
+        #Update object positions
+        simul.update_pos(True)
 
         #update soccer field
         field.draw_soccer_field()

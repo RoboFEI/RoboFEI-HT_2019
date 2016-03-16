@@ -14,7 +14,7 @@ def collide_ball(robot, ball):
     return True
 
 def collide_robot(fst_robot, snd_robot):
-    d = sqrt((fst_robot.x - snd_robot.x)**2 + (fst_robot.y - snd_robot.y)**2)
+    d = sqrt((fst_robot.new_x - snd_robot.new_x)**2 + (fst_robot.new_y - snd_robot.new_y)**2)
 
     if d > fst_robot.radius + snd_robot.radius:
         return False

@@ -7,6 +7,7 @@ class Screen():
         self.WHITE = (255, 255, 255)
         self.GREEN = (0, 150, 0)
         self.BLUE = (0, 0, 200)
+        self.RED = (255, 0, 0)
         self.screen_width = 1040
         self.screen_height = 740
         self.dimension = self.screen_width,self.screen_height

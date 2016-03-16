@@ -11,7 +11,7 @@ class Ball():
         self.friction = friction
         self.speed_x = 0
         self.speed_y = 0
-        self.radius = 10
+        self.radius = 7
 
     def put_in_motion(self, speed, angle):
         self.speed_x += speed * cos(radians(angle))

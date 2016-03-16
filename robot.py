@@ -20,60 +20,97 @@ class Robot(pygame.sprite.Sprite):
         self.front = 0
         self.rotate = 0
         self.index = 0
-        self.radius = 10
+        self.radius = 14
         self.front = 0
         self.rotate = 0
         self.collision = False
-        self.image = pygame.Surface(26, 26)
+        self.image = pygame.Surface([self.robot_width, self.robot_height])
         self.rect = self.image.get_rect()
         #self.saved_image = self.image
         self.front = 0
         self.rotate = 0
         self.rect.x = x
         self.rect.y = y
+        self.sum_time = 0
+        self.old_x = x
+        self.old_y = y
+
+
+    def motion_model(self,front,rotate):
+        self.front = front
+        self.rotate = (self.rotate + rotate) % 360
+
+        #self.front = -1
+        #elif self.collision and self.front == -1:
+        #self.front = 1
+
+        if not self.collision:
+
+            self.old_x = self.x
+            self.old_y = self.y
+
+            self.new_x += cos(radians(self.rotate))*self.front
+            self.new_y -= sin(radians(self.rotate))*self.front
+
+            self.x = int(self.new_x)
+            self.y = int(self.new_y)
+
+            if self.x > 1040:
+                self.x = 1040
+                self.new_x = 1040
+            elif self.x < 0:
+                self.x = 0
+                self.new_x = 0
+
+            if self.y > 740:
+                self.y = 740
+                self.new_y = 740
+            elif self.y < 0:
+                self.y = 0
+                self.new_y = 0
+
+        else:
+            print 'collision'
+            self.x = self.old_x
+            self.y = self.old_y
+            self.new_x = (self.old_x + cos(radians(self.rotate)) * 3 * self.front)
+            self.new_y = (self.old_y + sin(radians(self.rotate)) * 3 * self.front)
 
     def draw_robot(self,robot_index, screen):
         self.image.fill(screen.GREEN)
         self.image.set_colorkey(screen.GREEN)
 
-        self.rect.x = self.x - 8
-        self.rect.y = self.y -13
+        self.rect.x = self.x - 13
+        self.rect.y = self.y - 13
 
-        pygame.draw.rect(self.image, screen.BLUE, (0, 0, 16, 26), 0)
-
-        pygame.draw.rect(self.image, screen.BLACK, (16, 2, 5, 10), 0)
-        pygame.draw.rect(self.image, screen.BLACK, (16, 14, 5, 10), 0)
-
-        self.image = pygame.transform.rotate(self.image, self.rotate)
-
-
-
-
-
-        #pygame.draw.circle(self.image,screen.BLACK,(13,13),self.radius,0)
-        #robot_points = [(self.x - 7, self.y + 12),(self.x - 7, self.y - 12), (self.x + 7, self.y - 12), (self.x + 7, self.y + 12)]
-        #pygame.draw.polygon(self.image, screen.BLUE, robot_points, 0)
-
-
-        #screen.background.blit(self.image,(100,100))
-
-        #robot_points = [(self.x - 7, self.y + 12),(self.x - 7, self.y - 12), (self.x + 7, self.y - 12), (self.x + 7, self.y + 12)]
-        #pygame.draw.polygon(screen.background, screen.BLUE, robot_points, 0)
-
-        #pygame.draw.circle(screen.background,screen.BLACK,(self.x ,self.y),self.radius,0)
-        #pygame.draw.circle(screen.background,screen.BLUE,(self.x ,self.y),self.radius-2,0)
-
-        #x_theta = cos(radians(self.rotate))*8
-        #y_theta = cos(radians(self.rotate))*13
-
-
-         #body
-        #pygame.draw.rect(screen.background, screen.BLUE, (x_left + x_theta, y_top - y_theta, 16, 26), 0)
+        #robot's body
+        pygame.draw.rect(self.image, screen.BLUE, (3, 0, 16, 26), 0)
 
         #feet
-        #pygame.draw.rect(screen.background, screen.BLACK, (x_right, y_top + 2, 10, 10), 0)
-        #pygame.draw.rect(screen.background, screen.BLACK, (x_right, y_top + 14, 10, 10), 0)
+        pygame.draw.rect(self.image, screen.BLACK, (19, 2, 5, 10), 0)
+        pygame.draw.rect(self.image, screen.BLACK, (19, 14, 5, 10), 0)
 
+        #sum time between frames
+        self.sum_time = (screen.clock.get_time() + self.sum_time) % 500
+
+        #feet movement while walking
+        if self.front != 0:
+            if self.sum_time < 250:
+                pygame.draw.rect(self.image, screen.BLACK, (19, 1, 6, 12), 0)
+                pygame.draw.rect(self.image, screen.BLACK, (19, 14, 5, 10), 0)
+            else:
+                pygame.draw.rect(self.image, screen.BLACK, (19, 2, 5, 10), 0)
+                pygame.draw.rect(self.image, screen.BLACK, (19, 13, 6, 12), 0)
+
+        image2 = pygame.transform.rotate(self.image, self.rotate)
+
+        #fix rotation to the center
+        rot_rect = image2.get_rect(center=self.rect.center)
+
+        #show
+        screen.background.blit(image2, (rot_rect))
+
+        #text
         font = pygame.font.Font(None, 20)
         self.index = robot_index + 1
         robot_name = "B" + str(self.index)
@@ -81,36 +118,10 @@ class Robot(pygame.sprite.Sprite):
         textpos = (self.x - 5, self.y - 40)
         screen.background.blit(text, textpos)
 
-    def motion_model(self,front,rotate):
-        self.front = front
-        self.rotate = (self.rotate + rotate) % 360
 
-        if self.collision and self.front == 1:
-            self.front = -1
-        elif self.collision and self.front == -1:
-            self.front = 1
 
-        self.new_x += cos(radians(self.rotate))*self.front
-        self.new_y -= sin(radians(self.rotate))*self.front
 
-        self.x = int(self.new_x)
-        self.y = int(self.new_y)
-
-        if self.x > 1040:
-            self.x = 1040
-            self.new_x = 1040
-        elif self.x < 0:
-            self.x = 0
-            self.new_x = 0
-
-        if self.y > 740:
-            self.y = 740
-            self.new_y = 740
-        elif self.y < 0:
-            self.y = 0
-            self.new_y = 0
-
-        self.collision = False
+        #self.collision = False
 
     def kick(self, ball):
         d = sqrt((self.x - ball.x)**2+(self.y - ball.y)**2)
