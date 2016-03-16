@@ -9,6 +9,7 @@ from math import sqrt
 from math import atan2
 from math import pi
 from math import exp
+from random import gauss
 
 class Robot():
     def __init__(self,x,y):
@@ -24,13 +25,16 @@ class Robot():
         self.front = 0
         self.turn = 0
         self.drift = 0
+        self.in_motion = False
         self.collision = False
 
         self.control = CONTROL(self)
         self.ball = None
 
         # Errors - TODO movement errors
-        self.errors_on = False # if True *_error_variance can not be 0
+        # Mean = 0 for symmetrical errors
+        # Variances should not be 0
+        self.errors_on = False # Turn errors on and off!
         self.walk_error_mean = 0
         self.walk_error_variance = 0
         self.drift_error_mean = 0
@@ -68,19 +72,48 @@ class Robot():
         self.turn = rotate
         self.drift = drift
 
+    def set_errors(self,    walk_err_mean = 0, walk_err_var = 0,
+                            turn_err_mean = 0, turn_err_var = 0,
+                            drift_err_mean = 0, drift_err_var = 0,
+                            kick_ang_err_mean = 0, kick_ang_err_var = 0,
+                            kick_force_err_mean = 0, kick_force_err_var = 0):
+        self.errors_on = True
+        self.walk_error_mean = walk_err_mean
+        self.walk_error_variance = walk_err_var
+        self.turn_error_mean = turn_err_mean
+        self.turn_error_variance = turn_err_var
+        self.drift_error_mean = drift_err_mean
+        self.drift_error_variance = drift_err_var
+        self.kick_error_angle_mean = kick_ang_err_mean
+        self.kick_error_angle_variance = kick_ang_err_var
+        self.kick_error_force_mean = kick_force_err_mean
+        self.kick_error_force_variance = kick_force_err_var
+
     def motion_model(self):
         if self.collision and self.front == 1:
             self.front = -1
         elif self.collision and self.front == -1:
             self.front = 1
 
-        self.rotate = (self.rotate + self.turn) % 360
+        turn = self.turn
+        if self.errors_on and self.in_motion:
+            turn += gauss(self.turn_error_mean, self.turn_error_variance)
 
-        self.new_x += cos(radians(self.rotate))*self.front
-        self.new_y -= sin(radians(self.rotate))*self.front
+        front = self.front
+        if self.errors_on and self.in_motion:
+            front += gauss(self.walk_error_mean, self.walk_error_variance)
 
-        self.new_x -= sin(radians(self.rotate))*self.drift
-        self.new_y -= cos(radians(self.rotate))*self.drift
+        drift = self.drift
+        if self.errors_on and self.in_motion:
+            drift += gauss(self.drift_error_mean, self.drift_error_variance)
+
+        self.rotate = (self.rotate + turn) % 360
+
+        self.new_x += cos(radians(self.rotate))*front
+        self.new_y -= sin(radians(self.rotate))*front
+
+        self.new_x -= sin(radians(self.rotate))*drift
+        self.new_y -= cos(radians(self.rotate))*drift
 
         self.x = int(self.new_x)
         self.y = int(self.new_y)
@@ -112,6 +145,8 @@ class Robot():
         if self.rotate < 30 and (r < self.rotate or r > 330 + self.rotate) or r < self.rotate and r > self.rotate - 30:
             self.ball.put_in_motion(force, self.rotate)
 
+        self.control.action_select(0)
+
     def left_kick(self):
         R = degrees(atan2((self.y-self.ball.y), (self.ball.x-self.x)))
         d = sqrt((self.x - self.ball.x)**2+(self.y - self.ball.y)**2)
@@ -122,6 +157,8 @@ class Robot():
 
         if self.rotate > 330 and (r > self.rotate or r < self.rotate - 330) or r > self.rotate and r < self.rotate + 30:
             self.ball.put_in_motion(force, self.rotate)
+
+        self.control.action_select(0)
 
     def get_orientation(self):
         # TODO implement IMU cumulative error
@@ -140,6 +177,8 @@ class Robot():
             r < self.rotate + 15 and r > self.rotate - 15):
             self.ball.put_in_motion(force, self.rotate + 90)
 
+        self.control.action_select(0)
+
     def pass_right(self):
         R = degrees(atan2((self.y-self.ball.y), (self.ball.x-self.x)))
         d = sqrt((self.x - self.ball.x)**2+(self.y - self.ball.y)**2)
@@ -152,6 +191,8 @@ class Robot():
             self.rotate > 345 and (r > self.rotate - 15 or r < self.rotate - 345) or
             r < self.rotate + 15 and r > self.rotate - 15):
             self.ball.put_in_motion(force, self.rotate - 90)
+
+        self.control.action_select(0)
 
     def draw_vision(self,rotate):
         field_of_view = 101.75

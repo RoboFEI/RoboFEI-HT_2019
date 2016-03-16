@@ -69,7 +69,6 @@ class Simulation():
             if event.type == pygame.KEYUP and event.key == pygame.K_v:
                 self.robots[self.robot_index_control].control.action_select(13)
 
-
             if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
                 self.update_mouse_pos()
                 robot = Robot(self.mx, self.my)
