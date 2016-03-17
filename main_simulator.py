@@ -6,10 +6,13 @@ def main():
     screen = Screen()
     screen.start_simulation()
 
+
     simul = Simulation(screen)
+
 
     field = SoccerField(screen)
     pygame.display.set_icon(field.robofei_logo_scaled)
+
 
 
     #Main loop
@@ -18,14 +21,18 @@ def main():
         #Process events
         simul.perform_events()
 
-        #Update object positions
+
+        #Update object positions without checking for collisions
         simul.update_pos(False)
+
 
         #check for collisions
         simul.check_collision()
 
-        #Update object positions
+        #Update object positions checking for collisions
         simul.update_pos(True)
+
+
 
         #update soccer field
         field.draw_soccer_field()
@@ -35,6 +42,7 @@ def main():
 
         #Pause for the next frame
         screen.clock.tick(60)
+
 
     #Close window and exit
     #pygame.quit()

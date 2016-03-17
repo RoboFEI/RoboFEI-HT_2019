@@ -7,6 +7,7 @@ class SoccerField():
         self.robofei_logo_scaled = pygame.transform.scale(self.robofei_logo,(100,82))
 
     def draw_soccer_field(self):
+
         #background is green
         self.screen.background.fill(self.screen.GREEN)
 
@@ -29,10 +30,11 @@ class SoccerField():
         pygame.draw.line(self.screen.background,self.screen.WHITE,(520,365),(520,375), 7)
 
         #text
-        font = pygame.font.Font(None, 36)
+        font = pygame.font.SysFont("Arial", 20)
         text = font.render("RoboFEI-HT Simulator", 1, self.screen.WHITE)
         textpos = text.get_rect()
         textpos.centery = 30
         textpos.centerx = self.screen.background.get_rect().centerx
+
         self.screen.background.blit(text, textpos)
         self.screen.background.blit(self.robofei_logo_scaled,(950,2))

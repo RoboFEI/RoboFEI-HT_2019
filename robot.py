@@ -20,7 +20,7 @@ class Robot(pygame.sprite.Sprite):
         self.front = 0
         self.rotate = 0
         self.index = 0
-        self.radius = 14
+        self.radius = 13
         self.front = 0
         self.rotate = 0
         self.collision = False
@@ -70,11 +70,11 @@ class Robot(pygame.sprite.Sprite):
                 self.new_y = 0
 
         else:
-            print 'collision'
+            #print 'collision'
             self.x = self.old_x
             self.y = self.old_y
-            self.new_x = (self.old_x + cos(radians(self.rotate)) * 3 * self.front)
-            self.new_y = (self.old_y + sin(radians(self.rotate)) * 3 * self.front)
+            self.new_x = (self.old_x + cos(radians(self.rotate)) * self.radius/2 * self.front)
+            self.new_y = (self.old_y + sin(radians(self.rotate)) * self.radius/2 * self.front)
 
     def draw_robot(self,robot_index, screen):
         self.image.fill(screen.GREEN)
@@ -111,7 +111,8 @@ class Robot(pygame.sprite.Sprite):
         screen.background.blit(image2, (rot_rect))
 
         #text
-        font = pygame.font.Font(None, 20)
+
+        font = pygame.font.SysFont("Arial", 15)
         self.index = robot_index + 1
         robot_name = "B" + str(self.index)
         text = font.render(robot_name, 1, (10, 10, 10))
@@ -119,15 +120,11 @@ class Robot(pygame.sprite.Sprite):
         screen.background.blit(text, textpos)
 
 
-
-
-        #self.collision = False
-
     def kick(self, ball):
         d = sqrt((self.x - ball.x)**2+(self.y - ball.y)**2)
         r = atan2((ball.y-self.y), (ball.x-self.x))*180/pi
         force = 10 * exp(-2.3/ball.radius*d+2.3/ball.radius*(self.radius+ball.radius))
-        ball.put_in_motion(force, r)
+        ball.put_in_motion(force, force, r)
 
 
     def draw_vision(self,rotate):

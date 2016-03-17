@@ -8,15 +8,23 @@ def collide_ball(robot, ball):
 
     if d > robot.radius + ball.radius:
         return False
+    else:
+        r = atan2((ball.y-robot.y), (ball.x-robot.x))
+        if abs(ball.speed_x - speed_x_old) > 0.1 and abs(ball.speed_y - speed_y_old) > 0.1:
+            ball.put_in_motion(-ball.speed_x*ball.friction, -ball.speed_y*ball.friction, r*180/pi)
+        elif float(ball.speed_x) <= 0.5 and  float(ball.speed_y) <= 0.5:
+            ball.put_in_motion( 1, 1, r*180/pi)
+        else:
+            ball.put_in_motion(-ball.speed_x*ball.friction, -ball.speed_y*ball.friction, r*180/pi)
 
-    r = atan2((ball.y-robot.y), (ball.x-robot.x))
-    ball.put_in_motion(1, r*180/pi)
-    return True
+        speed_x_old = ball.speed_x
+        speed_y_old = ball.speed_y
+        return True
 
 def collide_robot(fst_robot, snd_robot):
-    d = sqrt((fst_robot.new_x - snd_robot.new_x)**2 + (fst_robot.new_y - snd_robot.new_y)**2)
+    dr = sqrt((fst_robot.new_x - snd_robot.new_x)**2 + (fst_robot.new_y - snd_robot.new_y)**2)
 
-    if d > fst_robot.radius + snd_robot.radius:
+    if dr > fst_robot.radius + snd_robot.radius:
         return False
     else:
         return True

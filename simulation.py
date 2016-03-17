@@ -101,11 +101,11 @@ class Simulation():
         self.rotate = 0
 
         if self.rotate_control == -1:
-            self.rotate = -20
+            self.rotate = -15
             self.rotate_control = 0
 
         elif self.rotate_control == 1:
-            self.rotate = 20
+            self.rotate = 15
             self.rotate_control = 0
 
         if self.robot_index_control == -1:
