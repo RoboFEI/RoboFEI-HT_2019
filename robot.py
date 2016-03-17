@@ -11,13 +11,17 @@ from math import pi
 from math import exp
 from random import gauss
 
+import sys
+# TODO uncomment after merging
+# sys.path.append('./Blackboard/src/')
+# from SharedMemory import SharedMemory
+
 class Robot():
     def __init__(self,x,y):
         self.x = x
         self.y = y
         self.new_x = x
         self.new_y = y
-        self.front = 0
         self.rotate = 0
         self.index = 0
         self.radius = 22
@@ -31,7 +35,7 @@ class Robot():
         self.control = CONTROL(self)
         self.ball = None
 
-        # Errors - TODO movement errors
+        # Errors
         # Mean = 0 for symmetrical errors
         # Variances should not be 0
         self.errors_on = False # Turn errors on and off!
@@ -47,9 +51,10 @@ class Robot():
         self.kick_error_force_mean = 0
         self.kick_error_force_variance = 0
 
-        # IMU - TODO imu errors
+        # IMU
         self.imu_error_mean = 0
         self.imu_error_variance = 0
+        self.orientation_error = 0
 
     def draw_robot(self,robot_index, screen):
         pygame.draw.circle(screen.background,screen.BLACK,(self.x ,self.y),self.radius,0)
@@ -57,9 +62,6 @@ class Robot():
         x_theta = cos(radians(self.rotate))*(self.radius-2)
         y_theta = sin(radians(self.rotate))*(self.radius-2)
         pygame.draw.line(screen.background,screen.BLACK,(self.x ,self.y),(self.x + x_theta, self.y - y_theta),3)
-
-        pygame.draw.line(screen.background,screen.BLACK,(self.x ,self.y),(self.x + x_theta, self.y - y_theta),1)
-
         font = pygame.font.Font(None, 20)
         self.index = robot_index + 1
         robot_name = "B" + str(self.index)
@@ -76,7 +78,8 @@ class Robot():
                             turn_err_mean = 0, turn_err_var = 0,
                             drift_err_mean = 0, drift_err_var = 0,
                             kick_ang_err_mean = 0, kick_ang_err_var = 0,
-                            kick_force_err_mean = 0, kick_force_err_var = 0):
+                            kick_force_err_mean = 0, kick_force_err_var = 0,
+                            imu_err_mean = 0, imu_err_var = 0):
         self.errors_on = True
         self.walk_error_mean = walk_err_mean
         self.walk_error_variance = walk_err_var
@@ -88,6 +91,8 @@ class Robot():
         self.kick_error_angle_variance = kick_ang_err_var
         self.kick_error_force_mean = kick_force_err_mean
         self.kick_error_force_variance = kick_force_err_var
+        self.imu_error_mean = imu_err_mean
+        self.imu_error_variance = imu_err_var
 
     def motion_model(self):
         if self.collision and self.front == 1:
@@ -106,6 +111,9 @@ class Robot():
         drift = self.drift
         if self.errors_on and self.in_motion:
             drift += gauss(self.drift_error_mean, self.drift_error_variance)
+
+        if self.errors_on:
+            self.orientation_error += gauss(self.imu_error_mean, self.imu_error_variance)
 
         self.rotate = (self.rotate + turn) % 360
 
@@ -137,7 +145,7 @@ class Robot():
     def right_kick(self):
         R = degrees(atan2((self.y-self.ball.y), (self.ball.x-self.x)))
         d = sqrt((self.x - self.ball.x)**2+(self.y - self.ball.y)**2)
-        force = 15 * exp(-2.3/self.ball.radius*d + 2.3/self.ball.radius*(self.radius+self.ball.radius))
+        force = min(10, 12 * exp(-2.3/self.ball.radius*d + 2.3/self.ball.radius*(self.radius+self.ball.radius)))
 
         r = R
         if R < 0: r = R + 360
@@ -150,7 +158,7 @@ class Robot():
     def left_kick(self):
         R = degrees(atan2((self.y-self.ball.y), (self.ball.x-self.x)))
         d = sqrt((self.x - self.ball.x)**2+(self.y - self.ball.y)**2)
-        force = 15 * exp(-2.3/self.ball.radius*d + 2.3/self.ball.radius*(self.radius+self.ball.radius))
+        force = min(10, 12 * exp(-2.3/self.ball.radius*d + 2.3/self.ball.radius*(self.radius+self.ball.radius)))
 
         r = R
         if R < 0: r = R + 360
@@ -161,13 +169,12 @@ class Robot():
         self.control.action_select(0)
 
     def get_orientation(self):
-        # TODO implement IMU cumulative error
-        return self.rotate
+        return self.rotate + self.orientation_error
 
     def pass_left(self):
         R = degrees(atan2((self.y-self.ball.y), (self.ball.x-self.x)))
         d = sqrt((self.x - self.ball.x)**2+(self.y - self.ball.y)**2)
-        force = 15 * exp(-2.3/self.ball.radius*d + 2.3/self.ball.radius*(self.radius+self.ball.radius))
+        force = min(10, 12 * exp(-2.3/self.ball.radius*d + 2.3/self.ball.radius*(self.radius+self.ball.radius)))
 
         r = R
         if R < 0: r = R + 360
@@ -182,7 +189,7 @@ class Robot():
     def pass_right(self):
         R = degrees(atan2((self.y-self.ball.y), (self.ball.x-self.x)))
         d = sqrt((self.x - self.ball.x)**2+(self.y - self.ball.y)**2)
-        force = 15 * exp(-2.3/self.ball.radius*d + 2.3/self.ball.radius*(self.radius+self.ball.radius))
+        force = min(10, 12 * exp(-2.3/self.ball.radius*d + 2.3/self.ball.radius*(self.radius+self.ball.radius)))
 
         r = R
         if R < 0: r = R + 360
@@ -238,6 +245,10 @@ class Robot():
 
         screen.blit(vision_surface, position)
 
+    def create_bkb(self,robot_index):
+        # TODO after merging, remove comment
+        # self.bkb = SharedMemory(robot_index)
+        pass
 
     def hcc(self,x1,y1,x2,y2):
         return sqrt((x1-x2)**2 + (y1-y2)**2)

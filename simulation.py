@@ -2,6 +2,7 @@ from robot import *
 from ball import *
 from collisions import *
 import sys
+from random import random
 
 class Simulation():
     def __init__(self, screen):
@@ -74,6 +75,8 @@ class Simulation():
                 robot = Robot(self.mx, self.my)
                 self.robots.append(robot)
 
+                #robot.set_errors(random(), random(), random(), random(), random(), random(), random(), random(), random(), random(), random(), random())
+
             if event.type == pygame.KEYDOWN and event.key == pygame.K_b:
                 self.update_mouse_pos()
                 self.ball = Ball(self.mx, self.my, 0.95)
@@ -126,9 +129,9 @@ class Simulation():
 
     def update_pos(self):
         # robots
-
         for robot in self.robots:
             robot.motion_model()
+            robot.control.control_update()
 
         # ball
         self.ball.motion_model()
