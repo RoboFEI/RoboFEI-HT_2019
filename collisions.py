@@ -1,9 +1,6 @@
 from math import sqrt
 from math import atan2
 from math import pi
-from math import cos
-from math import sin
-
 
 
 def collide_ball(robot, ball):
@@ -26,6 +23,24 @@ def collide_robot(fst_robot, snd_robot):
     if dr > fst_robot.radius + snd_robot.radius:
         return False
     else:
+        return True
+
+def collide_robot_goalpost(robot, post):
+    dr = sqrt((robot.new_x - post.x)**2 + (robot.new_y - post.y)**2)
+
+    if dr > robot.radius + post.radius:
+        return False
+    else:
+        return True
+
+def collide_ball_goalpost(ball, post):
+    d = sqrt((ball.x - post.x)**2 + (ball.y - post.y)**2)
+
+    if d > post.radius + ball.radius:
+        return False
+    else:
+        r = atan2((post.y - ball.y), (post.x - ball.x))
+        ball.put_in_motion(-ball.speed_x, -ball.speed_y, r*180/pi)
         return True
 
     #fst_r = atan2((fst_robot.y-snd_robot.y), (fst_robot.x-snd_robot.x))

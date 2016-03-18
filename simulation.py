@@ -85,7 +85,7 @@ class Simulation():
                 self.robots.append(robot)
                 self.group_robots.add(robot)
 
-                robot.set_errors(random(), random(), random(), random(), random(), random(), random(), random(), random(), random(), random(), random())
+                #robot.set_errors(random(), random(), random(), random(), random(), random(), random(), random(), random(), random(), random(), random())
 
             if event.type == pygame.KEYDOWN and event.key == pygame.K_b:
                 self.update_mouse_pos()
@@ -197,15 +197,16 @@ class Simulation():
         # ball
         self.ball.motion_model()
 
-    def check_collision(self):
+    def check_collision(self,field):
         if self.robots:
             for robot in range(0, len(self.robots)):
-                collide_ball(self.robots[robot], self.ball)
-                if len(self.robots) > 1:
-                    for other_robot in range(0, len(self.robots)):
-                        if robot != other_robot:
-                            if collide_robot(self.robots[robot], self.robots[other_robot]):
-                                self.robots[robot].collision = True
+                for other_robot in range(0, len(self.robots)):
+                    collide_ball(self.robots[other_robot], self.ball)
+                    for post in field.goalpost_list:
+                        if (collide_robot_goalpost(self.robots[robot],post) or
+                                (robot != other_robot and
+                                collide_robot(self.robots[robot], self.robots[other_robot]))):
+                            self.robots[robot].collision = True
 
 
     def display_update(self):

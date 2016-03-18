@@ -5,6 +5,17 @@ class SoccerField():
         self.screen = screen
         self.robofei_logo = pygame.image.load("RoboFEI_logo.png")
         self.robofei_logo_scaled = pygame.transform.scale(self.robofei_logo,(100,82))
+        self.goalpost_list = []
+        self.goalpost = GoalPosts(70,280)
+        self.goalpost_list.append(self.goalpost)
+        self.goalpost = GoalPosts(70,460)
+        self.goalpost_list.append(self.goalpost)
+        self.goalpost = GoalPosts(970,280)
+        self.goalpost_list.append(self.goalpost)
+        self.goalpost = GoalPosts(970,460)
+        self.goalpost_list.append(self.goalpost)
+
+
 
     def draw_soccer_field(self):
 
@@ -29,6 +40,11 @@ class SoccerField():
         pygame.draw.line(self.screen.background,self.screen.WHITE,(515,370),(525,370), 7)
         pygame.draw.line(self.screen.background,self.screen.WHITE,(520,365),(520,375), 7)
 
+        #goalsposts
+        for post in self.goalpost_list:
+            post.draw_goalposts(self.screen)
+
+
         #text
         font = pygame.font.SysFont("Arial", 20)
         text = font.render("RoboFEI-HT Simulator", 1, self.screen.WHITE)
@@ -38,3 +54,15 @@ class SoccerField():
 
         self.screen.background.blit(text, textpos)
         self.screen.background.blit(self.robofei_logo_scaled,(950,2))
+
+
+class GoalPosts(SoccerField):
+    def __init__(self,x,y):
+        self.radius = 10 #10cm
+        self.x = x
+        self.y = y
+
+    def draw_goalposts(self, screen):
+        '''draw goalposts'''
+        pygame.draw.circle(screen.background,screen.WHITE,(self.x,self.y),self.radius,2)
+

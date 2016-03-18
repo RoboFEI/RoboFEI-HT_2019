@@ -14,7 +14,6 @@ def main():
     pygame.display.set_icon(field.robofei_logo_scaled)
 
 
-
     #Main loop
     while True:
 
@@ -27,7 +26,7 @@ def main():
 
 
         #check for collisions
-        simul.check_collision()
+        simul.check_collision(field)
 
         #Update object positions checking for collisions
         simul.update_pos(True)
@@ -36,6 +35,7 @@ def main():
 
         #update soccer field
         field.draw_soccer_field()
+
 
         #Draw robots, ball and update the current frame
         simul.display_update()
