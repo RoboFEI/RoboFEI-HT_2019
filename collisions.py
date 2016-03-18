@@ -14,9 +14,6 @@ def collide_ball(robot, ball):
             ball.put_in_motion( 1, 1, r*180/pi)
         else:
             ball.put_in_motion(-ball.speed_x*ball.friction, -ball.speed_y*ball.friction, r*180/pi)
-
-        speed_x_old = ball.speed_x
-        speed_y_old = ball.speed_y
         return True
 
 def collide_robot(fst_robot, snd_robot):
