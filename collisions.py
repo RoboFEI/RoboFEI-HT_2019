@@ -10,9 +10,7 @@ def collide_ball(robot, ball):
         return False
     else:
         r = atan2((ball.y-robot.y), (ball.x-robot.x))
-        if abs(ball.speed_x - speed_x_old) > 0.1 and abs(ball.speed_y - speed_y_old) > 0.1:
-            ball.put_in_motion(-ball.speed_x*ball.friction, -ball.speed_y*ball.friction, r*180/pi)
-        elif float(ball.speed_x) <= 0.5 and  float(ball.speed_y) <= 0.5:
+        if float(ball.speed_x) <= 1 and  float(ball.speed_y) <= 1:
             ball.put_in_motion( 1, 1, r*180/pi)
         else:
             ball.put_in_motion(-ball.speed_x*ball.friction, -ball.speed_y*ball.friction, r*180/pi)

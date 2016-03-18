@@ -14,8 +14,6 @@ class Ball():
         self.radius = 7
 
     def put_in_motion(self, speed_x, speed_y, angle):
-        print 'self',self.speed_x, self.speed_y
-        print 'new', speed_x, speed_y
         self.speed_x = speed_x * cos(radians(angle))
         self.speed_y = speed_y * sin(radians(angle))
 
