@@ -3,6 +3,7 @@ from ball import *
 from collisions import *
 import sys
 from random import random
+from random import randrange
 
 class Simulation():
     def __init__(self, screen):
@@ -81,11 +82,12 @@ class Simulation():
 
             if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
                 self.update_mouse_pos()
-                robot = Robot(self.mx, self.my)
+                robot = Robot(self.mx, self.my,(len(self.robots)+1)*500)
                 self.robots.append(robot)
                 self.group_robots.add(robot)
+                #print len(self.robots)
 
-                #robot.set_errors(random(), random(), random(), random(), random(), random(), random(), random(), random(), random(), random(), random())
+                #robot.set_errors(randrange(-1,1), randrange(-1,1), randrange(-1,1), randrange(-1,1), randrange(-1,1), randrange(-1,1), randrange(-1,1), randrange(-1,1), randrange(-1,1), randrange(-1,1), randrange(-1,1), randrange(-1,1))
 
             if event.type == pygame.KEYDOWN and event.key == pygame.K_b:
                 self.update_mouse_pos()
@@ -213,8 +215,18 @@ class Simulation():
         if self.robots:
             for robot in range(0, len(self.robots)):
                 self.robots[robot].draw_robot(robot, self.screen)
+                self.robots[robot].draw_vision(self.screen)
 
         if self.ball.x != 0 and self.ball.y != 0 and self.ball.friction != 0:
             self.ball.draw_ball(self.screen)
 
+
         pygame.display.flip()
+
+    def searching(self):
+        if self.robots:
+            for i in range(0, len(self.robots)):
+                self.robots[i].perform_pan(self.ball.x,self.ball.y)
+                for j in range(0, len(self.robots)):
+                    if i!=j:
+                        self.robots[i].perform_pan(self.robots[j].x,self.robots[j].y)

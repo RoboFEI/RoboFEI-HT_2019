@@ -32,10 +32,11 @@ def main():
         simul.update_pos(True)
 
 
-
         #update soccer field
         field.draw_soccer_field()
 
+        #Ball searching
+        simul.searching()
 
         #Draw robots, ball and update the current frame
         simul.display_update()

@@ -1,5 +1,6 @@
 from screen import *
 from control import *
+from vision import *
 import pygame
 from math import cos
 from math import sin
@@ -11,13 +12,19 @@ from math import pi
 from math import exp
 from random import gauss
 
+import time
+
+import sys
+sys.path.append('./Blackboard/src/')
+from SharedMemory import SharedMemory
+
 import sys
 # TODO uncomment after merging
 # sys.path.append('./Blackboard/src/')
 # from SharedMemory import SharedMemory
 
 class Robot(pygame.sprite.Sprite):
-    def __init__(self,x,y):
+    def __init__(self,x,y,KEY):
         super(Robot,self).__init__()
         self.robot_width = 26
         self.robot_height = 26
@@ -45,6 +52,15 @@ class Robot(pygame.sprite.Sprite):
         self.sum_time = 0
         self.old_x = x
         self.old_y = y
+
+        self.panora = Vision()
+        self.view_rot = 0
+        self.KEY = KEY
+        self.bkb = SharedMemory(KEY)
+        print 'Shared Memory successfully created as ',KEY
+        #TODO remover a linha vision_search_ball.... como nao estou utilizando decisao ainda, estou forcando a busca..
+        self.bkb.write_int('VISION_SEARCH_BALL',1)
+        #TODO instanciar a classe visao passando o blackboard
 
 
         self.control = CONTROL(self)
@@ -159,6 +175,8 @@ class Robot(pygame.sprite.Sprite):
             self.orientation_error += gauss(self.imu_error_mean, self.imu_error_variance)
 
         self.rotate = (self.rotate + turn) % 360
+        #self.view_rot = (self.view_rot + turn) % 360
+        self.view_rot = (self.view_rot + self.rotate) % 360
 
         if not self.collision:
 
@@ -267,13 +285,20 @@ class Robot(pygame.sprite.Sprite):
 
         self.control.action_select(0)
 
-    def draw_vision(self,rotate):
+
+    def toRectangular(self,point):
+        r = point[0]
+        a = point[1]
+        return (r * cos(a), r * sin(a))
+
+
+    def draw_vision(self,screen):
         field_of_view = 101.75
         vision_dist = 200
-
-        startRad = radians(-35-rotate)
-        endRad = radians(35-rotate)
-        pygame.draw.arc(screen, (255, 255, 255), [self.x-vision_dist,self.y-vision_dist,vision_dist*2,vision_dist*2], startRad, endRad, 1)
+        #print '********************************************* ',self.view_rot
+        startRad = radians(-35+self.view_rot)
+        endRad = radians(35+self.view_rot)
+        pygame.draw.arc(screen.background, (255, 255, 255), [self.x-vision_dist,self.y-vision_dist,vision_dist*2,vision_dist*2], startRad, endRad, 1)
 
         vision_surface = pygame.Surface((vision_dist * 2, vision_dist * 2))
         vision_surface.fill([0,150,0])
@@ -281,22 +306,19 @@ class Robot(pygame.sprite.Sprite):
         vision_surface.set_alpha(200)
         vision_surface_center = (vision_dist, vision_dist)
 
-        #print rotate
-        #print self.theta
-        theta_vision = radians(rotate)
+        theta_vision = radians(self.view_rot)
 
-        angle_1 = theta_vision - field_of_view/2
-        angle_2 = theta_vision + field_of_view/2
+        angle_1 = -theta_vision + field_of_view/2
+        angle_2 = -theta_vision - field_of_view/2
 
         point_1 = (vision_dist, angle_1)
         point_2 = (vision_dist, angle_2)
 
-        point_1 = toRectangular(point_1)
-        point_2 = toRectangular(point_2)
+        point_1 = self.toRectangular(point_1)
+        point_2 = self.toRectangular(point_2)
 
         point_1 = (point_1[0] + vision_surface_center[0], point_1[1] + vision_surface_center[1])
         point_2 = (point_2[0] + vision_surface_center[0], point_2[1] + vision_surface_center[1])
-
 
         pygame.draw.arc(vision_surface, (255, 255, 255), [vision_dist/2,vision_dist/2,vision_dist,vision_dist], startRad, endRad, 1)
 
@@ -309,45 +331,18 @@ class Robot(pygame.sprite.Sprite):
             self.y - vision_dist
         )
 
-        screen.blit(vision_surface, position)
-
-    def create_bkb(self,robot_index):
-        # TODO after merging, remove comment
-        # self.bkb = SharedMemory(robot_index)
-        pass
-
-    def hcc(self,x1,y1,x2,y2):
-        return sqrt((x1-x2)**2 + (y1-y2)**2)
+        screen.background.blit(vision_surface, position)
 
 
-    def distD(self, x1, y1, x2, y2):
-        return self.hcc(x1, y1, x2, y2)
+    def ball_search(self,x,y):
+        self.ball.view_obj(self.bkb,self.x,self.y,x,y,self.rotate)
 
-    def distR(self, x1, y1, x2, y2):
-        return atan2((y2-y1), (x2-x1))*180/pi
-        # atan2 retorna angulo entre -pi e +pi
 
-    def compAng(self, ang, base):
-        angrange = 35
-        base = -base
-        if(base > 180 - angrange or base < -180 + angrange):
-            if(ang > 0 and base < 0):
-                return (ang < base + 360 + angrange) and (ang > base + 360 - angrange)
-            elif (ang < 0 and base > 0):
-                return (ang < base - 360 + angrange) and (ang > base - 360 - angrange)
-        return (ang < base + angrange) and (ang > base - angrange)
-
-    def view_obj(self,x,y,rotate):
-        field_of_view = 100
-        vision_dist = 200  #we need to add as global variavel
-
-        d = self.distD(self.x,self.y,x,y)
-        r = self.distR(self.x,self.y,x,y)
-
-        d=random.gauss(d,0.1*d/10)
-
-        if((d < vision_dist) and self.compAng(r,rotate)):
-            print 'Inside'
-        else:
-            print 'Outside'
-
+    def perform_pan(self,x,y):
+        #print hex(id(self.panora))
+        self.bkb = SharedMemory(self.KEY)
+        if self.bkb.read_int('VISION_SEARCH_BALL')== 1:
+            self.view_rot = self.panora.pan(self.view_rot,self.rotate)
+            rot = self.panora.view_obj(self.bkb,self.x,self.y,x,y,self.view_rot)
+            if rot != None:
+                self.bkb.write_int('VISION_SEARCH_BALL',0)
