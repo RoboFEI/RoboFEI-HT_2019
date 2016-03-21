@@ -175,8 +175,8 @@ class Robot(pygame.sprite.Sprite):
             self.orientation_error += gauss(self.imu_error_mean, self.imu_error_variance)
 
         self.rotate = (self.rotate + turn) % 360
-        #self.view_rot = (self.view_rot + turn) % 360
-        self.view_rot = (self.view_rot + self.rotate) % 360
+        self.view_rot = (self.view_rot + turn) % 360
+        #self.view_rot = (self.view_rot + self.rotate) % 360 #rotating like a drone!
 
         if not self.collision:
 
