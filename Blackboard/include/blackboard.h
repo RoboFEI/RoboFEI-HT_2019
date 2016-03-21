@@ -127,6 +127,6 @@ extern int *mem ; //Variável que manipula memória compartilhada
 extern float *memf ; //Variável que manipula memória compartilhada
 
 //----Functions prototype---------------------------------------------
-int using_shared_memory(int); //Função que cria e acopla a memória compartilhada
+int* using_shared_memory(int); //Função que cria e acopla a memória compartilhada
 
 

@@ -13,7 +13,7 @@ def collide_ball(robot, ball):
         if float(ball.speed_x) <= 1 and  float(ball.speed_y) <= 1:
             ball.put_in_motion( 1, 1, r*180/pi)
         else:
-            ball.put_in_motion(-ball.speed_x, -ball.speed_y, r*180/pi)
+            ball.put_in_motion(-ball.speed_x, -ball.speed_y, 0)
         return True
 
 
@@ -40,7 +40,7 @@ def collide_ball_goalpost(ball, post):
         return False
     else:
         r = atan2((post.y - ball.y), (post.x - ball.x))
-        ball.put_in_motion(-ball.speed_x, -ball.speed_y, r*180/pi)
+        ball.put_in_motion(-ball.speed_x, -ball.speed_y, 0)
         return True
 
     #fst_r = atan2((fst_robot.y-snd_robot.y), (fst_robot.x-snd_robot.x))

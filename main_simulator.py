@@ -36,7 +36,7 @@ def main():
         field.draw_soccer_field()
 
         #Ball searching
-        simul.searching()
+        #simul.searching()
 
         #Draw robots, ball and update the current frame
         simul.display_update()
