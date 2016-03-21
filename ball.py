@@ -13,9 +13,10 @@ class Ball():
         self.speed_y = 0
         self.radius = 7
 
-    def put_in_motion(self, speed, angle):
-        self.speed_x += speed * cos(radians(angle))
-        self.speed_y += speed * sin(radians(angle))
+    def put_in_motion(self, speed_x, speed_y, angle):
+        self.speed_x = speed_x * cos(radians(angle))
+        self.speed_y = speed_y * sin(radians(angle))
+
 
     def motion_model(self):
         # print "Motion"
@@ -32,4 +33,5 @@ class Ball():
         self.y += self.speed_y
 
     def draw_ball(self, screen):
-        pygame.draw.circle(screen.background, screen.WHITE, (int(self.x), int(self.y)), self.radius, 0)
+        #cirle
+        pygame.draw.circle(screen.background, screen.WHITE, (int(self.x),int(self.y)), self.radius, 0)
