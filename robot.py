@@ -23,19 +23,20 @@ import sys
 # sys.path.append('./Blackboard/src/')
 # from SharedMemory import SharedMemory
 
-class Robot(pygame.sprite.Sprite):
-    def __init__(self,x,y,KEY):
+class Robot(pygame.sprite.Sprite,Vision):
+    def __init__(self, x, y, theta, KEY, color):
         super(Robot,self).__init__()
-        self.robot_width = 26
-        self.robot_height = 26
         self.x = x
         self.y = y
+        self.rotate = theta
+        self.KEY = KEY
+        self.color = color
         self.new_x = x
         self.new_y = y
-        self.rotate = 0
-        self.index = 0
-
+        self.robot_width = 26
+        self.robot_height = 26
         self.radius = 13
+        self.index = 0
 
         self.front = 0
         self.turn = 0
@@ -46,7 +47,6 @@ class Robot(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         #self.saved_image = self.image
         self.front = 0
-        self.rotate = 0
         self.rect.x = x
         self.rect.y = y
         self.sum_time = 0
@@ -54,14 +54,15 @@ class Robot(pygame.sprite.Sprite):
         self.old_y = y
 
         self.panora = Vision()
-        self.view_rot = 0
-        self.KEY = KEY
-        self.bkb = SharedMemory(KEY)
+        self.view_rot = theta
+
+        self.bkb = SharedMemory()
+
+        self.Mem = self.bkb.shd_constructor(KEY)
         print 'Shared Memory successfully created as ',KEY
         #TODO remover a linha vision_search_ball.... como nao estou utilizando decisao ainda, estou forcando a busca..
-        self.bkb.write_int('VISION_SEARCH_BALL',1)
+        self.bkb.write_int(self.Mem,'VISION_SEARCH_BALL',1)
         #TODO instanciar a classe visao passando o blackboard
-
 
         self.control = CONTROL(self)
         self.ball = None
@@ -96,7 +97,7 @@ class Robot(pygame.sprite.Sprite):
         self.rect.y = self.y - 13
 
         #robot's body
-        pygame.draw.rect(self.image, screen.BLUE, (3, 0, 16, 26), 0)
+        pygame.draw.rect(self.image, self.color, (3, 0, 16, 26), 0)
 
         #feet
         pygame.draw.rect(self.image, screen.BLACK, (19, 2, 5, 10), 0)
@@ -178,6 +179,7 @@ class Robot(pygame.sprite.Sprite):
         self.view_rot = (self.view_rot + turn) % 360
         #self.view_rot = (self.view_rot + self.rotate) % 360 #rotating like a drone!
 
+
         if not self.collision:
 
             self.old_x = self.x
@@ -207,7 +209,7 @@ class Robot(pygame.sprite.Sprite):
                 self.new_y = 0
 
         else:
-            print 'collision'
+            #print 'collision'
             self.x = self.old_x
             self.y = self.old_y
             self.new_x = self.old_x + (cos(radians(self.rotate)) * self.radius/2 * self.front) + (sin(radians(self.rotate)) * drift * self.radius/2)
@@ -285,7 +287,6 @@ class Robot(pygame.sprite.Sprite):
 
         self.control.action_select(0)
 
-
     def toRectangular(self,point):
         r = point[0]
         a = point[1]
@@ -335,14 +336,29 @@ class Robot(pygame.sprite.Sprite):
 
 
     def ball_search(self,x,y):
-        self.ball.view_obj(self.bkb,self.x,self.y,x,y,self.rotate)
+        self.ball.view_obj(self.Mem, self.bkb,self.x,self.y,x,y,self.rotate)
 
 
-    def perform_pan(self,x,y):
+    def perform_pan(self):
         #print hex(id(self.panora))
-        self.bkb = SharedMemory(self.KEY)
-        if self.bkb.read_int('VISION_SEARCH_BALL')== 1:
+        #self.bkb = SharedMemory(self.KEY)
+        if self.bkb.read_int(self.Mem,'VISION_SEARCH_BALL')== 1:
+            print 'entrei'
             self.view_rot = self.panora.pan(self.view_rot,self.rotate)
-            rot = self.panora.view_obj(self.bkb,self.x,self.y,x,y,self.view_rot)
+            rot = self.panora.view_obj(self.Mem,self.bkb,self.x,self.y,500,500,self.view_rot)
             if rot != None:
-                self.bkb.write_int('VISION_SEARCH_BALL',0)
+                self.bkb.write_int(self.Mem,'VISION_SEARCH_BALL',0)
+            print self.view_rot
+            print 'vision_search_ball', self.bkb.read_int(self.Mem,'VISION_SEARCH_BALL')
+
+
+    def searching(self):
+        self.perform_pan()
+        #self.perform_pan(self.ball.x,self.ball.y)
+        #if self.robots:
+        #    for i in range(0, len(self.robots)):
+        #        self.robots[i].perform_pan(self.ball.x,self.ball.y)
+        #        for j in range(0, len(self.robots)):
+        #            if i!=j:
+        #                self.robots[i].perform_pan(self.robots[j].x,self.robots[j].y)
+

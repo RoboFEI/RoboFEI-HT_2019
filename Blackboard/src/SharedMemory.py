@@ -19,36 +19,39 @@ import os
 class SharedMemory(object):
 # Classe que lê e escreve na memória compartilhada do sistema '''
 
-    def __init__(self,KEY):
+    def shd_constructor(self,KEY):
         #print "Start the Class Blackboard"
         # Usando memoria compartilhada a partir das funções do c++-------------------------------------------------------
         try:
             self.testlib = ctypes.CDLL('../../build/lib/libblackboardpy.so') #chama a library que contem as funções em c++
         except OSError:
             self.testlib = ctypes.CDLL('./build/lib/libblackboardpy.so') #chama a library que contem as funções em c++
-        self.testlib.using_shared_memory(KEY)         #using c++ function
+        self.testlib.using_shared_memory.restype = ctypes.POINTER(ctypes.c_int)
+        mem = self.testlib.using_shared_memory(KEY)         #using c++ function
+        print 'python', mem
         self.testlib.leitura_float.restype = ctypes.c_float #defining the return type, that case defining float
         self.testlib.leitura_int.restype = ctypes.c_int #defining the return type, that case defining int
+        return mem
         #--------------------------------------------------------------------------------------------------------------------
 
     # Criando função que escreve float--------------------------------------------------------
-    def write_float(self, variable, value):
-        self.testlib.escreve_float(ctypes.c_int(self.variable_float[variable]), ctypes.c_float(value))
+    def write_float(self, mem, variable, value):
+        self.testlib.escreve_float(mem, ctypes.c_int(self.variable_float[variable]), ctypes.c_float(value))
     #-----------------------------------------------------------------------------------------
 
     # Criando função que escreve float--------------------------------------------------------
-    def write_int(self, variable, value):
-        self.testlib.escreve_int(ctypes.c_int(self.variable_int[variable]), ctypes.c_int(int(value)))
+    def write_int(self, mem, variable, value):
+        self.testlib.escreve_int(mem, ctypes.c_int(self.variable_int[variable]), ctypes.c_int(int(value)))
     #-----------------------------------------------------------------------------------------
 
     # Criando função que lê float--------------------------------------------------------
-    def read_float(self, variable):
-        return self.testlib.leitura_float(ctypes.c_int(self.variable_float[variable]))
+    def read_float(self, mem, variable):
+        return self.testlib.leitura_float(mem, ctypes.c_int(self.variable_float[variable]))
     #-----------------------------------------------------------------------------------------
 
     # Criando função que lê float--------------------------------------------------------
-    def read_int(self, variable):
-        return self.testlib.leitura_int(ctypes.c_int(self.variable_int[variable]))
+    def read_int(self, mem, variable):
+        return self.testlib.leitura_int(mem, ctypes.c_int(self.variable_int[variable]))
     #-----------------------------------------------------------------------------------------
 
     variable_int = {

@@ -3,8 +3,9 @@ import os
 import ctypes
 from math import *
 import random
+from screen import *
 
-class Vision (object):
+class Vision():
 
     #----------------------------------------------------------------------------------------------------------------------------------
     def __init__(self):
@@ -65,7 +66,7 @@ class Vision (object):
         return (ang < base + angrange) and (ang > base - angrange)
 
 
-    def view_obj(self,bkb,r_x,r_y,x,y,rotate):
+    def view_obj(self,mem,bkb,r_x,r_y,x,y,rotate):
         field_of_view = 100
         vision_dist = 200  #we need to add as global variavel
 
@@ -78,8 +79,8 @@ class Vision (object):
             print 'Inside'
             print 'Distance ',d
             print 'Rotate ',-r
-            bkb.write_float('VISION_DIST_BALL',d)
-            bkb.write_float('VISION_ANGLE_BALL',-r)
+            bkb.write_float(mem,'VISION_DIST_BALL',d)
+            bkb.write_float(mem,'VISION_ANGLE_BALL',-r)
             #bkb.write_int('VISION_SEARCH_BALL',0)
             return -r
         #else:
@@ -88,3 +89,6 @@ class Vision (object):
 
     def detect(self):
         self.view_obj(self,x,y,view_rot)
+
+
+
