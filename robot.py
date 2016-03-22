@@ -18,10 +18,6 @@ import sys
 sys.path.append('./Blackboard/src/')
 from SharedMemory import SharedMemory
 
-import sys
-# TODO uncomment after merging
-# sys.path.append('./Blackboard/src/')
-# from SharedMemory import SharedMemory
 
 class Robot(pygame.sprite.Sprite,Vision):
     def __init__(self, x, y, theta, KEY, color):

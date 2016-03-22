@@ -6,8 +6,9 @@ from ball import *
 class CONTROL():
     def __init__(self, robot):
         self.robot = robot
-        # TODO - uncomment after merge
-        # self.bkb = robot.bkb
+
+        self.bkb = robot.bkb
+        self.Mem = robot.Mem
 
         # Config
         self.walk_speed = 0.3
@@ -57,8 +58,7 @@ class CONTROL():
 
         print self.action_state
 
-        # TODO - uncomment after merge
-        #self.bkb.write_int('CONTROL_MOVING', 1)
+        self.bkb.write_int(self.Mem, 'CONTROL_MOVING', 1)
 
         if flag in self.action_exceptions:
             if flag == 4:
@@ -74,8 +74,7 @@ class CONTROL():
                 self.robot.motion_vars(self.action_vars[flag][0],
                                        self.action_vars[flag][1],
                                        self.action_vars[flag][2])
-                # TODO - uncomment after merge
-                #self.bkb.write_int('CONTROL_MOVING', 0)
+                self.bkb.write_int(self.Mem, 'CONTROL_MOVING', 0)
         else:
             self.robot.in_motion = True
             self.robot.motion_vars(self.action_vars[flag][0],
@@ -84,15 +83,9 @@ class CONTROL():
 
     def control_update(self):
         if self.action_flag in self.action_exceptions:
-            # TODO - uncomment after merge
-            #if self.action_flag == 0:
-            #    self.action_select(flag)
-            #else:
-            #    self.action_select(self.bkb.read_int('DECISION_ACTION_A'))
-            pass
+            if self.action_flag == 0:
+                self.action_select(self.bkb.read_int(self.Mem, 'DECISION_ACTION_A'))
         else:
-            # TODO - uncomment after merge
-            #flag = self.bkb.read_int('DECISION_ACTION_A')
-            #if flag != self.action_flag:
-            #    self.action_select(flag)
-            pass
+            flag = self.bkb.read_int(self.Mem, 'DECISION_ACTION_A')
+            if flag != self.action_flag:
+                self.action_select(flag)
