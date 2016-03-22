@@ -104,7 +104,7 @@ int* using_shared_memory(int KEY)
              // return(1) ;
             //}
     
-    printf("%x\n",(mem));
+    printf("%du\n",(mem));
     return(mem); 
     
     

@@ -182,6 +182,10 @@ class Simulation():
                 print 'p'
                 self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem,'VISION_SEARCH_BALL', 1)
 
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_o:
+                print 'o'
+                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem,'VISION_SEARCH_BALL', 0)
+
 
             if event.type == pygame.QUIT:
                 sys.exit()
@@ -238,7 +242,7 @@ class Simulation():
             for robot in range(0, len(self.robots)):
                 self.robots[robot].draw_robot(robot, self.screen)
                 self.robots[robot].draw_vision(self.screen)
-                if self.robots[self.robot_index_control].bkb.read_int(self.robots[self.robot_index_control].Mem,'VISION_SEARCH_BALL') == 1:
+                if self.robots[robot].bkb.read_int(self.robots[robot].Mem,'VISION_SEARCH_BALL') == 1:
                     self.robots[robot].searching()
 
 
