@@ -20,6 +20,7 @@ Arquivo de cabeçalho contendo as funções e definições do black board
 #define PLANNING_PARAMETER_ANGLE *(mem+2)
 #define IMU_STATE *(mem+3)
 
+#define CONTROL_MOVING *(mem+84)
 
 #define CONTROL_ACTION *(mem+13)
 #define CONTROL_HEIGHT_A *(mem+14)

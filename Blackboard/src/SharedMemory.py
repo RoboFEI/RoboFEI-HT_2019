@@ -59,6 +59,7 @@ class SharedMemory(object):
     "PLANNING_PARAMETER_VEL": 1,
     "PLANNING_PARAMETER_ANGLE": 2,
     "IMU_STATE" : 3,
+    "CONTROL_MOVING": 84,
     "CONTROL_ACTION": 13,
     "CONTROL_HEIGHT_A": 14,
     "CONTROL_HEIGHT_B": 15,
