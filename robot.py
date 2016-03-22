@@ -251,6 +251,8 @@ class Robot(pygame.sprite.Sprite,Vision):
         self.control.action_select(0)
 
     def get_orientation(self):
+        if self.errors_on:
+            self.orientation_error += gauss(self.imu_error_mean, self.imu_error_variance)
         return self.rotate + self.orientation_error
 
     def pass_left(self):
