@@ -29,29 +29,29 @@ class SharedMemory(object):
         self.testlib.using_shared_memory.restype = ctypes.POINTER(ctypes.c_int)
         mem = self.testlib.using_shared_memory(KEY)         #using c++ function
         print 'python', mem
-        self.testlib.leitura_float.restype = ctypes.c_float #defining the return type, that case defining float
-        self.testlib.leitura_int.restype = ctypes.c_int #defining the return type, that case defining int
+        self.testlib.read_float.restype = ctypes.c_float #defining the return type, that case defining float
+        self.testlib.read_int.restype = ctypes.c_int #defining the return type, that case defining int
         return mem
         #--------------------------------------------------------------------------------------------------------------------
 
     # Criando função que escreve float--------------------------------------------------------
     def write_float(self, mem, variable, value):
-        self.testlib.escreve_float(mem, ctypes.c_int(self.variable_float[variable]), ctypes.c_float(value))
+        self.testlib.write_float(mem, ctypes.c_int(self.variable_float[variable]), ctypes.c_float(value))
     #-----------------------------------------------------------------------------------------
 
     # Criando função que escreve float--------------------------------------------------------
     def write_int(self, mem, variable, value):
-        self.testlib.escreve_int(mem, ctypes.c_int(self.variable_int[variable]), ctypes.c_int(int(value)))
+        self.testlib.write_int(mem, ctypes.c_int(self.variable_int[variable]), ctypes.c_int(int(value)))
     #-----------------------------------------------------------------------------------------
 
     # Criando função que lê float--------------------------------------------------------
     def read_float(self, mem, variable):
-        return self.testlib.leitura_float(mem, ctypes.c_int(self.variable_float[variable]))
+        return self.testlib.read_float(mem, ctypes.c_int(self.variable_float[variable]))
     #-----------------------------------------------------------------------------------------
 
     # Criando função que lê float--------------------------------------------------------
     def read_int(self, mem, variable):
-        return self.testlib.leitura_int(mem, ctypes.c_int(self.variable_int[variable]))
+        return self.testlib.read_int(mem, ctypes.c_int(self.variable_int[variable]))
     #-----------------------------------------------------------------------------------------
 
     variable_int = {

@@ -25,19 +25,24 @@ import time
 
 class TreatingRawData(object):
 
-     #Instantiate the BlackBoard's class:
-    bkb = SharedMemory()
-    
-    # instantiate:
-    config = ConfigParser()
-
-    # looking for the file config.ini:
-    config.read('../../Control/Data/config.ini')
-    
     def __init__(self):
+        # instantiate:
+        self.config = ConfigParser()
+    
+        # looking for the file config.ini:
+        self.config.read('../../Control/Data/config.ini')
+        
+        self.mem_key = self.config.get('Communication', 'no_player_robofei')*100;
+
+        #Instantiate the BlackBoard's class:
+        self.bkb = SharedMemory()
+        self.mem = self.bkb.shd_constructor(self.mem_key)
+        
         print
         print 'Raw data - read (get) and write (set) methods'
         print
+        
+        #self.bkb.write_int(self.Mem,'VISION_SEARCH_BALL',1)
         
     def get_referee_usage(self):
         return self.config.get('Decision', 'referee')
@@ -46,120 +51,120 @@ class TreatingRawData(object):
         return self.config.get('Decision', 'orientation')
                     
     def get_referee(self):
-        return self.bkb.read_int('COM_REFEREE')
+        return self.bkb.read_int(self.mem, 'COM_REFEREE')
 
     def get_motor_tilt(self):
-        return self.bkb.read_int('VISION_MOTOR1_ANGLE')
+        return self.bkb.read_int(self.mem,'VISION_MOTOR1_ANGLE')
         
     def get_motor_pan(self):
-        return self.bkb.read_int('VISION_MOTOR2_ANGLE')
+        return self.bkb.read_int(self.mem,'VISION_MOTOR2_ANGLE')
           
     def get_orientation(self):
         '''1 for correct orientation'''
-        return self.bkb.read_int('LOCALIZATION_THETA')
+        return self.bkb.read_int(self.mem,'LOCALIZATION_THETA')
         
     def get_dist_ball(self):
-        return self.bkb.read_int('VISION_DIST_BALL')
+        return self.bkb.read_int(self.mem,'VISION_DIST_BALL')
         
-    def get_head_pan_initial(self):
+    ''''def get_head_pan_initial(self):
         return self.config.getint('Offset', 'ID_19')
 
     def get_head_tilt_initial(self):
-        return self.config.getint('Offset', 'ID_20')
+        return self.config.getint('Offset', 'ID_20')'''
         
     def get_search_ball_status(self):
-        return self.bkb.read_int('VISION_SEARCH_BALL')
+        return self.bkb.read_int(self.mem,'VISION_SEARCH_BALL')
         
     def get_lost_ball_status(self):
-        return self.bkb.read_int('VISION_LOST_BALL')
+        return self.bkb.read_int(self.mem,'VISION_LOST_BALL')
         
     def set_search_ball_status(self):
-        return self.bkb.write_int('VISION_SEARCH_BALL', 1)
+        return self.bkb.write_int(self.mem,'VISION_SEARCH_BALL', 1)
         
     def set_stand_still(self):
         print 'stand still'
-        self.bkb.write_int('DECISION_ACTION_A', 0)
+        self.bkb.write_int(self.mem,'DECISION_ACTION_A', 0)
         time.sleep(2)
         return 
 
     def set_walk_forward(self):
         print 'walk forward'
-        return self.bkb.write_int('DECISION_ACTION_A', 1)
+        return self.bkb.write_int(self.mem,'DECISION_ACTION_A', 1)
         
     def set_walk_speed(self,vel):
-        return self.bkb.write_int('DECISION_ACTION_B', vel)
+        return self.bkb.write_int(self.mem,'DECISION_ACTION_B', vel)
         
     def set_turn_left(self):
         print 'turn left'
-        return self.bkb.write_int('DECISION_ACTION_A', 2)
+        return self.bkb.write_int(self.mem,'DECISION_ACTION_A', 2)
         
     def set_turn_right(self):
         print 'turn right'
-        return self.bkb.write_int('DECISION_ACTION_A', 3)
+        return self.bkb.write_int(self.mem,'DECISION_ACTION_A', 3)
         
     def set_kick_right(self):
         print 'kick right'
-        self.bkb.write_int('DECISION_ACTION_A', 4)
+        self.bkb.write_int(self.mem,'DECISION_ACTION_A', 4)
         return self.set_search_ball_status()
         
     def set_kick_left(self):
         print 'kick left'
-        self.bkb.write_int('DECISION_ACTION_A', 5)
+        self.bkb.write_int(self.mem,'DECISION_ACTION_A', 5)
         return self.set_search_ball_status()
         
     def set_sidle_left(self):
         print 'sidle left'
-        return self.bkb.write_int('DECISION_ACTION_A', 6)
+        return self.bkb.write_int(self.mem,'DECISION_ACTION_A', 6)
         
     def set_sidle_right(self):
         print 'sidle right'
-        return self.bkb.write_int('DECISION_ACTION_A', 7)
+        return self.bkb.write_int(self.mem,'DECISION_ACTION_A', 7)
         
     def set_walk_forward_slow(self):
         print 'walk forward slow'
         self.set_walk_speed(3)
-        return self.bkb.write_int('DECISION_ACTION_A', 8)
+        return self.bkb.write_int(self.mem,'DECISION_ACTION_A', 8)
         
     def set_revolve_around_ball(self):
         print 'revolve around ball'
-        self.bkb.write_int('DECISION_ACTION_A', 9)
+        self.bkb.write_int(self.mem,'DECISION_ACTION_A', 9)
         time.sleep(7) #Tempo de Giro
         return self.set_stand_still()
         
     def set_walk_backward(self):
         print 'walk backward'
-        return self.bkb.write_int('DECISION_ACTION_A', 10)
+        return self.bkb.write_int(self.mem,'DECISION_ACTION_A', 10)
         
     def set_gait(self):
         print 'gait'
-        return self.bkb.write_int('DECISION_ACTION_A', 11)
+        return self.bkb.write_int(self.mem,'DECISION_ACTION_A', 11)
         
     def set_pass_left(self):
         print 'pass left'
-        return self.bkb.write_int('DECISION_ACTION_A', 12)
+        return self.bkb.write_int(self.mem,'DECISION_ACTION_A', 12)
         
     def set_pass_right(self):
         print 'pass right'
-        return self.bkb.write_int('DECISION_ACTION_A', 13)
+        return self.bkb.write_int(self.mem,'DECISION_ACTION_A', 13)
         
     def set_jump_left(self):
-        return self.bkb.write_int('DECISION_ACTION_A', 14)
+        return self.bkb.write_int(self.mem,'DECISION_ACTION_A', 14)
 
     def set_jump_right(self):
-        return self.bkb.write_int('DECISION_ACTION_A', 15)
+        return self.bkb.write_int(self.mem,'DECISION_ACTION_A', 15)
         
     def set_vision_ball(self):
-        self.bkb.write_int('DECISION_ACTION_VISION', 0)
+        self.bkb.write_int(self.mem,'DECISION_ACTION_VISION', 0)
         return time.sleep(2)
         
     def set_vision_orientation(self):
         print "orientating"
         self.set_stand_still()
-        self.bkb.write_int('LOCALIZATION_THETA', 0)
-        self.bkb.write_int('DECISION_ACTION_VISION', 2)
+        self.bkb.write_int(self.mem,'LOCALIZATION_THETA', 0)
+        self.bkb.write_int(self.mem,'DECISION_ACTION_VISION', 2)
         while(self.get_orientation() == 0):
             pass
-        return self.bkb.write_int('DECISION_ACTION_VISION', 0)
+        return self.bkb.write_int(self.mem,'DECISION_ACTION_VISION', 0)
         
     def delta_position_pan(self):
         '''right > 0 / left < 0'''
@@ -176,6 +181,7 @@ class Ordinary(TreatingRawData):
     " " " Ordinary class " " "
     
     def __init__(self):
+        super(Ordinary,self).__init__()
         print
         print 'Ordinary behavior called'
         print
@@ -277,13 +283,36 @@ class Ordinary(TreatingRawData):
 
 #############################################################################
         
-class Attacker(Ordinary):
+class Attacker(TreatingRawData):
     " " " Attacker class " " "
 
     def __init__(self):
+        super(Attacker,self).__init__()
         print
         print  'Attacker behavior called' 
         print
+        
+    def decision(self, referee):
+        if referee == 1: #stopped
+            print 'stand'
+            self.set_stand_still()
+            
+        elif referee == 11: #ready
+            print 'ready'
+            self.set_stand_still()
+            
+        elif referee == 12: #set
+            print 'set'
+            self.set_stand_still()
+            self.set_vision_ball()
+            
+        elif referee == 2: #play
+            print 'play'
+            self.set_turn_right()
+            time.sleep(2)
+            self.set_walk_forward()
+            time.sleep(2)
+
 
 ##############################################################################
         

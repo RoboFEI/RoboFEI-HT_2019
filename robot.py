@@ -15,7 +15,7 @@ from random import gauss
 import time
 
 import sys
-sys.path.append('./Blackboard/src/')
+sys.path.append('./AI/Blackboard/src/')
 from SharedMemory import SharedMemory
 
 import sys

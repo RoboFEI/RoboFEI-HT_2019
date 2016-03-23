@@ -34,25 +34,27 @@ float *memf ; //Variável que manipula memória compartilhada
 // será a memoria criada ->   key = 0x0000007b    bytes = 2048
 // nattch = number of attached processes
 
-void escreve_int(int *Mem, int index, int valor)
+void write_int(int *Mem, int index, int valor)
 {
     *(Mem+index) = valor;
 }
 
-void escreve_float(int *Mem, int index, float valor)
+void write_float(int *Mem, int index, float valor)
 {
-    float *Memf =  (float*)(Mem+125);
+    float* Memf;
+    Memf = (float*)(Mem+125);
     *(Memf+index) = valor;
 }
 
-int leitura_int(int *Mem, int index)
+int read_int(int *Mem, int index)
 {
     return *(Mem + index);
 }
 
-float leitura_float(int *Mem, int index)
+float read_float(int *Mem, int index)
 {
-    float *Memf =  (float*)(*Mem+125);
+    float* Memf;
+    Memf = (float*)(Mem+125);
     return *(Memf + index);
 }
 
@@ -106,11 +108,5 @@ int* using_shared_memory(int KEY)
     
     printf("%du\n",(mem));
     return(mem); 
-    
-    
-                                //danilo, tentei: 
-                                    //((int)(mem))
-                                    //  *(int*)(mem)
-                                    //  *(int*)(&mem)
-                                    //  (intptr_t)(mem)
+
 }
