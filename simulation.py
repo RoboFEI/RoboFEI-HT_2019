@@ -26,76 +26,77 @@ class Simulation():
     def perform_events(self):
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
-                self.robots[self.robot_index_control].control.action_select(8)
+                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 8)
 
             if event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
-                self.robots[self.robot_index_control].control.action_select(18)
+                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 18)
 
             if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
-                self.robots[self.robot_index_control].control.action_select(2)
+                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 2)
 
             #<<<<<<< HEAD
             #if event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
             #    self.front = 0.5
             #=======
             if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
-                self.robots[self.robot_index_control].control.action_select(3)
+                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 3)
 
             if event.type == pygame.KEYDOWN and event.key == pygame.K_w:
-                self.robots[self.robot_index_control].control.action_select(1)
+                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 1)
 
             #<<<<<<< HEAD
             #if event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
             #    self.front = -0.5
             #=======
             if event.type == pygame.KEYDOWN and event.key == pygame.K_s:
-                self.robots[self.robot_index_control].control.action_select(17)
+                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 17)
 
             if event.type == pygame.KEYDOWN and event.key == pygame.K_a:
-                self.robots[self.robot_index_control].control.action_select(6)
+                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 6)
 
             if event.type == pygame.KEYDOWN and event.key == pygame.K_d:
-                self.robots[self.robot_index_control].control.action_select(7)
+                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 7)
 
             if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
-                self.robots[self.robot_index_control].control.action_select(9)
+                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 9)
 
             if event.type == pygame.KEYDOWN and event.key == pygame.K_e:
-                self.robots[self.robot_index_control].control.action_select(14)
+                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 14)
 
             if event.type == pygame.KEYDOWN and event.key == pygame.K_f:
-                self.robots[self.robot_index_control].control.action_select(0)
+                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 0)
 
             if event.type == pygame.KEYDOWN and event.key == pygame.K_g:
-                self.robots[self.robot_index_control].control.action_select(11)
+                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 11)
 
             if event.type == pygame.KEYUP and event.key == pygame.K_x:
-                self.robots[self.robot_index_control].control.action_select(5)
+                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 5)
 
             if event.type == pygame.KEYUP and event.key == pygame.K_c:
-                self.robots[self.robot_index_control].control.action_select(4)
+                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 4)
 
             if event.type == pygame.KEYUP and event.key == pygame.K_z:
-                self.robots[self.robot_index_control].control.action_select(12)
+                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 12)
 
             if event.type == pygame.KEYUP and event.key == pygame.K_v:
-                self.robots[self.robot_index_control].control.action_select(13)
+                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 13)
 
             if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
                 self.update_mouse_pos()
-                robot = Robot(self.mx, self.my, 0,(len(self.robots)+1)*5, self.screen.CYAN)
+                robot = Robot(self.mx, self.my, 0,(len(self.robots)+1)*100, self.screen.CYAN)
+                robot.bkb.write_int(robot.Mem, 'DECISION_ACTION_A', 0)
 
                 if pygame.key.get_mods() & pygame.KMOD_CTRL:
-                    robot = Robot(self.mx, self.my, 180, (len(self.robots)+1)*5, self.screen.MAGENTA)
+                    robot = Robot(self.mx, self.my, 180, (len(self.robots)+1)*100, self.screen.MAGENTA)
 
                 if pygame.key.get_mods() & pygame.KMOD_LSHIFT:
-                    robot = Robot(self.mx, self.my,0,(len(self.robots)+1)*5, self.screen.YELLOW)
+                    robot = Robot(self.mx, self.my,0,(len(self.robots)+1)*100, self.screen.YELLOW)
 
                 if pygame.key.get_mods() & pygame.KMOD_LALT:
-                    robot = Robot(self.mx, self.my,180,(len(self.robots)+1)*5, self.screen.BLACK)
+                    robot = Robot(self.mx, self.my,180,(len(self.robots)+1)*100, self.screen.BLACK)
 
                 if pygame.key.get_mods() & pygame.KMOD_RSHIFT:
-                    robot = Robot(self.mx, self.my,180,(len(self.robots)+1)*5, self.screen.ORANGE)
+                    robot = Robot(self.mx, self.my,180,(len(self.robots)+1)*100, self.screen.ORANGE)
 
                 self.robots.append(robot)
                 self.group_robots.add(robot)

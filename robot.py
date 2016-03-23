@@ -8,20 +8,13 @@ from math import radians
 from math import degrees
 from math import sqrt
 from math import atan2
-from math import pi
 from math import exp
 from random import gauss
-
-import time
 
 import sys
 sys.path.append('./AI/Blackboard/src/')
 from SharedMemory import SharedMemory
 
-import sys
-# TODO uncomment after merging
-# sys.path.append('./Blackboard/src/')
-# from SharedMemory import SharedMemory
 
 class Robot(pygame.sprite.Sprite,Vision):
     def __init__(self, x, y, theta, KEY, color):
@@ -254,6 +247,9 @@ class Robot(pygame.sprite.Sprite,Vision):
         self.control.action_select(0)
 
     def get_orientation(self):
+        if self.errors_on:
+            self.orientation_error += gauss(self.imu_error_mean, self.imu_error_variance)
+
         return self.rotate + self.orientation_error
 
     def pass_left(self):

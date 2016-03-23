@@ -308,10 +308,8 @@ class Attacker(TreatingRawData):
             
         elif referee == 2: #play
             print 'play'
-            self.set_turn_right()
-            time.sleep(2)
-            self.set_walk_forward()
-            time.sleep(2)
+            self.set_walk_forward_slow()
+
 
 
 ##############################################################################
