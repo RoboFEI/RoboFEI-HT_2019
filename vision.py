@@ -89,10 +89,20 @@ class Vision():
             view_rot = self.pan(view_rot,rotate)
             rot, dist = self.view_obj(mem,bkb,rX,rY,ballX,ballY,view_rot)
             if rot != 99999:
+                #TODO para fazer o merge -- corrigindo o angulo da bola em relacao a orientacao do robo
+                if rot<0:
+                    rot = 360 + rot
+                print 'rotacao bola ', rot
+                print 'rotacao robo ',rotate
+                rot = rot - rotate
+                if rot < 0:
+                    rot = 360 + rot
+                print 'rotacao ok ',rot
                 bkb.write_float(mem,'VISION_DIST_BALL',dist)
-                bkb.write_float(mem,'VISION_ANGLE_BALL',-rot)
+                bkb.write_float(mem,'VISION_ANGLE_BALL',rot)
                 bkb.write_int(mem,'VISION_SEARCH_BALL',0) #stop searching
                 bkb.write_int(mem,'VISION_LOST_BALL',1)  #ball is found
+                #end TODO
             else:
                 bkb.write_int(mem,'VISION_LOST_BALL',0)  #ball not found
 
