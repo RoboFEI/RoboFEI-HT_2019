@@ -8,14 +8,11 @@ from math import radians
 from math import degrees
 from math import sqrt
 from math import atan2
-from math import pi
 from math import exp
 from random import gauss
 
-import time
-
 import sys
-sys.path.append('./Blackboard/src/')
+sys.path.append('./AI/Blackboard/src/')
 from SharedMemory import SharedMemory
 
 
@@ -173,8 +170,7 @@ class Robot(pygame.sprite.Sprite,Vision):
 
         self.rotate = (self.rotate + turn) % 360
         self.view_rot = (self.view_rot + turn) % 360
-        #self.view_rot = (self.view_rot + self.rotate) % 360 #rotating like a drone!
-
+        #self.view_rot = (self.view_rot + self.rotate) % 360
 
         if not self.collision:
 
@@ -253,6 +249,7 @@ class Robot(pygame.sprite.Sprite,Vision):
     def get_orientation(self):
         if self.errors_on:
             self.orientation_error += gauss(self.imu_error_mean, self.imu_error_variance)
+
         return self.rotate + self.orientation_error
 
     def pass_left(self):
@@ -338,16 +335,11 @@ class Robot(pygame.sprite.Sprite,Vision):
 
 
     def perform_pan(self):
-        #print hex(id(self.panora))
-        #self.bkb = SharedMemory(self.KEY)
         if self.bkb.read_int(self.Mem,'VISION_SEARCH_BALL')== 1:
-            print 'entrei'
             self.view_rot = self.panora.pan(self.view_rot,self.rotate)
             rot = self.panora.view_obj(self.Mem,self.bkb,self.x,self.y,500,500,self.view_rot)
-            if rot != None:
+            if rot == 99999:
                 self.bkb.write_int(self.Mem,'VISION_SEARCH_BALL',0)
-            print self.view_rot
-            print 'vision_search_ball', self.bkb.read_int(self.Mem,'VISION_SEARCH_BALL')
 
 
     def searching(self):
@@ -360,3 +352,14 @@ class Robot(pygame.sprite.Sprite,Vision):
         #            if i!=j:
         #                self.robots[i].perform_pan(self.robots[j].x,self.robots[j].y)
 
+
+
+    def vision_process(self,ballX,ballY,robots):
+        #ball detect
+        self.panora.ball_detect(self.Mem,self.bkb, self.view_rot, self.rotate, self.x, self.y, ballX,ballY)
+
+        #robot detect
+        if robots:
+            for j in range(0, len(robots)):
+                if j!=self.index-1:
+                    self.panora.robot_detect(self.Mem,self.bkb, self.view_rot, self.rotate, self.x, self.y, robots[j].x, robots[j].y, j)

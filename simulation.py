@@ -83,20 +83,20 @@ class Simulation():
 
             if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
                 self.update_mouse_pos()
-                robot = Robot(self.mx, self.my, 0,(len(self.robots)+1)*5, self.screen.CYAN)
+                robot = Robot(self.mx, self.my, 0,(len(self.robots)+1)*100, self.screen.CYAN)
                 robot.bkb.write_int(robot.Mem, 'DECISION_ACTION_A', 0)
 
                 if pygame.key.get_mods() & pygame.KMOD_CTRL:
-                    robot = Robot(self.mx, self.my, 180, (len(self.robots)+1)*5, self.screen.MAGENTA)
+                    robot = Robot(self.mx, self.my, 180, (len(self.robots)+1)*100, self.screen.MAGENTA)
 
                 if pygame.key.get_mods() & pygame.KMOD_LSHIFT:
-                    robot = Robot(self.mx, self.my,0,(len(self.robots)+1)*5, self.screen.YELLOW)
+                    robot = Robot(self.mx, self.my,0,(len(self.robots)+1)*100, self.screen.YELLOW)
 
                 if pygame.key.get_mods() & pygame.KMOD_LALT:
-                    robot = Robot(self.mx, self.my,180,(len(self.robots)+1)*5, self.screen.BLACK)
+                    robot = Robot(self.mx, self.my,180,(len(self.robots)+1)*100, self.screen.BLACK)
 
                 if pygame.key.get_mods() & pygame.KMOD_RSHIFT:
-                    robot = Robot(self.mx, self.my,180,(len(self.robots)+1)*5, self.screen.ORANGE)
+                    robot = Robot(self.mx, self.my,180,(len(self.robots)+1)*100, self.screen.ORANGE)
 
                 self.robots.append(robot)
                 self.group_robots.add(robot)
@@ -187,6 +187,9 @@ class Simulation():
                 print 'o'
                 self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem,'VISION_SEARCH_BALL', 0)
 
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_y:
+                print 'y'
+                self.robots[self.robot_index_control].vision_process(self.ball.x,self.ball.y,self.robots)
 
             if event.type == pygame.QUIT:
                 sys.exit()

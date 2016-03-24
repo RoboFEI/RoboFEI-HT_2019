@@ -76,19 +76,37 @@ class Vision():
         d=random.gauss(d,0.1*d/10)
 
         if((d < vision_dist) and self.compAng(r,rotate)):
-            print 'Inside'
-            print 'Distance ',d
-            print 'Rotate ',-r
-            bkb.write_float(mem,'VISION_DIST_BALL',d)
-            bkb.write_float(mem,'VISION_ANGLE_BALL',-r)
-            #bkb.write_int('VISION_SEARCH_BALL',0)
-            return -r
-        #else:
+            #print 'Inside'
+            #print 'Distance ',d
+            #print 'Rotate ',-r
+            return (-r,d)
+        else:
             #print 'Outside'
+            return (99999,99999)
+
+    def ball_detect(self,mem,bkb, view_rot, rotate, rX, rY, ballX,ballY):
+        if bkb.read_int(mem,'VISION_SEARCH_BALL')== 1:
+            view_rot = self.pan(view_rot,rotate)
+            rot, dist = self.view_obj(mem,bkb,rX,rY,ballX,ballY,view_rot)
+            if rot != 99999:
+                bkb.write_float(mem,'VISION_DIST_BALL',dist)
+                bkb.write_float(mem,'VISION_ANGLE_BALL',-rot)
+                bkb.write_int(mem,'VISION_SEARCH_BALL',0) #stop searching
+                bkb.write_int(mem,'VISION_LOST_BALL',1)  #ball is found
+            else:
+                bkb.write_int(mem,'VISION_LOST_BALL',0)  #ball not found
 
 
-    def detect(self):
-        self.view_obj(self,x,y,view_rot)
+    def write_bkb_robot_position(self,mem,bkb,rot,dist,robotID):
+        bkb.write_floatDynamic(mem,'VISION_DIST_RBT01',robotID,dist)
+        bkb.write_floatDynamic(mem,'VISION_ANGLE_RBT01',robotID,-rot)
 
 
 
+    def robot_detect(self,mem,bkb,view_rot, rotate, rX, rY, robotX, robotY,robotID):
+        if bkb.read_int(mem,'VISION_SEARCH_BALL')== 1:
+            view_rot = self.pan(view_rot,rotate)
+            rot, dist = self.view_obj(mem,bkb,rX,rY,robotX,robotY,view_rot)
+            if rot != 99999:
+                print 'Robot found!'
+                self.write_bkb_robot_position(mem,bkb,rot,dist,robotID)
