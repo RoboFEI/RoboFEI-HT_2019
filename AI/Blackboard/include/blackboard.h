@@ -120,6 +120,28 @@ Arquivo de cabeçalho contendo as funções e definições do black board
 #define VISION_ANGLE_OPP1 24
 #define VISION_ANGLE_OPP2 25
 #define VISION_ANGLE_OPP3 26
+#define VISION_DIST_RBT01 30
+#define VISION_DIST_RBT02 31
+#define VISION_DIST_RBT03 32
+#define VISION_DIST_RBT04 33
+#define VISION_DIST_RBT05 34
+#define VISION_DIST_RBT06 35
+#define VISION_DIST_RBT07 36
+#define VISION_DIST_RBT08 37
+#define VISION_DIST_RBT09 38
+#define VISION_DIST_RBT10 39
+#define VISION_DIST_RBT11 40
+#define VISION_ANGLE_RBT01 41
+#define VISION_ANGLE_RBT02 42
+#define VISION_ANGLE_RBT03 43
+#define VISION_ANGLE_RBT04 44
+#define VISION_ANGLE_RBT05 45
+#define VISION_ANGLE_RBT06 46
+#define VISION_ANGLE_RBT07 47
+#define VISION_ANGLE_RBT08 48
+#define VISION_ANGLE_RBT09 49
+#define VISION_ANGLE_RBT10 50
+#define VISION_ANGLE_RBT11 51
 
 
 //----global variables------------------------------------------------
