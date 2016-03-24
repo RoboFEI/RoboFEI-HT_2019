@@ -97,11 +97,13 @@ class TreatingRawData(object):
         
     def set_turn_left(self):
         print 'turn left'
-        return self.bkb.write_int(self.mem,'DECISION_ACTION_A', 2)
+        self.bkb.write_int(self.mem,'DECISION_ACTION_A', 2)
+        return time.sleep(2)
         
     def set_turn_right(self):
         print 'turn right'
-        return self.bkb.write_int(self.mem,'DECISION_ACTION_A', 3)
+        self.bkb.write_int(self.mem,'DECISION_ACTION_A', 3)
+        return time.sleep(2)
         
     def set_kick_right(self):
         print 'kick right'
@@ -156,6 +158,8 @@ class TreatingRawData(object):
         
     def set_vision_ball(self):
         self.bkb.write_int(self.mem,'DECISION_ACTION_VISION', 0)
+        self.bkb.write_int(self.mem,'VISION_SEARCH_BALL', 1)
+        self.bkb.write_int(self.mem,'VISION_LOST_BALL', 1)
         return time.sleep(2)
         
     def set_vision_orientation(self):
@@ -204,15 +208,15 @@ class Ordinary(TreatingRawData):
         elif referee == 2: #play
             print 'play'
             self.set_vision_ball() #set vision to find ball
-            print self.get_search_ball_status()   #está vindo 0
-            print self.get_lost_ball_status()      #está vindo 1
+            print 'search ball: ',self.get_search_ball_status()
+            print 'lost ball: ',self.get_lost_ball_status()
 
             if self.get_search_ball_status() == 1: #1 - searching ball
-                if self.get_lost_ball_status() == 1: #1 - lost ball
-                   self.set_turn_right()
+                if self.get_lost_ball_status() == 0: #0 - lost ball
+                    self.set_turn_right()
                 self.set_stand_still()
             else:
-                if self.get_lost_ball_status() == 1:
+                if self.get_lost_ball_status() == 1: #1 - ball is found
                     self.set_walk_forward_slow()
                     #self.set_stand_still() #stop robot because the ball
                     #can be already found

@@ -355,11 +355,13 @@ class Robot(pygame.sprite.Sprite,Vision):
 
 
     def vision_process(self,ballX,ballY,robots):
-        #ball detect
-        self.panora.ball_detect(self.Mem,self.bkb, self.view_rot, self.rotate, self.x, self.y, ballX,ballY)
+        #TODO alterei tambem por causa da decisao
+        if (self.bkb.read_int(self.Mem,'DECISION_ACTION_VISION') == 0):
+            #ball detect
+            self.panora.ball_detect(self.Mem,self.bkb, self.view_rot, self.rotate, self.x, self.y, ballX,ballY)
 
-        #robot detect
-        if robots:
-            for j in range(0, len(robots)):
-                if j!=self.index-1:
-                    self.panora.robot_detect(self.Mem,self.bkb, self.view_rot, self.rotate, self.x, self.y, robots[j].x, robots[j].y, j)
+            #robot detect
+            if robots:
+                for j in range(0, len(robots)):
+                    if j!=self.index-1:
+                        self.panora.robot_detect(self.Mem,self.bkb, self.view_rot, self.rotate, self.x, self.y, robots[j].x, robots[j].y, j)

@@ -246,6 +246,8 @@ class Simulation():
             for robot in range(0, len(self.robots)):
                 self.robots[robot].draw_robot(robot, self.screen)
                 self.robots[robot].draw_vision(self.screen)
+                #TODO inicia o processo de busca da bola - dar um merge
+                self.robots[robot].vision_process(self.ball.x,self.ball.y,self.robots)
                 if self.robots[robot].bkb.read_int(self.robots[robot].Mem,'VISION_SEARCH_BALL') == 1:
                     self.robots[robot].searching()
 
