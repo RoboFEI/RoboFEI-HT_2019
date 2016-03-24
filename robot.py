@@ -335,16 +335,11 @@ class Robot(pygame.sprite.Sprite,Vision):
 
 
     def perform_pan(self):
-        #print hex(id(self.panora))
-        #self.bkb = SharedMemory(self.KEY)
         if self.bkb.read_int(self.Mem,'VISION_SEARCH_BALL')== 1:
-            print 'entrei'
             self.view_rot = self.panora.pan(self.view_rot,self.rotate)
             rot = self.panora.view_obj(self.Mem,self.bkb,self.x,self.y,500,500,self.view_rot)
-            if rot != None:
+            if rot == 99999:
                 self.bkb.write_int(self.Mem,'VISION_SEARCH_BALL',0)
-            print self.view_rot
-            print 'vision_search_ball', self.bkb.read_int(self.Mem,'VISION_SEARCH_BALL')
 
 
     def searching(self):
@@ -357,3 +352,14 @@ class Robot(pygame.sprite.Sprite,Vision):
         #            if i!=j:
         #                self.robots[i].perform_pan(self.robots[j].x,self.robots[j].y)
 
+
+
+    def vision_process(self,ballX,ballY,robots):
+        #ball detect
+        self.panora.ball_detect(self.Mem,self.bkb, self.view_rot, self.rotate, self.x, self.y, ballX,ballY)
+
+        #robot detect
+        if robots:
+            for j in range(0, len(robots)):
+                if j!=self.index-1:
+                    self.panora.robot_detect(self.Mem,self.bkb, self.view_rot, self.rotate, self.x, self.y, robots[j].x, robots[j].y, j)

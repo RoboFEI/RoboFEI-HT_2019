@@ -187,6 +187,9 @@ class Simulation():
                 print 'o'
                 self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem,'VISION_SEARCH_BALL', 0)
 
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_y:
+                print 'y'
+                self.robots[self.robot_index_control].vision_process(self.ball.x,self.ball.y,self.robots)
 
             if event.type == pygame.QUIT:
                 sys.exit()

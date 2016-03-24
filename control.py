@@ -56,7 +56,7 @@ class CONTROL():
         self.action_flag = flag
         self.action_state = self.action_array[self.action_flag]
 
-        print self.action_state
+        #print self.action_state
 
         self.bkb.write_int(self.Mem, 'CONTROL_MOVING', 1)
 
