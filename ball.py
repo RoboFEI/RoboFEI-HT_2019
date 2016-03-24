@@ -37,3 +37,4 @@ class Ball():
         pygame.draw.circle(screen.background, screen.BLACK, (int(self.x),int(self.y)), self.radius-1, 0)
         ball = pygame.image.load("ball.png")
         ball = pygame.transform.scale(ball,(2*self.radius,2*self.radius))
+        screen.background.blit(ball,(self.x - self.radius, self.y - self.radius))
