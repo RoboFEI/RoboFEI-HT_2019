@@ -120,6 +120,28 @@ Arquivo de cabeçalho contendo as funções e definições do black board
 #define VISION_ANGLE_OPP1 24
 #define VISION_ANGLE_OPP2 25
 #define VISION_ANGLE_OPP3 26
+#define VISION_DIST_RBT01 *(memf+30)
+#define VISION_DIST_RBT02 *(memf+31)
+#define VISION_DIST_RBT03 *(memf+32)
+#define VISION_DIST_RBT04 *(memf+33)
+#define VISION_DIST_RBT05 *(memf+34)
+#define VISION_DIST_RBT06 *(memf+35)
+#define VISION_DIST_RBT07 *(memf+36)
+#define VISION_DIST_RBT08 *(memf+37)
+#define VISION_DIST_RBT09 *(memf+38)
+#define VISION_DIST_RBT10 *(memf+39)
+#define VISION_DIST_RBT11 *(memf+40)
+#define VISION_ANGLE_RBT01 *(memf+41)
+#define VISION_ANGLE_RBT02 *(memf+42)
+#define VISION_ANGLE_RBT03 *(memf+43)
+#define VISION_ANGLE_RBT04 *(memf+44)
+#define VISION_ANGLE_RBT05 *(memf+45)
+#define VISION_ANGLE_RBT06 *(memf+46)
+#define VISION_ANGLE_RBT07 *(memf+47)
+#define VISION_ANGLE_RBT08 *(memf+48)
+#define VISION_ANGLE_RBT09 *(memf+49)
+#define VISION_ANGLE_RBT10 *(memf+50)
+#define VISION_ANGLE_RBT11 *(memf+51)
 
 
 //----global variables------------------------------------------------

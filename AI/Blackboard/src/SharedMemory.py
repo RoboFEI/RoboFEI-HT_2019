@@ -39,6 +39,12 @@ class SharedMemory(object):
         self.testlib.write_float(mem, ctypes.c_int(self.variable_float[variable]), ctypes.c_float(value))
     #-----------------------------------------------------------------------------------------
 
+
+    # Criando função que escreve float--------------------------------------------------------
+    def write_floatDynamic(self, mem, variable,index, value):
+        self.testlib.write_float(mem, ctypes.c_int(self.variable_float[variable]+index), ctypes.c_float(value))
+    #-----------------------------------------------------------------------------------------
+
     # Criando função que escreve float--------------------------------------------------------
     def write_int(self, mem, variable, value):
         self.testlib.write_int(mem, ctypes.c_int(self.variable_int[variable]), ctypes.c_int(int(value)))
@@ -162,5 +168,27 @@ class SharedMemory(object):
     'VISION_ANGLE_OPP1':24,
     'VISION_ANGLE_OPP2':25,
     'VISION_ANGLE_OPP3':26,
+    'VISION_DIST_RBT01':30,
+    'VISION_DIST_RBT02':31,
+    'VISION_DIST_RBT03':32,
+    'VISION_DIST_RBT04':33,
+    'VISION_DIST_RBT05':34,
+    'VISION_DIST_RBT06':35,
+    'VISION_DIST_RBT07':36,
+    'VISION_DIST_RBT08':37,
+    'VISION_DIST_RBT09':38,
+    'VISION_DIST_RBT10':39,
+    'VISION_DIST_RBT11':40,
+    'VISION_ANGLE_RBT01':41,
+    'VISION_ANGLE_RBT02':42,
+    'VISION_ANGLE_RBT03':43,
+    'VISION_ANGLE_RBT04':44,
+    'VISION_ANGLE_RBT05':45,
+    'VISION_ANGLE_RBT06':46,
+    'VISION_ANGLE_RBT07':47,
+    'VISION_ANGLE_RBT08':48,
+    'VISION_ANGLE_RBT09':49,
+    'VISION_ANGLE_RBT10':50,
+    'VISION_ANGLE_RBT11':51,
     }
 #------------------------------------------------------------------------------------------
