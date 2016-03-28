@@ -3,7 +3,7 @@ from screen import *
 class SoccerField():
     def __init__(self, screen):
         self.screen = screen
-        self.robofei_logo = pygame.image.load("RoboFEI_logo.png")
+        self.robofei_logo = pygame.image.load("RoboFEI_scaled80.png")
         self.robofei_logo_scaled = pygame.transform.scale(self.robofei_logo,(80,80))
         self.goalpost_list = []
         self.goalpost = GoalPosts(70,280)
@@ -53,7 +53,7 @@ class SoccerField():
         textpos.centerx = self.screen.background.get_rect().centerx
 
         self.screen.background.blit(text, textpos)
-        self.screen.background.blit(self.robofei_logo_scaled,(950,2))
+        self.screen.background.blit(self.robofei_logo_scaled,(960,2))
 
 
 class GoalPosts(SoccerField):
