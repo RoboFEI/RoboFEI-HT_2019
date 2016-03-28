@@ -370,9 +370,21 @@ class Robot(pygame.sprite.Sprite,Vision):
         if (self.bkb.read_int(self.Mem,'DECISION_ACTION_VISION') == 0):
             #ball detect
             rotation_vision = self.ball_detect(self.Mem,self.bkb, self.view_rot, self.rotate, self.x, self.y, ballX,ballY)
-            if rotation_vision != None:
-                self.view_rot = rotation_vision + self.rotate
-                print 'view_rot', self.view_rot
+            if (rotation_vision != None):
+                #todo precisa ser corrigido
+                diff = abs(self.rotate - rotation_vision)%360
+                if (diff > 90) and (diff<270):
+                    print 'diff ',diff
+                else:
+                    self.view_rot = rotation_vision + self.rotate
+                #    print 'view_rot', self.view_rot
+            # if (rotation_vision != None):
+            #     diff = abs(self.rotate-rotation_vision)%360
+            #     if (diff > 135) and (diff<225):
+            #         print 'diff ',diff
+            #     else:
+            #         self.view_rot = rotation_vision + self.rotate
+            #         print 'view_rot', self.view_rot
 
 
             #robot detect
