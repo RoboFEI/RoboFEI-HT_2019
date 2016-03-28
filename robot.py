@@ -18,7 +18,8 @@ from SharedMemory import SharedMemory
 
 class Robot(pygame.sprite.Sprite,Vision):
     def __init__(self, x, y, theta, KEY, color):
-        super(Robot,self).__init__()
+        pygame.sprite.Sprite.__init__(self)
+        Vision.__init__(self)
         self.x = x
         self.y = y
         self.rotate = theta
@@ -46,7 +47,7 @@ class Robot(pygame.sprite.Sprite,Vision):
         self.old_x = x
         self.old_y = y
 
-        self.panora = Vision()
+        #self.panora = Vision()
         self.view_rot = theta
 
         self.bkb = SharedMemory()
@@ -80,7 +81,6 @@ class Robot(pygame.sprite.Sprite,Vision):
         self.imu_error_mean = 0
         self.imu_error_variance = 0
         self.orientation_error = 0
-
 
     def draw_robot(self,robot_index, screen):
         self.image.fill(screen.GREEN)
@@ -168,8 +168,8 @@ class Robot(pygame.sprite.Sprite,Vision):
         if self.errors_on:
             self.orientation_error += gauss(self.imu_error_mean, self.imu_error_variance)
 
-        self.rotate = (self.rotate + turn) % 360
-        self.view_rot = (self.view_rot + turn) % 360
+        self.rotate = (self.rotate + turn) % 360.00
+        self.view_rot = (self.view_rot + turn) % 360.00
         #self.view_rot = (self.view_rot + self.rotate) % 360
 
         if not self.collision:
@@ -276,7 +276,6 @@ class Robot(pygame.sprite.Sprite,Vision):
         if R < 0: r = R + 360
 
         if (self.rotate < 15 and (r < self.rotate + 15 or r > self.rotate + 345) or
-            self.rotate > 345 and (r > self.rotate - 15 or r < self.rotate - 345) or
             r < self.rotate + 15 and r > self.rotate - 15):
             self.ball.put_in_motion(force, -force, self.rotate - 90)
 
@@ -289,18 +288,28 @@ class Robot(pygame.sprite.Sprite,Vision):
 
 
     def draw_vision(self,screen):
-        field_of_view = 101.75
-        vision_dist = 200
         #print '********************************************* ',self.view_rot
-        startRad = radians(-35+self.view_rot)
-        endRad = radians(35+self.view_rot)
-        pygame.draw.arc(screen.background, (255, 255, 255), [self.x-vision_dist,self.y-vision_dist,vision_dist*2,vision_dist*2], startRad, endRad, 1)
+        vision_dist = self.vision_dist
+        field_of_view = self.field_of_view
+        startRad = radians(-35 + self.view_rot)
+        endRad = radians(35 + self.view_rot)
+
 
         vision_surface = pygame.Surface((vision_dist * 2, vision_dist * 2))
-        vision_surface.fill([0,150,0])
-        vision_surface.set_colorkey([0,150,0])
+        vision_surface.fill(screen.GREEN)
+        vision_surface.set_colorkey(screen.GREEN)
         vision_surface.set_alpha(200)
         vision_surface_center = (vision_dist, vision_dist)
+
+        if self.view_rot < 0:
+            self.view_rot = self.view % 360
+
+        if self.view_rot > (self.rotate + 90):
+            self.view = self.rotate + 90
+
+        elif self.view_rot < (self.rotate - 90):
+            self.view = self.rotate - 90
+
 
         theta_vision = radians(self.view_rot)
 
@@ -316,10 +325,12 @@ class Robot(pygame.sprite.Sprite,Vision):
         point_1 = (point_1[0] + vision_surface_center[0], point_1[1] + vision_surface_center[1])
         point_2 = (point_2[0] + vision_surface_center[0], point_2[1] + vision_surface_center[1])
 
-        pygame.draw.arc(vision_surface, (255, 255, 255), [vision_dist/2,vision_dist/2,vision_dist,vision_dist], startRad, endRad, 1)
 
-        pygame.draw.line(vision_surface, (255, 255, 255), vision_surface_center, point_1, 1)
-        pygame.draw.line(vision_surface, (255, 255, 255), vision_surface_center, point_2, 1)
+        pygame.draw.arc(screen.background, screen.WHITE,[self.x - vision_dist, self.y - vision_dist, vision_dist * 2, vision_dist * 2], startRad,endRad, 1)
+        pygame.draw.arc(screen.background, screen.WHITE, [self.x - vision_dist/2, self.y - vision_dist/2, vision_dist, vision_dist], startRad, endRad, 1)
+
+        pygame.draw.line(vision_surface, screen.WHITE, vision_surface_center, point_1, 1)
+        pygame.draw.line(vision_surface, screen.WHITE, vision_surface_center, point_2, 1)
 
 
         position = (
@@ -331,13 +342,13 @@ class Robot(pygame.sprite.Sprite,Vision):
 
 
     def ball_search(self,x,y):
-        self.ball.view_obj(self.Mem, self.bkb,self.x,self.y,x,y,self.rotate)
+        self.ball.view_obj(self.Mem, self.bkb,self.x,self.y,x,y,self.rotate,self.vision_dist)
 
 
     def perform_pan(self):
-        if self.bkb.read_int(self.Mem,'VISION_SEARCH_BALL')== 1:
-            self.view_rot = self.panora.pan(self.view_rot,self.rotate)
-            rot = self.panora.view_obj(self.Mem,self.bkb,self.x,self.y,500,500,self.view_rot)
+        if self.bkb.read_int(self.Mem,'VISION_SEARCH_BALL') == 1:
+            self.view_rot = self.pan(self.view_rot,self.rotate)
+            rot = self.view_obj(self.Mem,self.bkb,self.x,self.y,500,500,self.view_rot)
             if rot == 99999:
                 self.bkb.write_int(self.Mem,'VISION_SEARCH_BALL',0)
 
@@ -358,10 +369,14 @@ class Robot(pygame.sprite.Sprite,Vision):
         #TODO alterei tambem por causa da decisao
         if (self.bkb.read_int(self.Mem,'DECISION_ACTION_VISION') == 0):
             #ball detect
-            self.panora.ball_detect(self.Mem,self.bkb, self.view_rot, self.rotate, self.x, self.y, ballX,ballY)
+            rotation_vision = self.ball_detect(self.Mem,self.bkb, self.view_rot, self.rotate, self.x, self.y, ballX,ballY)
+            if rotation_vision != None:
+                self.view_rot = rotation_vision + self.rotate
+                print 'view_rot', self.view_rot
+
 
             #robot detect
             if robots:
                 for j in range(0, len(robots)):
                     if j!=self.index-1:
-                        self.panora.robot_detect(self.Mem,self.bkb, self.view_rot, self.rotate, self.x, self.y, robots[j].x, robots[j].y, j)
+                        self.robot_detect(self.Mem,self.bkb, self.view_rot, self.rotate, self.x, self.y, robots[j].x, robots[j].y, j)

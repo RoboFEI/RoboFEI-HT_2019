@@ -34,20 +34,12 @@ class Simulation():
             if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
                 self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 2)
 
-            #<<<<<<< HEAD
-            #if event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
-            #    self.front = 0.5
-            #=======
             if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
                 self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 3)
 
             if event.type == pygame.KEYDOWN and event.key == pygame.K_w:
                 self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 1)
 
-            #<<<<<<< HEAD
-            #if event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
-            #    self.front = -0.5
-            #=======
             if event.type == pygame.KEYDOWN and event.key == pygame.K_s:
                 self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 17)
 
@@ -196,28 +188,6 @@ class Simulation():
 
 
     def update_pos(self,check_collision):
-        # robots
-        #<<<<<<< HEAD
-        # self.rotate = 0
-        #
-        # if self.rotate_control == -1:
-        #     self.rotate = -15
-        #     self.rotate_control = 0
-        #
-        # elif self.rotate_control == 1:
-        #     self.rotate = 15
-        #     self.rotate_control = 0
-        #
-        # if self.robot_index_control == -1:
-        #     for self.robot_index in range(0, len(self.robots)):
-        #         if check_collision == False:
-        #             self.robots[self.robot_index].collision = False
-        #         self.robots[self.robot_index].motion_model(self.front, self.rotate)
-        # else:
-        #     if check_collision == False:
-        #         self.robots[self.robot_index_control].collision = False
-        #     self.robots[self.robot_index_control].motion_model(self.front, self.rotate)
-        #=======
         for robot in self.robots:
             if check_collision == False:
                      robot.collision = False
@@ -226,6 +196,7 @@ class Simulation():
 
         # ball
         self.ball.motion_model()
+
 
     def check_collision(self,field):
         if self.robots:
@@ -238,7 +209,6 @@ class Simulation():
                                 (robot != other_robot and
                                 collide_robot(self.robots[robot], self.robots[other_robot]))):
                             self.robots[robot].collision = True
-
 
 
     def display_update(self):
