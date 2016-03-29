@@ -11,6 +11,9 @@ def main():
 
 
     field = SoccerField(screen)
+
+    simul.field = field
+
     pygame.display.set_icon(field.robofei_logo_scaled)
 
 
@@ -20,16 +23,8 @@ def main():
         #Process events
         simul.perform_events()
 
-
-        #Update object positions without checking for collisions
-        simul.update_pos(False)
-
-
-        #check for collisions
-        simul.check_collision(field)
-
         #Update object positions checking for collisions
-        simul.update_pos(True)
+        simul.update_pos()
 
 
         #update soccer field

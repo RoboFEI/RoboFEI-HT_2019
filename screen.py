@@ -12,11 +12,14 @@ class Screen():
         self.CYAN = (0, 190, 190)
         self.YELLOW = (190, 190, 0)
         self.ORANGE = (229, 83, 0)
+        self.GRAY = (128, 128, 128)
+
         self.screen_width = 1040
         self.screen_height = 740
         self.dimension = self.screen_width,self.screen_height
         self.background = pygame.display.set_mode(self.dimension)
         self.clock = pygame.time.Clock()
+        self.KEY_BKB = 100
 
     def start_simulation(self):
         print 'RoboFEI-HT Simulator'

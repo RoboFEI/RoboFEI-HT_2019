@@ -2,8 +2,10 @@ from robot import *
 from ball import *
 from collisions import *
 import sys
+from helpmenu import *
 from random import random
 from random import randrange
+from setupmatch import *
 
 class Simulation():
     def __init__(self, screen):
@@ -20,76 +22,81 @@ class Simulation():
         self.screen = screen
         self.group_robots = pygame.sprite.Group()
 
+        self.field = None
+
+        self.Help = False
+
     def update_mouse_pos(self):
         self.mx, self.my = pygame.mouse.get_pos()
 
     def perform_events(self):
         for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
-                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 8)
-
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
-                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 18)
-
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
-                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 2)
-
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
-                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 3)
-
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_w:
-                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 1)
-
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_s:
-                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 17)
-
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_a:
-                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 6)
-
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_d:
-                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 7)
-
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
-                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 9)
-
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_e:
-                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 14)
-
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_f:
-                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 0)
-
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_g:
-                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 11)
-
-            if event.type == pygame.KEYUP and event.key == pygame.K_x:
-                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 5)
-
-            if event.type == pygame.KEYUP and event.key == pygame.K_c:
-                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 4)
-
-            if event.type == pygame.KEYUP and event.key == pygame.K_z:
-                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 12)
-
-            if event.type == pygame.KEYUP and event.key == pygame.K_v:
-                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 13)
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_k:
+                    self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 8)
 
             if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
+                    self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 18)
+
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_e:
+                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 2)
+
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_d:
+                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 3)
+
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_f:
+                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 1)
+
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_v:
+                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 17)
+
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_m:
+                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 6)
+
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_n:
+                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 7)
+
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_o:
+                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 9)
+
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
+                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 14)
+
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_t:
+                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 0)
+
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_s:
+                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 11)
+
+            if event.type == pygame.KEYUP and event.key == pygame.K_l:
+                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 5)
+
+            if event.type == pygame.KEYUP and event.key == pygame.K_p:
+                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 4)
+
+            if event.type == pygame.KEYUP and event.key == pygame.K_i:
+                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 12)
+
+            if event.type == pygame.KEYUP and event.key == pygame.K_j:
+                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 13)
+
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_a:
                 self.update_mouse_pos()
                 robot = Robot(self.mx, self.my, 0,(len(self.robots)+1)*100, self.screen.CYAN)
-                robot.bkb.write_int(robot.Mem, 'DECISION_ACTION_A', 0)
 
                 if pygame.key.get_mods() & pygame.KMOD_CTRL:
-                    robot = Robot(self.mx, self.my, 180, (len(self.robots)+1)*100, self.screen.MAGENTA)
+                    robot = Robot(self.mx, self.my, 180, (len(self.robots)+1)* self.screen.KEY_BKB, self.screen.MAGENTA)
 
                 if pygame.key.get_mods() & pygame.KMOD_LSHIFT:
-                    robot = Robot(self.mx, self.my,0,(len(self.robots)+1)*100, self.screen.YELLOW)
+                    robot = Robot(self.mx, self.my,0,(len(self.robots)+1)* self.screen.KEY_BKB, self.screen.YELLOW)
 
                 if pygame.key.get_mods() & pygame.KMOD_LALT:
-                    robot = Robot(self.mx, self.my,180,(len(self.robots)+1)*100, self.screen.BLACK)
+                    robot = Robot(self.mx, self.my,180,(len(self.robots)+1)* self.screen.KEY_BKB, self.screen.BLACK)
 
                 if pygame.key.get_mods() & pygame.KMOD_RSHIFT:
-                    robot = Robot(self.mx, self.my,180,(len(self.robots)+1)*100, self.screen.ORANGE)
+                    robot = Robot(self.mx, self.my,180,(len(self.robots)+1)* self.screen.KEY_BKB, self.screen.ORANGE)
 
+                robot.bkb.write_int(robot.Mem, 'DECISION_ACTION_A', 0)
+                robot.ball = self.ball
                 self.robots.append(robot)
                 self.group_robots.add(robot)
                 #print len(self.robots)
@@ -168,65 +175,82 @@ class Simulation():
                 else:
                     self.robots[self.robot_index_control].kill()
 
-            if event.type == pygame.KEYUP and event.key == pygame.K_SPACE:
-                self.robots[self.robot_index_control].control.action_select(5)
-
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_w:
                 print 'p'
                 self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem,'VISION_SEARCH_BALL', 1)
 
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_o:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
                 print 'o'
                 self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem,'VISION_SEARCH_BALL', 0)
 
+            if event.type == pygame.KEYUP and event.key == pygame.K_F1:
+                self.Help = not self.Help
+
+            if event.type == pygame.KEYUP and event.key == pygame.K_F2:
+                self.robots = []
+                self.robots, self.ball, self.field.FriendTeam, self.field.EnemyTeam = setup_match(self.screen)
+                self.field.GameStop = True
+
+            if event.type == pygame.KEYUP and event.key == pygame.K_F3:
+                self.robots = []
+                print '- RESET -'
+                self.robots, self.ball, self.field.FriendTeam, self.field.EnemyTeam = setup_match(self.screen)
+                self.field.FriendGoals = 0
+                self.field.EnemyGoals = 0
+                self.field.Counter = 0
+                self.field.GameStop = True
+
+            if event.type == pygame.KEYUP and event.key == pygame.K_F5:
+                GS = True
+                for goal in self.field.Goals:
+                    if self.ball.x - self.ball.radius > goal.x1 and self.ball.x + self.ball.radius < goal.x2 and self.ball.y - self.ball.radius > goal.y1 and self.ball.y + self.ball.radius < goal.y2:
+                        GS = False
+                if GS:
+                    self.field.GameStop = not self.field.GameStop
+
             if event.type == pygame.KEYDOWN and event.key == pygame.K_y:
-                print 'y'
-                self.robots[self.robot_index_control].vision_process(self.ball.x,self.ball.y,self.robots)
+                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem,
+                                                                    'VISION_SEARCH_BALL', 1)
+
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
+                self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem,
+                                                                    'VISION_SEARCH_BALL', 0)
+
 
             if event.type == pygame.QUIT:
                 sys.exit()
 
 
-    def update_pos(self,check_collision):
+    def update_pos(self):
         for robot in self.robots:
-            if check_collision == False:
-                     robot.collision = False
-            robot.motion_model()
+
+            robot.motion_model(self.field.LimitLines, self.field.goalpost_list, self.robots)
             robot.control.control_update()
 
         # ball
-        self.ball.motion_model()
-
-
-    def check_collision(self,field):
-        if self.robots:
-            for robot in range(0, len(self.robots)):
-                for other_robot in range(0, len(self.robots)):
-                    collide_ball(self.robots[other_robot], self.ball)
-                    for post in field.goalpost_list:
-                        collide_ball_goalpost(self.ball,post)
-                        if (collide_robot_goalpost(self.robots[robot],post) or
-                                (robot != other_robot and
-                                collide_robot(self.robots[robot], self.robots[other_robot]))):
-                            self.robots[robot].collision = True
-
+        GS, F, E = self.ball.motion_model(self.field.goalpost_list, self.field.LimitLines, self.field.Goals, self.field.PlayField)
+        if not self.field.GameStop and GS:
+            self.field.FriendGoals += F
+            self.field.EnemyGoals += E
+            self.field.GameStop = GS
 
     def display_update(self):
         if self.robots:
             for robot in range(0, len(self.robots)):
                 self.robots[robot].draw_robot(robot, self.screen)
                 self.robots[robot].draw_vision(self.screen)
-                #TODO inicia o processo de busca da bola - dar um merge
-                self.robots[robot].vision_process(self.ball.x,self.ball.y,self.robots)
+                self.robots[robot].vision_process(self.ball.x, self.ball.y, self.robots)
                 if self.robots[robot].bkb.read_int(self.robots[robot].Mem,'VISION_SEARCH_BALL') == 1:
                     self.robots[robot].searching()
-
 
         if self.ball.x != 0 and self.ball.y != 0 and self.ball.friction != 0:
             self.ball.draw_ball(self.screen)
 
+        if self.Help:
+            help(self.screen)
 
-
+        if not self.field.GameStop:
+            self.field.Counter += self.screen.clock.get_time()
 
         pygame.display.flip()
 

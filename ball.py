@@ -2,6 +2,7 @@ from screen import *
 from math import cos
 from math import sin
 from math import radians
+from collisions import *
 
 
 class Ball():
@@ -13,24 +14,45 @@ class Ball():
         self.speed_y = 0
         self.radius = 7
 
-    def put_in_motion(self, speed_x, speed_y, angle):
-        self.speed_x = speed_x * cos(radians(angle))
-        self.speed_y = speed_y * sin(radians(angle))
+
+    def put_in_motion(self, speed, angle):
+        self.speed_x = speed * cos(radians(angle))
+        self.speed_y = - speed * sin(radians(angle))
 
 
-    def motion_model(self):
-        # print "Motion"
-        self.speed_x *= self.friction
-        self.speed_y *= self.friction
+    def motion_model(self, goal_posts, limitlines, goals, field):
+            # print "Motion"
+            self.speed_x *= self.friction
+            self.speed_y *= self.friction
 
-        # print "Speed: " + str(self.speed_x) + "x" + str(self.speed_y)
-        if self.x + self.speed_x > 1040 - self.radius or self.x + self.speed_x < self.radius:
-            self.speed_x = - self.speed_x
-        if self.y + self.speed_y > 740 - self.radius or self.y + self.speed_y < self.radius:
-            self.speed_y = - self.speed_y
+            # print "Speed: " + str(self.speed_x) + "x" + str(self.speed_y)
+            # if self.x + self.speed_x > 1040 - self.radius or self.x + self.speed_x < self.radius:
+            #     self.speed_x = - self.speed_x
+            # if self.y + self.speed_y > 740 - self.radius or self.y + self.speed_y < self.radius:
+            #     self.speed_y = - self.speed_y
 
-        self.x += self.speed_x
-        self.y += self.speed_y
+            self.x += self.speed_x
+            self.y += self.speed_y
+
+            for goal in goal_posts:
+                collision_ball_vs_goal(self, goal)
+
+            for line in limitlines:
+                collision_ball_vs_line(self, line)
+
+            for goal in goals:
+                if self.x - self.radius > goal.x1 and self.x + self.radius < goal.x2 and self.y - self.radius > goal.y1 and self.y + self.radius < goal.y2:
+                    if goal.side == 'Friend':
+                        return True, 0, 1
+                    else:
+                        return True, 1, 0
+
+            if not (
+                                self.x + self.radius > field.x1 and self.x - self.radius < field.x2 and self.y + self.radius > field.y1 and self.y - self.radius < field.y2):
+                return True, 0, 0
+
+            return False, 0, 0
+
 
     def draw_ball(self, screen):
         #cirle

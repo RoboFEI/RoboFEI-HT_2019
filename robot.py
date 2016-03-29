@@ -125,6 +125,8 @@ class Robot(pygame.sprite.Sprite,Vision):
         screen.background.blit(text, textpos)
 
 
+
+    '''Control'''
     def motion_vars(self, front, rotate, drift):
         self.front = front
         self.turn = rotate
@@ -151,8 +153,7 @@ class Robot(pygame.sprite.Sprite,Vision):
         self.imu_error_mean = imu_err_mean
         self.imu_error_variance = imu_err_var
 
-    def motion_model(self):
-
+    def motion_model(self, lines, goals, robots):
         turn = self.turn
         if self.errors_on and self.in_motion:
             turn += gauss(self.turn_error_mean, self.turn_error_variance)
@@ -165,121 +166,119 @@ class Robot(pygame.sprite.Sprite,Vision):
         if self.errors_on and self.in_motion:
             drift += gauss(self.drift_error_mean, self.drift_error_variance)
 
-        if self.errors_on:
-            self.orientation_error += gauss(self.imu_error_mean, self.imu_error_variance)
+        self.rotate = (self.rotate + turn) % 360
+        self.view_rot = (self.view_rot + turn) % 360
 
-        self.rotate = (self.rotate + turn) % 360.00
-        self.view_rot = (self.view_rot + turn) % 360.00
-        #self.view_rot = (self.view_rot + self.rotate) % 360
+        self.x += cos(radians(self.rotate)) * front
+        self.y -= sin(radians(self.rotate)) * front
 
-        if not self.collision:
+        self.x -= sin(radians(self.rotate)) * drift
+        self.y -= cos(radians(self.rotate)) * drift
 
-            self.old_x = self.x
-            self.old_y = self.y
+        for line in lines:
+            x, y = collision_robot_vs_line(self, line)
+            self.x += x
+            self.y += y
 
-            self.new_x += cos(radians(self.rotate))*front
-            self.new_y -= sin(radians(self.rotate))*front
+        for goal in goals:
+            x, y = collision_robot_vs_goal(self, goal)
+            self.x += x
+            self.y += y
 
-            self.new_x -= sin(radians(self.rotate))*drift
-            self.new_y -= cos(radians(self.rotate))*drift
+        for robot in robots:
+            if robot.KEY != self.KEY:
+                x, y = collision_robot_vs_robot(self, robot)
+                self.x += x
+                self.y += y
 
-            self.x = int(self.new_x)
-            self.y = int(self.new_y)
-
-            if self.x > 1040:
-                self.x = 1040
-                self.new_x = 1040
-            elif self.x < 0:
-                self.x = 0
-                self.new_x = 0
-
-            if self.y > 740:
-                self.y = 740
-                self.new_y = 740
-            elif self.y < 0:
-                self.y = 0
-                self.new_y = 0
-
-        else:
-            #print 'collision'
-            self.x = self.old_x
-            self.y = self.old_y
-            self.new_x = self.old_x + (cos(radians(self.rotate)) * self.radius/2 * self.front) + (sin(radians(self.rotate)) * drift * self.radius/2)
-            self.new_y = self.old_y + sin(radians(self.rotate)) * self.radius/2 * self.front + (cos(radians(self.rotate)) * drift * self.radius/2)
-            #self.new_x = self.old_x +
-            #self.new_y = self.old_y + cos(radians(self.rotate)) * drift * self.radius/2
-
-
-
-
-    # old kick
-    # def kick(self, ball):
-    #     d = sqrt((self.x - ball.x)**2+(self.y - ball.y)**2)
-    #     r = atan2((ball.y-self.y), (ball.x-self.x))*180/pi
-    #     force = 10 * exp(-2.3/ball.radius*d+2.3/ball.radius*(self.radius+ball.radius))
-    #     ball.put_in_motion(force, force, r)
+        collision_robot_vs_ball(self, self.ball)
+        self.get_orientation()  # cumulative error
 
     def right_kick(self):
-        R = degrees(atan2((self.y-self.ball.y), (self.ball.x-self.x)))
-        d = sqrt((self.x - self.ball.x)**2+(self.y - self.ball.y)**2)
-        force = min(10, 12 * exp(-2.3/self.ball.radius*d + 2.3/self.ball.radius*(self.radius+self.ball.radius)))
+        R = degrees(atan2((self.y - self.ball.y), (self.ball.x - self.x)))
+        d = sqrt((self.x - self.ball.x) ** 2 + (self.y - self.ball.y) ** 2)
+        force = min(10,
+                    12 * exp(-2.3 / self.ball.radius * d + 2.3 / self.ball.radius * (self.radius + self.ball.radius)))
 
         r = R
         if R < 0: r = R + 360
 
         if self.rotate < 30 and (r < self.rotate or r > 330 + self.rotate) or r < self.rotate and r > self.rotate - 30:
-            self.ball.put_in_motion(force, -force, self.rotate)
+            if self.errors_on:
+                self.ball.put_in_motion(force + gauss(self.kick_error_force_mean, self.kick_error_force_variance),
+                                        self.rotate + gauss(self.kick_error_angle_mean, self.kick_error_angle_variance))
+            else:
+                self.ball.put_in_motion(force, self.rotate)
 
         self.control.action_select(0)
 
     def left_kick(self):
-        R = degrees(atan2((self.y-self.ball.y), (self.ball.x-self.x)))
-        d = sqrt((self.x - self.ball.x)**2+(self.y - self.ball.y)**2)
-        force = min(10, 12 * exp(-2.3/self.ball.radius*d + 2.3/self.ball.radius*(self.radius+self.ball.radius)))
+        R = degrees(atan2((self.y - self.ball.y), (self.ball.x - self.x)))
+        d = sqrt((self.x - self.ball.x) ** 2 + (self.y - self.ball.y) ** 2)
+        force = min(10,
+                    12 * exp(-2.3 / self.ball.radius * d + 2.3 / self.ball.radius * (self.radius + self.ball.radius)))
 
         r = R
         if R < 0: r = R + 360
 
         if self.rotate > 330 and (r > self.rotate or r < self.rotate - 330) or r > self.rotate and r < self.rotate + 30:
-            self.ball.put_in_motion(force, -force, self.rotate)
-
+            if self.errors_on:
+                self.ball.put_in_motion(force + gauss(self.kick_error_force_mean, self.kick_error_force_variance),
+                                        self.rotate + gauss(self.kick_error_angle_mean, self.kick_error_angle_variance))
+            else:
+                self.ball.put_in_motion(force, self.rotate)
 
         self.control.action_select(0)
 
     def get_orientation(self):
         if self.errors_on:
             self.orientation_error += gauss(self.imu_error_mean, self.imu_error_variance)
-
         return self.rotate + self.orientation_error
 
     def pass_left(self):
-        R = degrees(atan2((self.y-self.ball.y), (self.ball.x-self.x)))
-        d = sqrt((self.x - self.ball.x)**2+(self.y - self.ball.y)**2)
-        force = min(10, 12 * exp(-2.3/self.ball.radius*d + 2.3/self.ball.radius*(self.radius+self.ball.radius)))
+        R = degrees(atan2((self.y - self.ball.y), (self.ball.x - self.x)))
+        d = sqrt((self.x - self.ball.x) ** 2 + (self.y - self.ball.y) ** 2)
+        force = min(10,
+                    12 * exp(-2.3 / self.ball.radius * d + 2.3 / self.ball.radius * (self.radius + self.ball.radius)))
 
         r = R
         if R < 0: r = R + 360
 
         if (self.rotate < 15 and (r < self.rotate + 15 or r > self.rotate + 345) or
-            self.rotate > 345 and (r > self.rotate - 15 or r < self.rotate - 345) or
-            r < self.rotate + 15 and r > self.rotate - 15):
-            self.ball.put_in_motion(force, -force, self.rotate + 90)
+                        self.rotate > 345 and (r > self.rotate - 15 or r < self.rotate - 345) or
+                        r < self.rotate + 15 and r > self.rotate - 15):
+            if self.errors_on:
+                self.ball.put_in_motion(force + gauss(self.kick_error_force_mean, self.kick_error_force_variance),
+                                        self.rotate + 90 + gauss(self.kick_error_angle_mean,
+                                                                 self.kick_error_angle_variance))
+            else:
+                self.ball.put_in_motion(force, self.rotate + 90)
 
         self.control.action_select(0)
 
     def pass_right(self):
-        R = degrees(atan2((self.y-self.ball.y), (self.ball.x-self.x)))
-        d = sqrt((self.x - self.ball.x)**2+(self.y - self.ball.y)**2)
-        force = min(10, 12 * exp(-2.3/self.ball.radius*d + 2.3/self.ball.radius*(self.radius+self.ball.radius)))
+        R = degrees(atan2((self.y - self.ball.y), (self.ball.x - self.x)))
+        d = sqrt((self.x - self.ball.x) ** 2 + (self.y - self.ball.y) ** 2)
+        force = min(10,
+                    12 * exp(-2.3 / self.ball.radius * d + 2.3 / self.ball.radius * (self.radius + self.ball.radius)))
 
         r = R
         if R < 0: r = R + 360
 
         if (self.rotate < 15 and (r < self.rotate + 15 or r > self.rotate + 345) or
-            r < self.rotate + 15 and r > self.rotate - 15):
-            self.ball.put_in_motion(force, -force, self.rotate - 90)
+                        self.rotate > 345 and (r > self.rotate - 15 or r < self.rotate - 345) or
+                        r < self.rotate + 15 and r > self.rotate - 15):
+            if self.errors_on:
+                self.ball.put_in_motion(force + gauss(self.kick_error_force_mean, self.kick_error_force_variance),
+                                        self.rotate - 90 + gauss(self.kick_error_angle_mean,
+                                                                 self.kick_error_angle_variance))
+            else:
+                self.ball.put_in_motion(force, self.rotate - 90)
 
         self.control.action_select(0)
+
+
+    '''Vision'''
 
     def toRectangular(self,point):
         r = point[0]
