@@ -96,14 +96,20 @@ class Vision():
             #if rot < 0:
             #    rot = 360 + rot
 
-            if rotate > 180:
+
+            if rotate > 180 and rotate < 360:
                 rotate = rotate - 360
 
             #print 'rotacao bola ', rot
             #print 'rotacao robo ',rotate
 
-            rot -= rotate
+            rot = rot - rotate
 
+            if rot > 180:
+                rot = rot - 360
+
+            elif rot < -180:
+                rot = rot + 360
 
            # if rot < 0:
            #     rot = 360 + rot

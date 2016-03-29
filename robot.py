@@ -301,14 +301,15 @@ class Robot(pygame.sprite.Sprite,Vision):
         vision_surface.set_alpha(200)
         vision_surface_center = (vision_dist, vision_dist)
 
-        if self.view_rot < 0:
-            self.view_rot = self.view % 360
 
-        if self.view_rot > (self.rotate + 90):
-            self.view = self.rotate + 90
+       # if self.view_rot < 0:
+       #     self.view_rot = self.view % 360
 
-        elif self.view_rot < (self.rotate - 90):
-            self.view = self.rotate - 90
+        #if self.view_rot > (self.rotate + 90):
+        #    self.view_rot = self.rotate + 90
+
+        #elif self.view_rot < (self.rotate - 90):
+        #    self.view_rot = self.rotate - 90
 
 
         theta_vision = radians(self.view_rot)
@@ -371,20 +372,16 @@ class Robot(pygame.sprite.Sprite,Vision):
             #ball detect
             rotation_vision = self.ball_detect(self.Mem,self.bkb, self.view_rot, self.rotate, self.x, self.y, ballX,ballY)
             if (rotation_vision != None):
-                #todo precisa ser corrigido
-                diff = abs(self.rotate - rotation_vision)%360
-                if (diff > 90) and (diff<270):
-                    print 'diff ',diff
-                else:
-                    self.view_rot = rotation_vision + self.rotate
-                #    print 'view_rot', self.view_rot
-            # if (rotation_vision != None):
-            #     diff = abs(self.rotate-rotation_vision)%360
-            #     if (diff > 135) and (diff<225):
-            #         print 'diff ',diff
-            #     else:
-            #         self.view_rot = rotation_vision + self.rotate
-            #         print 'view_rot', self.view_rot
+                print 'rotat_raw',rotation_vision
+                if rotation_vision > 90:
+                    rotation_vision = 90
+                elif rotation_vision < -90:
+                    rotation_vision = -90
+                self.view_rot = rotation_vision + self.rotate
+                print 'self.rotate',self.rotate
+                print 'rotation_vision',rotation_vision
+                print 'view_rot', self.view_rot
+
 
 
             #robot detect
