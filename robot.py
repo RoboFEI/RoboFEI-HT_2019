@@ -371,12 +371,12 @@ class Robot(pygame.sprite.Sprite,Vision):
             #ball detect
             rotation_vision = self.ball_detect(self.Mem,self.bkb, self.view_rot, self.rotate, self.x, self.y, ballX,ballY)
             if (rotation_vision != None):
-                print 'rotat_raw',rotation_vision
+                #print 'rotat_raw',rotation_vision
                 if rotation_vision > 90:
                     rotation_vision = 90
                 elif rotation_vision < -90:
                     rotation_vision = -90
-                self.view_rot = rotation_vision + self.rotate
+                #self.view_rot = rotation_vision + self.rotate
                 print 'self.rotate',self.rotate
                 print 'rotation_vision',rotation_vision
                 print 'view_rot', self.view_rot

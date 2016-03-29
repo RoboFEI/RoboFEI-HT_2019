@@ -222,15 +222,18 @@ class Ordinary(TreatingRawData):
                 if (self.get_lost_ball_status() == 1) and (self.get_search_ball_status() == 0): #1 - ball is found
                     #align to the ball
                     print 'angle ', self.get_angle_ball()
-                    if self.get_angle_ball() > 10 and self.get_angle_ball() < 135:
+                    if self.get_angle_ball() > 20 and self.get_angle_ball() < 160:
                         self.set_turn_left()
-                    elif self.get_angle_ball() > 225 and self.get_angle_ball() < 350:
+                    elif self.get_angle_ball() < -20 and self.get_angle_ball() > -160:
                         self.set_turn_right()
                     else:
                         print 'Distance: ', self.get_dist_ball()
-                        self.set_walk_forward_slow()
-                        if self.get_dist_ball()<80:
+                        if self.get_dist_ball()<29 and self.get_angle_ball()<=0:
                             self.set_kick_right()
+                        elif self.get_dist_ball()<29 and self.get_angle_ball()>0:
+                            self.set_kick_left()
+                        else:
+                            self.set_walk_forward_slow()
                     #pan in the middle:
                     # if self.get_angle_ball() <= 10 or self.get_angle_ball() >= 350:
                     #     if self.get_dist_ball() >= 100:
