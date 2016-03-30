@@ -63,9 +63,12 @@ class TreatingRawData(object):
     def get_orientation(self):
         '''1 for correct orientation'''
         return self.bkb.read_int(self.mem,'LOCALIZATION_THETA')
+
+    def get_angle_ball(self):
+        return self.bkb.read_float(self.mem,'VISION_ANGLE_BALL')
         
     def get_dist_ball(self):
-        return self.bkb.read_int(self.mem,'VISION_DIST_BALL')
+        return self.bkb.read_float(self.mem,'VISION_DIST_BALL')
         
     ''''def get_head_pan_initial(self):
         return self.config.getint('Offset', 'ID_19')
@@ -85,7 +88,7 @@ class TreatingRawData(object):
     def set_stand_still(self):
         print 'stand still'
         self.bkb.write_int(self.mem,'DECISION_ACTION_A', 0)
-        time.sleep(2)
+        time.sleep(1)
         return 
 
     def set_walk_forward(self):
@@ -97,11 +100,13 @@ class TreatingRawData(object):
         
     def set_turn_left(self):
         print 'turn left'
-        return self.bkb.write_int(self.mem,'DECISION_ACTION_A', 2)
+        self.bkb.write_int(self.mem,'DECISION_ACTION_A', 2)
+        return time.sleep(1)
         
     def set_turn_right(self):
         print 'turn right'
-        return self.bkb.write_int(self.mem,'DECISION_ACTION_A', 3)
+        self.bkb.write_int(self.mem,'DECISION_ACTION_A', 3)
+        return time.sleep(1)
         
     def set_kick_right(self):
         print 'kick right'
@@ -156,6 +161,8 @@ class TreatingRawData(object):
         
     def set_vision_ball(self):
         self.bkb.write_int(self.mem,'DECISION_ACTION_VISION', 0)
+        self.bkb.write_int(self.mem,'VISION_SEARCH_BALL', 1)
+        self.bkb.write_int(self.mem,'VISION_LOST_BALL', 1)
         return time.sleep(2)
         
     def set_vision_orientation(self):
@@ -204,85 +211,164 @@ class Ordinary(TreatingRawData):
         elif referee == 2: #play
             print 'play'
             self.set_vision_ball() #set vision to find ball
-            print self.get_search_ball_status()   #está vindo 0
-            print self.get_lost_ball_status()      #está vindo 1
+            print 'search ball: ',self.get_search_ball_status()
+            print 'lost ball: ',self.get_lost_ball_status()
 
             if self.get_search_ball_status() == 1: #1 - searching ball
-                if self.get_lost_ball_status() == 1: #1 - lost ball
-                   self.set_turn_right()
+                if self.get_lost_ball_status() == 0: #0 - lost ball
+                    self.set_turn_right()
                 self.set_stand_still()
             else:
-                if self.get_lost_ball_status() == 1:
-                    self.set_walk_forward_slow()
-                    #self.set_stand_still() #stop robot because the ball
-                    #can be already found
-                else:
-                    #pan in the middle:
-                    if self.delta_position_pan() <= 70 and self.delta_position_pan() >= -70:
-                        if self.delta_position_tilt() >= -84:
+                if (self.get_lost_ball_status() == 1) and (self.get_search_ball_status() == 0): #1 - ball is found
+                    #align to the ball
+                    print 'angle ', self.get_angle_ball()
+                    if self.get_angle_ball() > 20 and self.get_angle_ball() < 160:
+                        self.set_turn_left()
+                        self.set_stand_still()
+                    elif self.get_angle_ball() < -20 and self.get_angle_ball() > -160:
+                        self.set_turn_right()
+                        self.set_stand_still()
+                    else:
+                        print 'Distance: ', self.get_dist_ball()
+                        if self.get_dist_ball() < 29 and self.get_angle_ball()<=0:
+                            self.set_kick_right()
+                        elif self.get_dist_ball() < 29 and self.get_angle_ball()>0:
+                            self.set_kick_left()
+                        elif self.get_dist_ball() > 80:
                             self.set_walk_forward()
-                        elif self.delta_position_tilt() < -84 and self.delta_position_tilt() >= -220:
+                        else:
                             self.set_walk_forward_slow()
-                        else:
-                            if self.delta_position_pan() >= 0:
-                                if self.get_orientation_usage() == 'yes':
-                                    self.set_vision_orientation()
-                                    if self.get_orientation() == 1:
-                                        self.set_kick_right()
-                                    else:
-                                        self.set_revolve_around_ball()
-                                        self.set_stand_still()
-                                        self.set_vision_ball()
-                                else:
-                                    self.set_kick_right()
-                            else:
-                                if self.get_orientation_usage() == 'yes':
-                                    self.set_vision_orientation()
-                                    if self.get_orientation() == 1:
-                                        self.set_kick_left()
-                                    else:
-                                        self.set_revolve_around_ball()
-                                        self.set_vision_ball()
-                                else:
-                                    self.set_kick_left()
+                            time.sleep(1)
+                            self.set_stand_still()
+#pan in the middle:
+                    # if self.get_angle_ball() <= 10 or self.get_angle_ball() >= 350:
+                    #     if self.get_dist_ball() >= 100:
+                    #         self.set_walk_forward()
+                    #     elif self.get_dist_ball() < 100 and self.get_dist_ball() >= 10:
+                    #         self.set_walk_forward_slow()
+                    #     else:
+                    #         if self.delta_angle_ball() >= 0:
+                    #             if self.get_orientation_usage() == 'yes':
+                    #                 self.set_vision_orientation()
+                    #                 if self.get_orientation() == 1:
+                    #                     self.set_kick_right()
+                    #                 else:
+                    #                     self.set_revolve_around_ball()
+                    #                     self.set_stand_still()
+                    #                     self.set_vision_ball()
+                    #             else:
+                    #                 self.set_kick_right()
+                    #         else:
+                    #             if self.get_orientation_usage() == 'yes':
+                    #                 self.set_vision_orientation()
+                    #                 if self.get_orientation() == 1:
+                    #                     self.set_kick_left()
+                    #                 else:
+                    #                     self.set_revolve_around_ball()
+                    #                     self.set_vision_ball()
+                    #             else:
+                    #                 self.set_kick_left()
 
-                    #pan in the right:
-                    if self.delta_position_pan() > 70:
-                        if self.delta_position_tilt() >= -220:
-                            self.set_turn_right()
-                        elif self.delta_position_tilt() < -220 and self.delta_position_pan() > 115:
-                            self.set_sidle_right()
-                        else:
-                            if self.get_orientation_usage() == 'yes':
-                                self.set_vision_orientation()
-                                if self.get_orientation() == 1:
-                                    self.set_kick_right()
-                                else:
-                                    self.set_revolve_around_ball()
-                                    self.set_vision_ball()
-                            else:
-                                self.set_kick_right()
-
-                    #pan in the left:
-                    if self.delta_position_pan() < -70:
-                        if self.delta_position_tilt() >= -220:
-                            self.set_turn_left()
-                        elif self.delta_position_tilt() < -220 and self.delta_position_pan() < -95:
-                            self.set_sidle_left()
-                        else:
-                            if self.get_orientation_usage() == 'yes':
-                                self.set_vision_orientation()
-                                if self.get_orientation() == 1:
-                                    self.set_kick_left()
-                                else:
-                                    self.set_revolve_around_ball()
-                                    self.set_vision_ball()
-                            else:
-                                self.set_kick_left()
+                    # #pan in the right:
+                    # if self.delta_position_pan() > 70:
+                    #     if self.delta_position_tilt() >= -220:
+                    #         self.set_turn_right()
+                    #     elif self.delta_position_tilt() < -220 and self.delta_position_pan() > 115:
+                    #         self.set_sidle_right()
+                    #     else:
+                    #         if self.get_orientation_usage() == 'yes':
+                    #             self.set_vision_orientation()
+                    #             if self.get_orientation() == 1:
+                    #                 self.set_kick_right()
+                    #             else:
+                    #                 self.set_revolve_around_ball()
+                    #                 self.set_vision_ball()
+                    #         else:
+                    #             self.set_kick_right()
+                    #
+                    # #pan in the left:
+                    # if self.delta_position_pan() < -70:
+                    #     if self.delta_position_tilt() >= -220:
+                    #         self.set_turn_left()
+                    #     elif self.delta_position_tilt() < -220 and self.delta_position_pan() < -95:
+                    #         self.set_sidle_left()
+                    #     else:
+                    #         if self.get_orientation_usage() == 'yes':
+                    #             self.set_vision_orientation()
+                    #             if self.get_orientation() == 1:
+                    #                 self.set_kick_left()
+                    #             else:
+                    #                 self.set_revolve_around_ball()
+                    #                 self.set_vision_ball()
+                    #         else:
+                    #             self.set_kick_left()
         else:
             print 'Invalid argument received from referee!'
 
 #############################################################################
+
+class Naive(TreatingRawData):
+    " " " Ordinary class " " "
+
+    def __init__(self):
+        super(Naive, self).__init__()
+        print
+        print 'Naive behavior called'
+        print
+
+    def decision(self, referee):
+        if referee == 1:  # stopped
+            print 'stand'
+            self.set_stand_still()
+
+        elif referee == 11:  # ready
+            print 'ready'
+            self.set_stand_still()
+
+        elif referee == 12:  # set
+            print 'set'
+            self.set_stand_still()
+            self.set_vision_ball()
+
+        elif referee == 2:  # play
+            print 'play'
+            self.set_vision_ball()  # set vision to find ball
+            print 'search ball: ', self.get_search_ball_status()
+            print 'lost ball: ', self.get_lost_ball_status()
+
+            if self.get_search_ball_status() == 1:  # 1 - searching ball
+                if self.get_lost_ball_status() == 0:  # 0 - lost ball
+                    self.set_turn_right()
+                self.set_stand_still()
+            else:
+                if (self.get_lost_ball_status() == 1) and (
+                    self.get_search_ball_status() == 0):  # 1 - ball is found
+                    # align to the ball
+                    print 'angle ', self.get_angle_ball()
+                    if self.get_angle_ball() > 20 and self.get_angle_ball() < 160:
+                        self.set_turn_left()
+                        self.set_stand_still()
+                    elif self.get_angle_ball() < -20 and self.get_angle_ball() > -160:
+                        self.set_turn_right()
+                        self.set_stand_still()
+                    else:
+                        print 'Distance: ', self.get_dist_ball()
+                        if self.get_dist_ball() < 29 and self.get_angle_ball() <= 0:
+                            self.set_kick_right()
+                        elif self.get_dist_ball() < 29 and self.get_angle_ball() > 0:
+                            self.set_kick_left()
+                        elif self.get_dist_ball() > 80:
+                            self.set_walk_forward()
+                        else:
+                            self.set_walk_forward_slow()
+                            time.sleep(1)
+                            self.set_stand_still()
+        else:
+            print 'Invalid argument received from referee!'
+
+            #############################################################################
+
+
         
 class Attacker(TreatingRawData):
     " " " Attacker class " " "

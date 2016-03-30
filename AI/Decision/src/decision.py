@@ -29,6 +29,7 @@ parser = argparse.ArgumentParser(description='Robot behavior', epilog= 'Se nenhu
 parser.add_argument('--golie', '-g', action="store_true", help = 'Seleciona comportamento de goleiro / selects golie behavior')
 parser.add_argument('--quarterback', '-q', action="store_true", help = 'Seleciona comportamento de zagueiro / selects quarterback behavior')
 parser.add_argument('--attacker', '-a', action="store_true", help = 'Seleciona comportamento de atacante / selects attacker behavior')
+parser.add_argument('--naive', '-n', action="store_true", help = 'Seleciona comportamento reativo / selects naive behavior')
 
 args = parser.parse_args()
 
@@ -43,7 +44,11 @@ elif args.quarterback == True:
 #Attacker decision:    
 elif args.attacker == True:
     robot = Attacker()
-    
+
+#Naive decision:
+elif args.naive == True:
+    robot = Naive()
+
 #Ordinary decision:
 else:
     robot = Ordinary()

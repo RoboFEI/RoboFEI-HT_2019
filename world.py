@@ -3,8 +3,8 @@ from screen import *
 class SoccerField():
     def __init__(self, screen):
         self.screen = screen
-        self.robofei_logo = pygame.image.load("RoboFEI_logo.png")
-        self.robofei_logo_scaled = pygame.transform.scale(self.robofei_logo,(100,82))
+        self.robofei_logo = pygame.image.load("RoboFEI_scaled80.png")
+        self.robofei_logo_scaled = pygame.transform.scale(self.robofei_logo,(80,80))
         self.goalpost_list = []
         self.goalpost = GoalPosts(70,280)
         self.goalpost_list.append(self.goalpost)
@@ -15,7 +15,30 @@ class SoccerField():
         self.goalpost = GoalPosts(970,460)
         self.goalpost_list.append(self.goalpost)
 
+        self.LimitLines = []
+        self.LimitLines.append(LimitLine(0, 1040, 0))
+        self.LimitLines.append(LimitLine(0, 1040, 740))
+        self.LimitLines.append(LimitLine(0, 740, 0, False))
+        self.LimitLines.append(LimitLine(0, 740, 1040, False))
+        self.LimitLines.append(LimitLine(0, 70, 280))
+        self.LimitLines.append(LimitLine(0, 70, 460))
+        self.LimitLines.append(LimitLine(970, 1040, 280))
+        self.LimitLines.append(LimitLine(970, 1040, 460))
 
+        self.Goals = []
+        self.Goals.append(SpecialArea(0, 280, 70, 460, True, 'Friend'))
+        self.Goals.append(SpecialArea(970, 280, 1040, 460, True, 'Enemy'))
+
+        self.PlayField = SpecialArea(70, 70, 970, 670)
+
+        self.FriendTeam = 'US'
+        self.EnemyTeam = 'OTHERS'
+        self.FriendGoals = 0
+        self.EnemyGoals = 0
+        self.GameStop = True
+        self.Counter = 0
+        self.Lap = 0
+        self.show = True
 
     def draw_soccer_field(self):
 
@@ -44,17 +67,52 @@ class SoccerField():
         for post in self.goalpost_list:
             post.draw_goalposts(self.screen)
 
+        #limit lines
+        for ll in self.LimitLines:
+            ll.draw_LimitLine(self.screen)
+
 
         #text
         font = pygame.font.SysFont("Arial", 20)
-        text = font.render("RoboFEI-HT Simulator", 1, self.screen.WHITE)
+        txt = self.FriendTeam + ' ' + str(self.FriendGoals) + ' x ' + str(self.EnemyGoals) + ' ' + self.EnemyTeam
+        text = font.render(txt, 1, self.screen.WHITE)
         textpos = text.get_rect()
         textpos.centery = 30
         textpos.centerx = self.screen.background.get_rect().centerx
 
         self.screen.background.blit(text, textpos)
-        self.screen.background.blit(self.robofei_logo_scaled,(950,2))
 
+        #time
+        if self.GameStop:
+            tick = pygame.time.get_ticks()
+            if tick - self.Lap > 300:
+                self.show = not self.show
+                self.Lap = tick
+        else:
+            self.show = True
+
+        if self.show:
+            minutes = int(self.Counter / 60000)
+            seconds = int(self.Counter / 1000) - minutes * 60
+            if minutes < 10:
+                mnt = '0' + str(minutes)
+            else:
+                mnt = str(minutes)
+
+            if seconds < 10:
+                snd = '0' + str(seconds)
+            else:
+                snd = str(seconds)
+
+            txt = mnt + ':' + snd
+            text = font.render(txt, 1, self.screen.WHITE)
+            textpos = text.get_rect()
+            textpos.centery = 50
+            textpos.centerx = self.screen.background.get_rect().centerx
+
+            self.screen.background.blit(text, textpos)
+
+        self.screen.background.blit(self.robofei_logo_scaled,(960,2))
 
 class GoalPosts(SoccerField):
     def __init__(self,x,y):
@@ -64,5 +122,31 @@ class GoalPosts(SoccerField):
 
     def draw_goalposts(self, screen):
         '''draw goalposts'''
-        pygame.draw.circle(screen.background,screen.WHITE,(self.x,self.y),self.radius,2)
+        pygame.draw.circle(screen.background,screen.WHITE,(self.x,self.y),self.radius,0)
 
+class LimitLine(SoccerField):
+    def __init__(self, a0, a1, b, cte_y = True):
+        # True means y constant
+        # False means x constante
+        self.a0 = a0
+        self.a1 = a1
+        self.b = b
+        self.cte_y = cte_y
+
+    def draw_LimitLine(self, screen):
+        if self.cte_y:
+            pygame.draw.line(screen.background, screen.WHITE, (self.a0, self.b), (self.a1, self.b), 2)
+        else:
+            pygame.draw.line(screen.background, screen.WHITE, (self.b, self.a0), (self.b, self.a1), 2)
+
+class SpecialArea(SoccerField):
+    def __init__(self, x1, y1, x2, y2, goal = False, side = 'None'):
+        # True for goal
+        # False for field
+        self.x1 = x1
+        self.y1 = y1
+        self.x2 = x2
+        self.y2 = y2
+
+        self.goal = goal
+        self.side = side

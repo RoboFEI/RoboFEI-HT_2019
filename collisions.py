@@ -1,49 +1,95 @@
 from math import sqrt
 from math import atan2
+from math import sin
+from math import cos
+from math import degrees
 from math import pi
 
-
-def collide_ball(robot, ball):
-    d = sqrt((robot.x - ball.x)**2 + (robot.y - ball.y)**2)
-
-    if d > robot.radius + ball.radius:
-        return False
+def collision_robot_vs_line(robot, line):
+    if line.cte_y:
+        if line.a0 < robot.x + robot.radius and line.a1 > robot.x - robot.radius and abs(line.b - robot.y) < robot.radius:
+            if line.b > robot.y:
+                return 0, -3
+            elif line.b < robot.y:
+                return 0, 3
     else:
-        r = atan2((ball.y-robot.y), (ball.x-robot.x))
-        if float(ball.speed_x) <= 1 and  float(ball.speed_y) <= 1:
-            ball.put_in_motion( 1, 1, r*180/pi)
-        else:
-            ball.put_in_motion(-ball.speed_x, -ball.speed_y, 0)
-        return True
+        if line.a0 < robot.y + robot.radius and line.a1 > robot.y - robot.radius and abs(line.b - robot.x) < robot.radius:
+            if line.b > robot.x:
+                return -3, 0
+            elif line.b < robot.x:
+                return 3, 0
+    return 0, 0
 
+def collision_robot_vs_goal(robot, goal):
+    dx = robot.x - goal.x
+    dy = robot.y - goal.y
 
-def collide_robot(fst_robot, snd_robot):
-    dr = sqrt((fst_robot.new_x - snd_robot.new_x)**2 + (fst_robot.new_y - snd_robot.new_y)**2)
+    d = sqrt(dx**2 + dy**2)
 
-    if dr > fst_robot.radius + snd_robot.radius:
-        return False
+    if d < robot.radius + goal.radius:
+        r = atan2(dy, dx)
+        return 3*cos(r), 3*sin(r)
+
+    return 0, 0
+
+def collision_robot_vs_ball(robot, ball):
+    delta_x = ball.x - robot.x
+    delta_y = robot.y - ball.y
+
+    distance = sqrt(delta_x**2 + delta_y**2)
+
+    if distance < robot.radius + ball.radius:
+        reaction_angle = atan2(delta_y, delta_x)
+
+        ball_speed = sqrt(ball.speed_x**2 + ball.speed_y**2)
+        ball_angle = atan2(ball.speed_y, ball.speed_x)
+
+        ball_speed_reaction_cos = ball_speed * cos(ball_angle-reaction_angle) + 1
+        ball_speed_reaction_sin = ball_speed * sin(ball_angle-reaction_angle)
+
+        new_ball_speed = sqrt(ball_speed_reaction_cos**2 + ball_speed_reaction_sin**2)
+        new_ball_angle = atan2(ball_speed_reaction_sin, ball_speed_reaction_cos) + reaction_angle
+
+        ball.put_in_motion(new_ball_speed, degrees(new_ball_angle))
+
+def collision_ball_vs_goal(ball, goal):
+    delta_x = ball.x - goal.x
+    delta_y = goal.y - ball.y
+
+    distance = sqrt(delta_x**2 + delta_y**2)
+    if distance < ball.radius + goal.radius:
+        reaction_angle = atan2(delta_y, delta_x)
+
+        ball_speed = sqrt(ball.speed_x**2 + ball.speed_y**2)
+        # ball_angle = atan2(ball.speed_y, ball.speed_x)
+
+        # ball_speed_reaction_cos = ball_speed * cos(ball_angle-reaction_angle)
+        # ball_speed_reaction_sin = ball_speed * sin(ball_angle-reaction_angle)
+
+        # new_ball_speed = sqrt(ball_speed_reaction_cos**2 + ball_speed_reaction_sin**2)
+        # new_ball_angle = atan2(ball_speed_reaction_sin, ball_speed_reaction_cos) + reaction_angle
+
+        ball.put_in_motion(ball_speed, degrees(reaction_angle))
+
+def collision_ball_vs_line(ball, line):
+    if line.cte_y:
+        if line.a0 < ball.x + ball.radius and line.a1 > ball.x - ball.radius and abs(line.b - ball.y) < ball.radius:
+            ball.speed_y = - ball.speed_y
     else:
-        return True
+        if line.a0 < ball.y + ball.radius and line.a1 > ball.y - ball.radius and abs(line.b - ball.x) < ball.radius:
+            ball.speed_x = - ball.speed_x
 
-def collide_robot_goalpost(robot, post):
-    dr = sqrt((robot.new_x - post.x)**2 + (robot.new_y - post.y)**2)
+def collision_robot_vs_robot(robot1, robot2):
+    delta_x = robot1.x - robot2.x
+    delta_y = robot1.y - robot2.y
 
-    if dr > robot.radius + post.radius:
-        return False
-    else:
-        return True
+    d = sqrt(delta_x**2 + delta_y**2)
+    if d < robot1.radius + robot2.radius:
+        reaction_angle = atan2(delta_y, delta_x)
 
-def collide_ball_goalpost(ball, post):
-    d = sqrt((ball.x - post.x)**2 + (ball.y - post.y)**2)
+        robot2.x += cos(reaction_angle + pi)
+        robot2.y += sin(reaction_angle + pi)
 
-    if d > post.radius + ball.radius:
-        return False
-    else:
-        r = atan2((post.y - ball.y), (post.x - ball.x))
-        ball.put_in_motion(-ball.speed_x, -ball.speed_y, 0)
-        return True
+        return 2 * cos(reaction_angle), 2 * sin(reaction_angle)
 
-    #fst_r = atan2((fst_robot.y-snd_robot.y), (fst_robot.x-snd_robot.x))
-    #scn_r = atan2((snd_robot.y-fst_robot.y), (snd_robot.x-fst_robot.x))
-    #print fst_r, scn_r
-
+    return 0, 0
