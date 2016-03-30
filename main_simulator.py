@@ -14,7 +14,7 @@ def main():
 
     simul.field = field
 
-    pygame.display.set_icon(field.robofei_logo_scaled)
+    pygame.display.set_icon(field.robofei_logo)
 
 
     #Main loop

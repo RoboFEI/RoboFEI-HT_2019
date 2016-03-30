@@ -14,8 +14,8 @@ class Screen():
         self.ORANGE = (229, 83, 0)
         self.GRAY = (128, 128, 128)
 
-        self.screen_width = 1040
-        self.screen_height = 740
+        self.screen_width = 1042
+        self.screen_height = 742
         self.dimension = self.screen_width,self.screen_height
         self.background = pygame.display.set_mode(self.dimension)
         self.clock = pygame.time.Clock()

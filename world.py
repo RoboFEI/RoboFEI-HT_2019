@@ -112,7 +112,7 @@ class SoccerField():
 
             self.screen.background.blit(text, textpos)
 
-        self.screen.background.blit(self.robofei_logo_scaled,(960,2))
+        self.screen.background.blit(self.robofei_logo_scaled,(965,2))
 
 class GoalPosts(SoccerField):
     def __init__(self,x,y):
