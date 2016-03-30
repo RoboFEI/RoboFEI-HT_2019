@@ -376,7 +376,7 @@ class Robot(pygame.sprite.Sprite,Vision):
                     rotation_vision = 90
                 elif rotation_vision < -90:
                     rotation_vision = -90
-                #self.view_rot = rotation_vision + self.rotate
+                self.view_rot = rotation_vision + self.rotate
                 print 'self.rotate',self.rotate
                 print 'rotation_vision',rotation_vision
                 print 'view_rot', self.view_rot

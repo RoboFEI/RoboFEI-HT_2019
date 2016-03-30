@@ -88,7 +88,7 @@ class TreatingRawData(object):
     def set_stand_still(self):
         print 'stand still'
         self.bkb.write_int(self.mem,'DECISION_ACTION_A', 0)
-        time.sleep(2)
+        time.sleep(1)
         return 
 
     def set_walk_forward(self):
@@ -224,17 +224,23 @@ class Ordinary(TreatingRawData):
                     print 'angle ', self.get_angle_ball()
                     if self.get_angle_ball() > 20 and self.get_angle_ball() < 160:
                         self.set_turn_left()
+                        self.set_stand_still()
                     elif self.get_angle_ball() < -20 and self.get_angle_ball() > -160:
                         self.set_turn_right()
+                        self.set_stand_still()
                     else:
                         print 'Distance: ', self.get_dist_ball()
-                        if self.get_dist_ball()<29 and self.get_angle_ball()<=0:
+                        if self.get_dist_ball() < 29 and self.get_angle_ball()<=0:
                             self.set_kick_right()
-                        elif self.get_dist_ball()<29 and self.get_angle_ball()>0:
+                        elif self.get_dist_ball() < 29 and self.get_angle_ball()>0:
                             self.set_kick_left()
+                        elif self.get_dist_ball() > 80:
+                            self.set_walk_forward()
                         else:
                             self.set_walk_forward_slow()
-                    #pan in the middle:
+                            time.sleep(1)
+                            self.set_stand_still()
+#pan in the middle:
                     # if self.get_angle_ball() <= 10 or self.get_angle_ball() >= 350:
                     #     if self.get_dist_ball() >= 100:
                     #         self.set_walk_forward()
@@ -300,6 +306,69 @@ class Ordinary(TreatingRawData):
             print 'Invalid argument received from referee!'
 
 #############################################################################
+
+class Naive(TreatingRawData):
+    " " " Ordinary class " " "
+
+    def __init__(self):
+        super(Naive, self).__init__()
+        print
+        print 'Naive behavior called'
+        print
+
+    def decision(self, referee):
+        if referee == 1:  # stopped
+            print 'stand'
+            self.set_stand_still()
+
+        elif referee == 11:  # ready
+            print 'ready'
+            self.set_stand_still()
+
+        elif referee == 12:  # set
+            print 'set'
+            self.set_stand_still()
+            self.set_vision_ball()
+
+        elif referee == 2:  # play
+            print 'play'
+            self.set_vision_ball()  # set vision to find ball
+            print 'search ball: ', self.get_search_ball_status()
+            print 'lost ball: ', self.get_lost_ball_status()
+
+            if self.get_search_ball_status() == 1:  # 1 - searching ball
+                if self.get_lost_ball_status() == 0:  # 0 - lost ball
+                    self.set_turn_right()
+                self.set_stand_still()
+            else:
+                if (self.get_lost_ball_status() == 1) and (
+                    self.get_search_ball_status() == 0):  # 1 - ball is found
+                    # align to the ball
+                    print 'angle ', self.get_angle_ball()
+                    if self.get_angle_ball() > 20 and self.get_angle_ball() < 160:
+                        self.set_turn_left()
+                        self.set_stand_still()
+                    elif self.get_angle_ball() < -20 and self.get_angle_ball() > -160:
+                        self.set_turn_right()
+                        self.set_stand_still()
+                    else:
+                        print 'Distance: ', self.get_dist_ball()
+                        if self.get_dist_ball() < 29 and self.get_angle_ball() <= 0:
+                            self.set_kick_right()
+                        elif self.get_dist_ball() < 29 and self.get_angle_ball() > 0:
+                            self.set_kick_left()
+                        elif self.get_dist_ball() > 80:
+                            self.set_walk_forward()
+                        else:
+                            self.set_walk_forward_slow()
+                            time.sleep(1)
+                            self.set_stand_still()
+        else:
+            print 'Invalid argument received from referee!'
+
+            #############################################################################
+
+
         
 class Attacker(TreatingRawData):
     " " " Attacker class " " "
