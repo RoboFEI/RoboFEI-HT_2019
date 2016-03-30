@@ -64,9 +64,9 @@ def help(screen):
     a += 15
     screen.background.blit(font.render('V - fast walk backward', 1, color), (10, a))
     a += 15
-    screen.background.blit(font.render('W - start search ball ?', 1, color), (10, a))
+    screen.background.blit(font.render('W - NOTHING', 1, color), (10, a))
     a += 15
-    screen.background.blit(font.render('X - stop search ball ?', 1, color), (10, a))
+    screen.background.blit(font.render('X - NOTHING', 1, color), (10, a))
     a += 15
     screen.background.blit(font.render('Y - Search Ball', 1, color), (10, a))
     a += 15

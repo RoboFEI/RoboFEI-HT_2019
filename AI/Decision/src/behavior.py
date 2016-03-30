@@ -54,11 +54,11 @@ class TreatingRawData(object):
     def get_referee(self):
         return self.bkb.read_int(self.mem, 'COM_REFEREE')
 
-    def get_motor_tilt(self):
-        return self.bkb.read_int(self.mem,'VISION_MOTOR1_ANGLE')
+    def get_motor_tilt_degrees(self):
+        return self.bkb.read_float(self.mem,'VISION_TILT_DEG')
         
-    def get_motor_pan(self):
-        return self.bkb.read_int(self.mem,'VISION_MOTOR2_ANGLE')
+    def get_motor_pan_degrees(self):
+        return self.bkb.read_float(self.mem,'VISION_PAN_DEG')
           
     def get_orientation(self):
         '''1 for correct orientation'''
@@ -68,7 +68,7 @@ class TreatingRawData(object):
         return self.bkb.read_float(self.mem,'VISION_ANGLE_BALL')
         
     def get_dist_ball(self):
-        return self.bkb.read_float(self.mem,'VISION_DIST_BALL')
+        return self.bkb.read_float(self.mem,'VISION_BALL_DIST')
         
     ''''def get_head_pan_initial(self):
         return self.config.getint('Offset', 'ID_19')
@@ -77,13 +77,13 @@ class TreatingRawData(object):
         return self.config.getint('Offset', 'ID_20')'''
         
     def get_search_ball_status(self):
-        return self.bkb.read_int(self.mem,'VISION_SEARCH_BALL')
+        return self.bkb.read_int(self.mem,'VISION_BALL_CENTERED')
         
     def get_lost_ball_status(self):
-        return self.bkb.read_int(self.mem,'VISION_LOST_BALL')
+        return self.bkb.read_int(self.mem,'VISION_BALL_LOST')
         
     def set_search_ball_status(self):
-        return self.bkb.write_int(self.mem,'VISION_SEARCH_BALL', 1)
+        return self.bkb.write_int(self.mem,'VISION_BALL_CENTERED', 1)
         
     def set_stand_still(self):
         print 'stand still'
@@ -161,8 +161,8 @@ class TreatingRawData(object):
         
     def set_vision_ball(self):
         self.bkb.write_int(self.mem,'DECISION_ACTION_VISION', 0)
-        self.bkb.write_int(self.mem,'VISION_SEARCH_BALL', 1)
-        self.bkb.write_int(self.mem,'VISION_LOST_BALL', 1)
+        self.bkb.write_int(self.mem,'VISION_BALL_CENTERED', 1)
+        self.bkb.write_int(self.mem,'VISION_BALL_LOST', 1)
         return time.sleep(2)
         
     def set_vision_orientation(self):
@@ -221,18 +221,18 @@ class Ordinary(TreatingRawData):
             else:
                 if (self.get_lost_ball_status() == 1) and (self.get_search_ball_status() == 0): #1 - ball is found
                     #align to the ball
-                    print 'angle ', self.get_angle_ball()
-                    if self.get_angle_ball() > 20 and self.get_angle_ball() < 160:
+                    print 'angle ', self.get_motor_pan_degrees()
+                    if self.get_motor_pan_degrees() > 20 and self.get_motor_pan_degrees() < 160:
                         self.set_turn_left()
                         self.set_stand_still()
-                    elif self.get_angle_ball() < -20 and self.get_angle_ball() > -160:
+                    elif self.get_motor_pan_degrees() < -20 and self.get_motor_pan_degrees() > -160:
                         self.set_turn_right()
                         self.set_stand_still()
                     else:
                         print 'Distance: ', self.get_dist_ball()
-                        if self.get_dist_ball() < 29 and self.get_angle_ball()<=0:
+                        if self.get_dist_ball() < 29 and self.get_motor_pan_degrees()<=0:
                             self.set_kick_right()
-                        elif self.get_dist_ball() < 29 and self.get_angle_ball()>0:
+                        elif self.get_dist_ball() < 29 and self.get_motor_pan_degrees()>0:
                             self.set_kick_left()
                         elif self.get_dist_ball() > 80:
                             self.set_walk_forward()
@@ -344,18 +344,18 @@ class Naive(TreatingRawData):
                 if (self.get_lost_ball_status() == 1) and (
                     self.get_search_ball_status() == 0):  # 1 - ball is found
                     # align to the ball
-                    print 'angle ', self.get_angle_ball()
-                    if self.get_angle_ball() > 20 and self.get_angle_ball() < 160:
+                    print 'angle ', self.get_motor_pan_degrees()
+                    if self.get_motor_pan_degrees() > 20 and self.get_motor_pan_degrees() < 160:
                         self.set_turn_left()
                         self.set_stand_still()
-                    elif self.get_angle_ball() < -20 and self.get_angle_ball() > -160:
+                    elif self.get_motor_pan_degrees() < -20 and self.get_motor_pan_degrees() > -160:
                         self.set_turn_right()
                         self.set_stand_still()
                     else:
                         print 'Distance: ', self.get_dist_ball()
-                        if self.get_dist_ball() < 29 and self.get_angle_ball() <= 0:
+                        if self.get_dist_ball() < 29 and self.get_motor_pan_degrees() <= 0:
                             self.set_kick_right()
-                        elif self.get_dist_ball() < 29 and self.get_angle_ball() > 0:
+                        elif self.get_dist_ball() < 29 and self.get_motor_pan_degrees() > 0:
                             self.set_kick_left()
                         elif self.get_dist_ball() > 80:
                             self.set_walk_forward()

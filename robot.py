@@ -55,7 +55,7 @@ class Robot(pygame.sprite.Sprite,Vision):
         self.Mem = self.bkb.shd_constructor(KEY)
         print 'Shared Memory successfully created as ',KEY
         #TODO remover a linha vision_search_ball.... como nao estou utilizando decisao ainda, estou forcando a busca..
-        self.bkb.write_int(self.Mem,'VISION_SEARCH_BALL',1)
+        self.bkb.write_int(self.Mem,'VISION_BALL_CENTERED',1)
         #TODO instanciar a classe visao passando o blackboard
 
         self.control = CONTROL(self)
@@ -346,11 +346,11 @@ class Robot(pygame.sprite.Sprite,Vision):
 
 
     def perform_pan(self):
-        if self.bkb.read_int(self.Mem,'VISION_SEARCH_BALL') == 1:
+        if self.bkb.read_int(self.Mem,'VISION_BALL_CENTERED') == 1:
             self.view_rot = self.pan(self.view_rot,self.rotate)
             rot = self.view_obj(self.Mem,self.bkb,self.x,self.y,500,500,self.view_rot)
             if rot == 99999:
-                self.bkb.write_int(self.Mem,'VISION_SEARCH_BALL',0)
+                self.bkb.write_int(self.Mem,'VISION_BALL_CENTERED',0)
 
 
     def searching(self):
@@ -381,10 +381,9 @@ class Robot(pygame.sprite.Sprite,Vision):
                 print 'rotation_vision',rotation_vision
                 print 'view_rot', self.view_rot
 
-
-
-            #robot detect
+            # robot detect
             if robots:
                 for j in range(0, len(robots)):
-                    if j!=self.index-1:
-                        self.robot_detect(self.Mem,self.bkb, self.view_rot, self.rotate, self.x, self.y, robots[j].x, robots[j].y, j)
+                    if j != self.index-1:
+                        self.robot_detect(self.Mem, self.bkb, self.view_rot, self.rotate, self.x, self.y, robots[j].x,
+                                          robots[j].y, j)

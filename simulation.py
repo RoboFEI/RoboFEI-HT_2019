@@ -176,13 +176,6 @@ class Simulation():
                     else:
                         self.robots[self.robot_index_control].kill()
 
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_w:
-                    print 'p'
-                    self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem,'VISION_SEARCH_BALL', 1)
-
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_x:
-                    print 'o'
-                    self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem,'VISION_SEARCH_BALL', 0)
 
                 if event.type == pygame.KEYUP and event.key == pygame.K_F1:
                     self.Help = not self.Help
@@ -211,11 +204,11 @@ class Simulation():
 
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_y:
                     self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem,
-                                                                        'VISION_SEARCH_BALL', 1)
+                                                                        'VISION_BALL_CENTERED', 1)
 
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
                     self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem,
-                                                                        'VISION_SEARCH_BALL', 0)
+                                                                        'VISION_BALL_CENTERED', 0)
             except:
                 pass
 
@@ -243,7 +236,7 @@ class Simulation():
                 self.robots[robot].draw_robot(robot, self.screen)
                 self.robots[robot].draw_vision(self.screen)
                 self.robots[robot].vision_process(self.ball.x, self.ball.y, self.robots)
-                if self.robots[robot].bkb.read_int(self.robots[robot].Mem,'VISION_SEARCH_BALL') == 1:
+                if self.robots[robot].bkb.read_int(self.robots[robot].Mem,'VISION_BALL_CENTERED') == 1:
                     self.robots[robot].searching()
 
         if self.ball.x != 0 and self.ball.y != 0 and self.ball.friction != 0:

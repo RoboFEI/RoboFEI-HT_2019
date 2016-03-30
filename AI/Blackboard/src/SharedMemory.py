@@ -108,10 +108,8 @@ class SharedMemory(object):
     "LOCALIZATION_X": 52,
     "LOCALIZATION_Y": 53,
     "LOCALIZATION_THETA": 54,
-    "VISION_MOTOR1_ANGLE": 55,
-    "VISION_MOTOR2_ANGLE": 56,
-    "VISION_LOST_BALL": 57,
-    "VISION_SEARCH_BALL": 58,
+    "VISION_BALL_LOST": 57,
+    "VISION_BALL_CENTERED": 58,
     "DECISION_ACTION_VISION": 59,
     "VISION_MOTOR1_GOAL": 60,
     "VISION_MOTOR2_GOAL": 61,
@@ -142,7 +140,7 @@ class SharedMemory(object):
     }
 
     variable_float = {
-    "VISION_DIST_BALL": 1,
+    "VISION_BALL_DIST": 1,
     "VISION_DIST_GOAL": 2,
     "VISION_DIST_OPP1": 3,
     "VISION_DIST_OPP2": 4,
@@ -190,5 +188,7 @@ class SharedMemory(object):
     'VISION_ANGLE_RBT09':49,
     'VISION_ANGLE_RBT10':50,
     'VISION_ANGLE_RBT11':51,
+    "VISION_TILT_DEG": 52,
+    "VISION_PAN_DEG": 53,
     }
 #------------------------------------------------------------------------------------------
