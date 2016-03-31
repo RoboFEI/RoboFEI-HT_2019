@@ -128,8 +128,8 @@ class Vision():
 
 
     def write_bkb_robot_position(self,mem,bkb,rot,dist,robotID):
-        bkb.write_floatDynamic(mem,'VISION_DIST_RBT01',robotID,dist)
-        bkb.write_floatDynamic(mem,'VISION_ANGLE_RBT01',robotID,-rot)
+        bkb.write_floatDynamic(mem,'VISION_RBT01_DIST',robotID,dist)
+        bkb.write_floatDynamic(mem,'VISION_RBT01_ANGLE',robotID,-rot)
 
 
 
