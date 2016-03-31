@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+__author__ = "RoboFEI-HT"
+__authors__ = "Danilo H. Perico, Thiago P. D. Homem, Aislan C. Almeida"
+
 from world import *
 from simulation import *
 
@@ -16,7 +19,7 @@ def main():
 
     simul.field = field
 
-    pygame.display.set_icon(field.robofei_logo)
+    pygame.display.set_icon(field.robofei_logo_scaled)
 
 
     #Main loop

@@ -75,6 +75,7 @@ class CONTROL():
                                        self.action_vars[flag][1],
                                        self.action_vars[flag][2])
                 self.bkb.write_int(self.Mem, 'CONTROL_MOVING', 0)
+                self.bkb.write_int(self.Mem, 'DECISION_ACTION_A', 0)
         else:
             self.robot.in_motion = True
             self.robot.motion_vars(self.action_vars[flag][0],

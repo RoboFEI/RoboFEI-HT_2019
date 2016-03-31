@@ -3,7 +3,7 @@ import pygame
 def help(screen):
     font = pygame.font.SysFont("Arial", 12)
     color = (255, 255, 255)
-    s = pygame.Surface((250, 600))
+    s = pygame.Surface((250, 740))
     s.fill((0, 0, 0))
     s.set_alpha(200)
     screen.background.blit(s, (0, 0))
@@ -38,7 +38,7 @@ def help(screen):
     a += 15
     screen.background.blit(font.render('I - pass to the left', 1, color), (10, a))
     a += 15
-    screen.background.blit(font.render('J - pass to the roght', 1, color), (10, a))
+    screen.background.blit(font.render('J - pass to the right', 1, color), (10, a))
     a += 15
     screen.background.blit(font.render('K - slow walk forward', 1, color), (10, a))
     a += 15
@@ -81,5 +81,9 @@ def help(screen):
     screen.background.blit(font.render('F1 - toggle help', 1, color), (10, a))
     a += 15
     screen.background.blit(font.render('F2 - load setup match archive', 1, color), (10, a))
+    a += 15
+    screen.background.blit(font.render('F3 - reset and load setup match', 1, color), (10, a))
+    a += 15
+    screen.background.blit(font.render('F4 - clean screen', 1, color), (10, a))
     a += 15
     screen.background.blit(font.render('F5 - toggle pause', 1, color), (10, a))

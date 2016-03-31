@@ -170,12 +170,13 @@ class Simulation():
                         self.robot_index_control = 15
 
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_DELETE:
-                    if self.robot_index_control == -1:
-                        for each_robot in self.robots:
-                            each_robot.kill()
-                    else:
-                        self.robots[self.robot_index_control].kill()
+                    self.robots[self.robot_index_control].x = 1000000
+                    self.robots[self.robot_index_control].y = 1000000
 
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_INSERT:
+                    self.update_mouse_pos()
+                    self.robots[self.robot_index_control].x = self.mx
+                    self.robots[self.robot_index_control].y = self.my
 
                 if event.type == pygame.KEYUP and event.key == pygame.K_F1:
                     self.Help = not self.Help
@@ -194,6 +195,10 @@ class Simulation():
                     self.field.Counter = 0
                     self.field.GameStop = True
 
+                if event.type == pygame.KEYUP and event.key == pygame.K_F4:
+                    self.robots = []
+                    self.ball = Ball(0, 0, 0)
+
                 if event.type == pygame.KEYUP and event.key == pygame.K_F5:
                     GS = True
                     for goal in self.field.Goals:
@@ -204,14 +209,14 @@ class Simulation():
 
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_y:
                     self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem,
-                                                                        'VISION_BALL_CENTERED', 1)
+                                                                        'VISION_BALL_PAN_ON', 1)
 
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
                     self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem,
-                                                                        'VISION_BALL_CENTERED', 0)
+                                                                        'VISION_BALL_PAN_ON', 0)
+
             except:
                 pass
-
 
             if event.type == pygame.QUIT:
                 sys.exit()
@@ -236,8 +241,6 @@ class Simulation():
                 self.robots[robot].draw_robot(robot, self.screen)
                 self.robots[robot].draw_vision(self.screen)
                 self.robots[robot].vision_process(self.ball.x, self.ball.y, self.robots)
-                if self.robots[robot].bkb.read_int(self.robots[robot].Mem,'VISION_BALL_CENTERED') == 1:
-                    self.robots[robot].searching()
 
         if self.ball.x != 0 and self.ball.y != 0 and self.ball.friction != 0:
             self.ball.draw_ball(self.screen)

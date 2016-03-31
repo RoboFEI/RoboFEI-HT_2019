@@ -25,7 +25,7 @@ class SharedMemory(object):
         try:
             self.testlib = ctypes.CDLL('../../build/lib/libblackboardpy.so') #chama a library que contem as funções em c++
         except OSError:
-            self.testlib = ctypes.CDLL('./AI/build/lib/libblackboardpy.so') #chama a library que contem as funções em c++
+            self.testlib = ctypes.CDLL('../AI/build/lib/libblackboardpy.so') #chama a library que contem as funções em c++
         self.testlib.using_shared_memory.restype = ctypes.POINTER(ctypes.c_int)
         mem = self.testlib.using_shared_memory(KEY)         #using c++ function
         print 'python', mem
@@ -109,7 +109,7 @@ class SharedMemory(object):
     "LOCALIZATION_Y": 53,
     "LOCALIZATION_THETA": 54,
     "VISION_BALL_LOST": 57,
-    "VISION_BALL_CENTERED": 58,
+    "VISION_BALL_PAN_ON": 58,
     "DECISION_ACTION_VISION": 59,
     "VISION_MOTOR1_GOAL": 60,
     "VISION_MOTOR2_GOAL": 61,
