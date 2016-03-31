@@ -26,6 +26,9 @@ class Simulation():
 
         self.Help = False
 
+        self.draw_vision_control = True
+        self.eopra_view = False
+
     def update_mouse_pos(self):
         self.mx, self.my = pygame.mouse.get_pos()
 
@@ -207,6 +210,12 @@ class Simulation():
                     if GS:
                         self.field.GameStop = not self.field.GameStop
 
+                if event.type == pygame.KEYUP and event.key == pygame.K_F6:
+                    self.draw_vision_control = not self.draw_vision_control
+
+                if event.type == pygame.KEYUP and event.key == pygame.K_F7:
+                    self.eopra_view = not self.eopra_view
+
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_y:
                     self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem,
                                                                         'VISION_BALL_PAN_ON', 1)
@@ -239,7 +248,10 @@ class Simulation():
         if self.robots:
             for robot in range(0, len(self.robots)):
                 self.robots[robot].draw_robot(robot, self.screen)
-                self.robots[robot].draw_vision(self.screen)
+                if self.draw_vision_control:
+                    self.robots[robot].draw_vision(self.screen)
+                if self.eopra_view:
+                    self.robots[robot].draw_eopra(self.screen)
                 self.robots[robot].vision_process(self.ball.x, self.ball.y, self.robots)
 
         if self.ball.x != 0 and self.ball.y != 0 and self.ball.friction != 0:
@@ -247,6 +259,7 @@ class Simulation():
 
         if self.Help:
             help(self.screen)
+
 
         if not self.field.GameStop:
             self.field.Counter += self.screen.clock.get_time()
