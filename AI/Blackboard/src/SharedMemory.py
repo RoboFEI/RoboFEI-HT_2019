@@ -25,7 +25,7 @@ class SharedMemory(object):
         try:
             self.testlib = ctypes.CDLL('../../build/lib/libblackboardpy.so') #chama a library que contem as funções em c++
         except OSError:
-            self.testlib = ctypes.CDLL('./AI/build/lib/libblackboardpy.so') #chama a library que contem as funções em c++
+            self.testlib = ctypes.CDLL('../AI/build/lib/libblackboardpy.so') #chama a library que contem as funções em c++
         self.testlib.using_shared_memory.restype = ctypes.POINTER(ctypes.c_int)
         mem = self.testlib.using_shared_memory(KEY)         #using c++ function
         print 'python', mem

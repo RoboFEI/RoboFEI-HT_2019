@@ -12,7 +12,7 @@ from math import exp
 from random import gauss
 
 import sys
-sys.path.append('./AI/Blackboard/src/')
+sys.path.append('../AI/Blackboard/src/')
 from SharedMemory import SharedMemory
 
 
@@ -381,10 +381,20 @@ class Robot(pygame.sprite.Sprite,Vision):
                 print 'rotation_vision',rotation_vision
                 print 'view_rot', self.view_rot
 
-
-
+        #DECISION_ACTION_VISION = 1 ---- search for the robots of the team
+        if (self.bkb.read_int(self.Mem, 'DECISION_ACTION_VISION') == 1):   #to test the code, please set 0.
             #robot detect
             if robots:
                 for j in range(0, len(robots)):
-                    if j!=self.index-1:
+                    if j!=self.index-1 and self.color==robots[j].color:
+                        #print 'Oponente: ', robots[j].color
                         self.robot_detect(self.Mem,self.bkb, self.view_rot, self.rotate, self.x, self.y, robots[j].x, robots[j].y, j)
+
+        # DECISION_ACTION_VISION = 2 ---- search for the opponent robots
+        if (self.bkb.read_int(self.Mem, 'DECISION_ACTION_VISION') == 2):  # to test the code, please set 0.
+            # robot detect
+            if robots:
+                for j in range(0, len(robots)):
+                    if j != self.index - 1 and self.color != robots[j].color:
+                        # print 'Oponente: ', robots[j].color
+                        self.robot_detect(self.Mem, self.bkb, self.view_rot, self.rotate, self.x, self.y, robots[j].x, robots[j].y, j)

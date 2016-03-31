@@ -131,9 +131,9 @@ class Vision():
 
 
     def robot_detect(self,mem,bkb,view_rot, rotate, rX, rY, robotX, robotY,robotID):
-        if bkb.read_int(mem,'VISION_SEARCH_BALL')== 1:
-            view_rot = self.pan(view_rot,rotate)
-            rot, dist = self.view_obj(mem,bkb,rX,rY,robotX,robotY,view_rot)
-            if rot != 99999:
-                print 'Robot found!'
-                self.write_bkb_robot_position(mem,bkb,rot,dist,robotID)
+#        if bkb.read_int(mem,'VISION_SEARCH_BALL')== 1:
+        view_rot = self.pan(view_rot,rotate)
+        rot, dist = self.view_obj(mem,bkb,rX,rY,robotX,robotY,view_rot)
+        if rot != 99999:
+            print 'Robot B',robotID+1, 'found!'
+            self.write_bkb_robot_position(mem,bkb,rot,dist,robotID)
