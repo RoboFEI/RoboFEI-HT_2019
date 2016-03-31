@@ -1,3 +1,8 @@
+#!/usr/bin/env python
+
+__author__ = "RoboFEI-HT"
+__authors__ = "Danilo H. Perico, Thiago P. D. Homem, Aislan C. Almeida"
+
 from world import *
 from simulation import *
 

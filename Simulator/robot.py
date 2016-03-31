@@ -55,7 +55,7 @@ class Robot(pygame.sprite.Sprite,Vision):
         self.Mem = self.bkb.shd_constructor(KEY)
         print 'Shared Memory successfully created as ',KEY
         #TODO remover a linha vision_search_ball.... como nao estou utilizando decisao ainda, estou forcando a busca..
-        self.bkb.write_int(self.Mem,'VISION_SEARCH_BALL',1)
+        self.bkb.write_int(self.Mem,'VISION_BALL_PAN_ON',1)
         #TODO instanciar a classe visao passando o blackboard
 
         self.control = CONTROL(self)
@@ -124,21 +124,19 @@ class Robot(pygame.sprite.Sprite,Vision):
         textpos = (self.x - 5, self.y - 40)
         screen.background.blit(text, textpos)
 
-
-
     '''Control'''
+
     def motion_vars(self, front, rotate, drift):
         self.front = front
         self.turn = rotate
         self.drift = drift
 
-
-    def set_errors(self,    walk_err_mean = 0, walk_err_var = 0,
-                            turn_err_mean = 0, turn_err_var = 0,
-                            drift_err_mean = 0, drift_err_var = 0,
-                            kick_ang_err_mean = 0, kick_ang_err_var = 0,
-                            kick_force_err_mean = 0, kick_force_err_var = 0,
-                            imu_err_mean = 0, imu_err_var = 0):
+    def set_errors(self, walk_err_mean=0, walk_err_var=0,
+                   turn_err_mean=0, turn_err_var=0,
+                   drift_err_mean=0, drift_err_var=0,
+                   kick_ang_err_mean=0, kick_ang_err_var=0,
+                   kick_force_err_mean=0, kick_force_err_var=0,
+                   imu_err_mean=0, imu_err_var=0):
         self.errors_on = True
         self.walk_error_mean = walk_err_mean
         self.walk_error_variance = walk_err_var
@@ -194,89 +192,42 @@ class Robot(pygame.sprite.Sprite,Vision):
         collision_robot_vs_ball(self, self.ball)
         self.get_orientation()  # cumulative error
 
-    def right_kick(self):
-        R = degrees(atan2((self.y - self.ball.y), (self.ball.x - self.x)))
-        d = sqrt((self.x - self.ball.x) ** 2 + (self.y - self.ball.y) ** 2)
-        force = min(10,
-                    12 * exp(-2.3 / self.ball.radius * d + 2.3 / self.ball.radius * (self.radius + self.ball.radius)))
-
-        r = R
-        if R < 0: r = R + 360
-
-        if self.rotate < 30 and (r < self.rotate or r > 330 + self.rotate) or r < self.rotate and r > self.rotate - 30:
-            if self.errors_on:
-                self.ball.put_in_motion(force + gauss(self.kick_error_force_mean, self.kick_error_force_variance),
-                                        self.rotate + gauss(self.kick_error_angle_mean, self.kick_error_angle_variance))
-            else:
-                self.ball.put_in_motion(force, self.rotate)
-
-        self.control.action_select(0)
-
-    def left_kick(self):
-        R = degrees(atan2((self.y - self.ball.y), (self.ball.x - self.x)))
-        d = sqrt((self.x - self.ball.x) ** 2 + (self.y - self.ball.y) ** 2)
-        force = min(10,
-                    12 * exp(-2.3 / self.ball.radius * d + 2.3 / self.ball.radius * (self.radius + self.ball.radius)))
-
-        r = R
-        if R < 0: r = R + 360
-
-        if self.rotate > 330 and (r > self.rotate or r < self.rotate - 330) or r > self.rotate and r < self.rotate + 30:
-            if self.errors_on:
-                self.ball.put_in_motion(force + gauss(self.kick_error_force_mean, self.kick_error_force_variance),
-                                        self.rotate + gauss(self.kick_error_angle_mean, self.kick_error_angle_variance))
-            else:
-                self.ball.put_in_motion(force, self.rotate)
-
-        self.control.action_select(0)
-
     def get_orientation(self):
         if self.errors_on:
             self.orientation_error += gauss(self.imu_error_mean, self.imu_error_variance)
         return self.rotate + self.orientation_error
 
+    def right_kick(self):
+        self.Kick(5, 30)
+
+    def left_kick(self):
+        self.Kick(30, 5)
+
     def pass_left(self):
-        R = degrees(atan2((self.y - self.ball.y), (self.ball.x - self.x)))
-        d = sqrt((self.x - self.ball.x) ** 2 + (self.y - self.ball.y) ** 2)
-        force = min(10,
-                    12 * exp(-2.3 / self.ball.radius * d + 2.3 / self.ball.radius * (self.radius + self.ball.radius)))
-
-        r = R
-        if R < 0: r = R + 360
-
-        if (self.rotate < 15 and (r < self.rotate + 15 or r > self.rotate + 345) or
-                        self.rotate > 345 and (r > self.rotate - 15 or r < self.rotate - 345) or
-                        r < self.rotate + 15 and r > self.rotate - 15):
-            if self.errors_on:
-                self.ball.put_in_motion(force + gauss(self.kick_error_force_mean, self.kick_error_force_variance),
-                                        self.rotate + 90 + gauss(self.kick_error_angle_mean,
-                                                                 self.kick_error_angle_variance))
-            else:
-                self.ball.put_in_motion(force, self.rotate + 90)
-
-        self.control.action_select(0)
+        self.Kick(15, 15, 90)
 
     def pass_right(self):
+        self.Kick(15, 15, -90)
+
+    def Kick(self, LeftLimit, RightLimit, Direction=0):
         R = degrees(atan2((self.y - self.ball.y), (self.ball.x - self.x)))
         d = sqrt((self.x - self.ball.x) ** 2 + (self.y - self.ball.y) ** 2)
-        force = min(10,
-                    12 * exp(-2.3 / self.ball.radius * d + 2.3 / self.ball.radius * (self.radius + self.ball.radius)))
+        force = min(10, 12 * exp(-((self.radius - d) ** 2) / (12) ** 2))
 
         r = R
         if R < 0: r = R + 360
 
-        if (self.rotate < 15 and (r < self.rotate + 15 or r > self.rotate + 345) or
-                        self.rotate > 345 and (r > self.rotate - 15 or r < self.rotate - 345) or
-                        r < self.rotate + 15 and r > self.rotate - 15):
+        if self.rotate > 360 - LeftLimit and (
+                r > self.rotate - RightLimit or r < self.rotate - 360 + LeftLimit) or self.rotate < RightLimit and (
+                r > 360 - RightLimit + self.rotate or r < self.rotate + LeftLimit) or r > self.rotate - RightLimit and r < self.rotate + LeftLimit:
             if self.errors_on:
                 self.ball.put_in_motion(force + gauss(self.kick_error_force_mean, self.kick_error_force_variance),
-                                        self.rotate - 90 + gauss(self.kick_error_angle_mean,
-                                                                 self.kick_error_angle_variance))
+                                        self.rotate + Direction + gauss(self.kick_error_angle_mean,
+                                                                        self.kick_error_angle_variance))
             else:
-                self.ball.put_in_motion(force, self.rotate - 90)
+                self.ball.put_in_motion(force, self.rotate + Direction)
 
         self.control.action_select(0)
-
 
     '''Vision'''
 
@@ -344,42 +295,18 @@ class Robot(pygame.sprite.Sprite,Vision):
     def ball_search(self,x,y):
         self.ball.view_obj(self.Mem, self.bkb,self.x,self.y,x,y,self.rotate,self.vision_dist)
 
-
     def perform_pan(self):
-        if self.bkb.read_int(self.Mem,'VISION_SEARCH_BALL') == 1:
-            self.view_rot = self.pan(self.view_rot,self.rotate)
-            rot = self.view_obj(self.Mem,self.bkb,self.x,self.y,500,500,self.view_rot)
-            if rot == 99999:
-                self.bkb.write_int(self.Mem,'VISION_SEARCH_BALL',0)
-
-
-    def searching(self):
-        self.perform_pan()
-        #self.perform_pan(self.ball.x,self.ball.y)
-        #if self.robots:
-        #    for i in range(0, len(self.robots)):
-        #        self.robots[i].perform_pan(self.ball.x,self.ball.y)
-        #        for j in range(0, len(self.robots)):
-        #            if i!=j:
-        #                self.robots[i].perform_pan(self.robots[j].x,self.robots[j].y)
-
-
+        self.view_rot = self.pan(self.view_rot, self.rotate)
 
     def vision_process(self,ballX,ballY,robots):
-        #TODO alterei tambem por causa da decisao
-        if (self.bkb.read_int(self.Mem,'DECISION_ACTION_VISION') == 0):
-            #ball detect
-            rotation_vision = self.ball_detect(self.Mem,self.bkb, self.view_rot, self.rotate, self.x, self.y, ballX,ballY)
-            if (rotation_vision != None):
-                #print 'rotat_raw',rotation_vision
-                if rotation_vision > 90:
-                    rotation_vision = 90
-                elif rotation_vision < -90:
-                    rotation_vision = -90
-                self.view_rot = rotation_vision + self.rotate
-                print 'self.rotate',self.rotate
-                print 'rotation_vision',rotation_vision
-                print 'view_rot', self.view_rot
+        # ball detect
+        if self.bkb.read_int(self.Mem, 'DECISION_ACTION_VISION') == 0:  # decision saying to vision to focus on ball
+            if self.bkb.read_int(self.Mem, 'VISION_BALL_PAN_ON') == 1:  # searching ball
+                self.perform_pan()
+            view_rot_aux = self.ball_detect(self.Mem, self.bkb, self.view_rot, self.rotate, self.x, self.y, ballX,
+                                                ballY)
+            if view_rot_aux != None:
+                self.view_rot = view_rot_aux
 
         #DECISION_ACTION_VISION = 1 ---- search for the robots of the team
         if (self.bkb.read_int(self.Mem, 'DECISION_ACTION_VISION') == 1):   #to test the code, please set 0.
@@ -396,5 +323,5 @@ class Robot(pygame.sprite.Sprite,Vision):
             if robots:
                 for j in range(0, len(robots)):
                     if j != self.index - 1 and self.color != robots[j].color:
-                        # print 'Oponente: ', robots[j].color
-                        self.robot_detect(self.Mem, self.bkb, self.view_rot, self.rotate, self.x, self.y, robots[j].x, robots[j].y, j)
+                        #print 'Robo ', self.index, 'found: '
+                        self.robot_detect(self.Mem, self.bkb, self.view_rot, self.rotate, self.x, self.y, robots[j].x, robots[j].y, j, self.index)

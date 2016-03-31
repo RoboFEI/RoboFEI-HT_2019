@@ -72,20 +72,20 @@ int* using_shared_memory(int KEY)
      //shmget:para criar um segmento de memória compartilhada
      if (( shmid = shmget((key_t)KEY, size,0)) == -1)
      {
-          perror("Erro no shmget") ;
-          printf("\nMemória será criada\n");
+          perror("shmget error") ;
+          printf("\n Memory will be created \n");
          //return(1) ;
         if (( shmid = shmget((key_t)KEY, size, IPC_CREAT|IPC_EXCL|SHM_R|SHM_W)) == -1)
         {
-            perror("Erro no shmget") ;
+            perror("shmget error") ;
             //return(1) ;
         }
 
      }
 #ifdef DEBUG
-     printf("Sou o processo com pid: %d \n",getpid()) ;
-     printf("Identificador do segmento recuperado: %d \n",shmid) ;
-     printf("Este segmento e associado a chave unica: %d\n",(key_t)KEY);
+     printf("PID: %d \n",getpid()) ;
+     printf("Segment identifier: %d \n",shmid) ;
+     printf("Segment is associated to the unique key: %d\n",(key_t)KEY);
 #endif
     //
     // acoplamento do processo a zona de memoria
@@ -93,7 +93,7 @@ int* using_shared_memory(int KEY)
     //
     //shmat:retorna um pointeiro para o segmento de memória compartilhada
      if ((mem = (int*)shmat (shmid, 0, flag)) == (int*)-1){
-          perror("acoplamento impossivel") ;
+          perror("Impossible linkage!") ;
           //return (2) ;
      }
 
@@ -106,7 +106,7 @@ int* using_shared_memory(int KEY)
              // return(1) ;
             //}
     
-    printf("%du\n",(mem));
+    printf("%d\n",(*mem));
     return(mem); 
 
 }

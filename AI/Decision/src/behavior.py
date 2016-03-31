@@ -54,11 +54,11 @@ class TreatingRawData(object):
     def get_referee(self):
         return self.bkb.read_int(self.mem, 'COM_REFEREE')
 
-    def get_motor_tilt(self):
-        return self.bkb.read_int(self.mem,'VISION_MOTOR1_ANGLE')
+    def get_motor_tilt_degrees(self):
+        return self.bkb.read_float(self.mem,'VISION_TILT_DEG')
         
-    def get_motor_pan(self):
-        return self.bkb.read_int(self.mem,'VISION_MOTOR2_ANGLE')
+    def get_motor_pan_degrees(self):
+        return self.bkb.read_float(self.mem,'VISION_PAN_DEG')
           
     def get_orientation(self):
         '''1 for correct orientation'''
@@ -68,7 +68,7 @@ class TreatingRawData(object):
         return self.bkb.read_float(self.mem,'VISION_ANGLE_BALL')
         
     def get_dist_ball(self):
-        return self.bkb.read_float(self.mem,'VISION_DIST_BALL')
+        return self.bkb.read_float(self.mem,'VISION_BALL_DIST')
         
     ''''def get_head_pan_initial(self):
         return self.config.getint('Offset', 'ID_19')
@@ -77,13 +77,13 @@ class TreatingRawData(object):
         return self.config.getint('Offset', 'ID_20')'''
         
     def get_search_ball_status(self):
-        return self.bkb.read_int(self.mem,'VISION_SEARCH_BALL')
+        return self.bkb.read_int(self.mem,'VISION_BALL_PAN_ON')
         
     def get_lost_ball_status(self):
-        return self.bkb.read_int(self.mem,'VISION_LOST_BALL')
+        return self.bkb.read_int(self.mem,'VISION_BALL_LOST')
         
     def set_search_ball_status(self):
-        return self.bkb.write_int(self.mem,'VISION_SEARCH_BALL', 1)
+        return self.bkb.write_int(self.mem,'VISION_BALL_PAN_ON', 1)
         
     def set_stand_still(self):
         print 'stand still'
@@ -161,8 +161,8 @@ class TreatingRawData(object):
         
     def set_vision_ball(self):
         self.bkb.write_int(self.mem,'DECISION_ACTION_VISION', 0)
-        self.bkb.write_int(self.mem,'VISION_SEARCH_BALL', 1)
-        self.bkb.write_int(self.mem,'VISION_LOST_BALL', 1)
+        self.bkb.write_int(self.mem,'VISION_BALL_PAN_ON', 1)
+        self.bkb.write_int(self.mem,'VISION_BALL_LOST', 1)
         return time.sleep(2)
         
     def set_vision_orientation(self):
@@ -215,24 +215,24 @@ class Ordinary(TreatingRawData):
             print 'lost ball: ',self.get_lost_ball_status()
 
             if self.get_search_ball_status() == 1: #1 - searching ball
-                if self.get_lost_ball_status() == 0: #0 - lost ball
+                if self.get_lost_ball_status() == 1: #1 - lost ball
                     self.set_turn_right()
                 self.set_stand_still()
             else:
-                if (self.get_lost_ball_status() == 1) and (self.get_search_ball_status() == 0): #1 - ball is found
+                if (self.get_lost_ball_status() == 0) and (self.get_search_ball_status() == 0): #1 - ball is found
                     #align to the ball
-                    print 'angle ', self.get_angle_ball()
-                    if self.get_angle_ball() > 20 and self.get_angle_ball() < 160:
+                    print 'angle ', self.get_motor_pan_degrees()
+                    if self.get_motor_pan_degrees() > 20 and self.get_motor_pan_degrees() < 160:
                         self.set_turn_left()
                         self.set_stand_still()
-                    elif self.get_angle_ball() < -20 and self.get_angle_ball() > -160:
+                    elif self.get_motor_pan_degrees() < -20 and self.get_motor_pan_degrees() > -160:
                         self.set_turn_right()
                         self.set_stand_still()
                     else:
                         print 'Distance: ', self.get_dist_ball()
-                        if self.get_dist_ball() < 29 and self.get_angle_ball()<=0:
+                        if self.get_dist_ball() < 29 and self.get_motor_pan_degrees()<=0:
                             self.set_kick_right()
-                        elif self.get_dist_ball() < 29 and self.get_angle_ball()>0:
+                        elif self.get_dist_ball() < 29 and self.get_motor_pan_degrees()>0:
                             self.set_kick_left()
                         elif self.get_dist_ball() > 80:
                             self.set_walk_forward()
@@ -240,75 +240,13 @@ class Ordinary(TreatingRawData):
                             self.set_walk_forward_slow()
                             time.sleep(1)
                             self.set_stand_still()
-#pan in the middle:
-                    # if self.get_angle_ball() <= 10 or self.get_angle_ball() >= 350:
-                    #     if self.get_dist_ball() >= 100:
-                    #         self.set_walk_forward()
-                    #     elif self.get_dist_ball() < 100 and self.get_dist_ball() >= 10:
-                    #         self.set_walk_forward_slow()
-                    #     else:
-                    #         if self.delta_angle_ball() >= 0:
-                    #             if self.get_orientation_usage() == 'yes':
-                    #                 self.set_vision_orientation()
-                    #                 if self.get_orientation() == 1:
-                    #                     self.set_kick_right()
-                    #                 else:
-                    #                     self.set_revolve_around_ball()
-                    #                     self.set_stand_still()
-                    #                     self.set_vision_ball()
-                    #             else:
-                    #                 self.set_kick_right()
-                    #         else:
-                    #             if self.get_orientation_usage() == 'yes':
-                    #                 self.set_vision_orientation()
-                    #                 if self.get_orientation() == 1:
-                    #                     self.set_kick_left()
-                    #                 else:
-                    #                     self.set_revolve_around_ball()
-                    #                     self.set_vision_ball()
-                    #             else:
-                    #                 self.set_kick_left()
-
-                    # #pan in the right:
-                    # if self.delta_position_pan() > 70:
-                    #     if self.delta_position_tilt() >= -220:
-                    #         self.set_turn_right()
-                    #     elif self.delta_position_tilt() < -220 and self.delta_position_pan() > 115:
-                    #         self.set_sidle_right()
-                    #     else:
-                    #         if self.get_orientation_usage() == 'yes':
-                    #             self.set_vision_orientation()
-                    #             if self.get_orientation() == 1:
-                    #                 self.set_kick_right()
-                    #             else:
-                    #                 self.set_revolve_around_ball()
-                    #                 self.set_vision_ball()
-                    #         else:
-                    #             self.set_kick_right()
-                    #
-                    # #pan in the left:
-                    # if self.delta_position_pan() < -70:
-                    #     if self.delta_position_tilt() >= -220:
-                    #         self.set_turn_left()
-                    #     elif self.delta_position_tilt() < -220 and self.delta_position_pan() < -95:
-                    #         self.set_sidle_left()
-                    #     else:
-                    #         if self.get_orientation_usage() == 'yes':
-                    #             self.set_vision_orientation()
-                    #             if self.get_orientation() == 1:
-                    #                 self.set_kick_left()
-                    #             else:
-                    #                 self.set_revolve_around_ball()
-                    #                 self.set_vision_ball()
-                    #         else:
-                    #             self.set_kick_left()
         else:
             print 'Invalid argument received from referee!'
 
 #############################################################################
 
 class Naive(TreatingRawData):
-    " " " Ordinary class " " "
+    " " " Naive class " " "
 
     def __init__(self):
         super(Naive, self).__init__()
@@ -337,31 +275,31 @@ class Naive(TreatingRawData):
             print 'lost ball: ', self.get_lost_ball_status()
 
             if self.get_search_ball_status() == 1:  # 1 - searching ball
-                if self.get_lost_ball_status() == 0:  # 0 - lost ball
+                if self.get_lost_ball_status() == 1:  # 1 - lost ball
                     self.set_turn_right()
                 self.set_stand_still()
             else:
-                if (self.get_lost_ball_status() == 1) and (
-                    self.get_search_ball_status() == 0):  # 1 - ball is found
+                if (self.get_lost_ball_status() == 0) and (
+                    self.get_search_ball_status() == 0):  # 0 - ball is found
                     # align to the ball
-                    print 'angle ', self.get_angle_ball()
-                    if self.get_angle_ball() > 20 and self.get_angle_ball() < 160:
+                    print 'angle ', self.get_motor_pan_degrees()
+                    if self.get_motor_pan_degrees() > 20 and self.get_motor_pan_degrees() < 160:
                         self.set_turn_left()
                         self.set_stand_still()
-                    elif self.get_angle_ball() < -20 and self.get_angle_ball() > -160:
+                    elif self.get_motor_pan_degrees() < -20 and self.get_motor_pan_degrees() > -160:
                         self.set_turn_right()
                         self.set_stand_still()
                     else:
                         print 'Distance: ', self.get_dist_ball()
-                        if self.get_dist_ball() < 29 and self.get_angle_ball() <= 0:
+                        if self.get_dist_ball() < 29 and self.get_motor_pan_degrees() <= 0:
                             self.set_kick_right()
-                        elif self.get_dist_ball() < 29 and self.get_angle_ball() > 0:
+                        elif self.get_dist_ball() < 29 and self.get_motor_pan_degrees() > 0:
                             self.set_kick_left()
                         elif self.get_dist_ball() > 80:
                             self.set_walk_forward()
                         else:
                             self.set_walk_forward_slow()
-                            time.sleep(1)
+                            time.sleep(0.5)
                             self.set_stand_still()
         else:
             print 'Invalid argument received from referee!'

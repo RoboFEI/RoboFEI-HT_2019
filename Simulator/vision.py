@@ -85,24 +85,16 @@ class Vision():
             return (-r,d)
         else:
             #print 'Outside'
-            return (99999,99999)
+            return ("NF", "NF")  # Not Found
 
-    def ball_detect(self,mem,bkb, view_rot, rotate, rX, rY, ballX, ballY):
-        #if bkb.read_int(mem,'VISION_SEARCH_BALL')== 1:
-        view_rot = self.pan(view_rot,rotate)
-        rot, dist = self.view_obj(mem,bkb,rX,rY,ballX,ballY,view_rot)
-        if rot != 99999:
-            #TODO para fazer o merge -- corrigindo o angulo da bola em relacao a orientacao do robo
-            #if rot < 0:
-            #    rot = 360 + rot
-
-
+    def ball_detect(self, mem, bkb, view_rot, rotate, rX, rY, ballX, ballY):
+        # if bkb.read_int(mem, 'VISION_BALL_CENTERED') == 0:  # and self.bkb.read_int(self.Mem, 'VISION_BALL_LOST') == 1
+        #    view_rot = self.pan(view_rot,rotate)
+        rot, dist = self.view_obj(mem, bkb, rX, rY, ballX, ballY, view_rot)
+        if rot != "NF":
+            bkb.write_int(mem, 'VISION_BALL_LOST', 0)  # ball is found
             if rotate > 180 and rotate < 360:
                 rotate = rotate - 360
-
-            #print 'rotacao bola ', rot
-            #print 'rotacao robo ',rotate
-
             rot = rot - rotate
 
             if rot > 180:
@@ -111,17 +103,28 @@ class Vision():
             elif rot < -180:
                 rot = rot + 360
 
-           # if rot < 0:
-           #     rot = 360 + rot
-            #print 'rotacao ok ',rot
-            bkb.write_float(mem,'VISION_DIST_BALL',dist)
-            bkb.write_float(mem,'VISION_ANGLE_BALL',rot)
-            bkb.write_int(mem,'VISION_SEARCH_BALL',0) #stop searching
-            bkb.write_int(mem,'VISION_LOST_BALL',1)  #ball is found
-            return rot
-            #end TODO
+            ball_orient_wrt_robot = rot
+
+            if rot > 90:
+                rot = 90
+            elif rot < -90:
+                rot = -90
+            view_rot_aux = rot + rotate
+
+            # print 'ball_for_robot', ball_orient_wrt_robot
+            # print 'view_rot_aux', int(view_rot_aux) % 360
+            # print 'view_rot', int(view_rot)
+
+            if (int(view_rot_aux) % 360) >= int(view_rot) - 1 and (int(view_rot_aux) % 360) <= int(view_rot) + 1:
+                bkb.write_int(mem, 'VISION_BALL_PAN_ON', 0)  # stop searching
+                bkb.write_float(mem, 'VISION_BALL_DIST', dist)
+                bkb.write_float(mem, 'VISION_PAN_DEG', ball_orient_wrt_robot)
+                return view_rot_aux
+            else:
+                bkb.write_int(mem, 'VISION_BALL_PAN_ON', 1)  # searching
+
         else:
-            bkb.write_int(mem,'VISION_LOST_BALL',0)  #ball not found
+            bkb.write_int(mem, 'VISION_BALL_LOST', 1)  # ball is lost
 
 
     def write_bkb_robot_position(self,mem,bkb,rot,dist,robotID):
@@ -130,10 +133,10 @@ class Vision():
 
 
 
-    def robot_detect(self,mem,bkb,view_rot, rotate, rX, rY, robotX, robotY,robotID):
+    def robot_detect(self,mem,bkb,view_rot, rotate, rX, rY, robotX, robotY,robotID,selfID):
 #        if bkb.read_int(mem,'VISION_SEARCH_BALL')== 1:
         view_rot = self.pan(view_rot,rotate)
         rot, dist = self.view_obj(mem,bkb,rX,rY,robotX,robotY,view_rot)
-        if rot != 99999:
-            print 'Robot B',robotID+1, 'found!'
+        if rot != "NF":
+            #print 'Robot B', selfID, 'found robot: ', robotID+1
             self.write_bkb_robot_position(mem,bkb,rot,dist,robotID)

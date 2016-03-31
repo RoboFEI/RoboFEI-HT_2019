@@ -63,10 +63,8 @@ Arquivo de cabeçalho contendo as funções e definições do black board
 #define LOCALIZATION_X 52
 #define LOCALIZATION_Y 53
 #define LOCALIZATION_THETA 54
-#define VISION_MOTOR1_ANGLE 55
-#define VISION_MOTOR2_ANGLE 56
-#define VISION_LOST_BALL 57
-#define VISION_SEARCH_BALL 58
+#define VISION_BALL_LOST 57
+#define VISION_BALL_PAN_ON 58
 #define DECISION_ACTION_VISION 59
 #define VISION_MOTOR1_GOAL 60
 #define VISION_MOTOR2_GOAL 61
@@ -94,7 +92,7 @@ Arquivo de cabeçalho contendo as funções e definições do black board
 #define ASKED_RELATED_ROBOT 83
 #define ROBOT_VIEW_ROTATE 100
 
-#define VISION_DIST_BALL 1
+#define VISION_BALL_DIST 1
 #define VISION_DIST_GOAL 2
 #define VISION_DIST_OPP1 3
 #define VISION_DIST_OPP2 4
@@ -142,6 +140,8 @@ Arquivo de cabeçalho contendo as funções e definições do black board
 #define VISION_ANGLE_RBT09 49
 #define VISION_ANGLE_RBT10 50
 #define VISION_ANGLE_RBT11 51
+#define VISION_TILT_DEG 52
+#define VISION_PAN_DEG 53
 
 
 //----global variables------------------------------------------------
