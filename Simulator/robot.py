@@ -57,6 +57,13 @@ class Robot(pygame.sprite.Sprite,Vision):
         self.bkb.write_int(self.Mem,'VISION_BALL_PAN_ON',1)
         #TODO instanciar a classe visao passando o blackboard
 
+
+        self.fast_walk_speed = 20
+        self.slow_walk_speed = 10
+        self.turn_angle = 20
+        self.drift_speed = 20
+        self.drift_turn_speed = 15
+
         self.control = CONTROL(self)
         self.ball = None
 
@@ -83,7 +90,7 @@ class Robot(pygame.sprite.Sprite,Vision):
 
         #EOPRA
         self.delta_eopra = 100 # 1 meter
-        self.m = 4 # 6 or 4
+        self.m = 6 # 6 or 4
 
     def draw_robot(self,robot_index, screen):
         self.image.fill(screen.GREEN)

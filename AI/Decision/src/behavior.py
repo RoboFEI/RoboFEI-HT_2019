@@ -128,7 +128,7 @@ class TreatingRawData(object):
         
     def set_walk_forward_slow(self):
         print 'walk forward slow'
-        self.set_walk_speed(3)
+        self.set_walk_speed(10)
         return self.bkb.write_int(self.mem,'DECISION_ACTION_A', 8)
         
     def set_revolve_around_ball(self):

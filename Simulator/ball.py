@@ -1,3 +1,4 @@
+
 from screen import *
 from math import cos
 from math import sin
@@ -47,9 +48,38 @@ class Ball():
                     else:
                         return True, 1, 0
 
-            if not (
-                                self.x + self.radius > field.x1 and self.x - self.radius < field.x2 and self.y + self.radius > field.y1 and self.y - self.radius < field.y2):
-                return True, 0, 0
+            # if not (self.x + self.radius > field.x1 and self.x - self.radius < field.x2 and self.y + self.radius > field.y1 and self.y - self.radius < field.y2):
+
+                # return True, 0, 0
+            if (self.x + self.radius > field.x2):
+                self.x = 870
+                if self.y > 570:
+                    self.y = 570
+                elif self.y < 170:
+                    self.y = 170
+                self.put_in_motion(0, 0)
+            elif (self.x - self.radius < field.x1):
+                self.x = 170
+                if self.y > 570:
+                    self.y = 570
+                elif self.y < 170:
+                    self.y = 170
+                self.put_in_motion(0, 0)
+
+            if (self.y + self.radius > field.y2):
+                self.y = 570
+                if self.x > 870:
+                    self.x = 870
+                elif self.x < 170:
+                    self.x = 170
+                self.put_in_motion(0, 0)
+            elif (self.y - self.radius < field.y1):
+                self.y = 170
+                if self.x > 870:
+                    self.x = 870
+                elif self.x < 170:
+                    self.x = 170
+                self.put_in_motion(0, 0)
 
             return False, 0, 0
 

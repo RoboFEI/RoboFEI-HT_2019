@@ -37,6 +37,8 @@ class Simulation():
             try:
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_k:
                         self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 8)
+                        self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem,
+                                                                    'DECISION_ACTION_B', 10)
 
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
                         self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 18)
