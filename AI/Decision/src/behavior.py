@@ -65,7 +65,7 @@ class TreatingRawData(object):
         return self.bkb.read_int(self.mem,'LOCALIZATION_THETA')
 
     def get_angle_ball(self):
-        return self.bkb.read_float(self.mem,'VISION_ANGLE_BALL')
+        return self.bkb.read_float(self.mem,'VISION_BALL_ANGLE')
         
     def get_dist_ball(self):
         return self.bkb.read_float(self.mem,'VISION_BALL_DIST')
