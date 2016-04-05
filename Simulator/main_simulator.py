@@ -2,6 +2,7 @@
 
 __author__ = "RoboFEI-HT"
 __authors__ = "Danilo H. Perico, Thiago P. D. Homem, Aislan C. Almeida"
+__license__ = "GNU General Public License v3.0"
 
 from world import *
 from simulation import *
