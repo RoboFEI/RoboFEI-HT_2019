@@ -15,7 +15,7 @@ class Simulation():
         self.drift = 0'''
         self.robot_index_control = -1
         self.robots = []
-        self.ball = Ball(0, 0, 0)
+        self.ball = Ball(520, 370, 0.95)
         self.mx = 0
         self.my = 0
         self.theta = 0
@@ -87,19 +87,22 @@ class Simulation():
 
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_a:
                     self.update_mouse_pos()
-                    robot = Robot(self.mx, self.my, 0,(len(self.robots)+1)*100, self.screen.CYAN)
 
                     if pygame.key.get_mods() & pygame.KMOD_CTRL:
-                        robot = Robot(self.mx, self.my, 180, (len(self.robots)+1)* self.screen.KEY_BKB, self.screen.MAGENTA)
+                        self.update_mouse_pos()
+                        robot = Robot(self.mx, self.my, 180, (len(self.robots)+1) * self.screen.KEY_BKB, self.screen.MAGENTA)
 
-                    if pygame.key.get_mods() & pygame.KMOD_LSHIFT:
-                        robot = Robot(self.mx, self.my,0,(len(self.robots)+1)* self.screen.KEY_BKB, self.screen.YELLOW)
+                    elif pygame.key.get_mods() & pygame.KMOD_LSHIFT:
+                        robot = Robot(self.mx, self.my,0,(len(self.robots)+1) * self.screen.KEY_BKB, self.screen.YELLOW)
 
-                    if pygame.key.get_mods() & pygame.KMOD_LALT:
-                        robot = Robot(self.mx, self.my,180,(len(self.robots)+1)* self.screen.KEY_BKB, self.screen.BLACK)
+                    elif pygame.key.get_mods() & pygame.KMOD_LALT:
+                        robot = Robot(self.mx, self.my,180,(len(self.robots)+1) * self.screen.KEY_BKB, self.screen.BLACK)
 
-                    if pygame.key.get_mods() & pygame.KMOD_RSHIFT:
-                        robot = Robot(self.mx, self.my,180,(len(self.robots)+1)* self.screen.KEY_BKB, self.screen.ORANGE)
+                    elif pygame.key.get_mods() & pygame.KMOD_RSHIFT:
+                        robot = Robot(self.mx, self.my,180,(len(self.robots)+1) * self.screen.KEY_BKB, self.screen.ORANGE)
+
+                    else:
+                        robot = Robot(self.mx, self.my, 0, (len(self.robots) + 1) * self.screen.KEY_BKB, self.screen.CYAN)
 
                     robot.bkb.write_int(robot.Mem, 'DECISION_ACTION_A', 0)
                     robot.ball = self.ball
@@ -255,9 +258,7 @@ class Simulation():
                 if self.eopra_view:
                     self.robots[robot].draw_eopra(self.screen)
                 self.robots[robot].vision_process(self.ball.x, self.ball.y, self.robots)
-
-        if self.ball.x != 0 and self.ball.y != 0 and self.ball.friction != 0:
-            self.ball.draw_ball(self.screen)
+        self.ball.draw_ball(self.screen)
 
         if self.Help:
             help(self.screen)
