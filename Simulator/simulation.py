@@ -91,6 +91,7 @@ class Simulation():
                     if pygame.key.get_mods() & pygame.KMOD_CTRL:
                         self.update_mouse_pos()
                         robot = Robot(self.mx, self.my, 180, (len(self.robots)+1) * self.screen.KEY_BKB, self.screen.MAGENTA)
+                        robot.imu_initial_value = 180
 
                     elif pygame.key.get_mods() & pygame.KMOD_LSHIFT:
                         robot = Robot(self.mx, self.my,0,(len(self.robots)+1) * self.screen.KEY_BKB, self.screen.YELLOW)
@@ -110,7 +111,7 @@ class Simulation():
                     self.group_robots.add(robot)
                     #print len(self.robots)
 
-                    #robot.set_errors(randrange(-1,1), randrange(-1,1), randrange(-1,1), randrange(-1,1), randrange(-1,1), randrange(-1,1), randrange(-1,1), randrange(-1,1), randrange(-1,1), randrange(-1,1), randrange(-1,1), randrange(-1,1))
+                    robot.set_errors(0,0,0,0,0,0,0,0,0,0,0,0.01)
 
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_b:
                     self.update_mouse_pos()

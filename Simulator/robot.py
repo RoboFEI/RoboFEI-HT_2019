@@ -87,6 +87,7 @@ class Robot(pygame.sprite.Sprite,Vision):
         self.imu_error_mean = 0
         self.imu_error_variance = 0
         self.orientation_error = 0
+        self.imu_initial_value = 0
 
         #EOPRA
         self.delta_eopra = 100 # 1 meter
@@ -146,7 +147,8 @@ class Robot(pygame.sprite.Sprite,Vision):
                    drift_err_mean=0, drift_err_var=0,
                    kick_ang_err_mean=0, kick_ang_err_var=0,
                    kick_force_err_mean=0, kick_force_err_var=0,
-                   imu_err_mean=0, imu_err_var=0):
+                   imu_err_mean = 0, imu_err_var = 0):
+
         self.errors_on = True
         self.walk_error_mean = walk_err_mean
         self.walk_error_variance = walk_err_var
@@ -204,8 +206,13 @@ class Robot(pygame.sprite.Sprite,Vision):
 
     def get_orientation(self):
         if self.errors_on:
-            self.orientation_error += gauss(self.imu_error_mean, self.imu_error_variance)
-        return self.rotate + self.orientation_error
+            error = gauss(self.imu_error_mean, self.imu_error_variance)
+            self.orientation_error += error
+            print 'error', self.orientation_error
+        if self.imu_initial_value == 0:
+            return self.rotate + self.orientation_error
+        elif self.imu_initial_value == 180:
+            return (self.rotate - 180) + self.orientation_error
 
     def right_kick(self):
         self.Kick(5, 30)
