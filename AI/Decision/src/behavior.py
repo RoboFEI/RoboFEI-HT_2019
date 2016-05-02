@@ -59,10 +59,7 @@ class TreatingRawData(object):
         
     def get_motor_pan_degrees(self):
         return self.bkb.read_float(self.mem,'VISION_PAN_DEG')
-          
-    def get_orientation(self):
-        '''1 for correct orientation'''
-        return self.bkb.read_int(self.mem,'LOCALIZATION_THETA')
+
 
     def get_angle_ball(self):
         return self.bkb.read_float(self.mem,'VISION_BALL_ANGLE')
@@ -84,6 +81,9 @@ class TreatingRawData(object):
         
     def set_search_ball_status(self):
         return self.bkb.write_int(self.mem,'VISION_BALL_PAN_ON', 1)
+
+    def get_orientation(self):
+        return self.bkb.read_float(self.mem, 'IMU_EULER_Z')
         
     def set_stand_still(self):
         print 'stand still'
@@ -126,9 +126,9 @@ class TreatingRawData(object):
         print 'sidle right'
         return self.bkb.write_int(self.mem,'DECISION_ACTION_A', 7)
         
-    def set_walk_forward_slow(self):
+    def set_walk_forward_slow(self,vel):
         print 'walk forward slow'
-        self.set_walk_speed(10)
+        self.set_walk_speed(vel)
         return self.bkb.write_int(self.mem,'DECISION_ACTION_A', 8)
         
     def set_revolve_around_ball(self):
@@ -237,8 +237,7 @@ class Ordinary(TreatingRawData):
                         elif self.get_dist_ball() > 80:
                             self.set_walk_forward()
                         else:
-                            self.set_walk_forward_slow()
-                            time.sleep(1)
+                            self.set_walk_forward_slow(8)
                             self.set_stand_still()
         else:
             print 'Invalid argument received from referee!'
@@ -274,6 +273,8 @@ class Naive(TreatingRawData):
             print 'search ball: ', self.get_search_ball_status()
             print 'lost ball: ', self.get_lost_ball_status()
 
+            print 'orientation', self.get_orientation()
+
             if self.get_search_ball_status() == 1:  # 1 - searching ball
                 if self.get_lost_ball_status() == 1:  # 1 - lost ball
                     self.set_turn_right()
@@ -298,9 +299,9 @@ class Naive(TreatingRawData):
                         elif self.get_dist_ball() > 80:
                             self.set_walk_forward()
                         else:
-                            self.set_walk_forward_slow()
-                            time.sleep(0.5)
-                            self.set_stand_still()
+                            self.set_walk_forward_slow((self.get_dist_ball() / 8))
+                            #time.sleep(0.5)
+                            #self.set_stand_still()
         else:
             print 'Invalid argument received from referee!'
 
