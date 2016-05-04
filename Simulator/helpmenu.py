@@ -49,11 +49,11 @@ def help(screen):
     a += space
     screen.background.blit(font.render('N - walk right', 1, color), (10, a))
     a += space
-    screen.background.blit(font.render('O - turn left around the ball', 1, color), (10, a))
+    screen.background.blit(font.render('O - rotate around the ball - clockwise', 1, color), (10, a))
     a += space
     screen.background.blit(font.render('P - right kick', 1, color), (10, a))
     a += space
-    screen.background.blit(font.render('Q - turn left around the ball', 1, color), (10, a))
+    screen.background.blit(font.render('Q - rotate around the ball - anticlockwise', 1, color), (10, a))
     a += space
     screen.background.blit(font.render('R - slow walk backward', 1, color), (10, a))
     a += space

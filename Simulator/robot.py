@@ -54,7 +54,7 @@ class Robot(pygame.sprite.Sprite,Vision):
         self.Mem = self.bkb.shd_constructor(KEY)
         print 'Shared Memory successfully created as ',KEY
         #TODO remover a linha vision_search_ball.... como nao estou utilizando decisao ainda, estou forcando a busca..
-        self.bkb.write_int(self.Mem,'VISION_BALL_PAN_ON',1)
+        self.bkb.write_int(self.Mem,'DECISION_SEARCH_ON',1)
         #TODO instanciar a classe visao passando o blackboard
 
 
@@ -208,7 +208,6 @@ class Robot(pygame.sprite.Sprite,Vision):
         if self.errors_on:
             error = gauss(self.imu_error_mean, self.imu_error_variance)
             self.orientation_error += error
-            print 'error', self.orientation_error
         if self.imu_initial_value == 0:
             return self.rotate + self.orientation_error
         elif self.imu_initial_value == 180:
@@ -318,7 +317,7 @@ class Robot(pygame.sprite.Sprite,Vision):
     def vision_process(self,ballX,ballY,robots):
         # ball detect
         if self.bkb.read_int(self.Mem, 'DECISION_ACTION_VISION') == 0:  # decision saying to vision to focus on ball
-            if self.bkb.read_int(self.Mem, 'VISION_BALL_PAN_ON') == 1:  # searching ball
+            if self.bkb.read_int(self.Mem, 'DECISION_SEARCH_ON') == 1:  # searching ball
                 self.perform_pan()
             view_rot_aux = self.ball_detect(self.Mem, self.bkb, self.view_rot, self.rotate, self.x, self.y, ballX,
                                                 ballY)

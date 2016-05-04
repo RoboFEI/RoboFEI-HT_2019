@@ -72,15 +72,14 @@ class TreatingRawData(object):
 
     def get_head_tilt_initial(self):
         return self.config.getint('Offset', 'ID_20')'''
+
+    def get_search_status(self):
+        time.sleep(1)
+        return self.bkb.read_int(self.mem,'VISION_LOST')
+
         
-    def get_search_ball_status(self):
-        return self.bkb.read_int(self.mem,'VISION_BALL_PAN_ON')
-        
-    def get_lost_ball_status(self):
-        return self.bkb.read_int(self.mem,'VISION_BALL_LOST')
-        
-    def set_search_ball_status(self):
-        return self.bkb.write_int(self.mem,'VISION_BALL_PAN_ON', 1)
+    def set_vision_search(self):
+        return self.bkb.write_int(self.mem,'DECISION_SEARCH_ON', 1)
 
     def get_orientation(self):
         return self.bkb.read_float(self.mem, 'IMU_EULER_Z')
@@ -88,101 +87,79 @@ class TreatingRawData(object):
     def set_stand_still(self):
         print 'stand still'
         self.bkb.write_int(self.mem,'DECISION_ACTION_A', 0)
-        time.sleep(1)
-        return 
+        #time.sleep(1)
 
     def set_walk_forward(self):
         print 'walk forward'
-        return self.bkb.write_int(self.mem,'DECISION_ACTION_A', 1)
+        self.bkb.write_int(self.mem,'DECISION_ACTION_A', 1)
         
     def set_walk_speed(self,vel):
-        return self.bkb.write_int(self.mem,'DECISION_ACTION_B', vel)
+        self.bkb.write_int(self.mem,'DECISION_ACTION_B', vel)
         
     def set_turn_left(self):
         print 'turn left'
         self.bkb.write_int(self.mem,'DECISION_ACTION_A', 2)
-        return time.sleep(1)
         
     def set_turn_right(self):
         print 'turn right'
         self.bkb.write_int(self.mem,'DECISION_ACTION_A', 3)
-        return time.sleep(1)
         
     def set_kick_right(self):
         print 'kick right'
         self.bkb.write_int(self.mem,'DECISION_ACTION_A', 4)
-        return self.set_search_ball_status()
         
     def set_kick_left(self):
         print 'kick left'
         self.bkb.write_int(self.mem,'DECISION_ACTION_A', 5)
-        return self.set_search_ball_status()
         
     def set_sidle_left(self):
         print 'sidle left'
-        return self.bkb.write_int(self.mem,'DECISION_ACTION_A', 6)
+        self.bkb.write_int(self.mem,'DECISION_ACTION_A', 6)
         
     def set_sidle_right(self):
         print 'sidle right'
-        return self.bkb.write_int(self.mem,'DECISION_ACTION_A', 7)
+        self.bkb.write_int(self.mem,'DECISION_ACTION_A', 7)
         
     def set_walk_forward_slow(self,vel):
         print 'walk forward slow'
         self.set_walk_speed(vel)
-        return self.bkb.write_int(self.mem,'DECISION_ACTION_A', 8)
+        self.bkb.write_int(self.mem,'DECISION_ACTION_A', 8)
         
-    def set_revolve_around_ball(self):
-        print 'revolve around ball'
+    def set_revolve_around_ball_clockwise(self):
+        print 'revolve around ball - clockwise'
         self.bkb.write_int(self.mem,'DECISION_ACTION_A', 9)
-        time.sleep(7) #Tempo de Giro
-        return self.set_stand_still()
+        #time.sleep(1) #Tempo de Giro
+
+    def set_revolve_around_ball_anticlockwise(self):
+        print 'revolve around ball - anticlockwise'
+        self.bkb.write_int(self.mem,'DECISION_ACTION_A', 14)
+        #time.sleep(1) #Tempo de Giro
         
     def set_walk_backward(self):
         print 'walk backward'
-        return self.bkb.write_int(self.mem,'DECISION_ACTION_A', 10)
+        self.bkb.write_int(self.mem,'DECISION_ACTION_A', 10)
         
     def set_gait(self):
         print 'gait'
-        return self.bkb.write_int(self.mem,'DECISION_ACTION_A', 11)
+        self.bkb.write_int(self.mem,'DECISION_ACTION_A', 11)
         
     def set_pass_left(self):
         print 'pass left'
-        return self.bkb.write_int(self.mem,'DECISION_ACTION_A', 12)
+        self.bkb.write_int(self.mem,'DECISION_ACTION_A', 12)
         
     def set_pass_right(self):
         print 'pass right'
-        return self.bkb.write_int(self.mem,'DECISION_ACTION_A', 13)
-        
-    def set_jump_left(self):
-        return self.bkb.write_int(self.mem,'DECISION_ACTION_A', 14)
+        self.bkb.write_int(self.mem,'DECISION_ACTION_A', 13)
 
-    def set_jump_right(self):
-        return self.bkb.write_int(self.mem,'DECISION_ACTION_A', 15)
         
     def set_vision_ball(self):
         self.bkb.write_int(self.mem,'DECISION_ACTION_VISION', 0)
-        self.bkb.write_int(self.mem,'VISION_BALL_PAN_ON', 1)
-        self.bkb.write_int(self.mem,'VISION_BALL_LOST', 1)
-        return time.sleep(2)
-        
-    def set_vision_orientation(self):
-        print "orientating"
-        self.set_stand_still()
-        self.bkb.write_int(self.mem,'LOCALIZATION_THETA', 0)
+        #return time.sleep(2)
+
+    def set_vision_robot(self):
         self.bkb.write_int(self.mem,'DECISION_ACTION_VISION', 2)
-        while(self.get_orientation() == 0):
-            pass
-        return self.bkb.write_int(self.mem,'DECISION_ACTION_VISION', 0)
-        
-    def delta_position_pan(self):
-        '''right > 0 / left < 0'''
-        return self.get_head_pan_initial() - self.get_motor_pan()
+        #return time.sleep(2)
 
-    def delta_position_tilt(self):
-        '''up > 0 / down < 0 / middle is looking for the horizon'''
-        return self.get_head_tilt_initial() - self.get_motor_tilt()
-
-        
 ##############################################################################
 
 class Ordinary(TreatingRawData):
@@ -273,7 +250,6 @@ class Naive(TreatingRawData):
             print 'search ball: ', self.get_search_ball_status()
             print 'lost ball: ', self.get_lost_ball_status()
 
-            print 'orientation', self.get_orientation()
 
             if self.get_search_ball_status() == 1:  # 1 - searching ball
                 if self.get_lost_ball_status() == 1:  # 1 - lost ball
@@ -307,6 +283,79 @@ class Naive(TreatingRawData):
 
             #############################################################################
 
+class NaiveIMU(TreatingRawData):
+    " " " Naive class " " "
+
+    def __init__(self):
+        super(NaiveIMU, self).__init__()
+        print
+        print 'Naive behavior called'
+        print
+
+    def decision(self, referee):
+        if referee == 1:  # stopped
+            print 'stand'
+            self.set_stand_still()
+
+        elif referee == 11:  # ready
+            print 'ready'
+            self.set_stand_still()
+
+        elif referee == 12:  # set
+            print 'set'
+            self.set_stand_still()
+            self.set_vision_ball()
+
+        elif referee == 2:  # play
+            print 'play'
+            #self.set_vision_ball()  # set vision to find ball
+            #print 'search ball: ', self.get_search_ball_status()
+            #print 'lost ball: ', self.get_lost_ball_status()
+
+            print 'Distance: ', self.get_dist_ball()
+            print 'Orientation', self.get_angle_ball()
+
+
+
+            if self.get_search_status() == 1: # 1 - vision lost
+                #self.set_vision_search()
+                self.set_turn_right()
+            elif self.get_search_status() == 0: # 0 - object found
+                # align to the ball
+                if self.get_motor_pan_degrees() > 20 and self.get_motor_pan_degrees() < 160:
+                    self.set_turn_left()
+                    #self.set_stand_still()
+                elif self.get_motor_pan_degrees() < -20 and self.get_motor_pan_degrees() > -160:
+                    self.set_turn_right()
+                    #self.set_stand_still()
+                else:
+
+                    if self.get_dist_ball() < 29 and self.get_dist_ball() > 26 and self.get_motor_pan_degrees() <= 0:
+                        print 'orientation', self.get_orientation()
+                        if self.get_orientation() <= 15 and self.get_orientation() >= -15:
+                            self.set_kick_right()
+                        elif self.get_orientation() > 15:
+                            self.set_revolve_around_ball_clockwise()
+                        elif self.get_orientation() < -15:
+                            self.set_revolve_around_ball_anticlockwise()
+                    elif self.get_dist_ball() < 29 and self.get_dist_ball() > 26 and self.get_motor_pan_degrees() > 0:
+                        print 'orientation', self.get_orientation()
+                        if self.get_orientation() <= 15 and self.get_orientation() >= -15:
+                            self.set_kick_left()
+                        elif self.get_orientation() > 15:
+                            self.set_revolve_around_ball_clockwise()
+                        elif self.get_orientation() < -15:
+                            self.set_revolve_around_ball_anticlockwise()
+                    elif self.get_dist_ball() > 50:
+                        self.set_walk_forward()
+                    else:
+                        self.set_walk_forward_slow((self.get_dist_ball() / 5))
+                        # time.sleep(0.5)
+                        # self.set_stand_still()
+        else:
+            print 'Invalid argument received from referee!'
+
+            #############################################################################
 
         
 class Attacker(TreatingRawData):
