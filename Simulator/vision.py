@@ -121,8 +121,8 @@ class Vision():
                 bkb.write_float(mem, 'VISION_BALL_DIST', dist)
                 bkb.write_float(mem, 'VISION_PAN_DEG', ball_orient_wrt_robot)
                 return view_rot_aux
-            #else:
-            #    bkb.write_int(mem, 'DECISION_SEARCH_ON', 1)  # searching
+            else:
+                bkb.write_int(mem, 'DECISION_SEARCH_ON', 1)  # searching
 
         else:
             bkb.write_int(mem, 'VISION_LOST', 1)  # ball is lost
@@ -170,8 +170,8 @@ class Vision():
                                                   robotID)
 
                 return view_rot_aux
-            #else:
-            #    bkb.write_int(mem, 'DECISION_SEARCH_ON', 1)  # searching
+            else:
+                bkb.write_int(mem, 'DECISION_SEARCH_ON', 1)  # searching
 
         else:
             bkb.write_int(mem, 'VISION_LOST', 1)  # ball is lost

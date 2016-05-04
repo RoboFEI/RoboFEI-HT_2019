@@ -307,19 +307,18 @@ class NaiveIMU(TreatingRawData):
             self.set_vision_ball()
 
         elif referee == 2:  # play
-            print 'play'
+            #print 'play'
             #self.set_vision_ball()  # set vision to find ball
             #print 'search ball: ', self.get_search_ball_status()
             #print 'lost ball: ', self.get_lost_ball_status()
 
-            print 'Distance: ', self.get_dist_ball()
-            print 'Orientation', self.get_angle_ball()
-
-
+            #print 'Distance: ', self.get_dist_ball()
+            #print 'orientation', self.get_orientation()
 
             if self.get_search_status() == 1: # 1 - vision lost
+                print 'vision lost'
                 #self.set_vision_search()
-                self.set_turn_right()
+                #self.set_turn_right()
             elif self.get_search_status() == 0: # 0 - object found
                 # align to the ball
                 if self.get_motor_pan_degrees() > 20 and self.get_motor_pan_degrees() < 160:
@@ -330,16 +329,14 @@ class NaiveIMU(TreatingRawData):
                     #self.set_stand_still()
                 else:
 
-                    if self.get_dist_ball() < 29 and self.get_dist_ball() > 26 and self.get_motor_pan_degrees() <= 0:
-                        print 'orientation', self.get_orientation()
-                        if self.get_orientation() <= 15 and self.get_orientation() >= -15:
+                    if self.get_dist_ball() < 35 and self.get_dist_ball() > 26 and self.get_motor_pan_degrees() <= 0:
+                        if self.get_orientation() <= 20 and self.get_orientation() >= -20:
                             self.set_kick_right()
-                        elif self.get_orientation() > 15:
+                        elif self.get_orientation() > 20:
                             self.set_revolve_around_ball_clockwise()
-                        elif self.get_orientation() < -15:
+                        elif self.get_orientation() < -20:
                             self.set_revolve_around_ball_anticlockwise()
-                    elif self.get_dist_ball() < 29 and self.get_dist_ball() > 26 and self.get_motor_pan_degrees() > 0:
-                        print 'orientation', self.get_orientation()
+                    elif self.get_dist_ball() < 35 and self.get_dist_ball() > 26 and self.get_motor_pan_degrees() > 0:
                         if self.get_orientation() <= 15 and self.get_orientation() >= -15:
                             self.set_kick_left()
                         elif self.get_orientation() > 15:
