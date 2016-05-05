@@ -209,7 +209,10 @@ class Robot(pygame.sprite.Sprite,Vision):
             error = gauss(self.imu_error_mean, self.imu_error_variance)
             self.orientation_error += error
         if self.imu_initial_value == 0:
-            return self.rotate + self.orientation_error
+            if self.rotate > 180:
+                return (self.rotate - 360) + self.orientation_error
+            else:
+                return self.rotate + self.orientation_error
         elif self.imu_initial_value == 180:
             return (self.rotate - 180) + self.orientation_error
 

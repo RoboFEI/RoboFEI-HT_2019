@@ -63,25 +63,33 @@ class Vision():
     def compAng(self, ang, base):
         angrange = 35
         base = -base
+        print 'ang',ang
+        print 'base', base
         if(base > 180-angrange or base < -180+angrange):
             if(ang > 0 and base < 0):
                 return (ang < base + 360 + angrange) and (ang > base + 360 - angrange)
             elif (ang < 0 and base > 0):
                 return (ang < base - 360 + angrange) and (ang > base - 360 - angrange)
+            elif (ang < 0 and base < 0 and ang > -90):
+                return (ang < base + 360 + angrange) and (ang > base + 360 - angrange)
         return (ang < base + angrange) and (ang > base - angrange)
 
 
-    def view_obj(self,mem,bkb,r_x,r_y,x,y,rotate):
+    def view_obj(self,mem,bkb,r_x,r_y,x,y,view_rot):
 
         d = self.distD(r_x,r_y,x,y)
         r = self.distR(r_x,r_y,x,y)
 
         #d=random.gauss(d,0.1*d/10)
 
-        if((d < self.vision_dist) and self.compAng(r,rotate)):
+        print 'Distance ', d
+        print 'Rotate ', -r
+        print 'self.vision_dist', self.vision_dist
+        print 'self.compAng(r,rotate)', self.compAng(r, view_rot)
+        print '-------------'
+
+        if((d < self.vision_dist) and self.compAng(r,view_rot)):
             #print 'Inside'
-            #print 'Distance ',d
-            #print 'Rotate ',-r
             return (-r,d)
         else:
             #print 'Outside'
@@ -111,20 +119,44 @@ class Vision():
                 rot = -135
             view_rot_aux = rot + rotate
 
-            # print 'ball_for_robot', ball_orient_wrt_robot
-            # print 'view_rot_aux', int(view_rot_aux) % 360
+            ref = view_rot_aux - rotate
+
+            #print 'ball_for_robot', ball_orient_wrt_robot
+            #print 'view_rot_aux', int(view_rot_aux) % 360
             # print 'view_rot', int(view_rot)
 
             if (int(view_rot_aux) % 360) >= int(view_rot) - 1 and (int(view_rot_aux) % 360) <= int(view_rot) + 1:
                 bkb.write_int(mem, 'DECISION_SEARCH_ON', 0)  # stop searching
-                print 'dist,pan', dist, ball_orient_wrt_robot
+                #print 'dist,pan', dist, ball_orient_wrt_robot
                 bkb.write_float(mem, 'VISION_BALL_DIST', dist)
                 bkb.write_float(mem, 'VISION_PAN_DEG', ball_orient_wrt_robot)
                 return view_rot_aux
             else:
-                bkb.write_int(mem, 'DECISION_SEARCH_ON', 1)  # searching
+                if (view_rot - rotate) > 180:
+                    ref = (view_rot - rotate) - 360
+                else:
+                    ref = (view_rot - rotate)
+
+                #print '------ELSE-------'
+                #print 'rotate', rotate
+                #print 'view_rot', view_rot
+                #print 'ref', ref
+                #print 'ball', ball_orient_wrt_robot
+                #print 'view_rot - rotate ', view_rot - rotate
+
+
+
+                if ref < ball_orient_wrt_robot:
+                    self.pan_left = True
+                    self.pan_right = False
+                    return self.pan(view_rot, rotate)
+                else:
+                    self.pan_left = False
+                    self.pan_right = True
+                    return self.pan(view_rot, rotate)
 
         else:
+            print 'lost!'
             bkb.write_int(mem, 'VISION_LOST', 1)  # ball is lost
 
 

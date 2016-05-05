@@ -23,13 +23,21 @@ def setup_match(screen):
     # KEY = use (len(robots)+1)*5 !!!
     # COLOR = any color tuple, you can use the predefined ones...
 
-    robots.append(Robot(320, 170, 0,(len(robots)+1)* screen.KEY_BKB, screen.MAGENTA))
-    robots.append(Robot(200, 370, 0,(len(robots)+1)* screen.KEY_BKB, screen.MAGENTA))
-    robots.append(Robot(320, 570, 0,(len(robots)+1)* screen.KEY_BKB, screen.MAGENTA))
+    robots.append(Robot(320, 170, 0,(len(robots)+1)* screen.KEY_BKB, screen.CYAN))
+    robots.append(Robot(200, 370, 0,(len(robots)+1)* screen.KEY_BKB, screen.CYAN))
+    robots.append(Robot(320, 570, 0,(len(robots)+1)* screen.KEY_BKB, screen.CYAN))
 
-    robots.append(Robot(720, 170, 180,(len(robots)+1)* screen.KEY_BKB, screen.CYAN))
-    robots.append(Robot(840, 370, 180,(len(robots)+1)* screen.KEY_BKB, screen.CYAN))
-    robots.append(Robot(720, 570, 180,(len(robots)+1)* screen.KEY_BKB, screen.CYAN))
+    robots.append(Robot(720, 170, 180,(len(robots)+1)* screen.KEY_BKB, screen.MAGENTA))
+    robots.append(Robot(840, 370, 180,(len(robots)+1)* screen.KEY_BKB, screen.MAGENTA))
+    robots.append(Robot(720, 570, 180,(len(robots)+1)* screen.KEY_BKB, screen.MAGENTA))
+
+    robots[0].imu_initial_value = 0
+    robots[1].imu_initial_value = 0
+    robots[2].imu_initial_value = 0
+
+    robots[3].imu_initial_value = 180
+    robots[4].imu_initial_value = 180
+    robots[5].imu_initial_value = 180
 
     # Set robot moving errors
     # robots[i].set_errors(A, B, C, D, E, F, G, H, I, J, K, L)
@@ -41,7 +49,7 @@ def setup_match(screen):
     # I and J are the kicking force errors
     # K and L are the orientation sensor error (in degrees and cumulative)
 
-    robots[0].set_errors(0.01, 0.1, -0.02, 0.1, -0.01, 0.2, 1.0, 5.0, 0.0, 0.5, 0.1, 1)
+    #robots[0].set_errors(0.01, 0.1, -0.02, 0.1, -0.01, 0.2, 1.0, 5.0, 0.0, 0.5, 0.1, 1)
 
     # Set the ball here
     # ball = Ball(PosX, PosY, Friction)

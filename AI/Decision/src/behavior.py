@@ -315,6 +315,8 @@ class NaiveIMU(TreatingRawData):
             #print 'Distance: ', self.get_dist_ball()
             #print 'orientation', self.get_orientation()
 
+           #time.sleep(1)
+
             if self.get_search_status() == 1: # 1 - vision lost
                 print 'vision lost'
                 #self.set_vision_search()
