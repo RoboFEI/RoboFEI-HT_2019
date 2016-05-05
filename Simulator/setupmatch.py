@@ -12,8 +12,8 @@ def setup_match(screen):
     robots = []
 
     # changes teams names
-    LeftTeam = 'Lefts'
-    RightTeam = 'Rights'
+    LeftTeam = 'ROBOFEI-HT'
+    RightTeam = 'OTHERS'
 
     # Add robots here
     # robots.append(Robot(PosX, PosY, Angle, KEY, COLOR))
