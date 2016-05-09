@@ -25,11 +25,12 @@ print '################### Decision #########################'
 print 
 
 #create arguments for each behavior
-parser = argparse.ArgumentParser(description='Robot behavior', epilog= 'Se nenhuma ação for selecionada um comportamento comum será adotado! / If there is not a selected argument an ordinary behavior will be adopted!')
-parser.add_argument('--golie', '-g', action="store_true", help = 'Seleciona comportamento de goleiro / selects golie behavior')
-parser.add_argument('--quarterback', '-q', action="store_true", help = 'Seleciona comportamento de zagueiro / selects quarterback behavior')
-parser.add_argument('--attacker', '-a', action="store_true", help = 'Seleciona comportamento de atacante / selects attacker behavior')
-parser.add_argument('--naive', '-n', action="store_true", help = 'Seleciona comportamento reativo / selects naive behavior')
+parser = argparse.ArgumentParser(description='Robot behavior', epilog= 'If there is not a selected argument an ordinary behavior will be adopted!')
+parser.add_argument('--golie', '-g', action="store_true", help = 'selects golie behavior')
+parser.add_argument('--quarterback', '-q', action="store_true", help = 'selects quarterback behavior')
+parser.add_argument('--attacker', '-a', action="store_true", help = 'selects attacker behavior')
+parser.add_argument('--naive', '-n', action="store_true", help = 'selects naive behavior')
+parser.add_argument('--naive_imu', '-ni', action="store_true", help = 'selects naive behavior with orientation')
 
 args = parser.parse_args()
 
@@ -48,6 +49,10 @@ elif args.attacker == True:
 #Naive decision:
 elif args.naive == True:
     robot = Naive()
+
+# Naive decision with orientation:
+elif args.naive_imu == True:
+    robot = NaiveIMU()
 
 #Ordinary decision:
 else:

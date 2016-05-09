@@ -30,7 +30,7 @@ class SoccerField():
 
         self.PlayField = SpecialArea(70, 70, 970, 670)
 
-        self.FriendTeam = 'US'
+        self.FriendTeam = 'ROBOFEI-HT'
         self.EnemyTeam = 'OTHERS'
         self.FriendGoals = 0
         self.EnemyGoals = 0

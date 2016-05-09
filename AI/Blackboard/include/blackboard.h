@@ -63,8 +63,8 @@ Arquivo de cabeçalho contendo as funções e definições do black board
 #define LOCALIZATION_X 52
 #define LOCALIZATION_Y 53
 #define LOCALIZATION_THETA 54
-#define VISION_BALL_LOST 57
-#define VISION_BALL_PAN_ON 58
+#define VISION_LOST 57
+#define DECISION_SEARCH_ON 58
 #define DECISION_ACTION_VISION 59
 #define VISION_MOTOR1_GOAL 60
 #define VISION_MOTOR2_GOAL 61

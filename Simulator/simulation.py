@@ -95,15 +95,19 @@ class Simulation():
 
                     elif pygame.key.get_mods() & pygame.KMOD_LSHIFT:
                         robot = Robot(self.mx, self.my,0,(len(self.robots)+1) * self.screen.KEY_BKB, self.screen.YELLOW)
+                        robot.imu_initial_value = 0
 
                     elif pygame.key.get_mods() & pygame.KMOD_LALT:
                         robot = Robot(self.mx, self.my,180,(len(self.robots)+1) * self.screen.KEY_BKB, self.screen.BLACK)
+                        robot.imu_initial_value = 180
 
                     elif pygame.key.get_mods() & pygame.KMOD_RSHIFT:
                         robot = Robot(self.mx, self.my,180,(len(self.robots)+1) * self.screen.KEY_BKB, self.screen.ORANGE)
+                        robot.imu_initial_value = 180
 
                     else:
                         robot = Robot(self.mx, self.my, 0, (len(self.robots) + 1) * self.screen.KEY_BKB, self.screen.CYAN)
+                        robot.imu_initial_value = 0
 
                     robot.bkb.write_int(robot.Mem, 'DECISION_ACTION_A', 0)
                     robot.ball = self.ball
@@ -206,7 +210,7 @@ class Simulation():
 
                 if event.type == pygame.KEYUP and event.key == pygame.K_F4:
                     self.robots = []
-                    self.ball = Ball(0, 0, 0)
+                    self.ball = Ball(520, 370, 0.95)
 
                 if event.type == pygame.KEYUP and event.key == pygame.K_F5:
                     GS = True
@@ -224,11 +228,11 @@ class Simulation():
 
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_y:
                     self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem,
-                                                                        'VISION_BALL_PAN_ON', 1)
+                                                                        'DECISION_SEARCH_ON', 1)
 
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_z:
                     self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem,
-                                                                        'VISION_BALL_PAN_ON', 0)
+                                                                        'DECISION_SEARCH_ON', 0)
 
             except:
                 pass
