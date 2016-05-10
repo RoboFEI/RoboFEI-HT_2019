@@ -19,6 +19,7 @@ Arquivo de cabeçalho contendo as funções e definições do black board
 #define PLANNING_PARAMETER_VEL 1
 #define PLANNING_PARAMETER_ANGLE 2
 #define IMU_STATE 3
+#define IMU_RESET 4
 
 
 #define CONTROL_ACTION 13
