@@ -312,21 +312,21 @@ void publishMsgs(um7::Registers& r)
 //    temp_pub.publish(temp_msg);
 //  }
 
-    IMU_GYRO_X = r.gyro.get_scaled(1)/10;
-    IMU_GYRO_Y = r.gyro.get_scaled(0)/10;
-    IMU_GYRO_Z = -r.gyro.get_scaled(2)/10;
+    write_float(mem, IMU_GYRO_X, r.gyro.get_scaled(1)/10);
+    write_float(mem, IMU_GYRO_Y, r.gyro.get_scaled(0)/10);
+    write_float(mem, IMU_GYRO_Z, -r.gyro.get_scaled(2)/10);
 
-    IMU_ACCEL_X = r.accel.get_scaled(1)/10;
-    IMU_ACCEL_Y = r.accel.get_scaled(0)/10;
-    IMU_ACCEL_Z = -r.accel.get_scaled(2)/10;
+    write_float(mem, IMU_ACCEL_X, r.accel.get_scaled(1)/10);
+    write_float(mem, IMU_ACCEL_Y, r.accel.get_scaled(0)/10);
+    write_float(mem, IMU_ACCEL_Z, -r.accel.get_scaled(2)/10);
 
-    IMU_COMPASS_X = r.mag.get_scaled(1);
-    IMU_COMPASS_Y = r.mag.get_scaled(0);
-    IMU_COMPASS_Z = -r.mag.get_scaled(2);
+    write_float(mem, IMU_COMPASS_X, r.mag.get_scaled(1));
+    write_float(mem, IMU_COMPASS_Y, r.mag.get_scaled(0));
+    write_float(mem, IMU_COMPASS_Z, -r.mag.get_scaled(2));
 
-    IMU_EULER_X = r.euler.get_scaled(1);
-    IMU_EULER_Y = r.euler.get_scaled(0);
-    IMU_EULER_Z = -r.euler.get_scaled(2);
+    write_float(mem, IMU_EULER_X, r.euler.get_scaled(1));
+    write_float(mem, IMU_EULER_Y, r.euler.get_scaled(0));
+    write_float(mem, IMU_EULER_Z, -r.euler.get_scaled(2));
 
  //   IMU_QUAT_X = r.quat.get_scaled(2);
  //   IMU_QUAT_Y = r.quat.get_scaled(1);
@@ -342,9 +342,10 @@ int main(int argc, char **argv)
 {
   //ros::init(argc, argv, "um7_driver");
 
-    using_shared_memory();
+    int *mem = using_shared_memory(0); //0 for real robot
 
-    IMU_RESET=0;
+    write_int(mem, IMU_RESET, 0);
+
 
   // Load parameters from private node handle.
   std::string port("/dev/robot/imu");
@@ -412,48 +413,48 @@ int main(int argc, char **argv)
         while (1)
         {
             //--------- calcula a média do accel em Z-----------------------------
-            if(contador>=40)
+            if(contador >= 40)
             {
                 med_accel_z = ac_med_accel_z/40; // calcula a média do accel em Z
                 contador = 0;
                 ac_med_accel_z = 0;
             }
-            ac_med_accel_z = ac_med_accel_z + IMU_ACCEL_Z;
+            ac_med_accel_z = ac_med_accel_z +  read_float(mem, IMU_ACCEL_Z);
             contador++;
             //--------------------------------------------------------------------
 
             if(med_accel_z>0.70) // Identifica se o robô esta caido ou em pé
-                IMU_STATE = 0; // Robo caido
+                write_int(mem, IMU_STATE, 0); // Robo caido
             else
-                IMU_STATE = 1; // Robo em pé
+                write_int(mem, IMU_STATE, 1); // Robo em pé
 
             if(IMU_RESET)
             {
-                IMU_RESET=0;
+                write_int(mem, IMU_RESET, 0);
                 handleResetService(&sensor);
             }
 
-            if(t>40)
+            if(t > 40)
             {
-                std::cout<<"Robo caido = "<<std::fixed<<IMU_STATE<<std::endl;
-                std::cout<<"med_acc_z = "<<std::fixed<<med_accel_z<<std::endl;
-                std::cout<<"giros_x = "<<std::fixed<<IMU_GYRO_X<<std::endl;
-                std::cout<<"giros_y = "<<std::fixed<<IMU_GYRO_Y<<std::endl;
-                std::cout<<"giros_z = "<<std::fixed<<IMU_GYRO_Z<<std::endl;
+                std::cout << "Robo caido = " << std::fixed << read_int(mem,IMU_STATE) << std::endl;
+                std::cout << "med_acc_z = " << std::fixed << med_accel_z << std::endl;
+                std::cout << "giros_x = " << std::fixed << read_float(mem, IMU_GYRO_X) << std::endl;
+                std::cout << "giros_y = " << std::fixed << read_float(mem, IMU_GYRO_Y) << std::endl;
+                std::cout << "giros_z = " << std::fixed << read_float(mem, IMU_GYRO_Z) << std::endl;
 
-                std::cout<<"accel_x = "<<std::fixed<<IMU_ACCEL_X<<std::endl;
-                std::cout<<"accel_y = "<<std::fixed<<IMU_ACCEL_Y<<std::endl;
-                std::cout<<"accel_z = "<<std::fixed<<IMU_ACCEL_Z<<std::endl;
+                std::cout << "accel_x = " << std::fixed << read_float(mem, IMU_ACCEL_X) << std::endl;
+                std::cout << "accel_y = " << std::fixed << read_float(mem, IMU_ACCEL_Y) << std::endl;
+                std::cout << "accel_z = " << std::fixed << read_float(mem, IMU_ACCEL_Z) << std::endl;
 
-                std::cout<<"magne_x = "<<std::fixed<<IMU_COMPASS_X<<std::endl;
-                std::cout<<"magne_y = "<<std::fixed<<IMU_COMPASS_Y<<std::endl;
-                std::cout<<"magne_z = "<<std::fixed<<IMU_COMPASS_Z<<std::endl;
-                std::cout<<"Quat_x = "<<std::fixed<<IMU_QUAT_X<<std::endl;
-                std::cout<<"Quat_y = "<<std::fixed<<IMU_QUAT_Y<<std::endl;
-                std::cout<<"Quat_z = "<<std::fixed<<IMU_QUAT_Z<<std::endl;
-                std::cout<<"Euler_x = "<<std::fixed<<IMU_EULER_X<<std::endl;
-                std::cout<<"Euler_y = "<<std::fixed<<IMU_EULER_Y<<std::endl;
-                std::cout<<"Euler_z = "<<std::fixed<<IMU_EULER_Z<<std::endl<<std::endl;
+                std::cout << "magne_x = " << std::fixed << read_float(mem, IMU_COMPASS_X) << std::endl;
+                std::cout << "magne_y = " << std::fixed << read_float(mem, IMU_COMPASS_Y) << std::endl;
+                std::cout << "magne_z = "<< std::fixed << read_float(mem, IMU_COMPASS_Z) << std::endl;
+                std::cout << "Quat_x = " << std::fixed << read_float(mem, IMU_QUAT_X) << std::endl;
+                std::cout << "Quat_y = " << std::fixed << read_float(mem, IMU_QUAT_Y) << std::endl;
+                std::cout << "Quat_z = " << std::fixed << read_float(mem, IMU_QUAT_Z) << std::endl;
+                std::cout << "Euler_x = " << std::fixed << read_float(mem, IMU_EULER_X) << std::endl;
+                std::cout << "Euler_y = " << std::fixed << read_float(mem, IMU_EULER_Y) << std::endl;
+                std::cout << "Euler_z = " << std::fixed << read_float(mem, IMU_EULER_Z) << std::endl << std::endl;
                 t=0;
             }
             t++;
