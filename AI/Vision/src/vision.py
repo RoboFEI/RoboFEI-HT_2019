@@ -15,7 +15,7 @@ import sys
 sys.path.append('../../Blackboard/src/')
 from SharedMemory import SharedMemory 
 bkb = SharedMemory()
-KEY = 0
+KEY = 100
 Mem = bkb.shd_constructor(KEY)
 
 
@@ -55,21 +55,23 @@ def statusBall(positionballframe):
 			mens += " centro"
 		print mens
 	if positionballframe[0] == 2:
-		if bkb.read_int(Mem, 'VISION_TILT_DEG') < 50:
-			VISION_DIST_BALL = 0.0848048735*exp(0.042451235*bkb.read_int(Mem, 'VISION_TILT_DEG'))
+		if bkb.read_float(Mem, 'VISION_TILT_DEG') < 50:
+			bkb.write_float(Mem, 'VISION_BALL_DIST', 1000 * 0.0848048735*exp(0.042451235*bkb.read_float(Mem, 'VISION_TILT_DEG')))
 			#print "Distancia da Bola func 1 em metros: " + str(0.0848048735*exp(0.042451235*bkb.read_int('VISION_MOTOR1_ANGLE')))
 			#print "Bola encontrada na posicao x: " + str(round(positionballframe[1],2)) + " y: " + str(round(positionballframe[2],2)) + " e diametro de: " + str(round(positionballframe[3],2))
 		else:
 			#print "Bola encontrada na posicao x: " + str(round(positionballframe[1],2)) + " y: " + str(round(positionballframe[2],2)) + " e diametro de: " + str(round(positionballframe[3],2))
 			#print "Distancia da Bola func 2 em metros: " + str(4.1813911146*pow(positionballframe[3],-1.0724682465))
-			VISION_DIST_BALL = 4.1813911146*pow(positionballframe[3],-1.0724682465)
-		bkb.write_int(Mem,'VISION_LOST', 1)
+			bkb.write_float(Mem, 'VISION_BALL_DIST', 1000 * 4.1813911146*pow(positionballframe[3],-1.0724682465))
+		bkb.write_int(Mem,'VISION_LOST', 0)
 		
 #		print "Bola encontrada = " + str(bkb.read_int('VISION_LOST_BALL'))
 #		print "Posicao servo 1 tilt = " + str(bkb.read_int('VISION_MOTOR1_ANGLE'))
 	else:
-	    bkb.write_int(Mem,'VISION_LOST', 0)
+	    bkb.write_int(Mem,'VISION_LOST', 1)
 #	    print "Bola Perdida = " + str(bkb.read_int('VISION_LOST_BALL'))
+
+	print 'dist', bkb.read_float(Mem, 'VISION_BALL_DIST')
 	    
 #----------------------------------------------------------------------------------------------------------------------------------
 

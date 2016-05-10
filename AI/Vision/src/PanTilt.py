@@ -11,7 +11,7 @@ import sys
 sys.path.append('../../Blackboard/src/')
 from SharedMemory import SharedMemory 
 bkb = SharedMemory()
-KEY = 0
+KEY = 100
 Mem = bkb.shd_constructor(KEY)
 
 class Pantilt (object):
@@ -307,9 +307,9 @@ class Pantilt (object):
 							self.__GOAL_POS,
 							int(self.servo.readWord(self.__SERVO_TILT,self.__PRESENT_POS) - self.__ControllerTilt.update(status[2])))
 		
-		bkb.write_int(Mem, 'VISION_TILT_DEG', abs(self.servo.readWord(self.__SERVO_TILT, self.__PRESENT_POS) - self.max_posTILT)*0.29)
-		bkb.write_int(Mem, 'VISION_PAN_DEG', abs(self.servo.readWord(self.__SERVO_PAN , self.__PRESENT_POS) - self.cen_posPAN )*0.29)
-		
+		bkb.write_float(Mem, 'VISION_TILT_DEG', (self.servo.readWord(self.__SERVO_TILT, self.__PRESENT_POS) - self.max_posTILT)*0.29)
+		bkb.write_float(Mem, 'VISION_PAN_DEG', (self.servo.readWord(self.__SERVO_PAN , self.__PRESENT_POS) - self.cen_posPAN )*0.29)
+		print bkb.read_float(Mem, 'VISION_PAN_DEG')
 #		bkb.write_int('VISION_MOTOR1_ANGLE', self.servo.readWord(self.__SERVO_TILT, self.__PRESENT_POS))
 #		bkb.write_int('VISION_MOTOR2_ANGLE', self.servo.readWord(self.__SERVO_PAN, self.__PRESENT_POS))
 		
