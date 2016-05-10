@@ -32,11 +32,11 @@ install(TARGETS libcontrol DESTINATION ${RoboFEI-HT_BINARY_DIR}/lib)
 add_executable(control ./Linux/project/control/main.cpp)
 
 #adiciona as dependências
-add_dependencies(control libcontrol dynamixel  dxl_hal blackboard)
+add_dependencies(control libcontrol blackboard)
 
 set(LIB_DARWIN ${RoboFEI-HT_SOURCE_DIR}/Control/Linux/lib/darwin.a)
 
-target_link_libraries(control libcontrol dynamixel dxl_hal blackboard ${LIB_DARWIN} -Wno-write-strings -lpthread -ljpeg -lrt  ${Boost_LIBRARIES})
+target_link_libraries(control libcontrol blackboard ${LIB_DARWIN} -Wno-write-strings -lpthread -ljpeg -lrt  ${Boost_LIBRARIES})
 
 install(TARGETS control DESTINATION ${RoboFEI-HT_BINARY_DIR}/bin)
 #install(TARGETS control DESTINATION /usr/local/bin)
