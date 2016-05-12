@@ -4,11 +4,7 @@
  * @author Isaac Jesus da Silva - ROBOFEI-HT - FEI 😛
  * @version V0.0.1
  * @created 24/08/2015
-<<<<<<< HEAD
- * @Modified 16/02/2016
-=======
- * @Modified 18/02/2016
->>>>>>> master
+ * @Modified 24/08/2015
  * @e-mail isaac25silva@yahoo.com.br
  * @brief serial imu 😛
  ****************************************************************************
@@ -84,7 +80,7 @@ sudo make install
 //#include "std_msgs/Header.h"
 #include "um7/comms.h"
 #include "um7/registers.h"
-#include"INIReader.h"
+#include "INIReader.h"
 //#include "um7/Reset.h"
 #include <string>
 
@@ -193,7 +189,8 @@ void configureSensor(um7::Comms* sensor)
   uint32_t misc_config_reg = 0;  // initialize all options off
 
   // Optionally disable mag updates in the sensor's EKF.
-  bool mag_updates=false;
+  bool mag_updates;
+  //ros::param::param<bool>("~mag_updates", mag_updates, true);
   if (mag_updates)
   {
     misc_config_reg |= MAG_UPDATES_ENABLED;
@@ -204,7 +201,8 @@ void configureSensor(um7::Comms* sensor)
   }
 
   // Optionally enable quaternion mode .
-  bool quat_mode=false;
+  bool quat_mode;
+  //ros::param::param<bool>("~quat_mode", quat_mode, true);
   if (quat_mode)
   {
     misc_config_reg |= QUATERNION_MODE_ENABLED;
@@ -222,7 +220,8 @@ void configureSensor(um7::Comms* sensor)
   }
 
   // Optionally disable performing a zero gyros command on driver startup.
-  bool zero_gyros=true;
+  bool zero_gyros;
+  //ros::param::param<bool>("~zero_gyros", zero_gyros, true);
   if (zero_gyros) sendCommand(sensor, r.cmd_zero_gyros, "zero gyroscopes");
 }
 
@@ -332,9 +331,9 @@ void publishMsgs(um7::Registers& r)
     write_float(mem, IMU_EULER_Y, r.euler.get_scaled(0));
     write_float(mem, IMU_EULER_Z, -r.euler.get_scaled(2));
 
- //   IMU_QUAT_X = r.quat.get_scaled(2);
- //   IMU_QUAT_Y = r.quat.get_scaled(1);
- //   IMU_QUAT_Z = -r.quat.get_scaled(3);
+    write_float(mem, IMU_QUAT_X, r.quat.get_scaled(2));
+    write_float(mem, IMU_QUAT_Y, r.quat.get_scaled(1));
+    write_float(mem, IMU_QUAT_Z, -r.quat.get_scaled(3));
 
 }
 
@@ -346,16 +345,17 @@ int main(int argc, char **argv)
 {
   //ros::init(argc, argv, "um7_driver");
 
+    //using_shared_memory();
+
     INIReader reader(INI_FILE_PATH);
     if (reader.ParseError() < 0) {
         std::cout << "Can't load 'test.ini'\n";
         return 1;
     }
-	const int mem_key = (int)reader.GetInteger("Communication","no_player_robofei",-1024)*100;
+    const int mem_key = (int)reader.GetInteger("Communication","no_player_robofei",-1024)*100;
     int* mem = using_shared_memory(mem_key);
 
-    write_int(mem, IMU_RESET, 0);
-
+   write_int(mem, IMU_RESET, 0);
 
   // Load parameters from private node handle.
   std::string port("/dev/robot/imu");
@@ -423,22 +423,22 @@ int main(int argc, char **argv)
         while (1)
         {
             //--------- calcula a média do accel em Z-----------------------------
-            if(contador >= 40)
+            if(contador>=40)
             {
                 med_accel_z = ac_med_accel_z/40; // calcula a média do accel em Z
                 contador = 0;
                 ac_med_accel_z = 0;
             }
-            ac_med_accel_z = ac_med_accel_z +  read_float(mem, IMU_ACCEL_Z);
+            ac_med_accel_z = ac_med_accel_z + read_float(mem, IMU_ACCEL_Z);
             contador++;
             //--------------------------------------------------------------------
 
             if(med_accel_z>0.70) // Identifica se o robô esta caido ou em pé
                 write_int(mem, IMU_STATE, 0); // Robo caido
             else
-                write_int(mem, IMU_STATE, 1); // Robo em pé
+               write_int(mem, IMU_STATE, 1); // Robo em pé
 
-            if(IMU_RESET)
+            if(read_int(mem,IMU_RESET))
             {
                 write_int(mem, IMU_RESET, 0);
                 handleResetService(&sensor);
@@ -446,7 +446,8 @@ int main(int argc, char **argv)
 
             if(t > 40)
             {
-                std::cout << "Robo caido = " << std::fixed << read_int(mem,IMU_STATE) << std::endl;
+
+std::cout << "Robo caido = " << std::fixed << read_int(mem,IMU_STATE) << std::endl;
                 std::cout << "med_acc_z = " << std::fixed << med_accel_z << std::endl;
                 std::cout << "giros_x = " << std::fixed << read_float(mem, IMU_GYRO_X) << std::endl;
                 std::cout << "giros_y = " << std::fixed << read_float(mem, IMU_GYRO_Y) << std::endl;
@@ -465,16 +466,16 @@ int main(int argc, char **argv)
                 std::cout << "Euler_x = " << std::fixed << read_float(mem, IMU_EULER_X) << std::endl;
                 std::cout << "Euler_y = " << std::fixed << read_float(mem, IMU_EULER_Y) << std::endl;
                 std::cout << "Euler_z = " << std::fixed << read_float(mem, IMU_EULER_Z) << std::endl << std::endl;
-                t=0;
+            t=0;
             }
             t++;
-            // triggered by arrival of last message packet
-            if (sensor.receive(&registers) == TRIGGER_PACKET)
-            {
-                //header.stamp = ros::Time::now();
-                publishMsgs(registers);
-                //ros::spinOnce();
-            }
+          // triggered by arrival of last message packet
+          if (sensor.receive(&registers) == TRIGGER_PACKET)
+          {
+            //header.stamp = ros::Time::now();
+            publishMsgs(registers);
+            //ros::spinOnce();
+          }
         }
       }
       catch(const std::exception& e)
