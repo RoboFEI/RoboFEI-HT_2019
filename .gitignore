@@ -14,8 +14,6 @@ lib64/
 parts/
 sdist/
 var/
-AI*/
-REAL_ROBOT/
 *.egg-info/
 .installed.cfg
 *.egg
