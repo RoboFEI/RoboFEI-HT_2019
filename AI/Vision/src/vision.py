@@ -14,17 +14,20 @@ from PanTilt import *
 import sys
 sys.path.append('../../Blackboard/src/')
 from SharedMemory import SharedMemory 
-bkb = SharedMemory()
-KEY = 100
-Mem = bkb.shd_constructor(KEY)
-
-
-
 
 try:
     from configparser import ConfigParser
 except ImportError:
     from ConfigParser import ConfigParser  # ver. < 3.0
+
+
+bkb = SharedMemory()
+config = ConfigParser()
+# looking for the file config.ini:
+config.read('../../Control/Data/config.ini')
+mem_key = int(self.config.get('Communication', 'no_player_robofei'))*100
+Mem = bkb.shd_constructor(mem_key)
+
 
 parser = argparse.ArgumentParser(description='Robot Vision', epilog= 'Responsavel pela deteccao dos objetos em campo / Responsible for detection of Field objects')
 parser.add_argument('--visionball', '--vb', action="store_true", help = 'Calibra valor para a visao da bola')

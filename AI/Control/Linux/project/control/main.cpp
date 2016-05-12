@@ -91,8 +91,12 @@ int main(int argc, char **argv)
 
     unsigned int tensaomedia = 0;
 
+    minIni* ini;
+    ini = new minIni((char *)INI_FILE_PATH);
+
   	//Acopla ou cria a memoria compartilhada
-    int *mem = using_shared_memory(0); //0 for real robot
+
+    int *mem = using_shared_memory(ini->getd("Communication","no_player_robofei",-1024) * 100); //0 for real robot
 
     bool stop_gait = 1;
 	char *Servoport;
@@ -110,8 +114,7 @@ int main(int argc, char **argv)
 
     Action::GetInstance()->LoadFile((char *)MOTION_FILE_PATH);
 
-	minIni* ini;
-	ini = new minIni((char *)INI_FILE_PATH);
+
 
     //Carregando valores do config.ini -----------------------------------------
     ReadConfig gait("Gait",ini);

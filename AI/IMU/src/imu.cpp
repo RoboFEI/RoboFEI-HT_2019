@@ -84,8 +84,12 @@ sudo make install
 //#include "std_msgs/Header.h"
 #include "um7/comms.h"
 #include "um7/registers.h"
+#include"INIReader.h"
 //#include "um7/Reset.h"
 #include <string>
+
+// =================== COMMUNICATION SETTINGS ===================
+#define INI_FILE_PATH       "../../Control/Data/config.ini"
 
 float covar[9];     // orientation covariance values
 const char VERSION[10] = "0.0.2";   // um7_driver version
@@ -342,7 +346,13 @@ int main(int argc, char **argv)
 {
   //ros::init(argc, argv, "um7_driver");
 
-    int *mem = using_shared_memory(0); //0 for real robot
+    INIReader reader(INI_FILE_PATH);
+    if (reader.ParseError() < 0) {
+        std::cout << "Can't load 'test.ini'\n";
+        return 1;
+    }
+	const int mem_key = (int)reader.GetInteger("Communication","no_player_robofei",-1024)*100;
+    int* mem = using_shared_memory(mem_key);
 
     write_int(mem, IMU_RESET, 0);
 

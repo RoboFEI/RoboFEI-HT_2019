@@ -13,7 +13,7 @@ then
     exit 1
 fi
 
-echo "Will this setup be used for Simulation or Real robot (S/R)? "
+sudo echo "Will this setup be used for Simulation or Real robot (S/R)? "
 read MODE
 
 if [  $MODE == "S" ] || [  $MODE == "s" ];
@@ -22,7 +22,7 @@ then
 	echo
 	read -p "How many robots do you want to compile? "
 	echo 
-	if [  $REPLY == 1 ]; then
+	if [ $REPLY == 1 ]; then
 		echo -e "${blue} AI ${NC}"
 		echo
 		echo -e "${blue} Installing whole software ${NC}"
@@ -32,12 +32,24 @@ then
 		cmake ../
 		make all
 		make install
-		cd ../..
+		cd ..
+		cd Control/Data
+		sed -i -e 's/no_player_robofei = [0-30]*/no_player_robofei = 1 /' config.ini
+		cd ../../..
 	fi
 
-	if [  $REPLY -gt 1 ]; then
+	if [ $REPLY -gt 1 ]; then
 		echo 'starting ' $REPLY ' robots'
-
+		cd AI
+		mkdir build
+		cd build
+		cmake ../
+		make all
+		make install
+		cd ..
+		cd Control/Data
+		sed -i -e 's/no_player_robofei = [0-30]*/no_player_robofei = 1 /' config.ini
+		cd ../../..
 		for ((i = 2; i <= $REPLY; i++)); do
 		    cp -ar AI AI$i
 		    cd AI$i/Control/Data
@@ -62,11 +74,9 @@ then
 	done
 else
 	echo -e "${blue} ***** REAL MODE ***** ${NC}"
-	sudo rm -rf REAL_ROBOT
-	cp -ar AI REAL_ROBOT
 	sleep 1
 	echo -e "${blue} Installing serial ${NC}"
-	cd REAL_ROBOT/IMU/serial
+	cd AI/IMU/serial
 	mkdir build
 	cd build
 	cmake ../
@@ -75,7 +85,7 @@ else
 	cd ../../..
 
 	echo -e "${blue} Installing whole software ${NC}"
-	cd REAL_ROBOT
+	cd AI
 	mkdir build
 	cd build
 	cmake ../
@@ -115,11 +125,11 @@ EOF
 		 read CONF
 		 if [ "$CONF" = "y" ]
 		 then
-		    cp ../../conf_robos/01/grama/* .
+		    ln -sf ../../conf_robos/01/grama/* .
 		    echo "grass files copied!"
 		 elif [ "$CONF" = "n" ]
 		 then
-		    cp ../../conf_robos/01/chao/* .
+		    ln -sf ../../conf_robos/01/chao/* .
 		    echo "flat floor files copied!"
 		 else
 		     echo "invalid choice"
@@ -130,11 +140,11 @@ EOF
 		 read CONF
 		 if [ "$CONF" = "y" ]
 		 then
-		    cp ../../conf_robos/02/grama/* .
+		    ln -sf ../../conf_robos/02/grama/* .
 		    echo "grass files copied!"
 		 elif [ "$CONF" = "n" ]
 		 then
-		    cp ../../conf_robos/02/chao/* .
+		    ln -sf ../../conf_robos/02/chao/* .
 		    echo "flat floor files copied!"
 		 else
 		     echo "invalid choice"
@@ -145,11 +155,11 @@ EOF
 		 read CONF
 		 if [ "$CONF" = "y" ]
 		 then
-		    cp ../../conf_robos/03/grama/* .
+		    ln -sf ../../conf_robos/03/grama/* .
 		    echo "grass files copied!"
 		 elif [ "$CONF" = "n" ]
 		 then
-		    cp ../../conf_robos/03/chao/* .
+		    ln -sf ../../conf_robos/03/chao/* .
 		    echo "flat floor files copied!"
 		 else
 		     echo "invalid choice"
@@ -160,11 +170,11 @@ EOF
 		 read CONF
 		 if [ "$CONF" = "y" ]
 		 then
-		    cp ../../conf_robos/04/grama/* .
+		    ln -sf ../../conf_robos/04/grama/* .
 		    echo "grass files copied!"
 		 elif [ "$CONF" = "n" ]
 		 then
-		    cp ../../conf_robos/04/chao/* .
+		    ln -sf ../../conf_robos/04/chao/* .
 		    echo "flat floor files copied!"
 		 else
 		     echo "invalid choice"
@@ -175,6 +185,5 @@ EOF
 fi
 
 cd ../../..
-sudo chmod -R 555 REAL_ROBOT
 
 echo -e "${blue} That's all folks! Have fun! ${NC}" 

@@ -27,15 +27,14 @@ install(TARGETS registers DESTINATION ${RoboFEI-HT_BINARY_DIR}/lib)
 #MESSAGE(STATUS "CMAKE_SOURCE_DIR:         " ${RoboFEI-HT_SOURCE_DIR})
 #MESSAGE(STATUS "CMAKE_BINARY_DIR:         " ${RoboFEI-HT_BINARY_DIR})
 
-add_executable(imu src/imu.cpp)
+add_executable(imu src/imu.cpp src/INIReader.cpp src/ini.c)
 add_dependencies(imu 
 blackboard serial comms registers ${Boost_LIBRARIES})
 
 target_link_libraries(imu 
 blackboard serial comms registers rt pthread ${Boost_LIBRARIES})
 
-install(TARGETS imu DESTINATION ${RoboFEI-HT_BINARY_DIR}/bin)
+#install(TARGETS imu DESTINATION ${RoboFEI-HT_BINARY_DIR}/bin)
 #install(TARGETS control DESTINATION /usr/local/bin)
-
 
 

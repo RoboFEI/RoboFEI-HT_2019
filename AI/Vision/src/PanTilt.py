@@ -5,14 +5,23 @@ from servo import Servo
 from PID import *
 import matplotlib.pyplot as plt
 
-
-
 import sys
 sys.path.append('../../Blackboard/src/')
 from SharedMemory import SharedMemory 
+
+try:
+    from configparser import ConfigParser
+except ImportError:
+    from ConfigParser import ConfigParser  # ver. < 3.0
+
+
 bkb = SharedMemory()
-KEY = 100
-Mem = bkb.shd_constructor(KEY)
+config = ConfigParser()
+# looking for the file config.ini:
+config.read('../../Control/Data/config.ini')
+mem_key = int(self.config.get('Communication', 'no_player_robofei'))*100
+Mem = bkb.shd_constructor(mem_key)
+
 
 class Pantilt (object):
 
