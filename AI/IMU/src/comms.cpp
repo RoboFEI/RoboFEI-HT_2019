@@ -49,6 +49,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/foreach.hpp>
 #include <string>
+#include <iostream>
 
 //#include "ros/console.h"
 #include "serial/serial.h"

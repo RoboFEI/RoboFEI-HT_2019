@@ -61,18 +61,21 @@ class Vision():
         # atan2 retorna angulo entre -pi e +pi
 
     def compAng(self, ang, base):
-        angrange = 35
-        base = -base
-        print 'ang',ang
-        print 'base', base
-        if(base > 180-angrange or base < -180+angrange):
-            if(ang > 0 and base < 0):
-                return (ang < base + 360 + angrange) and (ang > base + 360 - angrange)
-            elif (ang < 0 and base > 0):
-                return (ang < base - 360 + angrange) and (ang > base - 360 - angrange)
-            elif (ang < 0 and base < 0 and ang > -90):
-                return (ang < base + 360 + angrange) and (ang > base + 360 - angrange)
-        return (ang < base + angrange) and (ang > base - angrange)
+        limitAngle = 35  # The vision range
+        realLimit = limitAngle + base  # Convert to the base angle
+        ang = -ang  # invert the inverted angle
+
+        # computes the x and y coordinates
+        limit = [cos(radians(realLimit)), sin(radians(realLimit))]
+        angle = [cos(radians(ang)), sin(radians(ang))]
+        zero = [cos(radians(base)), sin(radians(base))]
+
+        # computes the square of the distance between the base angle and the two comparing angles
+        dist2angle = (angle[0] - zero[0]) ** 2 + (angle[1] - zero[1]) ** 2
+        dist2limit = (limit[0] - zero[0]) ** 2 + (limit[1] - zero[1]) ** 2
+
+        # compares if the distance between the angle and the base falls into the vision range
+        return dist2angle < dist2limit
 
 
     def view_obj(self,mem,bkb,r_x,r_y,x,y,view_rot):
