@@ -24,6 +24,14 @@ then
 	echo 
 	if [ $REPLY == 1 ]; then
 		echo -e "${blue} AI ${NC}"
+		echo -e "${blue} Installing serial ${NC}"
+	    cd AI/IMU/serial
+	    mkdir build
+	    cd build
+	    cmake ../
+	    make all
+	    sudo make install
+	    cd ../../..
 		echo
 		echo -e "${blue} Installing whole software ${NC}"
 		cd AI
