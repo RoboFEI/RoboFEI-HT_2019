@@ -19,7 +19,7 @@ bkb = SharedMemory()
 config = ConfigParser()
 # looking for the file config.ini:
 config.read('../../Control/Data/config.ini')
-mem_key = int(self.config.get('Communication', 'no_player_robofei'))*100
+mem_key = int(config.get('Communication', 'no_player_robofei'))*100
 Mem = bkb.shd_constructor(mem_key)
 
 
