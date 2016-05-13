@@ -84,9 +84,9 @@ class VisionBall (object):
 				cv2.createTrackbar('S_High','Mascara - Bola',255,255,self.__nothing)
 				cv2.createTrackbar('V_Low','Mascara - Bola',0,255,self.__nothing)
 				cv2.createTrackbar('V_High',				'Mascara - Bola',	255,	255,	self.__nothing)
-				cv2.createTrackbar('Size element', 'Mascara - Bola', 0, 25, self.__nothing)
-				cv2.createTrackbar('Erosion','Mascara - Bola',0,25,self.__nothing)
-				cv2.createTrackbar('Dilation','Mascara - Bola',0,25,self.__nothing)
+				cv2.createTrackbar('Size element', 'Mascara - Bola', 1, 25, self.__nothing)
+				cv2.createTrackbar('Erosion','Mascara - Bola',1,25,self.__nothing)
+				cv2.createTrackbar('Dilation','Mascara - Bola',1,25,self.__nothing)
 				cv2.createTrackbar('Blur','Mascara - Bola',0,25,self.__nothing)
 				cv2.createTrackbar('Cut sensitivity','Mascara - Bola',0,500,self.__nothing)
 				
@@ -154,11 +154,11 @@ class VisionBall (object):
 				cv2.namedWindow('Calibrar Haar - Bola')
 			
 				# create trackbars for color change
-				cv2.createTrackbar('Min size','Calibrar Haar - Bola',0,255,self.__nothing)
-				cv2.createTrackbar('Max size','Calibrar Haar - Bola',0,10000,self.__nothing)
-				cv2.createTrackbar('Neighbours','Calibrar Haar - Bola',0,255,self.__nothing)
-				cv2.createTrackbar('Scalefactor','Calibrar Haar - Bola',0,255,self.__nothing)
-				cv2.createTrackbar('Cut sensitivity','Calibrar Haar - Bola',0,255,self.__nothing)
+				cv2.createTrackbar('Min size','Calibrar Haar - Bola',1,255,self.__nothing)
+				cv2.createTrackbar('Max size','Calibrar Haar - Bola',1,10000,self.__nothing)
+				cv2.createTrackbar('Neighbours','Calibrar Haar - Bola',1,255,self.__nothing)
+				cv2.createTrackbar('Scalefactor','Calibrar Haar - Bola',1,255,self.__nothing)
+				cv2.createTrackbar('Cut sensitivity','Calibrar Haar - Bola',1,255,self.__nothing)
 			
 				#Setando valoeres iniciais
 				cv2.setTrackbarPos('Min size','Calibrar Haar - Bola', self.__minSize_HaarBall)
@@ -229,6 +229,7 @@ class VisionBall (object):
 												(int(cut[2] + cut[4]*self.__cut_sensitivity_haar_input), int(cut[3] + cut[4]*self.__cut_sensitivity_haar_input)),
 												(255, 0, 0),
 												2)
+						
 						cv2.imshow('Corte - Bola', frame_cut)
 						
 						balls = self.__haarBall(frame_cut)
@@ -253,6 +254,7 @@ class VisionBall (object):
 							pos = None
 					
 					frame = cv2.resize(frame, (0,0), fx=640.0/1920, fy=640.0/1920)
+					
 					cv2.imshow('Calibrar Haar - Bola', frame)
 				
 					if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -601,5 +603,5 @@ class VisionBall (object):
 
 #----------------------------------------------------------------------------------------------------------------------------------
 
-	def __nothing(x):
+	def __nothing(x,y):
 		pass
