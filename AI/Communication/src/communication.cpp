@@ -146,7 +146,7 @@ int leia()
 	}
 	
 	const int mem_key = (int)reader.GetInteger("Communication","no_player_robofei",-1024)*100;
-    int* mem = using_shared_memory(mem_key);
+    	int* mem = using_shared_memory(mem_key);
 
 	//fiz separado pois estávamos tendo problema com tipos de variáveis.
 	    SERVER = strcpy((char*)malloc(arqIP.length()+1), arqIP.c_str());

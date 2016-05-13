@@ -34,7 +34,7 @@ target_link_libraries(communication
   blackboard pthread
 )
 #indica caminho para instalação 
-install(TARGETS communication DESTINATION ${RoboFEI-HT_BINARY_DIR}/bin)
+#install(TARGETS communication DESTINATION ${RoboFEI-HT_BINARY_DIR}/bin)
 #install(TARGETS communication DESTINATION /usr/local/bin)
 
 

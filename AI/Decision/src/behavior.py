@@ -319,6 +319,7 @@ class NaiveIMU(TreatingRawData):
 
             if self.get_search_status() == 1: # 1 - vision lost
                 print 'vision lost'
+		self.set_stand_still()
                 #self.set_vision_search()
                 #self.set_turn_right()
             elif self.get_search_status() == 0: # 0 - object found
