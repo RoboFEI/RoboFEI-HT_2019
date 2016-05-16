@@ -1,33 +1,34 @@
-# RoboFEI-HT: Artificial Intelligence and Simulator
+#RoboFEI-HT: Artificial Intelligence and Simulator
 
 ## AI: Artificial Intelligence for Humanoid Robots
 
-AI is built upon the Cross Architecture (Perico et. al, 2014; Perico et al., 2015).
+AI is built upon the Cross Architecture \[[1]] \[[2]]. Some methods used for the Vision System can be found in \[[3]] and \[[4]]. A Control technique applied to improve the robot's stability can be found in \[[5]]. A qualitative localization studied for the robot can be found in \[[6]].
+
+[1]: http://dx.doi.org/10.1109/SBR.LARS.Robocontrol.2014.39
+[2]: http://dx.doi.org/10.1007/978-3-662-48134-9_4
+[3]: http://dx.doi.org/10.1109/SBR.LARS.Robocontrol.2014.51
+[4]: http://dx.doi.org/10.1109/LARS-SBR.2015.43
+[5]: http://dx.doi.org/10.1109/LARS-SBR.2015.41
+[6]: http://dx.doi.org/10.1109/LARS-SBR.2015.44
+
 
 ### Setup
 
 1. compile the code of the robot running *./setup.sh*
 
-2. run *./start.sh* for running the simulator and the AI
-
-###References
-
-D. H. Perico et al., "Hardware and Software Aspects of the Design and Assembly of a New Humanoid Robot for RoboCup Soccer," Robotics: SBR-LARS Robotics Symposium and Robocontrol (SBR LARS Robocontrol), 2014 Joint Conference on, Sao Carlos, 2014, pp. 73-78.
-doi: 10.1109/SBR.LARS.Robocontrol.2014.39
-
-D. H. Perico et al., "Newton: A High Level Control Humanoid Robot for the RoboCup Soccer KidSize League". Robotics: Joint Conference on Robotics, LARS 2014, SBR 2014, Robocontrol 2014, Sao Carlos, Brazil, October 18-23, 2014. Revised Selected Papers. Springer Berlin Heidelberg, 2015.
-doi: 10.1007/978-3-662-48134-9_4
-
-
 ## Simulator
 
-RoboFEI-HT simulator used for developing AI (decision, localization, planning etc)
+RoboFEI-HT simulator used for developing AI (decision, localization, planning etc).
+
+### Setup
+
+1. Once the AI is compiled, run *./start_simulator.sh* for running the simulator and the AI
 
 ### Changing objects' positions
 
 **Robots:** It is possible to change the position of the robots by pressing the number of the robot + *INSERT*. Example: if I want to change robot 1 position I will press *1* followed by *INSERT*. The robot will be moved following the mouse pointer position. The orientation will be random.
 
-**Ball:** It is possible to change the position of the ball by pressing *b*.The ball will be moved following the mouse pointer position. 
+**Ball:** It is possible to change the position of the ball by pressing *b*.The ball will be moved following the mouse pointer position.
 
 ### Simulator Help
 
