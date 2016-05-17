@@ -6,7 +6,7 @@ import cv2
 import ctypes
 import argparse
 import time
-from math import log,exp
+from math import log,exp,tan
 
 from BallVision import *
 from PanTilt import *
@@ -26,7 +26,7 @@ config = ConfigParser()
 # looking for the file config.ini:
 config.read('../../Control/Data/config.ini')
 mem_key = int(config.get('Communication', 'no_player_robofei'))*100
-Mem = bkb.shd_constructor(mem_key)
+Mem = bkb.shd_constructor(200)
 
 
 parser = argparse.ArgumentParser(description='Robot Vision', epilog= 'Responsavel pela deteccao dos objetos em campo / Responsible for detection of Field objects')
@@ -38,7 +38,7 @@ parser.add_argument('--head', '--he', action="store_true", help = 'Configurando 
 
 def statusBall(positionballframe):
 	if positionballframe[0] == 0:
-		print "Campo nao encontrada"
+		print "Campo nao encontrado"
 		
 	if positionballframe[0] == 1:
 		mens = "Bola nao encontrada, campo "
@@ -59,14 +59,18 @@ def statusBall(positionballframe):
 		print mens
 	if positionballframe[0] == 2:
 		if bkb.read_float(Mem, 'VISION_TILT_DEG') < 50:
-			bkb.write_float(Mem, 'VISION_BALL_DIST', 1000 * 0.0848048735*exp(0.042451235*bkb.read_float(Mem, 'VISION_TILT_DEG')))
+			##bkb.write_float(Mem, 'VISION_BALL_DIST', 84.8048735*exp(0.042451235*bkb.read_float(Mem, 'VISION_TILT_DEG')))
+			bkb.write_float(Mem, 'VISION_BALL_DIST', 420*tan(bkb.read_float(Mem, 'VISION_TILT_DEG')))
+			print 'Dist using tilt angle: ', bkb.read_float(Mem, 'VISION_BALL_DIST')
 			#print "Distancia da Bola func 1 em metros: " + str(0.0848048735*exp(0.042451235*bkb.read_int('VISION_MOTOR1_ANGLE')))
 			#print "Bola encontrada na posicao x: " + str(round(positionballframe[1],2)) + " y: " + str(round(positionballframe[2],2)) + " e diametro de: " + str(round(positionballframe[3],2))
 		else:
 			#print "Bola encontrada na posicao x: " + str(round(positionballframe[1],2)) + " y: " + str(round(positionballframe[2],2)) + " e diametro de: " + str(round(positionballframe[3],2))
 			#print "Distancia da Bola func 2 em metros: " + str(4.1813911146*pow(positionballframe[3],-1.0724682465))
-			bkb.write_float(Mem, 'VISION_BALL_DIST', 1000 * 4.1813911146*pow(positionballframe[3],-1.0724682465))
+			bkb.write_float(Mem, 'VISION_BALL_DIST', 4181.3911146*pow(positionballframe[3],-1.0724682465) + 100)
+			print 'Dist using pixel size: ', bkb.read_float(Mem, 'VISION_BALL_DIST')
 		bkb.write_int(Mem,'VISION_LOST', 0)
+		
 		
 #		print "Bola encontrada = " + str(bkb.read_int('VISION_LOST_BALL'))
 #		print "Posicao servo 1 tilt = " + str(bkb.read_int('VISION_MOTOR1_ANGLE'))
@@ -74,7 +78,6 @@ def statusBall(positionballframe):
 	    bkb.write_int(Mem,'VISION_LOST', 1)
 #	    print "Bola Perdida = " + str(bkb.read_int('VISION_LOST_BALL'))
 
-	print 'dist', bkb.read_float(Mem, 'VISION_BALL_DIST')
 	    
 #----------------------------------------------------------------------------------------------------------------------------------
 
@@ -173,7 +176,7 @@ while True:
 	statusBall(positionballframe)
 	
 	if args.withoutservo == False:
-		posheadball = head.mov(positionballframe,posheadball)
+		posheadball = head.mov(positionballframe,posheadball,Mem)
 	
 	setResolution(positionballframe)
 	

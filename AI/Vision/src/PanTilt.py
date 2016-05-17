@@ -20,8 +20,8 @@ config = ConfigParser()
 # looking for the file config.ini:
 config.read('../../Control/Data/config.ini')
 mem_key = int(config.get('Communication', 'no_player_robofei'))*100
-Mem = bkb.shd_constructor(mem_key)
-
+#Mem = bkb.shd_constructor(mem_key)
+#Mem = bkb.shd_constructor(200)
 
 class Pantilt (object):
 
@@ -130,7 +130,7 @@ class Pantilt (object):
 
 #----------------------------------------------------------------------------------------------------------------------------------
 
-	def mov(self,status, posHead):
+	def mov(self,status, posHead, Mem):
 		if self.__args.head == True:
 			self.__p_pan = cv2.getTrackbarPos('P Pan','Video - Bola')/100.0
 			self.__i_pan = cv2.getTrackbarPos('I Pan','Video - Bola')/100.0
@@ -181,7 +181,7 @@ class Pantilt (object):
 		
 		if status[0] == 2:
 			if status[1] != 0 and status[2] != 0 and self.__lost == 0:
-				posHead = self.__segue(status)
+				posHead = self.__segue(status,Mem)
 			else:
 				if self.__args.head == False or self.servo.readByte(self.__SERVO_PAN,self.__STATUS) == 1:
 					self.servo.writeWord(self.__SERVO_PAN,
@@ -297,7 +297,7 @@ class Pantilt (object):
 
 #----------------------------------------------------------------------------------------------------------------------------------
 
-	def __segue(self,status):
+	def __segue(self,status, Mem):
 		# Pan
 #		# Posicao
 		self.__pos_find = 0

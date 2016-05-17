@@ -28,7 +28,7 @@ class SharedMemory(object):
             self.testlib = ctypes.CDLL('../AI/build/lib/libblackboardpy.so') #chama a library que contem as funções em c++
         self.testlib.using_shared_memory.restype = ctypes.POINTER(ctypes.c_int)
         mem = self.testlib.using_shared_memory(KEY)         #using c++ function
-        print 'python', mem
+        #print 'python', mem
         self.testlib.read_float.restype = ctypes.c_float #defining the return type, that case defining float
         self.testlib.read_int.restype = ctypes.c_int #defining the return type, that case defining int
         return mem

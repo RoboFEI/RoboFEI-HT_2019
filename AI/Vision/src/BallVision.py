@@ -76,6 +76,7 @@ class VisionBall (object):
 		while passo != 2:
 			if passo == 0:
 				cv2.namedWindow('Mascara - Bola')
+				#cv2.namedWindow('Frame cortado  - Bola', cv2.WINDOW_AUTOSIZE)
 				
 				# create trackbars for color change
 				cv2.createTrackbar('H_Low','Mascara - Bola',0,255,self.__nothing)
@@ -143,7 +144,10 @@ class VisionBall (object):
 #					frame_campo = cv2.resize(frame_campo, (0,0), fx=640.0/1024, fy=640.0/1024)
 					if np.all(cut != -1) == True:
 						frame = cv2.resize(frame, (0,0), fx=640.0/1920, fy=640.0/1920)
-						cv2.imshow('Frame cortado  - Bola', frame_campo)
+						if frame_campo.shape[0] < 10 or frame_campo.shape[1] < 10:#This is for error control
+							print "Calibration Error: Frame too small for Segmentation"
+						else:
+						        cv2.imshow('Frame cortado  - Bola', frame_campo)
 					
 					if cv2.waitKey(1) & 0xFF == ord('q'):
 						break
@@ -229,8 +233,15 @@ class VisionBall (object):
 												(int(cut[2] + cut[4]*self.__cut_sensitivity_haar_input), int(cut[3] + cut[4]*self.__cut_sensitivity_haar_input)),
 												(255, 0, 0),
 												2)
-						
-						cv2.imshow('Corte - Bola', frame_cut)
+												
+						try:
+							if frame_cut.shape[0] < 10 or frame_cut.shape[1] < 10 :
+								cv2.imshow('Corte - Bola', frame_cut)					
+						except :
+							print "Calibration Error: Frame too small to cut"
+							pass
+												
+    					#cv2.imshow('Corte - Bola', frame_cut)
 						
 						balls = self.__haarBall(frame_cut)
 						if balls is not ():
@@ -254,8 +265,10 @@ class VisionBall (object):
 							pos = None
 					
 					frame = cv2.resize(frame, (0,0), fx=640.0/1920, fy=640.0/1920)
-					
-					cv2.imshow('Calibrar Haar - Bola', frame)
+					if frame.shape[0] < 10 or frame.shape[1] < 10:#This is for error control
+						print "Calibration Error: Frame too small for Haar"
+					else:
+						cv2.imshow('Calibrar Haar - Bola', frame)
 				
 					if cv2.waitKey(1) & 0xFF == ord('q'):
 						break
