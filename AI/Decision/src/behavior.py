@@ -85,7 +85,7 @@ class TreatingRawData(object):
         return self.bkb.read_float(self.mem, 'IMU_EULER_Z')
         
     def set_stand_still(self):
-        print 'stand still'
+        #print 'stand still'
         self.bkb.write_int(self.mem,'DECISION_ACTION_A', 0)
         #time.sleep(1)
 
@@ -355,9 +355,95 @@ class NaiveIMU(TreatingRawData):
         else:
             print 'Invalid argument received from referee!'
 
-            #############################################################################
+#############################################################################
 
-        
+class NaiveIMUDecTurning(TreatingRawData):
+    " " " Naive class " " "
+
+    def __init__(self):
+        super(NaiveIMUDecTurning, self).__init__()
+        print
+        print 'Naive behavior called'
+        print
+
+    def decision(self, referee):
+        if referee == 1:  # stopped
+            print 'stand'
+            self.set_stand_still()
+
+        elif referee == 11:  # ready
+            print 'ready'
+            self.set_stand_still()
+
+        elif referee == 12:  # set
+            print 'set'
+            self.set_stand_still()
+            self.set_vision_ball()
+
+        elif referee == 2:  # play
+            #print 'play'
+            #self.set_vision_ball()  # set vision to find ball
+            #print 'search ball: ', self.get_search_ball_status()
+            #print 'lost ball: ', self.get_lost_ball_status()
+
+            #print 'Distance: ', self.get_dist_ball()
+            #print 'orientation', self.get_orientation()
+
+           #time.sleep(1)
+            print 'dist_ball', self.get_dist_ball()
+
+            if self.get_search_status() == 1: # 1 - vision lost
+                print 'vision lost'
+                self.set_stand_still()
+                #self.set_vision_search()
+                #self.set_turn_right()
+            elif self.get_search_status() == 0: # 0 - object found
+                # align to the ball
+                if self.get_motor_pan_degrees() > 20 and self.get_motor_pan_degrees() < 160:
+                    self.set_turn_left()
+                    #self.set_stand_still()
+                elif self.get_motor_pan_degrees() < -20 and self.get_motor_pan_degrees() > -160:
+                    self.set_turn_right()
+                    #self.set_stand_still()
+                else:
+
+                    if self.get_dist_ball() < 28 and self.get_motor_pan_degrees() <= 0:
+                        if self.get_orientation() <= 20 and self.get_orientation() >= -20:
+                            self.set_kick_right()
+                        elif self.get_orientation() > 20:
+                            #revolve_clockwise:
+                            self.set_pass_right()
+                            #########
+                        elif self.get_orientation() < -20:
+                            #revolve_anticlockwise:
+                            self.set_pass_left()
+                            #########
+                    elif self.get_dist_ball() < 28 and self.get_motor_pan_degrees() > 0:
+                        if self.get_orientation() <= 20 and self.get_orientation() >= -20:
+                            self.set_kick_left()
+                        elif self.get_orientation() > 20:
+                            #revolve_clockwise:
+                            self.set_pass_right()
+                            #########
+                        elif self.get_orientation() < -20:
+                            #revolve_anticlockwise:
+                            self.set_pass_left()
+                            #########
+                    elif self.get_dist_ball() > 60:
+                        self.set_walk_forward()
+                    elif self.get_dist_ball() <= 26:
+                        self.set_stand_still()
+                    else:
+                        self.set_walk_forward_slow((self.get_dist_ball() / 6))
+                        
+                        # time.sleep(0.5)
+                        # self.set_stand_still()
+        else:
+            print 'Invalid argument received from referee!'
+
+#############################################################################
+
+
 class Attacker(TreatingRawData):
     " " " Attacker class " " "
 

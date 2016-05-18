@@ -31,6 +31,7 @@ parser.add_argument('--quarterback', '-q', action="store_true", help = 'selects 
 parser.add_argument('--attacker', '-a', action="store_true", help = 'selects attacker behavior')
 parser.add_argument('--naive', '-n', action="store_true", help = 'selects naive behavior')
 parser.add_argument('--naive_imu', '-ni', action="store_true", help = 'selects naive behavior with orientation')
+parser.add_argument('--naive_imu_dec_turning', '-nidt', action="store_true", help = 'selects naive behavior with orientation')
 
 args = parser.parse_args()
 
@@ -53,6 +54,10 @@ elif args.naive == True:
 # Naive decision with orientation:
 elif args.naive_imu == True:
     robot = NaiveIMU()
+    
+# Naive decision with orientation:
+elif args.naive_imu_dec_turning == True:
+    robot = NaiveIMUDecTurning()
 
 #Ordinary decision:
 else:
@@ -67,7 +72,7 @@ while True:
     else:
         robot.decision(2) #always on play 
    
-    time.sleep(0.2) 
+    #time.sleep(0.01) 
     
     
     

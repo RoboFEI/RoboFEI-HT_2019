@@ -223,15 +223,15 @@ class Robot(pygame.sprite.Sprite,Vision):
         self.Kick(30, 5)
 
     def pass_left(self):
-        self.Kick(15, 15, 90)
+        self.Kick(30, 30, 90, 8) #leftlimit, rightlimit, direction, force = 1 to 12
 
     def pass_right(self):
-        self.Kick(15, 15, -90)
+        self.Kick(30, 30, -90, 8) #leftlimit, rightlimit, direction, force 1 to 12
 
-    def Kick(self, LeftLimit, RightLimit, Direction=0):
+    def Kick(self, LeftLimit, RightLimit, Direction=0, force_limit = 12):
         R = degrees(atan2((self.y - self.ball.y), (self.ball.x - self.x)))
         d = sqrt((self.x - self.ball.x) ** 2 + (self.y - self.ball.y) ** 2)
-        force = min(10, 12 * exp(-((self.radius - d) ** 2) / (12) ** 2))
+        force = min(10, force_limit * exp(-((self.radius - d) ** 2) / (force_limit) ** 2))
 
         r = R
         if R < 0: r = R + 360
