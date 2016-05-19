@@ -130,10 +130,10 @@ class Pantilt (object):
 
 #----------------------------------------------------------------------------------------------------------------------------------
 
-	def mov(self,status, posHead, Mem):
+	def mov(self,status, posHead, Mem, bkb):
 		if self.__args.head == True:
 			self.__p_pan = cv2.getTrackbarPos('P Pan','Video - Bola')/100.0
-			self.__i_pan = cv2.getTrackbarPos('I Pan','Video - Bola')/100.0
+			self.__i_pan = cv2.getTrackbarPos('I Pan','Video -Mem, Bola')/100.0
 			self.__d_pan = cv2.getTrackbarPos('D Pan','Video - Bola')/1000.0
 			
 			self.__p_tilt = cv2.getTrackbarPos('P Tilt','Video - Bola')/100.0
@@ -162,7 +162,7 @@ class Pantilt (object):
 					self.servo.writeByte(self.__SERVO_TILT,self.__STATUS, 0)
 				elif mod == 2:
 					self.servo.writeByte(self.__SERVO_PAN,self.__STATUS, 0)
-					self.servo.writeByte(self.__SERVO_TILT,self.__STATUS, 1)
+					self.servo.writeByte(self.__SERVO_TILT,selMem,f.__STATUS, 1)
 					self.servo.writeWord(self.__SERVO_TILT, self.__SPEED, self.__min_speed)
 				elif mod == 1:
 					self.servo.writeByte(self.__SERVO_PAN,self.__STATUS, 1)
@@ -172,7 +172,7 @@ class Pantilt (object):
 					self.servo.writeByte(self.__SERVO_PAN,self.__STATUS, 1)
 					self.servo.writeByte(self.__SERVO_TILT,self.__STATUS, 1)
 					self.servo.writeWord(self.__SERVO_PAN, self.__SPEED, self.__min_speed)
-					self.servo.writeWord(self.__SERVO_TILT, self.__SPEED, self.__min_speed)
+					self.servo.writeWord(self.__SERVO_TILT, seMem,lf.__SPEED, self.__min_speed)
 				self.__ControllerPan.setIntegrator(0)
 				self.__ControllerPan.setDerivator(0)
 				self.__ControllerTilt.setIntegrator(0)
@@ -181,9 +181,11 @@ class Pantilt (object):
 		
 		if status[0] == 2:
 			if status[1] != 0 and status[2] != 0 and self.__lost == 0:
-				posHead = self.__segue(status,Mem)
+				posHead = self.__segue(status,Mem, bkb)
 			else:
 				if self.__args.head == False or self.servo.readByte(self.__SERVO_PAN,self.__STATUS) == 1:
+					print "PosHead0 ", posHead[0]
+					#print "size ",len(posHead)
 					self.servo.writeWord(self.__SERVO_PAN,
 															self.__GOAL_POS,
 															posHead[0])
@@ -192,6 +194,7 @@ class Pantilt (object):
 															self.__GOAL_POS,
 															posHead[1])
 				self.__lost = 0
+				print "PosHead1 ", posHead[1]
 		else:
 			self.__lost = 1
 			self.__ControllerPan.setIntegrator(0)
@@ -297,7 +300,7 @@ class Pantilt (object):
 
 #----------------------------------------------------------------------------------------------------------------------------------
 
-	def __segue(self,status, Mem):
+	def __segue(self,status, Mem, bkb):
 		# Pan
 #		# Posicao
 		self.__pos_find = 0
@@ -340,7 +343,7 @@ class Pantilt (object):
 		cv2.setTrackbarPos('Val dir','Ajustar varredura - Head', self.min_posPAN)
 		cv2.setTrackbarPos('Val centro','Ajustar varredura - Head', self.cen_posPAN)
 		cv2.setTrackbarPos('Val esq','Ajustar varredura - Head', self.max_posPAN)
-		
+		Mem,
 		cv2.setTrackbarPos('Val cima','Ajustar varredura - Head', self.min_posTILT)
 		cv2.setTrackbarPos('Val meio','Ajustar varredura - Head', self.cen_posTILT)
 		cv2.setTrackbarPos('Val baixo','Ajustar varredura - Head', self.max_posTILT)
@@ -356,7 +359,7 @@ class Pantilt (object):
 				self.servo.writeWord(self.__SERVO_TILT,self.__GOAL_POS, self.cen_posTILT)
 				self.servo.writeWord(self.__SERVO_PAN,self.__VAL_MIN, self.min_posPAN)
 				self.servo.writeWord(self.__SERVO_PAN,self.__GOAL_POS, self.min_posPAN)
-			
+			Mem,
 			if self.cen_posPAN != cv2.getTrackbarPos('Val centro','Ajustar varredura - Head'):
 				self.cen_posPAN = cv2.getTrackbarPos('Val centro','Ajustar varredura - Head')
 				self.servo.writeWord(self.__SERVO_PAN,self.__GOAL_POS, self.cen_posPAN)
@@ -385,7 +388,7 @@ class Pantilt (object):
 				self.servo.writeWord(self.__SERVO_TILT,self.__VAL_MAX, self.max_posTILT)
 				self.servo.writeWord(self.__SERVO_TILT,self.__GOAL_POS, self.max_posTILT)
 			
-			cv2.imshow('Ajustar varredura - Head', frame)
+			cv2.imshow('Ajustar varredura - Head', fMem,rame)
 			if cv2.waitKey(1) & 0xFF == ord('q'):
 				break
 		cv2.destroyAllWindows()

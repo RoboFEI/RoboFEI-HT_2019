@@ -176,7 +176,7 @@ while True:
 	statusBall(positionballframe)
 	
 	if args.withoutservo == False:
-		posheadball = head.mov(positionballframe,posheadball,Mem)
+		posheadball = head.mov(positionballframe,posheadball,Mem, bkb)
 	
 	setResolution(positionballframe)
 	
