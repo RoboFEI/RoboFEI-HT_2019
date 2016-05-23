@@ -20,6 +20,7 @@ sys.path.append('../../Blackboard/src/')
 from SharedMemory import SharedMemory 
 
 import time
+from math import degrees
 
 ###############################################################################
 
@@ -82,7 +83,9 @@ class TreatingRawData(object):
         return self.bkb.write_int(self.mem,'DECISION_SEARCH_ON', 1)
 
     def get_orientation(self):
-        return self.bkb.read_float(self.mem, 'IMU_EULER_Z')
+        #print degrees(self.bkb.read_float(self.mem, 'IMU_EULER_Z'))
+        #print self.bkb.read_float(self.mem, 'IMU_EULER_Z')
+        return degrees(self.bkb.read_float(self.mem, 'IMU_EULER_Z'))
         
     def set_stand_still(self):
         #print 'stand still'
@@ -332,14 +335,14 @@ class NaiveIMU(TreatingRawData):
                     #self.set_stand_still()
                 else:
 
-                    if self.get_dist_ball() < 35 and self.get_dist_ball() > 26 and self.get_motor_pan_degrees() <= 0:
+                    if self.get_dist_ball() < 14 and self.get_motor_pan_degrees() <= 0:
                         if self.get_orientation() <= 20 and self.get_orientation() >= -20:
                             self.set_kick_right()
                         elif self.get_orientation() > 20:
                             self.set_revolve_around_ball_clockwise()
                         elif self.get_orientation() < -20:
                             self.set_revolve_around_ball_anticlockwise()
-                    elif self.get_dist_ball() < 35 and self.get_dist_ball() > 26 and self.get_motor_pan_degrees() > 0:
+                    elif self.get_dist_ball() < 14 and self.get_motor_pan_degrees() > 0:
                         if self.get_orientation() <= 15 and self.get_orientation() >= -15:
                             self.set_kick_left()
                         elif self.get_orientation() > 15:
@@ -347,7 +350,8 @@ class NaiveIMU(TreatingRawData):
                         elif self.get_orientation() < -15:
                             self.set_revolve_around_ball_anticlockwise()
                     elif self.get_dist_ball() > 50:
-                        self.set_walk_forward()
+                        #self.set_walk_forward()
+                        self.set_walk_forward_slow((self.get_dist_ball() / 5))
                     else:
                         self.set_walk_forward_slow((self.get_dist_ball() / 5))
                         # time.sleep(0.5)

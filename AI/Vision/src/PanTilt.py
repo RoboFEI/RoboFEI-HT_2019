@@ -133,7 +133,7 @@ class Pantilt (object):
 	def mov(self,status, posHead, Mem, bkb):
 		if self.__args.head == True:
 			self.__p_pan = cv2.getTrackbarPos('P Pan','Video - Bola')/100.0
-			self.__i_pan = cv2.getTrackbarPos('I Pan','Video -Mem, Bola')/100.0
+			self.__i_pan = cv2.getTrackbarPos('I Pan','Video - Bola')/100.0
 			self.__d_pan = cv2.getTrackbarPos('D Pan','Video - Bola')/1000.0
 			
 			self.__p_tilt = cv2.getTrackbarPos('P Tilt','Video - Bola')/100.0
@@ -162,7 +162,7 @@ class Pantilt (object):
 					self.servo.writeByte(self.__SERVO_TILT,self.__STATUS, 0)
 				elif mod == 2:
 					self.servo.writeByte(self.__SERVO_PAN,self.__STATUS, 0)
-					self.servo.writeByte(self.__SERVO_TILT,selMem,f.__STATUS, 1)
+					self.servo.writeByte(self.__SERVO_TILT,self.__STATUS, 1)
 					self.servo.writeWord(self.__SERVO_TILT, self.__SPEED, self.__min_speed)
 				elif mod == 1:
 					self.servo.writeByte(self.__SERVO_PAN,self.__STATUS, 1)
@@ -172,7 +172,7 @@ class Pantilt (object):
 					self.servo.writeByte(self.__SERVO_PAN,self.__STATUS, 1)
 					self.servo.writeByte(self.__SERVO_TILT,self.__STATUS, 1)
 					self.servo.writeWord(self.__SERVO_PAN, self.__SPEED, self.__min_speed)
-					self.servo.writeWord(self.__SERVO_TILT, seMem,lf.__SPEED, self.__min_speed)
+					self.servo.writeWord(self.__SERVO_TILT, self.__SPEED, self.__min_speed)
 				self.__ControllerPan.setIntegrator(0)
 				self.__ControllerPan.setDerivator(0)
 				self.__ControllerTilt.setIntegrator(0)
@@ -290,7 +290,7 @@ class Pantilt (object):
 														1+int(99*(dis_tilt/max_dis)))
 				self.servo.writeWord(self.__SERVO_TILT,
 														self.__GOAL_POS,
-														self.__list_find[self.__pos_find%2][1]+(self.__jump_find*(self.__pos_find/2)))
+														self.__list_find[self.__pos_find%2][1]-(self.__jump_find*(self.__pos_find/2)))
 			self.__pos_find += 1
 			if self.__list_find[self.__pos_find%2][1]-(self.__jump_find*(self.__pos_find/2)) <= self.min_posTILT:
 				self.__pos_find = 0
@@ -309,7 +309,7 @@ class Pantilt (object):
 			self.servo.writeWord(self.__SERVO_PAN,
 								self.__GOAL_POS,
 								int(self.servo.readWord(self.__SERVO_PAN,self.__PRESENT_POS) + self.__ControllerPan.update(status[1])))
-								
+		
 
 		# Tilt
 		# Posicao
@@ -319,9 +319,9 @@ class Pantilt (object):
 							self.__GOAL_POS,
 							int(self.servo.readWord(self.__SERVO_TILT,self.__PRESENT_POS) - self.__ControllerTilt.update(status[2])))
 		
-		bkb.write_float(Mem, 'VISION_TILT_DEG', (self.servo.readWord(self.__SERVO_TILT, self.__PRESENT_POS) - self.max_posTILT)*0.29)
+		bkb.write_float(Mem, 'VISION_TILT_DEG', (self.max_posTILT - self.servo.readWord(self.__SERVO_TILT, self.__PRESENT_POS) )*0.29)
 		bkb.write_float(Mem, 'VISION_PAN_DEG', (self.servo.readWord(self.__SERVO_PAN , self.__PRESENT_POS) - self.cen_posPAN )*0.29)
-		print bkb.read_float(Mem, 'VISION_PAN_DEG')
+		print bkb.read_float(Mem, 'VISION_TILT_DEG')
 #		bkb.write_int('VISION_MOTOR1_ANGLE', self.servo.readWord(self.__SERVO_TILT, self.__PRESENT_POS))
 #		bkb.write_int('VISION_MOTOR2_ANGLE', self.servo.readWord(self.__SERVO_PAN, self.__PRESENT_POS))
 		
@@ -343,7 +343,7 @@ class Pantilt (object):
 		cv2.setTrackbarPos('Val dir','Ajustar varredura - Head', self.min_posPAN)
 		cv2.setTrackbarPos('Val centro','Ajustar varredura - Head', self.cen_posPAN)
 		cv2.setTrackbarPos('Val esq','Ajustar varredura - Head', self.max_posPAN)
-		Mem,
+		
 		cv2.setTrackbarPos('Val cima','Ajustar varredura - Head', self.min_posTILT)
 		cv2.setTrackbarPos('Val meio','Ajustar varredura - Head', self.cen_posTILT)
 		cv2.setTrackbarPos('Val baixo','Ajustar varredura - Head', self.max_posTILT)
@@ -359,7 +359,7 @@ class Pantilt (object):
 				self.servo.writeWord(self.__SERVO_TILT,self.__GOAL_POS, self.cen_posTILT)
 				self.servo.writeWord(self.__SERVO_PAN,self.__VAL_MIN, self.min_posPAN)
 				self.servo.writeWord(self.__SERVO_PAN,self.__GOAL_POS, self.min_posPAN)
-			Mem,
+			
 			if self.cen_posPAN != cv2.getTrackbarPos('Val centro','Ajustar varredura - Head'):
 				self.cen_posPAN = cv2.getTrackbarPos('Val centro','Ajustar varredura - Head')
 				self.servo.writeWord(self.__SERVO_PAN,self.__GOAL_POS, self.cen_posPAN)
@@ -388,7 +388,7 @@ class Pantilt (object):
 				self.servo.writeWord(self.__SERVO_TILT,self.__VAL_MAX, self.max_posTILT)
 				self.servo.writeWord(self.__SERVO_TILT,self.__GOAL_POS, self.max_posTILT)
 			
-			cv2.imshow('Ajustar varredura - Head', fMem,rame)
+			cv2.imshow('Ajustar varredura - Head', frame)
 			if cv2.waitKey(1) & 0xFF == ord('q'):
 				break
 		cv2.destroyAllWindows()
