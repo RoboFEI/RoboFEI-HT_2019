@@ -24,6 +24,24 @@ mem_key = int(config.get('Communication', 'no_player_robofei'))*100
 #Mem = bkb.shd_constructor(200)
 
 class Pantilt (object):
+	__list_varredura = ['''Cada linha representa um ponto na varredura, todos os valores são em relação a posição central dos servos (isaac ajuda nisso) os pontos são respetivamente:
+São 5 pontos olhando para baixo
+São 4 pontos olhando para meio
+São 3 pontos olhando para cima
+e seguem a ordem de [posição do PAN, posição do TILT], todos os pontos devem ser ajustados'''
+	[-20,50], # Olhando para baixo
+	[-10,50], # Olhando para baixo
+	[0,50], # Olhando para baixo
+	[10,50], # Olhando para baixo
+	[20,50], # Olhando para baixo
+	[-20,0], # Olhando para meio
+	[-10,0], # Olhando para meio
+	[10,0], # Olhando para meio
+	[20,0], # Olhando para meio
+	[-20,-50], # Olhando para cima
+	[0,-50], # Olhando para cima
+	[20,-50], # Olhando para cima
+	]
 
 	servo = None #Para controle dos servos
 
@@ -37,7 +55,8 @@ class Pantilt (object):
 	max_posPAN = None #Max do Pan
 	
 	__Config = None #Leitura arquivo
-	__args = None
+	__args = None #Argumentos de entrada
+	__cont_varredura = 0 #Argumentos de entrada
 	
 	# Ganhos
 	__p_pan = None
@@ -194,6 +213,7 @@ class Pantilt (object):
 															self.__GOAL_POS,
 															posHead[1])
 				self.__lost = 0
+				self.__cont_varredura = 0
 				print "PosHead1 ", posHead[1]
 		else:
 			self.__lost = 1
@@ -257,12 +277,30 @@ class Pantilt (object):
 #----------------------------------------------------------------------------------------------------------------------------------
 
 	def __find(self,status):
-		self.__jump_find = 75
-		self.__list_find = [[self.min_posPAN, self.max_posTILT],
-												[self.max_posPAN, self.max_posTILT]]
+		# Indo para posição
+		self.servo.writeWord(self.__SERVO_PAN, self.__SPEED,
+													0) # Velocidade maxima do servo (CHECAR)
 		
-		# Indo para bola
-		if abs(self.servo.readWord(self.__SERVO_PAN, self.__PRESENT_POS)-self.servo.readWord(self.__SERVO_PAN, self.__GOAL_POS)) < 10:
+		self.servo.writeWord(self.__SERVO_PAN,
+													self.__GOAL_POS,
+													self.cen_posPAN + self.__list_varredura[self.__cont_varredura][0])
+		
+		self.servo.writeWord(__SERVO_TILT, self.__SPEED,
+													0) # Velocidade maxima do servo (CHECAR)
+		
+		self.servo.writeWord(self.__SERVO_TILT,
+													self.__GOAL_POS,
+													self.cen_posTILT + self.__list_varredura[self.__cont_varredura][1])
+		self.__cont_varredura += 1
+		
+		if self.__cont_varredura >= len(self.__list_varredura): # Testa se não atingiu o final da lista
+			self.__cont_varredura = 0
+		
+		while abs(self.servo.readWord(self.__SERVO_PAN, self.__PRESENT_POS)-self.servo.readWord(self.__SERVO_PAN, self.__GOAL_POS)) > 10 or abs(self.servo.readWord(self.__SERVO_TILT, self.__PRESENT_POS)-self.servo.readWord(self.__SERVO_TILT, self.__GOAL_POS)) > 10:
+			pass #(CHECAR) Testar se com o sleep funciona melhor
+		time.sleep(0.05) #(CHECA) Ver se é o tempo necessario para a ajuste automatico da camera
+'''---------------------------------Codigo antigo se funcinar eu apago----------------------------------------------------------------------
+		
 			# Procura qual e o maior valor da distancia
 			dis_pan =  abs(self.servo.readWord(self.__SERVO_PAN,  self.__PRESENT_POS) - self.__list_find[self.__pos_find%2][0])*1.0
 			dis_tilt = abs(self.servo.readWord(self.__SERVO_TILT, self.__PRESENT_POS) - self.__list_find[self.__pos_find%2][1] + self.__jump_find*(self.__pos_find/2))*1.0
@@ -293,7 +331,7 @@ class Pantilt (object):
 														self.__list_find[self.__pos_find%2][1]-(self.__jump_find*(self.__pos_find/2)))
 			self.__pos_find += 1
 			if self.__list_find[self.__pos_find%2][1]-(self.__jump_find*(self.__pos_find/2)) <= self.min_posTILT:
-				self.__pos_find = 0
+				self.__pos_find = 0'''
 		
 		return [self.servo.readWord(self.__SERVO_PAN, self.__PRESENT_POS), self.servo.readWord(self.__SERVO_TILT, self.__PRESENT_POS)]
 
