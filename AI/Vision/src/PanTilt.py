@@ -1,3 +1,4 @@
+# coding=utf-8
 import cv2
 import time
 
@@ -24,24 +25,8 @@ mem_key = int(config.get('Communication', 'no_player_robofei'))*100
 #Mem = bkb.shd_constructor(200)
 
 class Pantilt (object):
-	__list_varredura = ['''Cada linha representa um ponto na varredura, todos os valores são em relação a posição central dos servos (isaac ajuda nisso) os pontos são respetivamente:
-São 5 pontos olhando para baixo
-São 4 pontos olhando para meio
-São 3 pontos olhando para cima
-e seguem a ordem de [posição do PAN, posição do TILT], todos os pontos devem ser ajustados'''
-	[-20,50], # Olhando para baixo
-	[-10,50], # Olhando para baixo
-	[0,50], # Olhando para baixo
-	[10,50], # Olhando para baixo
-	[20,50], # Olhando para baixo
-	[-20,0], # Olhando para meio
-	[-10,0], # Olhando para meio
-	[10,0], # Olhando para meio
-	[20,0], # Olhando para meio
-	[-20,-50], # Olhando para cima
-	[0,-50], # Olhando para cima
-	[20,-50], # Olhando para cima
-	]
+
+	
 
 	servo = None #Para controle dos servos
 
@@ -58,6 +43,18 @@ e seguem a ordem de [posição do PAN, posição do TILT], todos os pontos devem
 	__args = None #Argumentos de entrada
 	__cont_varredura = 0 #Argumentos de entrada
 	
+	TiltSearchUp = None
+	TiltSearchCenter = None
+	TiltSearchDown = None
+	
+	PanSearchLeft1 = None
+	PanSearchLeft2 = None
+	PanSearchCenter3 = None
+	PanSearchRight4 = None
+	PanSearchRight5 = None
+	__list_varredura = None
+
+
 	# Ganhos
 	__p_pan = None
 	__i_pan = None
@@ -116,6 +113,31 @@ e seguem a ordem de [posição do PAN, posição do TILT], todos os pontos devem
 		
 		self.servo.writeWord(self.__SERVO_PAN, self.__SPEED, self.__min_speed)
 		self.servo.writeWord(self.__SERVO_TILT, self.__SPEED, self.__min_speed)
+		
+		self.__list_varredura = [
+		[self.PanSearchLeft1,self.TiltSearchDown], # Olhando para baixo
+		[self.PanSearchLeft2,self.TiltSearchDown], # Olhando para baixo
+		[self.PanSearchCenter3,self.TiltSearchDown], # Olhando para baixo
+		[self.PanSearchRight4,self.TiltSearchDown], # Olhando para baixo
+		[self.PanSearchRight5,self.TiltSearchDown], # Olhando para baixo
+		[self.PanSearchLeft1,self.TiltSearchCenter], # Olhando para meio
+		[self.PanSearchLeft2,self.TiltSearchCenter], # Olhando para meio
+		[self.PanSearchRight4,self.TiltSearchCenter], # Olhando para meio
+		[self.PanSearchRight5,self.TiltSearchCenter], # Olhando para meio
+		[self.PanSearchLeft1,self.TiltSearchUp], # Olhando para cima
+		[self.PanSearchCenter3,self.TiltSearchUp], # Olhando para cima
+		[self.PanSearchRight5,self.TiltSearchUp], # Olhando para cima
+		]
+	
+#		        self.TiltSearchUp -50
+#				self.TiltSearchCenter 0
+#				self.TiltSearchDown 50
+#				self.PanSearchLeft1 -20
+#				self.PanSearchLeft2 -10
+#				self.PanSearchCenter3 0
+#				self.PanSearchRight4 10
+#				self.PanSearchRight5 20
+		
 		
 		if args.head == True:
 			self.__setVarredura()
@@ -199,11 +221,12 @@ e seguem a ordem de [posição do PAN, posição do TILT], todos os pontos devem
 				self.lastmod = mod
 		
 		if status[0] == 2:
+
 			if status[1] != 0 and status[2] != 0 and self.__lost == 0:
-				posHead = self.__segue(status,Mem, bkb)
+				self.__segue(status,Mem, bkb)
 			else:
 				if self.__args.head == False or self.servo.readByte(self.__SERVO_PAN,self.__STATUS) == 1:
-					print "PosHead0 ", posHead[0]
+					#print "PosHead0 ", posHead[0]
 					#print "size ",len(posHead)
 					self.servo.writeWord(self.__SERVO_PAN,
 															self.__GOAL_POS,
@@ -213,8 +236,8 @@ e seguem a ordem de [posição do PAN, posição do TILT], todos os pontos devem
 															self.__GOAL_POS,
 															posHead[1])
 				self.__lost = 0
-				self.__cont_varredura = 0
-				print "PosHead1 ", posHead[1]
+				#self.__cont_varredura = 0
+				#print "PosHead1 ", posHead[1]
 		else:
 			self.__lost = 1
 			self.__ControllerPan.setIntegrator(0)
@@ -274,9 +297,50 @@ e seguem a ordem de [posição do PAN, posição do TILT], todos os pontos devem
 				self.__min_speed = int(self.__Config.get('Head', 'min_vel').rpartition(';')[0])
 				break
 
+		while True:
+			if 'Search'not in self.__Config.sections():
+				print "Offset inexistentes, criando valores padrao"
+				self.__Config.add_section('Search')
+				self.__Config.set('Search', 'TiltSearchUp', str(-50)+'\t;First level tilt search')
+				self.__Config.set('Search', 'TiltSearchCenter', str(0)+'\t;Second level tilt search')
+				self.__Config.set('Search', 'TiltSearchDown', str(50)+'\t;Third level tilt search')
+				self.__Config.set('Search', 'PanSearchLeft1', str(-20)+'\t;First level Pan search')
+				self.__Config.set('Search', 'PanSearchLeft2', str(-10)+'\t;Second level Pan search')
+				self.__Config.set('Search', 'PanSearchCenter3', str(0)+'\t;Third level Pan search')
+				self.__Config.set('Search', 'PanSearchRight4', str(10)+'\t;Forth level Pan search')
+				self.__Config.set('Search', 'PanSearchRight5', str(20)+'\t;Fifth level Pan search')
+				
+				with open('../Data/config.ini', 'wb') as configfile:
+					self.__Config.write(configfile)
+				
+				self.__Config.read('../Data/config.ini')
+			else:
+				self.TiltSearchUp = self.__Config.getint('Search', 'TiltSearchUp')
+				self.TiltSearchCenter = self.__Config.getint('Search', 'TiltSearchCenter')
+				self.TiltSearchDown = self.__Config.getint('Search', 'TiltSearchDown')
+				self.PanSearchLeft1 = self.__Config.getint('Search', 'PanSearchLeft1')
+				self.PanSearchLeft2 = self.__Config.getint('Search', 'PanSearchLeft2')
+				self.PanSearchCenter3 = self.__Config.getint('Search', 'PanSearchCenter3')
+				self.PanSearchRight4 = self.__Config.getint('Search', 'PanSearchRight4')
+				self.PanSearchRight5 = self.__Config.getint('Search', 'PanSearchRight5')
+				break
+				
+
+
+
 #----------------------------------------------------------------------------------------------------------------------------------
 
+#Cada linha representa um ponto na varredura, todos os valores são em relação a posição central dos servos (isaac ajuda nisso) os pontos são respetivamente:
+#São 5 pontos olhando para baixo
+#São 4 pontos olhando para meio
+#São 3 pontos olhando para cima
+#e seguem a ordem de [posição do PAN, posição do TILT], todos os pontos devem ser ajustados'''
+
+	
+
 	def __find(self,status):
+		
+		
 		# Indo para posição
 		self.servo.writeWord(self.__SERVO_PAN, self.__SPEED,
 													0) # Velocidade maxima do servo (CHECAR)
@@ -285,7 +349,7 @@ e seguem a ordem de [posição do PAN, posição do TILT], todos os pontos devem
 													self.__GOAL_POS,
 													self.cen_posPAN + self.__list_varredura[self.__cont_varredura][0])
 		
-		self.servo.writeWord(__SERVO_TILT, self.__SPEED,
+		self.servo.writeWord(self.__SERVO_TILT, self.__SPEED,
 													0) # Velocidade maxima do servo (CHECAR)
 		
 		self.servo.writeWord(self.__SERVO_TILT,
@@ -297,58 +361,69 @@ e seguem a ordem de [posição do PAN, posição do TILT], todos os pontos devem
 			self.__cont_varredura = 0
 		
 		while abs(self.servo.readWord(self.__SERVO_PAN, self.__PRESENT_POS)-self.servo.readWord(self.__SERVO_PAN, self.__GOAL_POS)) > 10 or abs(self.servo.readWord(self.__SERVO_TILT, self.__PRESENT_POS)-self.servo.readWord(self.__SERVO_TILT, self.__GOAL_POS)) > 10:
-			pass #(CHECAR) Testar se com o sleep funciona melhor
+			time.sleep(0.05) #(CHECAR) Testar se com o sleep funciona melhor
 		time.sleep(0.05) #(CHECA) Ver se é o tempo necessario para a ajuste automatico da camera
-'''---------------------------------Codigo antigo se funcinar eu apago----------------------------------------------------------------------
-		
-			# Procura qual e o maior valor da distancia
-			dis_pan =  abs(self.servo.readWord(self.__SERVO_PAN,  self.__PRESENT_POS) - self.__list_find[self.__pos_find%2][0])*1.0
-			dis_tilt = abs(self.servo.readWord(self.__SERVO_TILT, self.__PRESENT_POS) - self.__list_find[self.__pos_find%2][1] + self.__jump_find*(self.__pos_find/2))*1.0
-			
-			if dis_pan > dis_tilt:
-				max_dis = dis_pan
-			else:
-				max_dis = dis_tilt
-			
-#			print("dis_pan: " + str(dis_pan))
-#			print("dis_tilt: " + str(dis_tilt))
-#			raw_input("max_dis: " + str(max_dis))
-			
-#			print(99*(dis_pan/max_dis))
-#			raw_input(99*(dis_tilt/max_dis))
-			
-			if self.__args.head == False or self.servo.readByte(self.__SERVO_PAN,self.__STATUS) == 1:
-				self.servo.writeWord(self.__SERVO_PAN, self.__SPEED,
-													1+int(99*(dis_pan/max_dis)))
-				self.servo.writeWord(self.__SERVO_PAN,
-													self.__GOAL_POS,
-													self.__list_find[self.__pos_find%2][0])
-			if self.__args.head == False or self.servo.readByte(self.__SERVO_TILT,self.__STATUS) == 1:
-				self.servo.writeWord(self.__SERVO_TILT, self.__SPEED,
-														1+int(99*(dis_tilt/max_dis)))
-				self.servo.writeWord(self.__SERVO_TILT,
-														self.__GOAL_POS,
-														self.__list_find[self.__pos_find%2][1]-(self.__jump_find*(self.__pos_find/2)))
-			self.__pos_find += 1
-			if self.__list_find[self.__pos_find%2][1]-(self.__jump_find*(self.__pos_find/2)) <= self.min_posTILT:
-				self.__pos_find = 0'''
-		
-		return [self.servo.readWord(self.__SERVO_PAN, self.__PRESENT_POS), self.servo.readWord(self.__SERVO_TILT, self.__PRESENT_POS)]
 
+#'''---------------------------------Codigo antigo se funcinar eu apago----------------------------------
+#		
+#			# Procura qual e o maior valor da distancia
+#			dis_pan =  abs(self.servo.readWord(self.__SERVO_PAN,  self.__PRESENT_POS) - self.__list_find[self.__pos_find%2][0])*1.0
+#			dis_tilt = abs(self.servo.readWord(self.__SERVO_TILT, self.__PRESENT_POS) - self.__list_find[self.__pos_find%2][1] + self.__jump_find*(self.__pos_find/2))*1.0
+#			
+#			if dis_pan > dis_tilt:
+#				max_dis = dis_pan
+#			else:
+#				max_dis = dis_tilt
+#			
+##			print("dis_pan: " + str(dis_pan))
+##			print("dis_tilt: " + str(dis_tilt))
+##			raw_input("max_dis: " + str(max_dis))
+#			
+##			print(99*(dis_pan/max_dis))
+##			raw_input(99*(dis_tilt/max_dis))
+#			
+#			if self.__args.head == False or self.servo.readByte(self.__SERVO_PAN,self.__STATUS) == 1:
+#				self.servo.writeWord(self.__SERVO_PAN, self.__SPEED,
+#													1+int(99*(dis_pan/max_dis)))
+#				self.servo.writeWord(self.__SERVO_PAN,
+#													self.__GOAL_POS,
+#													self.__list_find[self.__pos_find%2][0])
+#			if self.__args.head == False or self.servo.readByte(self.__SERVO_TILT,self.__STATUS) == 1:
+#				self.servo.writeWord(self.__SERVO_TILT, self.__SPEED,
+#														1+int(99*(dis_tilt/max_dis)))
+#				self.servo.writeWord(self.__SERVO_TILT,
+#														self.__GOAL_POS,
+#														self.__list_find[self.__pos_find%2][1]-(self.__jump_find*(self.__pos_find/2)))
+#			self.__pos_find += 1
+#			if self.__list_find[self.__pos_find%2][1]-(self.__jump_find*(self.__pos_find/2)) <= self.min_posTILT:
+#				self.__pos_find = 0'''
+		
+													
+#		return [self.servo.readWord(self.__SERVO_PAN, self.__PRESENT_POS), self.servo.readWord(self.__SERVO_TILT, self.__PRESENT_POS)]
+		if status[2] == 0 :
+			panpos = self.servo.readWord(self.__SERVO_PAN, self.__PRESENT_POS)
+			tiltpos = self.servo.readWord(self.__SERVO_TILT, self.__PRESENT_POS)
+		else:
+			panpos = self.servo.readWord(self.__SERVO_PAN, self.__PRESENT_POS)-self.__list_varredura[self.__cont_varredura][0]
+			tiltpos = self.servo.readWord(self.__SERVO_TILT, self.__PRESENT_POS)-self.__list_varredura[self.__cont_varredura][1]
+		
+		
+		return [panpos,tiltpos]
 
 #----------------------------------------------------------------------------------------------------------------------------------
 
 	def __segue(self,status, Mem, bkb):
 		# Pan
 #		# Posicao
-		self.__pos_find = 0
+							
+		#self.__pos_find = 0
 		if self.__args.head == False or self.servo.readByte(self.__SERVO_PAN,self.__STATUS) == 1:
 			self.servo.writeWord(self.__SERVO_PAN, self.__SPEED, self.__min_speed)
 			self.servo.writeWord(self.__SERVO_PAN,
 								self.__GOAL_POS,
 								int(self.servo.readWord(self.__SERVO_PAN,self.__PRESENT_POS) + self.__ControllerPan.update(status[1])))
 		
-
+		
 		# Tilt
 		# Posicao
 		if self.__args.head == False or self.servo.readByte(self.__SERVO_TILT,self.__STATUS) == 1:
@@ -359,7 +434,7 @@ e seguem a ordem de [posição do PAN, posição do TILT], todos os pontos devem
 		
 		bkb.write_float(Mem, 'VISION_TILT_DEG', (self.max_posTILT - self.servo.readWord(self.__SERVO_TILT, self.__PRESENT_POS) )*0.29)
 		bkb.write_float(Mem, 'VISION_PAN_DEG', (self.servo.readWord(self.__SERVO_PAN , self.__PRESENT_POS) - self.cen_posPAN )*0.29)
-		print bkb.read_float(Mem, 'VISION_TILT_DEG')
+		#print bkb.read_float(Mem, 'VISION_TILT_DEG')
 #		bkb.write_int('VISION_MOTOR1_ANGLE', self.servo.readWord(self.__SERVO_TILT, self.__PRESENT_POS))
 #		bkb.write_int('VISION_MOTOR2_ANGLE', self.servo.readWord(self.__SERVO_PAN, self.__PRESENT_POS))
 		
