@@ -117,19 +117,51 @@ class Pantilt (object):
 		self.__list_varredura = [
 		[self.PanSearchLeft1,self.TiltSearchDown], # Olhando para baixo
 		[self.PanSearchLeft2,self.TiltSearchDown], # Olhando para baixo
-		[self.PanSearchCenter3,self.TiltSearchDown], # Olhando para baixo
-		[self.PanSearchRight4,self.TiltSearchDown], # Olhando para baixo
+		[self.PanSearchLeft3,self.TiltSearchDown], # Olhando para baixo
+		[self.PanSearchLeft4,self.TiltSearchDown], # Olhando para baixo
+		[self.PanSearchLeft5,self.TiltSearchDown], # Olhando para baixo
+		[self.PanSearchLeft6,self.TiltSearchDown], # Olhando para baixo
+
+		[self.PanSearchCenter0,self.TiltSearchDown], # Olhando para baixo
+
+		[self.PanSearchRight6,self.TiltSearchDown], # Olhando para baixo
 		[self.PanSearchRight5,self.TiltSearchDown], # Olhando para baixo
-		[self.PanSearchLeft1,self.TiltSearchCenter], # Olhando para meio
-		[self.PanSearchLeft2,self.TiltSearchCenter], # Olhando para meio
+		[self.PanSearchRight4,self.TiltSearchDown], # Olhando para baixo
+		[self.PanSearchRight3,self.TiltSearchDown], # Olhando para baixo
+		[self.PanSearchRight2,self.TiltSearchDown], # Olhando para baixo
+		[self.PanSearchRight1,self.TiltSearchDown], # Olhando para baixo
+
+		[self.PanSearchRight2,self.TiltSearchCenter], # Olhando para meio
+		[self.PanSearchRight3,self.TiltSearchCenter], # Olhando para meio
 		[self.PanSearchRight4,self.TiltSearchCenter], # Olhando para meio
 		[self.PanSearchRight5,self.TiltSearchCenter], # Olhando para meio
-		[self.PanSearchLeft1,self.TiltSearchUp], # Olhando para cima
-		[self.PanSearchCenter3,self.TiltSearchUp], # Olhando para cima
-		[self.PanSearchRight5,self.TiltSearchUp], # Olhando para cima
+		[self.PanSearchRight6,self.TiltSearchCenter], # Olhando para meio
+
+		[self.PanSearchCenter0,self.TiltSearchCenter], # Olhando para meio
+
+		[self.PanSearchLeft6,self.TiltSearchCenter], # Olhando para meio
+		[self.PanSearchLeft5,self.TiltSearchCenter], # Olhando para meio
+		[self.PanSearchLeft4,self.TiltSearchCenter], # Olhando para meio
+		[self.PanSearchLeft3,self.TiltSearchCenter], # Olhando para meio
+		[self.PanSearchLeft2,self.TiltSearchCenter], # Olhando para meio
+
+		[self.PanSearchLeft2,self.TiltSearchUp], # Olhando para Cima
+		[self.PanSearchLeft3,self.TiltSearchUp], # Olhando para Cima
+		[self.PanSearchLeft4,self.TiltSearchUp], # Olhando para Cima
+		[self.PanSearchLeft5,self.TiltSearchUp], # Olhando para Cima
+		[self.PanSearchLeft6,self.TiltSearchUp], # Olhando para Cima
+
+		[self.PanSearchCenter0,self.TiltSearchUp], # Olhando para Cima
+
+		[self.PanSearchRight6,self.TiltSearchUp], # Olhando para baixo
+		[self.PanSearchRight5,self.TiltSearchUp], # Olhando para baixo
+		[self.PanSearchRight4,self.TiltSearchUp], # Olhando para baixo
+		[self.PanSearchRight3,self.TiltSearchUp], # Olhando para baixo
+		[self.PanSearchRight2,self.TiltSearchUp], # Olhando para baixo
+
 		]
 	
-#		        self.TiltSearchUp -50
+#		        	self.TiltSearchUp -50
 #				self.TiltSearchCenter 0
 #				self.TiltSearchDown 50
 #				self.PanSearchLeft1 -20
@@ -230,11 +262,11 @@ class Pantilt (object):
 					#print "size ",len(posHead)
 					self.servo.writeWord(self.__SERVO_PAN,
 															self.__GOAL_POS,
-															posHead[0])
+															posHead[0] - self.__list_varredura[self.__cont_varredura][0])
 				if self.__args.head == False or self.servo.readByte(self.__SERVO_TILT,self.__STATUS) == 1:
 					self.servo.writeWord(self.__SERVO_TILT,
 															self.__GOAL_POS,
-															posHead[1])
+															posHead[1] - self.__list_varredura[self.__cont_varredura][1])
 				self.__lost = 0
 				#self.__cont_varredura = 0
 				#print "PosHead1 ", posHead[1]
@@ -299,16 +331,24 @@ class Pantilt (object):
 
 		while True:
 			if 'Search'not in self.__Config.sections():
-				print "Offset inexistentes, criando valores padrao"
+				print "Non-existent values, creating standard values"
 				self.__Config.add_section('Search')
 				self.__Config.set('Search', 'TiltSearchUp', str(-50)+'\t;First level tilt search')
 				self.__Config.set('Search', 'TiltSearchCenter', str(0)+'\t;Second level tilt search')
 				self.__Config.set('Search', 'TiltSearchDown', str(50)+'\t;Third level tilt search')
-				self.__Config.set('Search', 'PanSearchLeft1', str(-20)+'\t;First level Pan search')
-				self.__Config.set('Search', 'PanSearchLeft2', str(-10)+'\t;Second level Pan search')
-				self.__Config.set('Search', 'PanSearchCenter3', str(0)+'\t;Third level Pan search')
-				self.__Config.set('Search', 'PanSearchRight4', str(10)+'\t;Forth level Pan search')
-				self.__Config.set('Search', 'PanSearchRight5', str(20)+'\t;Fifth level Pan search')
+				self.__Config.set('Search', 'PanSearchLeft1', str(-300)+'\t;Left First level Pan search')
+				self.__Config.set('Search', 'PanSearchLeft2', str(-250)+'\t;Left Second level Pan search')
+				self.__Config.set('Search', 'PanSearchLeft3', str(-200)+'\t;Left Third level Pan search')
+				self.__Config.set('Search', 'PanSearchLeft4', str(-150)+'\t;Left Fourth level Pan search')
+				self.__Config.set('Search', 'PanSearchLeft5', str(-100)+'\t;Left Fifth level Pan search')
+				self.__Config.set('Search', 'PanSearchLeft6', str(-50)+'\t;Left Sixth level Pan search')
+				self.__Config.set('Search', 'PanSearchCenter0', str(0)+'\t;Zero level Pan search')
+				self.__Config.set('Search', 'PanSearchRight6', str(50)+'\t;Right Sixth level Pan search')
+				self.__Config.set('Search', 'PanSearchRight5', str(100)+'\t;Right Fifth level Pan search')
+				self.__Config.set('Search', 'PanSearchRight4', str(150)+'\t;Right Forth level Pan search')
+				self.__Config.set('Search', 'PanSearchRight3', str(200)+'\t;Right Third level Pan search')
+				self.__Config.set('Search', 'PanSearchRight2', str(250)+'\t;Right Second level Pan search')
+				self.__Config.set('Search', 'PanSearchRight1', str(300)+'\t;Right First level Pan search')
 				
 				with open('../Data/config.ini', 'wb') as configfile:
 					self.__Config.write(configfile)
@@ -320,9 +360,18 @@ class Pantilt (object):
 				self.TiltSearchDown = self.__Config.getint('Search', 'TiltSearchDown')
 				self.PanSearchLeft1 = self.__Config.getint('Search', 'PanSearchLeft1')
 				self.PanSearchLeft2 = self.__Config.getint('Search', 'PanSearchLeft2')
-				self.PanSearchCenter3 = self.__Config.getint('Search', 'PanSearchCenter3')
-				self.PanSearchRight4 = self.__Config.getint('Search', 'PanSearchRight4')
+				self.PanSearchLeft3 = self.__Config.getint('Search', 'PanSearchLeft3')
+				self.PanSearchLeft4 = self.__Config.getint('Search', 'PanSearchLeft4')
+				self.PanSearchLeft5 = self.__Config.getint('Search', 'PanSearchLeft5')
+				self.PanSearchLeft6 = self.__Config.getint('Search', 'PanSearchLeft6')
+				self.PanSearchCenter0 = self.__Config.getint('Search', 'PanSearchCenter0')
+				self.PanSearchRight6 = self.__Config.getint('Search', 'PanSearchRight6')
 				self.PanSearchRight5 = self.__Config.getint('Search', 'PanSearchRight5')
+				self.PanSearchRight4 = self.__Config.getint('Search', 'PanSearchRight4')
+				self.PanSearchRight3 = self.__Config.getint('Search', 'PanSearchRight3')
+				self.PanSearchRight2 = self.__Config.getint('Search', 'PanSearchRight2')
+				self.PanSearchRight1 = self.__Config.getint('Search', 'PanSearchRight1')
+
 				break
 				
 
@@ -348,7 +397,7 @@ class Pantilt (object):
 		
 		if self.__args.head == False or self.servo.readByte(self.__SERVO_PAN,self.__STATUS) == 1:
 			self.servo.writeWord(self.__SERVO_PAN, self.__SPEED,
-														0) # Velocidade maxima do servo (CHECAR)
+														200) # Velocidade maxima do servo (CHECAR)
 			
 			self.servo.writeWord(self.__SERVO_PAN,
 														self.__GOAL_POS,
@@ -356,7 +405,7 @@ class Pantilt (object):
 		
 		if self.__args.head == False or self.servo.readByte(self.__SERVO_TILT,self.__STATUS) == 1:
 			self.servo.writeWord(self.__SERVO_TILT, self.__SPEED,
-														0) # Velocidade maxima do servo (CHECAR)
+														200) # Velocidade maxima do servo (CHECAR)
 		
 			self.servo.writeWord(self.__SERVO_TILT,
 														self.__GOAL_POS,
@@ -408,7 +457,7 @@ class Pantilt (object):
 	def __segue(self,status, Mem, bkb):
 		# Pan
 #		# Posicao
-							
+		#print "Status ", status[1]				
 		#self.__pos_find = 0
 		if self.__args.head == False or self.servo.readByte(self.__SERVO_PAN,self.__STATUS) == 1:
 			self.servo.writeWord(self.__SERVO_PAN, self.__SPEED, self.__min_speed)
@@ -457,7 +506,7 @@ class Pantilt (object):
 		self.servo.writeWord(self.__SERVO_PAN,self.__SPEED, 0)
 		self.servo.writeWord(self.__SERVO_TILT,self.__SPEED, 0)
 		
-		cap = cv2.VideoCapture(0)
+		cap = cv2.VideoCapture(1)
 		while True:
 			ret, frame = cap.read()
 			if self.min_posPAN != cv2.getTrackbarPos('Val dir','Ajustar varredura - Head'):
