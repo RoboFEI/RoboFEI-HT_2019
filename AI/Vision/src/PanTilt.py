@@ -342,23 +342,25 @@ class Pantilt (object):
 		
 		
 		# Indo para posição
-		self.servo.writeWord(self.__SERVO_PAN, self.__SPEED,
-													0) # Velocidade maxima do servo (CHECAR)
-		
-		self.servo.writeWord(self.__SERVO_PAN,
-													self.__GOAL_POS,
-													self.cen_posPAN + self.__list_varredura[self.__cont_varredura][0])
-		
-		self.servo.writeWord(self.__SERVO_TILT, self.__SPEED,
-													0) # Velocidade maxima do servo (CHECAR)
-		
-		self.servo.writeWord(self.__SERVO_TILT,
-													self.__GOAL_POS,
-													self.cen_posTILT + self.__list_varredura[self.__cont_varredura][1])
 		self.__cont_varredura += 1
-		
 		if self.__cont_varredura >= len(self.__list_varredura): # Testa se não atingiu o final da lista
 			self.__cont_varredura = 0
+		
+		if self.__args.head == False or self.servo.readByte(self.__SERVO_PAN,self.__STATUS) == 1:
+			self.servo.writeWord(self.__SERVO_PAN, self.__SPEED,
+														0) # Velocidade maxima do servo (CHECAR)
+			
+			self.servo.writeWord(self.__SERVO_PAN,
+														self.__GOAL_POS,
+														self.cen_posPAN + self.__list_varredura[self.__cont_varredura][0])
+		
+		if self.__args.head == False or self.servo.readByte(self.__SERVO_TILT,self.__STATUS) == 1:
+			self.servo.writeWord(self.__SERVO_TILT, self.__SPEED,
+														0) # Velocidade maxima do servo (CHECAR)
+		
+			self.servo.writeWord(self.__SERVO_TILT,
+														self.__GOAL_POS,
+														self.cen_posTILT + self.__list_varredura[self.__cont_varredura][1])
 		
 		while abs(self.servo.readWord(self.__SERVO_PAN, self.__PRESENT_POS)-self.servo.readWord(self.__SERVO_PAN, self.__GOAL_POS)) > 10 or abs(self.servo.readWord(self.__SERVO_TILT, self.__PRESENT_POS)-self.servo.readWord(self.__SERVO_TILT, self.__GOAL_POS)) > 10:
 			time.sleep(0.05) #(CHECAR) Testar se com o sleep funciona melhor
@@ -399,16 +401,7 @@ class Pantilt (object):
 #				self.__pos_find = 0'''
 		
 													
-#		return [self.servo.readWord(self.__SERVO_PAN, self.__PRESENT_POS), self.servo.readWord(self.__SERVO_TILT, self.__PRESENT_POS)]
-		if status[2] == 0 :
-			panpos = self.servo.readWord(self.__SERVO_PAN, self.__PRESENT_POS)
-			tiltpos = self.servo.readWord(self.__SERVO_TILT, self.__PRESENT_POS)
-		else:
-			panpos = self.servo.readWord(self.__SERVO_PAN, self.__PRESENT_POS)-self.__list_varredura[self.__cont_varredura][0]
-			tiltpos = self.servo.readWord(self.__SERVO_TILT, self.__PRESENT_POS)-self.__list_varredura[self.__cont_varredura][1]
-		
-		
-		return [panpos,tiltpos]
+		return [self.servo.readWord(self.__SERVO_PAN, self.__PRESENT_POS), self.servo.readWord(self.__SERVO_TILT, self.__PRESENT_POS)]
 
 #----------------------------------------------------------------------------------------------------------------------------------
 
