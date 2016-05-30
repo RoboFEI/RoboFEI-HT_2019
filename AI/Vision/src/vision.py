@@ -71,7 +71,7 @@ def statusBall(positionballframe):
 		else:
 			#print "Bola encontrada na posicao x: " + str(round(positionballframe[1],2)) + " y: " + str(round(positionballframe[2],2)) + " e diametro de: " + str(round(positionballframe[3],2))
 			#print "Distancia da Bola func 2 em metros: " + str(4.1813911146*pow(positionballframe[3],-1.0724682465))
-			lista.append(418.13911146*pow(positionballframe[3],-1.0724682465) + 100)
+			lista.append(418.13911146*pow(positionballframe[3],-1.0724682465))
 			print 'Dist using pixel size: ', bkb.read_float(Mem, 'VISION_BALL_DIST')
 		if len(lista) == 1:
 			dist_media = lista[0]

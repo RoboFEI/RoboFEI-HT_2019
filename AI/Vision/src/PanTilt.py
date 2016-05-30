@@ -261,12 +261,12 @@ class Pantilt (object):
 					#print "PosHead0 ", posHead[0]
 					#print "size ",len(posHead)
 					self.servo.writeWord(self.__SERVO_PAN,
-															self.__GOAL_POS,
-															posHead[0] - self.__list_varredura[self.__cont_varredura][0])
+														self.__GOAL_POS,
+														self.cen_posPAN + self.__list_varredura[self.__cont_varredura-1][0])
 				if self.__args.head == False or self.servo.readByte(self.__SERVO_TILT,self.__STATUS) == 1:
 					self.servo.writeWord(self.__SERVO_TILT,
-															self.__GOAL_POS,
-															posHead[1] - self.__list_varredura[self.__cont_varredura][1])
+														self.__GOAL_POS,
+														self.cen_posTILT + self.__list_varredura[self.__cont_varredura-1][1])
 				self.__lost = 0
 				#self.__cont_varredura = 0
 				#print "PosHead1 ", posHead[1]
@@ -411,8 +411,8 @@ class Pantilt (object):
 														self.__GOAL_POS,
 														self.cen_posTILT + self.__list_varredura[self.__cont_varredura][1])
 		
-		while abs(self.servo.readWord(self.__SERVO_PAN, self.__PRESENT_POS)-self.servo.readWord(self.__SERVO_PAN, self.__GOAL_POS)) > 10 or abs(self.servo.readWord(self.__SERVO_TILT, self.__PRESENT_POS)-self.servo.readWord(self.__SERVO_TILT, self.__GOAL_POS)) > 10:
-			time.sleep(0.05) #(CHECAR) Testar se com o sleep funciona melhor
+		while (abs(self.servo.readWord(self.__SERVO_PAN, self.__PRESENT_POS)-self.servo.readWord(self.__SERVO_PAN, self.__GOAL_POS)) > 10 or abs(self.servo.readWord(self.__SERVO_TILT, self.__PRESENT_POS)-self.servo.readWord(self.__SERVO_TILT, self.__GOAL_POS)) > 10) and self.servo.readByte(self.__SERVO_PAN,self.__STATUS) == 1 and self.servo.readByte(self.__SERVO_TILT,self.__STATUS) == 1:
+			pass #(CHECAR) Testar se com o sleep funciona melhor
 		time.sleep(0.05) #(CHECA) Ver se é o tempo necessario para a ajuste automatico da camera
 
 #'''---------------------------------Codigo antigo se funcinar eu apago----------------------------------
