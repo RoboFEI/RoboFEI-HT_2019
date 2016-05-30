@@ -5,7 +5,7 @@
 
 env/
 build/
-AI/Control/Data
+AI/Control/Data/
 develop-eggs/
 dist/
 downloads/
