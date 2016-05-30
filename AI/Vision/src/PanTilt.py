@@ -506,7 +506,7 @@ class Pantilt (object):
 		self.servo.writeWord(self.__SERVO_PAN,self.__SPEED, 0)
 		self.servo.writeWord(self.__SERVO_TILT,self.__SPEED, 0)
 		
-		cap = cv2.VideoCapture(1)
+		cap = cv2.VideoCapture(0)
 		while True:
 			ret, frame = cap.read()
 			if self.min_posPAN != cv2.getTrackbarPos('Val dir','Ajustar varredura - Head'):

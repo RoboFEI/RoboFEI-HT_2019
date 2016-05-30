@@ -168,14 +168,14 @@ resolutions = readResolutions(ball.Config)
 atualres = len(resolutions)/2 -1
 razao = pow(minRadio/maxRadio, 1.0/len(resolutions))
 
-cap = cv2.VideoCapture(1) #Abrindo camera
+cap = cv2.VideoCapture(0) #Abrindo camera
 
 ret = cap.set(3,resolutions[atualres,0])
 ret = cap.set(4,resolutions[atualres,1])
 
 if args.withoutservo == False:
 	posheadball = np.array([head.cen_posTILT,head.cen_posPAN]) #Iniciando valores iniciais da posicao da bola
-os.system("v4l2-ctl -d /dev/video1 -c focus_auto=0 && v4l2-ctl -d /dev/video1 -c focus_absolute=0")
+os.system("v4l2-ctl -d /dev/video0 -c focus_auto=0 && v4l2-ctl -d /dev/video0 -c focus_absolute=0")
 
 while True:
 	#Salva o frame
