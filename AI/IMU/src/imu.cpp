@@ -349,7 +349,7 @@ int main(int argc, char **argv)
 
     INIReader reader(INI_FILE_PATH);
     if (reader.ParseError() < 0) {
-        std::cout << "Can't load 'test.ini'\n";
+        std::cout << "Can't load 'config.ini'\n";
         return 1;
     }
     const int mem_key = (int)reader.GetInteger("Communication","no_player_robofei",-1024)*100;
