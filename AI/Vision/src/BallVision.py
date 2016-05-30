@@ -44,7 +44,7 @@ class VisionBall (object):
 	
 	#Contrele logica
 	__contframelost = 1
-	__framelostball = 20
+	__framelostball = 10
 	__inspos = None
 	__status = np.array([0,-1,-1,-1])
 	
@@ -345,7 +345,7 @@ class VisionBall (object):
 
 	def detect(self,frame,res):
 		if self.__status[0] == 2 and self.__contframelost<=5:
-#			print "Localizado" #Debug
+			#print "Localizado bola" #Debug
 			posx = (self.__inspos[len(self.__inspos)-1,0]+10)*(res[0]/20)
 			posy = (self.__inspos[len(self.__inspos)-1,1]+10)*(res[1]/20)
 			raio = (self.__inspos[len(self.__inspos)-1,2]*(res[1]/20))/2

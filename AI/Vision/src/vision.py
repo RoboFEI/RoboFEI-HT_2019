@@ -6,7 +6,7 @@ import cv2
 import ctypes
 import argparse
 import time
-from math import log,exp,tan
+from math import log,exp,tan,radians
 
 from BallVision import *
 from PanTilt import *
@@ -37,10 +37,13 @@ parser.add_argument('--head', '--he', action="store_true", help = 'Configurando 
 #----------------------------------------------------------------------------------------------------------------------------------
 
 def statusBall(positionballframe):
+	global lista
 	if positionballframe[0] == 0:
+		lista = []
 		print "Campo nao encontrado"
 		
 	if positionballframe[0] == 1:
+		lista = []
 		mens = "Bola nao encontrada, campo "
 		
 		if positionballframe[1] == -1:
@@ -59,16 +62,24 @@ def statusBall(positionballframe):
 		print mens
 	if positionballframe[0] == 2:
 		if bkb.read_float(Mem, 'VISION_TILT_DEG') < 50:
-			##bkb.write_float(Mem, 'VISION_BALL_DIST', 84.8048735*exp(0.042451235*bkb.read_float(Mem, 'VISION_TILT_DEG')))
-			bkb.write_float(Mem, 'VISION_BALL_DIST', 420*tan(bkb.read_float(Mem, 'VISION_TILT_DEG')))
+			lista.append(8.48048735*exp(0.042451235*bkb.read_float(Mem, 'VISION_TILT_DEG')))
+			##bkb.write_float(Mem, 'VISION_BALL_DIST', 430*tan(radians(bkb.read_float(Mem, 'VISION_TILT_DEG'))))
 			print 'Dist using tilt angle: ', bkb.read_float(Mem, 'VISION_BALL_DIST')
+			#0.0848048735*exp(0.042451235*bkb.read_int('VISION_TILT_DEG')
 			#print "Distancia da Bola func 1 em metros: " + str(0.0848048735*exp(0.042451235*bkb.read_int('VISION_MOTOR1_ANGLE')))
 			#print "Bola encontrada na posicao x: " + str(round(positionballframe[1],2)) + " y: " + str(round(positionballframe[2],2)) + " e diametro de: " + str(round(positionballframe[3],2))
 		else:
 			#print "Bola encontrada na posicao x: " + str(round(positionballframe[1],2)) + " y: " + str(round(positionballframe[2],2)) + " e diametro de: " + str(round(positionballframe[3],2))
 			#print "Distancia da Bola func 2 em metros: " + str(4.1813911146*pow(positionballframe[3],-1.0724682465))
-			bkb.write_float(Mem, 'VISION_BALL_DIST', 4181.3911146*pow(positionballframe[3],-1.0724682465) + 100)
+			lista.append(418.13911146*pow(positionballframe[3],-1.0724682465))
 			print 'Dist using pixel size: ', bkb.read_float(Mem, 'VISION_BALL_DIST')
+		if len(lista) == 1:
+			dist_media = lista[0]
+		else:
+			if len(lista) >= 20:
+				lista.pop(0)
+			dist_media = float(sum(lista)/len(lista))
+		bkb.write_float(Mem, 'VISION_BALL_DIST', dist_media)
 		bkb.write_int(Mem,'VISION_LOST', 0)
 		
 		
@@ -149,6 +160,7 @@ ball = VisionBall(args)
 if args.withoutservo == False:
 	head = Pantilt(args, ball.Config)
 
+lista = []
 minRadio = 0.8
 maxRadio = 20.0
 
