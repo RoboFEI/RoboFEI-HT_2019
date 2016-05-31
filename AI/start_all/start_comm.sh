@@ -4,5 +4,6 @@
 echo "communication"
 
 cd ../
+cd build/Communication/
 
-./build/Communication/communication
+./communication

@@ -4,4 +4,5 @@
 echo "imu"
 
 cd ..
-./build/IMU/imu
+cd build/IMU/
+./imu

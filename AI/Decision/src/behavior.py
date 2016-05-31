@@ -359,16 +359,21 @@ class NaiveIMU(TreatingRawData):
                             if self.get_orientation() <= 20 and self.get_orientation() >= -20:
                                 self.set_kick_right()
                             elif self.get_orientation() > 20:
-                                self.set_revolve_around_ball_clockwise()
+                                ####################################  #set pass until our robot doesn`t revolve around ball
+                                #self.set_revolve_around_ball_clockwise()  
+                                self.set_pass_right()
                             elif self.get_orientation() < -20:
-                                self.set_revolve_around_ball_anticlockwise()
+                                #self.set_revolve_around_ball_anticlockwise()
+                                self.set_pass_left()
                         elif self.get_dist_ball() < distance_to_kick and self.get_motor_pan_degrees() > 0:
                             if self.get_orientation() <= 15 and self.get_orientation() >= -15:
                                 self.set_kick_left()
                             elif self.get_orientation() > 15:
-                                self.set_revolve_around_ball_clockwise()
+                                #self.set_revolve_around_ball_clockwise()
+                                self.set_pass_right()
                             elif self.get_orientation() < -15:
-                                self.set_revolve_around_ball_anticlockwise()
+                                #self.set_revolve_around_ball_anticlockwise()
+                                self.set_pass_left()
                         elif self.get_dist_ball() > 50:
                             #self.set_walk_forward()
                             self.set_walk_forward_slow((self.get_dist_ball() / 5))
