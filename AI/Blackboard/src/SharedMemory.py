@@ -254,5 +254,9 @@ class SharedMemory(object):
     'LOCALIZATION_OPP10_Y': 112,
     'LOCALIZATION_OPP11_X': 113,
     'LOCALIZATION_OPP11_Y': 114,
+    'DECISION_RBT01_DIST_BALL': 115,
+    'DECISION_RBT02_DIST_BALL': 116,
+    'DECISION_RBT03_DIST_BALL': 117,
+    'DECISION_RBT04_DIST_BALL': 118,
     }
 #------------------------------------------------------------------------------------------

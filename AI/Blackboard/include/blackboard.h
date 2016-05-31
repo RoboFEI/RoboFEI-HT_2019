@@ -208,6 +208,10 @@ Arquivo de cabeçalho contendo as funções e definições do black board
 #define LOCALIZATION_OPP10_Y 112
 #define LOCALIZATION_OPP11_X 113
 #define LOCALIZATION_OPP11_Y 114
+#define DECISION_RBT01_DIST_BALL 115
+#define DECISION_RBT02_DIST_BALL 116
+#define DECISION_RBT03_DIST_BALL 117
+#define DECISION_RBT04_DIST_BALL 118
 
 //----global variables------------------------------------------------
 extern int *mem ; //Variável que manipula memória compartilhada
