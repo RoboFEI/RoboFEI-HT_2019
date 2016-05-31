@@ -77,6 +77,16 @@ void move_action(int move_number, bool interrupt, bool &stop_gait); // Robot per
 
 void move_gait(float X_amplitude, float Y_amplitude, float A_amplitude, bool &stop_gait, ReadConfig* configGait, ReadConfig* configP); // Robot perform gait
 
+void kick_right_strong(CM730 *cm730, bool &stop_gait);
+
+void kick_left_strong(CM730 *cm730, bool &stop_gait);
+
+void robot_stop(ReadConfig *gait , bool &stop_gait);
+
+void pass_left(CM730 *cm730,bool &stop_gait);
+
+void pass_right(CM730 *cm730,bool &stop_gait);
+
 void change_current_dir()
 {
     char exepath[1024] = {0};
@@ -247,78 +257,11 @@ int main(int argc, char **argv)
 		        break;
 		        
 		        case 112: //p
-				    cout << "Chutar direito bola branca" << endl;
-					move_action(1, 0, stop_gait);
-					while(Action::GetInstance()->IsRunning()) usleep(8*1000);
-					Action::GetInstance()->Start(60);
-					while(Action::GetInstance()->IsRunning()) usleep(8*1000);
-					Action::GetInstance()->Stop();
-					Action::GetInstance()->m_Joint.SetEnableBody(false);
-					MotionManager::GetInstance()->SetEnable(false);
-					
-					//getchar();
-					
-					// Velocidades
-					cm730.WriteWord(11, 32, 399, &erro);
-					cm730.WriteWord(13, 32, 926, &erro);
-					cm730.WriteWord(15, 32, 1023, &erro);
-					cm730.WriteWord(17, 32, 97, &erro);
-					
-					cm730.WriteWord(11, 30, MotionManager::GetInstance()->m_Offset[11]+294, &erro);
-					cm730.WriteWord(13, 30, MotionManager::GetInstance()->m_Offset[13]+614, &erro);
-					cm730.WriteWord(15, 30, MotionManager::GetInstance()->m_Offset[15]+448, &erro);
-					cm730.WriteWord(17, 30, MotionManager::GetInstance()->m_Offset[17]+545, &erro);
-					
-					//Esperando movimento
-					cm730.ReadWord(15, 36, &value, 0);
-					while(abs(value-(MotionManager::GetInstance()->m_Offset[15]+448))>10)
-					{
-					cm730.ReadWord(15, 36, &value, 0);
-					//cout<<"position: "<<MotionManager::GetInstance()->m_Offset[15]+448<<" value: "<<value<<" dif: "<<abs(value-(MotionManager::GetInstance()->m_Offset[15]+448))<<endl;
-					usleep(8*1000);
-					}
-					
-					Action::GetInstance()->m_Joint.SetEnableBody(true);
-					MotionManager::GetInstance()->SetEnable(true);
-					Action::GetInstance()->Start(61);
-					while(Action::GetInstance()->IsRunning()) usleep(8*1000);
+				    kick_right_strong(&cm730, stop_gait);
 		        break;
 
 		        case 108: //l
-				    cout << "Chutar esquerdo bola branca" << endl;
-					move_action(1, 0, stop_gait);
-					Action::GetInstance()->Start(62);
-					while(Action::GetInstance()->IsRunning()) usleep(8*1000);
-					Action::GetInstance()->Stop();
-		   			Action::GetInstance()->m_Joint.SetEnableBody(false);
-					MotionManager::GetInstance()->SetEnable(false);
-					
-					//getchar();
-					
-					// Velocidades
-					cm730.WriteWord(12, 32, 985, &erro);
-					cm730.WriteWord(14, 32, 812, &erro);
-					cm730.WriteWord(16, 32, 1023, &erro);
-					cm730.WriteWord(18, 32, 150, &erro);
-					
-					cm730.WriteWord(12, 30, MotionManager::GetInstance()->m_Offset[12]+741, &erro);
-					cm730.WriteWord(14, 30, MotionManager::GetInstance()->m_Offset[14]+327, &erro);
-					cm730.WriteWord(16, 30, MotionManager::GetInstance()->m_Offset[16]+501, &erro);
-					cm730.WriteWord(18, 30, MotionManager::GetInstance()->m_Offset[18]+478, &erro);
-					
-					//Esperando movimento
-					cm730.ReadWord(16, 36, &value, 0);
-					while(abs(value-(MotionManager::GetInstance()->m_Offset[16]+501))>10)
-					{
-					cm730.ReadWord(16, 36, &value, 0);
-					//cout<<"position: "<<MotionManager::GetInstance()->m_Offset[14]+409<<" value: "<<value<<" dif: "<<abs(value-(MotionManager::GetInstance()->m_Offset[14]+409))<<endl;
-					usleep(8*1000);
-					}
-					
-					Action::GetInstance()->m_Joint.SetEnableBody(true);
-					MotionManager::GetInstance()->SetEnable(true);
-					Action::GetInstance()->Start(63);
-					while(Action::GetInstance()->IsRunning()) usleep(8*1000);
+				    kick_left_strong(&cm730, stop_gait);
 		        break;
 
 		        case 99: //c
@@ -342,36 +285,7 @@ int main(int argc, char **argv)
 		        break;
 
 		        case 105: //i
-				    cout << "Passe Esquerda" << endl;
-					move_action(1, 0, stop_gait);
-					Action::GetInstance()->Start(70);
-					while(Action::GetInstance()->IsRunning()) usleep(8*1000);
-					Action::GetInstance()->Stop();
-		   			Action::GetInstance()->m_Joint.SetEnableBody(false);
-					MotionManager::GetInstance()->SetEnable(false);
-					
-					//getchar();
-					
-					// Velocidades
-					cm730.WriteWord(7, 32, 255, &erro);
-					cm730.WriteWord(9, 32, 1023, &erro);
-					
-					cm730.WriteWord(7, 30, MotionManager::GetInstance()->m_Offset[7]+603, &erro);
-					cm730.WriteWord(9, 30, MotionManager::GetInstance()->m_Offset[9]+385, &erro);
-					
-					//Esperando movimento
-					cm730.ReadWord(9, 36, &value, 0);
-					while(abs(value-(MotionManager::GetInstance()->m_Offset[9]+385))>10)
-					{
-					cm730.ReadWord(9, 36, &value, 0);
-					//cout<<"position: "<<MotionManager::GetInstance()->m_Offset[14]+409<<" value: "<<value<<" dif: "<<abs(value-(MotionManager::GetInstance()->m_Offset[14]+409))<<endl;
-					usleep(8*1000);
-					}
-					
-					Action::GetInstance()->m_Joint.SetEnableBody(true);
-					MotionManager::GetInstance()->SetEnable(true);
-					Action::GetInstance()->Start(72);
-					while(Action::GetInstance()->IsRunning()) usleep(8*1000);
+				    pass_left(&cm730, stop_gait);
 		        break;
 
 		        case 101: //e
@@ -380,36 +294,7 @@ int main(int argc, char **argv)
 		        break;
 
 		        case 106: //j
-				    cout << "Passe Direita" << endl;
-					move_action(1, 0, stop_gait);
-					Action::GetInstance()->Start(71);
-					while(Action::GetInstance()->IsRunning()) usleep(8*1000);
-					Action::GetInstance()->Stop();
-		   			Action::GetInstance()->m_Joint.SetEnableBody(false);
-					MotionManager::GetInstance()->SetEnable(false);
-					
-					//getchar();
-					
-					// Velocidades
-					cm730.WriteWord(8, 32, 255, &erro);
-					cm730.WriteWord(10, 32, 1023, &erro);
-					
-					cm730.WriteWord(8, 30, MotionManager::GetInstance()->m_Offset[8]+420, &erro);
-					cm730.WriteWord(10, 30, MotionManager::GetInstance()->m_Offset[10]+638, &erro);
-					
-					//Esperando movimento
-					cm730.ReadWord(10, 36, &value, 0);
-					while(abs(value-(MotionManager::GetInstance()->m_Offset[10]+638))>10)
-					{
-					cm730.ReadWord(10, 36, &value, 0);
-					//cout<<"position: "<<MotionManager::GetInstance()->m_Offset[14]+409<<" value: "<<value<<" dif: "<<abs(value-(MotionManager::GetInstance()->m_Offset[14]+409))<<endl;
-					usleep(8*1000);
-					}
-					
-					Action::GetInstance()->m_Joint.SetEnableBody(true);
-					MotionManager::GetInstance()->SetEnable(true);
-					Action::GetInstance()->Start(73);
-					while(Action::GetInstance()->IsRunning()) usleep(8*1000);
+				    pass_right(&cm730, stop_gait);
 		        break;
 
 		        case 109: //m
@@ -453,21 +338,7 @@ int main(int argc, char **argv)
 		        break;
 
 		        case 116: //t
-		            if (Walking::GetInstance()->IsRunning()!=0)
-		            {
-		                move_gait(gait.walk_foward, gait.sidle, gait.turn_angle, stop_gait, &gait, &gait);
-		                sleep(1);
-		            }
-				    cout << "Stop" << endl;
-					while(Walking::GetInstance()->GetCurrentPhase()!=0 && Walking::GetInstance()->IsRunning()!=0)  usleep(8*1000);
-					Walking::GetInstance()->Stop();
-					Walking::GetInstance()->m_Joint.SetEnableBody(false);
-					Action::GetInstance()->m_Joint.SetEnableBody(true);
-					MotionManager::GetInstance()->SetEnable(true);
-					usleep(500000); //Aguarda meio segundo
-					Action::GetInstance()->Start(1); // Realiza a ação do numero contido no move_number
-					while(Action::GetInstance()->IsRunning()) usleep(8*1000);
-					stop_gait = 1;
+		            robot_stop(&gait , stop_gait);
 		        break;
 
 		        case 104: //h
@@ -523,23 +394,7 @@ int main(int argc, char **argv)
 
 			if(read_int(mem, DECISION_ACTION_A) == 0)
 			{
-		        if (Walking::GetInstance()->IsRunning()!=0)
-		        {
-		            move_gait(gait.walk_foward, gait.sidle, gait.turn_angle, stop_gait, &gait, &gait);
-		            sleep(1);
-		        }
-				std::cout<<" | Nada a fazer"<<std::endl;
-				while(Walking::GetInstance()->GetCurrentPhase()!=0 && Walking::GetInstance()->IsRunning()!=0)  usleep(8*1000);
-				Walking::GetInstance()->Stop();
-				Walking::GetInstance()->m_Joint.SetEnableBody(false);
-				Action::GetInstance()->m_Joint.SetEnableBody(true);
-				MotionManager::GetInstance()->SetEnable(true);
-				usleep(700000); //Aguarda 0.7 segundos
-				Action::GetInstance()->Start(1); // Realiza a ação do numero contido no move_number
-				while(Action::GetInstance()->IsRunning()) usleep(8*1000);
-				stop_gait = 1;
-				write_int(mem, CONTROL_MOVING, 0);
-				
+		        robot_stop(&gait , stop_gait);
 			}
 
 			if(read_int(mem, DECISION_ACTION_A) == 1)
@@ -562,71 +417,11 @@ int main(int argc, char **argv)
 			}
 			if(read_int(mem, DECISION_ACTION_A) == 4)
 			{
-                cout << "Chutar direito bola branca" << endl;
-				move_action(1, 0, stop_gait);
-				while(Action::GetInstance()->IsRunning()) usleep(8*1000);
-				Action::GetInstance()->Start(60);
-				while(Action::GetInstance()->IsRunning()) usleep(8*1000);
-				Action::GetInstance()->Stop();
-				Action::GetInstance()->m_Joint.SetEnableBody(false);
-				MotionManager::GetInstance()->SetEnable(false);
-				
-				cm730.WriteWord(11, 32, 399, &erro);
-				cm730.WriteWord(13, 32, 926, &erro);
-				cm730.WriteWord(15, 32, 1023, &erro);
-				cm730.WriteWord(17, 32, 97, &erro);
-					
-				cm730.WriteWord(11, 30, MotionManager::GetInstance()->m_Offset[11]+294, &erro);
-				cm730.WriteWord(13, 30, MotionManager::GetInstance()->m_Offset[13]+614, &erro);
-				cm730.WriteWord(15, 30, MotionManager::GetInstance()->m_Offset[15]+448, &erro);
-				cm730.WriteWord(17, 30, MotionManager::GetInstance()->m_Offset[17]+545, &erro);
-				
-				//Esperando movimento
-				cm730.ReadWord(15, 36, &value, 0);
-				while(abs(value-(MotionManager::GetInstance()->m_Offset[15]+448))>10)
-				{
-				    cm730.ReadWord(15, 36, &value, 0);
-				    //cout<<"position: "<<MotionManager::GetInstance()->m_Offset[15]+448<<" value: "<<value<<" dif: "<<abs(value-(MotionManager::GetInstance()->m_Offset[15]+448))<<endl;
-				    usleep(8*1000);
-			    }
-				Action::GetInstance()->m_Joint.SetEnableBody(true);
-				MotionManager::GetInstance()->SetEnable(true);
-				Action::GetInstance()->Start(63);
-				while(Action::GetInstance()->IsRunning()) usleep(8*1000);
+                kick_right_strong(&cm730, stop_gait);
 			}
 			if(read_int(mem, DECISION_ACTION_A) == 5)
 			{
-			    cout << "Chutar esquerdo bola branca" << endl;
-				move_action(1, 0, stop_gait);
-				Action::GetInstance()->Start(62);
-				while(Action::GetInstance()->IsRunning()) usleep(8*1000);
-				Action::GetInstance()->Stop();
-		   		Action::GetInstance()->m_Joint.SetEnableBody(false);
-				MotionManager::GetInstance()->SetEnable(false);
-					
-				cm730.WriteWord(12, 32, 985, &erro);
-				cm730.WriteWord(14, 32, 812, &erro);
-				cm730.WriteWord(16, 32, 1023, &erro);
-				cm730.WriteWord(18, 32, 150, &erro);
-					
-				cm730.WriteWord(12, 30, MotionManager::GetInstance()->m_Offset[12]+741, &erro);
-				cm730.WriteWord(14, 30, MotionManager::GetInstance()->m_Offset[14]+327, &erro);
-				cm730.WriteWord(16, 30, MotionManager::GetInstance()->m_Offset[16]+501, &erro);
-				cm730.WriteWord(18, 30, MotionManager::GetInstance()->m_Offset[18]+478, &erro);
-					
-				//Esperando movimento
-				cm730.ReadWord(16, 36, &value, 0);
-				while(abs(value-(MotionManager::GetInstance()->m_Offset[16]+501))>10)
-				{
-					cm730.ReadWord(16, 36, &value, 0);
-					//cout<<"position: "<<MotionManager::GetInstance()->m_Offset[14]+409<<" value: "<<value<<" dif: "<<abs(value-(MotionManager::GetInstance()->m_Offset[14]+409))<<endl;
-					usleep(8*1000);
-				}
-				
-				Action::GetInstance()->m_Joint.SetEnableBody(true);
-				MotionManager::GetInstance()->SetEnable(true);
-				Action::GetInstance()->Start(63);
-				while(Action::GetInstance()->IsRunning()) usleep(8*1000);
+			    kick_left_strong(&cm730, stop_gait);
 			}
 			if(read_int(mem, DECISION_ACTION_A) == 6)
 			{
@@ -676,13 +471,11 @@ int main(int argc, char **argv)
 			}
 			if(read_int(mem, DECISION_ACTION_A) == 12)
 			{			
-					cout<<" | Passe Esquerda"<<std::endl;
-					move_action(70, 0, stop_gait);
+				pass_left(&cm730, stop_gait);
             }
             if(read_int(mem, DECISION_ACTION_A) == 13)
 			{			
-					cout<<" | Passe Direito"<<std::endl;
-					move_action(71, 0, stop_gait);
+				pass_right(&cm730, stop_gait);
             }
 
 			if(read_int(mem, DECISION_ACTION_A) == 14)
@@ -950,3 +743,196 @@ int check_servo(CM730 *cm730, int idServo, bool &stop_gait)
 
 	return 0;
 }
+
+//==============================================================================
+void robot_stop(ReadConfig *gait , bool &stop_gait)
+{
+    write_int(mem, CONTROL_MOVING, 1);
+    if (Walking::GetInstance()->IsRunning()!=0)
+    {
+		move_gait(gait->walk_foward, gait->sidle, gait->turn_angle, stop_gait, gait, gait);
+		sleep(1);
+	}
+	std::cout<<" | Nada a fazer"<<std::endl;
+	while(Walking::GetInstance()->GetCurrentPhase()!=0 && Walking::GetInstance()->IsRunning()!=0)  usleep(8*1000);
+	Walking::GetInstance()->Stop();
+	Walking::GetInstance()->m_Joint.SetEnableBody(false);
+	Action::GetInstance()->m_Joint.SetEnableBody(true);
+	MotionManager::GetInstance()->SetEnable(true);
+	usleep(500000); //Aguarda 0.5 segundos
+	Action::GetInstance()->Start(1); // Realiza a ação do numero contido no move_number
+	while(Action::GetInstance()->IsRunning()) usleep(8*1000);
+	stop_gait = 1;
+	write_int(mem, CONTROL_MOVING, 0);
+}
+
+//==============================================================================
+void kick_left_strong(CM730 *cm730, bool &stop_gait)
+{
+    write_int(mem, CONTROL_MOVING, 1);
+    int erro;
+    int value;
+    cout << "Chute esquerdo bola branca" << endl;
+	move_action(1, 0, stop_gait);
+	Action::GetInstance()->Start(62);
+    while(Action::GetInstance()->IsRunning()) usleep(8*1000);
+	Action::GetInstance()->Stop();
+	Action::GetInstance()->m_Joint.SetEnableBody(false);
+    MotionManager::GetInstance()->SetEnable(false);
+
+	//getchar();
+
+	// Velocidades
+	cm730->WriteWord(12, 32, 985, &erro);
+	cm730->WriteWord(14, 32, 812, &erro);
+	cm730->WriteWord(16, 32, 1023, &erro);
+    cm730->WriteWord(18, 32, 150, &erro);
+
+	cm730->WriteWord(12, 30, MotionManager::GetInstance()->m_Offset[12]+741, &erro);
+	cm730->WriteWord(14, 30, MotionManager::GetInstance()->m_Offset[14]+327, &erro);
+	cm730->WriteWord(16, 30, MotionManager::GetInstance()->m_Offset[16]+501, &erro);
+	cm730->WriteWord(18, 30, MotionManager::GetInstance()->m_Offset[18]+478, &erro);
+
+	//Esperando movimento
+	cm730->ReadWord(16, 36, &value, 0);
+	while(abs(value-(MotionManager::GetInstance()->m_Offset[16]+501))>10)
+	{
+	    cm730->ReadWord(16, 36, &value, 0);
+	    //cout<<"position: "<<MotionManager::GetInstance()->m_Offset[14]+409<<" value: "<<value<<" dif: "<<abs(value-(MotionManager::GetInstance()->m_Offset[14]+409))<<endl;
+		usleep(8*1000);
+	}
+
+	Action::GetInstance()->m_Joint.SetEnableBody(true);
+	MotionManager::GetInstance()->SetEnable(true);
+	Action::GetInstance()->Start(63);
+	while(Action::GetInstance()->IsRunning()) usleep(8*1000);
+	write_int(mem, CONTROL_MOVING, 0);
+}
+
+//==============================================================================
+void kick_right_strong(CM730 *cm730, bool &stop_gait)
+{
+    write_int(mem, CONTROL_MOVING, 1);
+    int erro;
+    int value;
+	cout << "Chute direito bola branca" << endl;
+	move_action(1, 0, stop_gait);
+	while(Action::GetInstance()->IsRunning()) usleep(8*1000);
+	Action::GetInstance()->Start(60);
+	while(Action::GetInstance()->IsRunning()) usleep(8*1000);
+	Action::GetInstance()->Stop();
+	Action::GetInstance()->m_Joint.SetEnableBody(false);
+	MotionManager::GetInstance()->SetEnable(false);
+
+	//getchar();
+
+	// Velocidades
+	cm730->WriteWord(11, 32, 399, &erro);
+	cm730->WriteWord(13, 32, 926, &erro);
+	cm730->WriteWord(15, 32, 1023, &erro);
+	cm730->WriteWord(17, 32, 97, &erro);
+
+	cm730->WriteWord(11, 30, MotionManager::GetInstance()->m_Offset[11]+294, &erro);
+	cm730->WriteWord(13, 30, MotionManager::GetInstance()->m_Offset[13]+614, &erro);
+	cm730->WriteWord(15, 30, MotionManager::GetInstance()->m_Offset[15]+448, &erro);
+	cm730->WriteWord(17, 30, MotionManager::GetInstance()->m_Offset[17]+545, &erro);
+					
+	//Esperando movimento
+	cm730->ReadWord(15, 36, &value, 0);
+	while(abs(value-(MotionManager::GetInstance()->m_Offset[15]+448))>10)
+	{
+	    cm730->ReadWord(15, 36, &value, 0);
+		//cout<<"position: "<<MotionManager::GetInstance()->m_Offset[15]+448<<" value: "<<value<<" dif: "<<abs(value-(MotionManager::GetInstance()->m_Offset[15]+448))<<endl;
+		usleep(8*1000);
+	}
+
+	Action::GetInstance()->m_Joint.SetEnableBody(true);
+	MotionManager::GetInstance()->SetEnable(true);
+	Action::GetInstance()->Start(61);
+	while(Action::GetInstance()->IsRunning()) usleep(8*1000);
+	write_int(mem, CONTROL_MOVING, 0);
+
+}
+
+//==============================================================================
+void pass_left(CM730 *cm730, bool &stop_gait)
+{
+    write_int(mem, CONTROL_MOVING, 1);
+    int erro;
+    int value;
+    cout << "Passe Esquerda" << endl;
+	move_action(1, 0, stop_gait);
+	Action::GetInstance()->Start(70);
+	while(Action::GetInstance()->IsRunning()) usleep(8*1000);
+	Action::GetInstance()->Stop();
+	Action::GetInstance()->m_Joint.SetEnableBody(false);
+	MotionManager::GetInstance()->SetEnable(false);
+					
+	//getchar();
+					
+	// Velocidades
+	cm730->WriteWord(7, 32, 255, &erro);
+	cm730->WriteWord(9, 32, 1023, &erro);
+					
+	cm730->WriteWord(7, 30, MotionManager::GetInstance()->m_Offset[7]+603, &erro);
+	cm730->WriteWord(9, 30, MotionManager::GetInstance()->m_Offset[9]+385, &erro);
+					
+	//Esperando movimento
+	cm730->ReadWord(9, 36, &value, 0);
+	while(abs(value-(MotionManager::GetInstance()->m_Offset[9]+385))>10)
+	{
+		cm730->ReadWord(9, 36, &value, 0);
+		//cout<<"position: "<<MotionManager::GetInstance()->m_Offset[14]+409<<" value: "<<value<<" dif: "<<abs(value-(MotionManager::GetInstance()->m_Offset[14]+409))<<endl;
+	    usleep(8*1000);
+	}
+
+	Action::GetInstance()->m_Joint.SetEnableBody(true);
+	MotionManager::GetInstance()->SetEnable(true);
+	Action::GetInstance()->Start(72);
+	while(Action::GetInstance()->IsRunning()) usleep(8*1000);
+	write_int(mem, CONTROL_MOVING, 0);
+	
+}
+
+//==============================================================================
+void pass_right(CM730 *cm730, bool &stop_gait)
+{
+    write_int(mem, CONTROL_MOVING, 1);
+    cout << "Passe Direita" << endl;
+    int erro;
+    int value;
+	move_action(1, 0, stop_gait);
+    Action::GetInstance()->Start(71);
+	while(Action::GetInstance()->IsRunning()) usleep(8*1000);
+	Action::GetInstance()->Stop();
+	Action::GetInstance()->m_Joint.SetEnableBody(false);
+    MotionManager::GetInstance()->SetEnable(false);
+					
+	//getchar();
+					
+	// Velocidades
+	cm730->WriteWord(8, 32, 255, &erro);
+	cm730->WriteWord(10, 32, 1023, &erro);
+					
+    cm730->WriteWord(8, 30, MotionManager::GetInstance()->m_Offset[8]+420, &erro);
+	cm730->WriteWord(10, 30, MotionManager::GetInstance()->m_Offset[10]+638, &erro);
+					
+	//Esperando movimento
+	cm730->ReadWord(10, 36, &value, 0);
+	while(abs(value-(MotionManager::GetInstance()->m_Offset[10]+638))>10)
+	{
+		cm730->ReadWord(10, 36, &value, 0);
+		//cout<<"position: "<<MotionManager::GetInstance()->m_Offset[14]+409<<" value: "<<value<<" dif: "<<abs(value-       (MotionManager::GetInstance()->m_Offset[14]+409))<<endl;
+		usleep(8*1000);
+	}
+					
+	Action::GetInstance()->m_Joint.SetEnableBody(true);
+	MotionManager::GetInstance()->SetEnable(true);
+	Action::GetInstance()->Start(73);
+    while(Action::GetInstance()->IsRunning()) usleep(8*1000);
+    write_int(mem, CONTROL_MOVING, 0);
+    
+}
+
+
+
