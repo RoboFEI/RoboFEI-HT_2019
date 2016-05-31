@@ -222,10 +222,10 @@ class VisionBall (object):
 							cut[0] = cut[4]*self.__cut_sensitivity_haar_input
 						if cut[1] - cut[4]*self.__cut_sensitivity_haar_input < 0:
 							cut[1] = cut[4]*self.__cut_sensitivity_haar_input
-						if cut[2] + cut[4]*self.__cut_sensitivity_haar_input > 1296:
-							cut[2] = 1296 - cut[4]*self.__cut_sensitivity_haar_input
-						if cut[3] + cut[4]*self.__cut_sensitivity_haar_input > 2304:
-							cut[3] = 2304 - cut[4]*self.__cut_sensitivity_haar_input
+						if cut[2] + cut[4]*self.__cut_sensitivity_haar_input > 2304:
+							cut[2] = 2304 - cut[4]*self.__cut_sensitivity_haar_input
+						if cut[3] + cut[4]*self.__cut_sensitivity_haar_input > 1296:
+							cut[3] = 1296 - cut[4]*self.__cut_sensitivity_haar_input
 						
 						frame_cut = frame[cut[1] - cut[4]*self.__cut_sensitivity_haar_input:cut[3] + cut[4]*self.__cut_sensitivity_haar_input, cut[0] - cut[4]*self.__cut_sensitivity_haar_input:cut[2] + cut[4]*self.__cut_sensitivity_haar_input]
 						cv2.rectangle(	frame,
@@ -350,16 +350,16 @@ class VisionBall (object):
 			posy = (self.__inspos[len(self.__inspos)-1,1]+10)*(res[1]/20)
 			raio = (self.__inspos[len(self.__inspos)-1,2]*(res[1]/20))/2
 			
-			esquerda = int( posx - raio * (1 + self.__cut_sensitivity_haar_input + self.__contframelost * 0.15/self.__cut_sensitivity_haar_input ) )
+			esquerda = int( posx - raio * (1 + self.__cut_sensitivity_haar_input + self.__contframelost * 0.5/self.__cut_sensitivity_haar_input ) )
 			if esquerda < 0:
 				esquerda = 0
-			direita = int( posx + raio * (1 + self.__cut_sensitivity_haar_input + self.__contframelost * 0.15/self.__cut_sensitivity_haar_input ) ) + 5
+			direita = int( posx + raio * (1 + self.__cut_sensitivity_haar_input + self.__contframelost * 0.5/self.__cut_sensitivity_haar_input ) ) + 5
 			
-			cima = int( posy - raio * (1 + self.__cut_sensitivity_haar_input + self.__contframelost * 0.15/self.__cut_sensitivity_haar_input ) )
+			cima = int( posy - raio * (1 + self.__cut_sensitivity_haar_input + self.__contframelost * 0.5/self.__cut_sensitivity_haar_input ) )
 			if cima < 0:
 				cima = 0
 			
-			baixo = int( posy + raio * (1 + self.__cut_sensitivity_haar_input + self.__contframelost * 0.15/self.__cut_sensitivity_haar_input ) ) + 15
+			baixo = int( posy + raio * (1 + self.__cut_sensitivity_haar_input + self.__contframelost * 0.5/self.__cut_sensitivity_haar_input ) ) + 15
 			
 			cut = np.array([esquerda, direita, cima, baixo])
 			
