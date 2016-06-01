@@ -2,9 +2,9 @@
  ******************************************************************************
  * @file imu.cpp
  * @author Isaac Jesus da Silva - ROBOFEI-HT - FEI 😛
- * @version V0.0.1
+ * @version V0.2.0
  * @created 24/08/2015
- * @Modified 24/08/2015
+ * @Modified 01/05/2016
  * @e-mail isaac25silva@yahoo.com.br
  * @brief serial imu 😛
  ****************************************************************************
@@ -71,17 +71,12 @@ sudo make install
 #include <iostream>
 #include <stdlib.h>
 #include <blackboard.h>
+#include <unistd.h>
 
-//#include "geometry_msgs/Vector3Stamped.h"
-//#include "ros/ros.h"
-//#include "sensor_msgs/Imu.h"
 #include <serial.h>
-//#include "std_msgs/Float32.h"
-//#include "std_msgs/Header.h"
 #include "um7/comms.h"
 #include "um7/registers.h"
 #include "INIReader.h"
-//#include "um7/Reset.h"
 #include <string>
 
 // =================== COMMUNICATION SETTINGS ===================
@@ -106,23 +101,6 @@ void configureVector3(um7::Comms* sensor, const um7::Accessor<RegT>& reg,
   {
     throw std::logic_error("configureVector3 may only be used with 3-field registers!");
   }
-
-  /*if (ros::param::has(param))
-  {
-    double x, y, z;
-    ros::param::get(param + "/x", x);
-    ros::param::get(param + "/y", y);
-    ros::param::get(param + "/z", z);
-    ROS_INFO_STREAM("Configuring " << human_name << " to ("
-                    << x << ", " << y << ", " << z << ")");
-    reg.set_scaled(0, x);
-    reg.set_scaled(1, y);
-    reg.set_scaled(2, z);
-    if (sensor->sendWaitAck(reg))
-    {
-      throw std::runtime_error("Unable to configure vector.");
-    }
-  }*/
 }
 
 /**
@@ -132,7 +110,6 @@ void configureVector3(um7::Comms* sensor, const um7::Accessor<RegT>& reg,
 template<typename RegT>
 void sendCommand(um7::Comms* sensor, const um7::Accessor<RegT>& reg, std::string human_name)
 {
-  //ROS_INFO_STREAM("Sending command: " << human_name);
   std::cout<<"Sending command: " << human_name<<std::endl;
   if (!sensor->sendWaitAck(reg))
   {
@@ -202,14 +179,12 @@ void configureSensor(um7::Comms* sensor)
 
   // Optionally enable quaternion mode .
   bool quat_mode;
-  //ros::param::param<bool>("~quat_mode", quat_mode, true);
   if (quat_mode)
   {
     misc_config_reg |= QUATERNION_MODE_ENABLED;
   }
   else
   {
-    //ROS_WARN("Excluding quaternion mode.");
     std::cout<<"Excluding quaternion mode."<<std::endl;
   }
 
@@ -221,7 +196,6 @@ void configureSensor(um7::Comms* sensor)
 
   // Optionally disable performing a zero gyros command on driver startup.
   bool zero_gyros;
-  //ros::param::param<bool>("~zero_gyros", zero_gyros, true);
   if (zero_gyros) sendCommand(sensor, r.cmd_zero_gyros, "zero gyroscopes");
 }
 
@@ -239,81 +213,10 @@ bool handleResetService(um7::Comms* sensor,
 }
 
 /**
- * Uses the register accessors to grab data from the IMU, and populate
- * the ROS messages which are output.
+ * Uses the register accessors to grab data from the IMU
  */
-//void publishMsgs(um7::Registers& r, ros::NodeHandle* n, const std_msgs::Header& header)
 void publishMsgs(um7::Registers& r)
 {
-//  static ros::Publisher imu_pub = n->advertise<sensor_msgs::Imu>("imu/data", 1, false);
-//  static ros::Publisher mag_pub = n->advertise<geometry_msgs::Vector3Stamped>("imu/mag", 1, false);
-//  static ros::Publisher rpy_pub = n->advertise<geometry_msgs::Vector3Stamped>("imu/rpy", 1, false);
-//  static ros::Publisher temp_pub = n->advertise<std_msgs::Float32>("imu/temperature", 1, false);
-
-//  if (imu_pub.getNumSubscribers() > 0)
-//  {
-//    sensor_msgs::Imu imu_msg;
-//    imu_msg.header = header;
-
-//    // IMU outputs [w,x,y,z], convert to [x,y,z,w] & transform to ROS axes
-//    imu_msg.orientation.x =  r.quat.get_scaled(1);
-//    imu_msg.orientation.y = -r.quat.get_scaled(2);
-//    imu_msg.orientation.z = -r.quat.get_scaled(3);
-//    imu_msg.orientation.w = r.quat.get_scaled(0);
-
-//    // Covariance of attitude.  set to constant default or parameter values
-//    imu_msg.orientation_covariance[0] = covar[0];
-//    imu_msg.orientation_covariance[1] = covar[1];
-//    imu_msg.orientation_covariance[2] = covar[2];
-//    imu_msg.orientation_covariance[3] = covar[3];
-//    imu_msg.orientation_covariance[4] = covar[4];
-//    imu_msg.orientation_covariance[5] = covar[5];
-//    imu_msg.orientation_covariance[6] = covar[6];
-//    imu_msg.orientation_covariance[7] = covar[7];
-//    imu_msg.orientation_covariance[8] = covar[8];
-
-//    // Angular velocity.  transform to ROS axes
-//    imu_msg.angular_velocity.x =  r.gyro.get_scaled(0);
-//    imu_msg.angular_velocity.y = -r.gyro.get_scaled(1);
-//    imu_msg.angular_velocity.z = -r.gyro.get_scaled(2);
-
-//    // Linear accel.  transform to ROS axes
-//    imu_msg.linear_acceleration.x =  r.accel.get_scaled(0);
-//    imu_msg.linear_acceleration.y = -r.accel.get_scaled(1);
-//    imu_msg.linear_acceleration.z = -r.accel.get_scaled(2);
-
-//    imu_pub.publish(imu_msg);
-//  }
-
-//  // Magnetometer.  transform to ROS axes
-//  if (mag_pub.getNumSubscribers() > 0)
-//  {
-//    geometry_msgs::Vector3Stamped mag_msg;
-//    mag_msg.header = header;
-//    mag_msg.vector.x =  r.mag.get_scaled(0);
-//    mag_msg.vector.y = -r.mag.get_scaled(1);
-//    mag_msg.vector.z = -r.mag.get_scaled(2);
-//    mag_pub.publish(mag_msg);
-//  }
-
-//  // Euler attitudes.  transform to ROS axes
-//  if (rpy_pub.getNumSubscribers() > 0)
-//  {
-//    geometry_msgs::Vector3Stamped rpy_msg;
-//    rpy_msg.header = header;
-//    rpy_msg.vector.x =  r.euler.get_scaled(0);
-//    rpy_msg.vector.y = -r.euler.get_scaled(1);
-//    rpy_msg.vector.z = -r.euler.get_scaled(2);
-//    rpy_pub.publish(rpy_msg);
-//  }
-
-//  // Temperature
-//  if (temp_pub.getNumSubscribers() > 0)
-//  {
-//    std_msgs::Float32 temp_msg;
-//    temp_msg.data = r.temperature.get_scaled(0);
-//    temp_pub.publish(temp_msg);
-//  }
 
     write_float(mem, IMU_GYRO_X, r.gyro.get_scaled(1)/10);
     write_float(mem, IMU_GYRO_Y, r.gyro.get_scaled(0)/10);
@@ -343,9 +246,6 @@ void publishMsgs(um7::Registers& r)
  */
 int main(int argc, char **argv)
 {
-  //ros::init(argc, argv, "um7_driver");
-
-    //using_shared_memory();
 
     INIReader reader(INI_FILE_PATH);
     if (reader.ParseError() < 0) {
@@ -355,23 +255,17 @@ int main(int argc, char **argv)
     const int mem_key = (int)reader.GetInteger("Communication","no_player_robofei",-1024)*100;
     int* mem = using_shared_memory(mem_key);
 
-   write_int(mem, IMU_RESET, 0);
+    write_int(mem, IMU_RESET, 0);
 
   // Load parameters from private node handle.
   std::string port("/dev/robot/imu");
   int32_t baud = 115200;
-  //ros::param::param<std::string>("~port", port, "/dev/ttyUSB0");
-  //ros::param::param<int32_t>("~baud", baud, 115200);
 
   serial::Serial ser;
   ser.setPort(port);
   ser.setBaudrate(baud);
   serial::Timeout to = serial::Timeout(50, 50, 0, 50, 0);
   ser.setTimeout(to);
-
-  //ros::NodeHandle n;
-  //std_msgs::Header header;
-  //ros::param::param<std::string>("~frame_id", header.frame_id, "imu_link");
 
   // Initialize covariance. The UM7 sensor does not provide covariance values so,
   //   by default, this driver provides a covariance array of all zeros indicating
@@ -414,8 +308,6 @@ int main(int argc, char **argv)
         um7::Comms sensor(&ser);
         configureSensor(&sensor);
         um7::Registers registers;
-        //ros::ServiceServer srv = n.advertiseService<um7::Reset::Request, um7::Reset::Response>(
-        //    "reset", boost::bind(handleResetService, &sensor, _1, _2));
 		handleResetService(&sensor);
         int t=0;
         int contador = 0;
@@ -436,7 +328,7 @@ int main(int argc, char **argv)
             if(med_accel_z>0.70) // Identifica se o robô esta caido ou em pé
                 write_int(mem, IMU_STATE, 0); // Robo caido
             else
-               write_int(mem, IMU_STATE, 1); // Robo em pé
+                write_int(mem, IMU_STATE, 1); // Robo em pé
 
             if(read_int(mem,IMU_RESET))
             {
@@ -446,8 +338,7 @@ int main(int argc, char **argv)
 
             if(t > 40)
             {
-
-std::cout << "Robo caido = " << std::fixed << read_int(mem,IMU_STATE) << std::endl;
+                std::cout << "Robo caido = " << std::fixed << read_int(mem,IMU_STATE) << std::endl;
                 std::cout << "med_acc_z = " << std::fixed << med_accel_z << std::endl;
                 std::cout << "giros_x = " << std::fixed << read_float(mem, IMU_GYRO_X) << std::endl;
                 std::cout << "giros_y = " << std::fixed << read_float(mem, IMU_GYRO_Y) << std::endl;
@@ -466,7 +357,7 @@ std::cout << "Robo caido = " << std::fixed << read_int(mem,IMU_STATE) << std::en
                 std::cout << "Euler_x = " << std::fixed << read_float(mem, IMU_EULER_X) << std::endl;
                 std::cout << "Euler_y = " << std::fixed << read_float(mem, IMU_EULER_Y) << std::endl;
                 std::cout << "Euler_z = " << std::fixed << read_float(mem, IMU_EULER_Z) << std::endl << std::endl;
-            t=0;
+                t=0;
             }
             t++;
           // triggered by arrival of last message packet
@@ -481,20 +372,16 @@ std::cout << "Robo caido = " << std::fixed << read_int(mem,IMU_STATE) << std::en
       catch(const std::exception& e)
       {
         if (ser.isOpen()) ser.close();
-        //ROS_ERROR_STREAM(e.what());
-        //ROS_INFO("Attempting reconnection after error.");
         std::cout<<"Attempting reconnection after error."<<std::endl;
-        //ros::Duration(1.0).sleep();
+        usleep(50000);
       }
     }
     else
     {
-      //ROS_WARN_STREAM_COND(first_failure, "Could not connect to serial device "
-      //    << port << ". Trying again every 1 second.");
       std::cout<< "Could not connect to serial device "
-                << port << ". Trying again every 1 second."<< std::endl;
+                << port << ". Trying again every 0.05 second."<< std::endl;
       first_failure = false;
-      //ros::Duration(1.0).sleep();
+      usleep(50000);
     }
   }
 }
