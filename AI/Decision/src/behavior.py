@@ -272,8 +272,10 @@ class Naive(TreatingRawData):
                     elif self.get_dist_ball() > 50:
                         #self.set_walk_forward()
                         self.set_walk_forward_slow((self.get_dist_ball() / 5))
-                    else:
+                    elif self.get_dist_ball() < 50 and self.get_dist_ball() > 20:
                         self.set_walk_forward_slow((self.get_dist_ball() / 5))
+                    else:
+                        self.set_gait()
                         # time.sleep(0.5)
                         # self.set_stand_still()        else:
             print 'Invalid argument received from referee!'

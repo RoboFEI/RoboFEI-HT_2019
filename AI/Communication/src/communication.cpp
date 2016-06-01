@@ -182,6 +182,7 @@ void *recebendo(void* arg)
 //~ exit(1);
 	while(1)
 	{
+        sleep(0.05);
 		//cout << "[=============kl========waiting==]";
 		client_gcd.receive(Struct2String(referre), sizeof(referre));
 		//cout << "================================\n" << referre.version;
@@ -270,6 +271,7 @@ void *enviando(void *arg)
 
     while(1)
     {
+        sleep(0.05);
         //send the message
         if (sendto(s, AlfaStruct2String(dado), 500 , 0 , (struct sockaddr *) &si_other, slen)==-1)
         {
@@ -315,6 +317,7 @@ int main(void)
 	//cin.get();
 	establishCommunication();
 	while(1){
+    sleep(1);
 	}
     return 0;
 }

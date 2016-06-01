@@ -72,7 +72,7 @@ while True:
     else:
         robot.decision(2) #always on play 
    
-    #time.sleep(0.01) 
+    time.sleep(0.05) 
     
     
     

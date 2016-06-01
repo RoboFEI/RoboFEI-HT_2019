@@ -8,10 +8,10 @@ sudo echo "starting all processes"
 
 while true
 do
-    if [ ! "$(pidof imu)" ] 
-    then
-       mate-terminal --title="IMU" -x sh -c './start_imu.sh' &
-    fi
+    #if [ ! "$(pidof imu)" ] 
+    #then
+    #   mate-terminal --title="IMU" -x sh -c './start_imu.sh' &
+    #fi
 
    if [ ! "$(pidof -x start_vision.sh)" ] 
    then

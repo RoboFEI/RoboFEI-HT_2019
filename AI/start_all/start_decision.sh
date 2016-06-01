@@ -14,4 +14,4 @@ cd Decision/src/
 #--naive_imu: naive behavior with orientation and pass, but the robot closest to ball goes to it.
 #--naive_imu_dec_turning: naive behavior with orientation and pass
 #python decision.py --naive_imu_dec_turning
-python decision.py --naive_imu
+python decision.py -n
