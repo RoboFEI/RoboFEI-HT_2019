@@ -3,9 +3,9 @@
 ******************************************************************************
 * @file control.cpp
 * @author Isaac Jesus da Silva - ROBOFEI-HT - FEI 😛
-* @version V1.2.0
+* @version V2.1.0
 * @created 20/01/2015
-* @Modified 22/02/2016
+* @Modified 01/05/2016
 * @e-mail isaac25silva@yahoo.com.br
 * @brief control 😛
 ****************************************************************************
@@ -30,16 +30,10 @@ Arquivo fonte contendo o programa que controla os servos do corpo do robô
 #include <sys/shm.h>
 
 
-//#include "Camera.h"
-//#include "Point.h"
-//#include "mjpg_streamer.h"
 #include "minIni.h"
-//#include "LinuxCamera.h"
-//#include "ColorFinder.h"
 #include <string>
 
 #include "Action.h"
-//#include "Head.h"
 #include "Walking.h"
 #include "MX28.h"
 #include "MotionManager.h"
@@ -87,6 +81,8 @@ void pass_left(CM730 *cm730,bool &stop_gait);
 
 void pass_right(CM730 *cm730,bool &stop_gait);
 
+void goalkeeper(bool &stop_gait);
+
 void change_current_dir()
 {
     char exepath[1024] = {0};
@@ -105,7 +101,6 @@ int main(int argc, char **argv)
     ini = new minIni((char *)INI_FILE_PATH);
 
   	//Acopla ou cria a memoria compartilhada
-
     int *mem = using_shared_memory(ini->getd("Communication","no_player_robofei",-1024) * 100); //0 for real robot
 
     bool stop_gait = 1;
@@ -340,6 +335,10 @@ int main(int argc, char **argv)
 		        case 116: //t
 		            robot_stop(&gait , stop_gait);
 		        break;
+		        
+		        case 117: //u
+		            goalkeeper(stop_gait);
+		        break;
 
 		        case 104: //h
 				    cout << "Greetings" << endl;
@@ -401,19 +400,16 @@ int main(int argc, char **argv)
 			{
 				std::cout<<" | Andar para frente"<<std::endl;
 				move_gait(walkfoward.walk_foward, walkfoward.sidle, walkfoward.turn_angle, stop_gait, &gait, &walkfoward);
-				usleep(100000);
 			}
 			if(read_int(mem, DECISION_ACTION_A) == 2)
 			{
 				std::cout<<" | Virar a esquerda"<<std::endl;
 				move_gait(turnRobot.walk_foward, turnRobot.sidle, turnRobot.turn_angle, stop_gait, &gait, &turnRobot);
-				usleep(100000);
 			}
 			if(read_int(mem, DECISION_ACTION_A) == 3)
 			{
 				std::cout<<" | Virar a direita"<<std::endl;
 				move_gait(turnRobot.walk_foward, turnRobot.sidle, -turnRobot.turn_angle, stop_gait, &gait, &turnRobot);
-				usleep(100000);
 			}
 			if(read_int(mem, DECISION_ACTION_A) == 4)
 			{
@@ -427,13 +423,11 @@ int main(int argc, char **argv)
 			{
 				std::cout<<" | Andar de Lado esquerda"<<std::endl;
 				move_gait(sidleL.walk_foward, sidleL.sidle, sidleL.turn_angle, stop_gait, &gait, &sidleL);
-				usleep(100000);
 			}
 			if(read_int(mem, DECISION_ACTION_A) == 7)
 			{
 				std::cout<<" | Andar de Lado direita"<<std::endl;
 				move_gait(sidleR.walk_foward, -sidleR.sidle, sidleR.turn_angle, stop_gait, &gait, &sidleR);
-				usleep(100000);
 			}
 			if(read_int(mem, DECISION_ACTION_A) == 8)
 			{
@@ -442,32 +436,21 @@ int main(int argc, char **argv)
 				    move_gait(float(read_int(mem, DECISION_ACTION_B)), walkslow.sidle, walkslow.turn_angle, stop_gait, &gait, &walkslow);
 				else
     				move_gait(walkslow.walk_foward, walkslow.sidle, walkslow.turn_angle, stop_gait, &gait, &walkslow);
-				usleep(100000);
 			}
 			if(read_int(mem, DECISION_ACTION_A) == 9)
 			{
 				std::cout<<" | Girar em torno da bola para esquerda"<<std::endl;
 				move_gait(turnBallL.walk_foward, turnBallL.sidle, turnBallL.turn_angle, stop_gait, &gait, &turnBallL);
-				usleep(100000);
 			}
 
 			if(read_int(mem, DECISION_ACTION_A) == 10)
-			{							// colocar o action-script para cair e defender!!!
-				std::cout<<" | Defender a bola"<<std::endl;  //---------------------------------------------------------TODO
-				Walking::GetInstance()->Stop();
-				Walking::GetInstance()->m_Joint.SetEnableBody(false);
-		   		Action::GetInstance()->m_Joint.SetEnableBody(true);
-				MotionManager::GetInstance()->SetEnable(true);
-				Action::GetInstance()->Start(1);    /* Init(stand up) pose */
-				while(Action::GetInstance()->IsRunning()) usleep(8*1000);
-				Action::GetInstance()->Start(20);    // colocar o action-script para cair e defender!!!
-				usleep(100000);
+			{
+				goalkeeper(stop_gait);  // colocar o action-script para cair e defender!!!
 			}
 			if(read_int(mem, DECISION_ACTION_A) == 11)
 			{
 				std::cout<<" | Stop com gait"<<std::endl;
 			    move_gait(gait.walk_foward, gait.sidle, gait.turn_angle, stop_gait, &gait, &gait);
-				usleep(100000);
 			}
 			if(read_int(mem, DECISION_ACTION_A) == 12)
 			{			
@@ -482,7 +465,6 @@ int main(int argc, char **argv)
 			{
 				std::cout<<" | Girar em torno da bola para direita"<<std::endl;
 				move_gait(turnBallR.walk_foward, -turnBallR.sidle, -turnBallR.turn_angle, stop_gait, &gait, &turnBallR);
-				usleep(100000);
 			}
 			if(read_int(mem, DECISION_ACTION_A) == 15)
 			{
@@ -522,6 +504,7 @@ int main(int argc, char **argv)
 				cout<<" | GoodBye"<<endl;
 			    move_action(8, 0, stop_gait);
 			}
+			usleep(50000);
 			
 	}
 	//--------------------------------------------------------------------------------------------------
@@ -806,6 +789,7 @@ void kick_left_strong(CM730 *cm730, bool &stop_gait)
 	MotionManager::GetInstance()->SetEnable(true);
 	Action::GetInstance()->Start(63);
 	while(Action::GetInstance()->IsRunning()) usleep(8*1000);
+	stop_gait = 1;
 	write_int(mem, CONTROL_MOVING, 0);
 }
 
@@ -850,6 +834,7 @@ void kick_right_strong(CM730 *cm730, bool &stop_gait)
 	MotionManager::GetInstance()->SetEnable(true);
 	Action::GetInstance()->Start(61);
 	while(Action::GetInstance()->IsRunning()) usleep(8*1000);
+	stop_gait = 1;
 	write_int(mem, CONTROL_MOVING, 0);
 
 }
@@ -890,6 +875,7 @@ void pass_left(CM730 *cm730, bool &stop_gait)
 	MotionManager::GetInstance()->SetEnable(true);
 	Action::GetInstance()->Start(72);
 	while(Action::GetInstance()->IsRunning()) usleep(8*1000);
+	stop_gait = 1;
 	write_int(mem, CONTROL_MOVING, 0);
 	
 }
@@ -930,8 +916,16 @@ void pass_right(CM730 *cm730, bool &stop_gait)
 	MotionManager::GetInstance()->SetEnable(true);
 	Action::GetInstance()->Start(73);
     while(Action::GetInstance()->IsRunning()) usleep(8*1000);
+    stop_gait = 1;
     write_int(mem, CONTROL_MOVING, 0);
     
+}
+
+void goalkeeper(bool &stop_gait)
+{
+    std::cout<<" | Defender a bola"<<std::endl;  //------------------------------TODO
+    move_action(1, 0, stop_gait);    /* Init(stand up) pose */
+    move_action(20, 0, stop_gait);    // colocar o action-script para cair e defender!!!
 }
 
 
