@@ -62,8 +62,8 @@ Walking::Walking()
 	m_Joint.SetAngle(JointData::ID_L_SHOULDER_PITCH, 10.00);
 	m_Joint.SetAngle(JointData::ID_R_SHOULDER_ROLL, -15.10);
     m_Joint.SetAngle(JointData::ID_L_SHOULDER_ROLL, 15.10);
-	m_Joint.SetAngle(JointData::ID_R_ELBOW, -15.300);
-	m_Joint.SetAngle(JointData::ID_L_ELBOW,  15.593);
+	m_Joint.SetAngle(JointData::ID_R_ELBOW, 0); // positivo frente
+	m_Joint.SetAngle(JointData::ID_L_ELBOW,  0); // negativo frente
   BALANCE_ANGLE_GAIN = 0.1;
   BALANCE_ANGLE_SMOOTH_GAIN = 0.91;
 
@@ -390,7 +390,7 @@ void Walking::Process()
 	//                     R_HIP_YAW, R_HIP_ROLL, R_HIP_PITCH, R_KNEE, R_ANKLE_PITCH, R_ANKLE_ROLL, L_HIP_YAW, L_HIP_ROLL, L_HIP_PITCH, L_KNEE, L_ANKLE_PITCH, L_ANKLE_ROLL, R_ARM_SWING, L_ARM_SWING
 //	int dir[14]          = {   -1,         1,          1,         1,         -1,           -1,          -1,         1,         -1,         -1,         1,           -1,           1,           -1      };
 	int dir[14]          = {   -1,        -1,          1,         1,         -1,            1,          -1,        -1,         -1,         -1,         1,            1,           1,           -1      };
-    double initAngle[14] =     {   0.0,       0.0,        0.0,       0.0,        0.0,          0.0,         0.0,       0.0,        0.0,        0.0,       0.0,          0.0,         -10,           10    };
+    double initAngle[14] =     {   0.0,       0.0,        0.0,       0.0,        0.0,          0.0,         0.0,       0.0,        0.0,        0.0,       0.0,          0.0,         -25,           25    };
 	int outValue[14];
 
     // Update walk parameters
