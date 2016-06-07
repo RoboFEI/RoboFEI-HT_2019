@@ -4,7 +4,7 @@ import cv2
 import ctypes
 
 try:
-    from configparser import ConfigParser
+    from ConfigParser import ConfigParser
 except ImportError:
     from ConfigParser import ConfigParser  # ver. < 3.0
 
@@ -298,19 +298,19 @@ class VisionBall (object):
 				self.__s_low = self.Config.getint('Vision Ball', 'S_Low')
 				self.__s_high = self.Config.getint('Vision Ball', 'S_High')
 				self.__v_low = self.Config.getint('Vision Ball', 'V_Low')
-				self.__v_high = int(self.Config.get('Vision Ball', 'V_High').rpartition(';')[0])
+				self.__v_high = int(self.Config.get('Vision Ball', 'V_High'))
 			
 				self.__size_element_input = self.Config.getint('Vision Ball','size_element')
 				self.__erosion_input = self.Config.getint('Vision Ball','erosion_iterations')
 				self.__dilation_input = self.Config.getint('Vision Ball', 'dilation_iterations')
 				self.__blur_input = self.Config.getint('Vision Ball', 'Blur')
-				self.__cut_sensitivity_seg_input = int(self.Config.get('Vision Ball', 'cut_sensitivity_seg').rpartition(';')[0])
+				self.__cut_sensitivity_seg_input = int(self.Config.get('Vision Ball', 'cut_sensitivity_seg'))
 
 				self.__minSize_HaarBall = self.Config.getint('Vision Ball', 'minSize_HaarBall')
 				self.__maxSize_HaarBall = self.Config.getint('Vision Ball', 'maxSize_HaarBall')
 				self.__neighbours_HaarBall = self.Config.getint('Vision Ball', 'neighbours_HaarBall')
 				self.__scaleFactor_HaarBall = self.Config.getfloat('Vision Ball', 'scaleFactor_HaarBall')
-				self.__cut_sensitivity_haar_input = float(self.Config.get('Vision Ball', 'cut_sensitivity_HaarBall').rpartition(';')[0])
+				self.__cut_sensitivity_haar_input = float(self.Config.get('Vision Ball', 'cut_sensitivity_HaarBall'))
 				break
 
 			else:
@@ -324,19 +324,19 @@ class VisionBall (object):
 				self.Config.set('Vision Ball', 'S_Low', str(0)+'\t\t\t;Valor minimo para o saturation')
 				self.Config.set('Vision Ball', 'S_High', str(255)+'\t;Valor maximo para o saturation')
 				self.Config.set('Vision Ball', 'V_Low', str(0)+'\t\t\t;Valor minimo para o value')
-				self.Config.set('Vision Ball', 'V_High', str(255)+'\t;Valor maximo para o value\n;Mascara de cor usando hsv\n')
+				self.Config.set('Vision Ball', 'V_High', str(255)+'\t;Valor maximo para o value\n')
 	
 				self.Config.set('Vision Ball','size_element', str(2)+'\t\t\t\t;Tamanho do elemento')
 				self.Config.set('Vision Ball','erosion_iterations', str(0)+'\t;Numero de vezes para erosao')
 				self.Config.set('Vision Ball', 'dilation_iterations', str(0)+'\t;Numero de vezes para dilacao')
 				self.Config.set('Vision Ball', 'Blur', str(0)+'\t\t\t\t\t\t\t\t;Raio das bordas')
-				self.Config.set('Vision Ball', 'cut_sensitivity_seg', str(0)+'\t;Quao sensivel o corte do frame deve ser para segmentacao\n;Tratamento de ruido\n')
+				self.Config.set('Vision Ball', 'cut_sensitivity_seg', str(0)+'\t;Quao sensivel o corte do frame deve ser para segmentacao\n')
 	
 				self.Config.set('Vision Ball', 'minSize_HaarBall',str(50)+'\t\t\t\t\t;Minimo tamanho do quadro')
 				self.Config.set('Vision Ball', 'maxSize_HaarBall',str(1000)+'\t\t\t\t;Maximo tamanho do quadro')
 				self.Config.set('Vision Ball', 'neighbours_HaarBall', str(5)+'\t\t\t\t;Vizinhos proximos')
 				self.Config.set('Vision Ball', 'scaleFactor_HaarBall', str(1.29)+'\t\t;Fator de escala')
-				self.Config.set('Vision Ball', 'cut_sensitivity_HaarBall', str(1)+'\t;Quao sensivel o corte do frame deve ser para Haar\n;Parametros do haar para a bola\n')
+				self.Config.set('Vision Ball', 'cut_sensitivity_HaarBall', str(1)+'\t;Quao sensivel o corte do frame deve ser para Haar\n')
 			
 				with open('../Data/config.ini', 'wb') as configfile:
 					self.Config.write(configfile)
@@ -597,19 +597,19 @@ class VisionBall (object):
 		self.Config.set('Vision Ball', 'S_Low', str(self.__s_low)+'\t\t\t;Valor minimo para o saturation')
 		self.Config.set('Vision Ball', 'S_High', str(self.__s_high)+'\t;Valor maximo para o saturation')
 		self.Config.set('Vision Ball', 'V_Low', str(self.__v_low)+'\t\t\t;Valor minimo para o value')
-		self.Config.set('Vision Ball', 'V_High', str(self.__v_high)+'\t;Valor maximo para o value\n;Mascara de cor usando hsv\n')
+		self.Config.set('Vision Ball', 'V_High', str(self.__v_high)+'\t;Valor maximo para o value\n')
 
 		self.Config.set('Vision Ball','size_element', str(self.__size_element_input)+'\t\t\t\t;Tamanho do elemento')
 		self.Config.set('Vision Ball','erosion_iterations', str(self.__erosion_input)+'\t;Numero de vezes para erosao')
 		self.Config.set('Vision Ball', 'dilation_iterations', str(self.__dilation_input)+'\t;Numero de vezes para dilacao')
 		self.Config.set('Vision Ball', 'Blur', str(self.__blur_input)+'\t\t\t\t\t\t\t\t;Raio das bordas')
-		self.Config.set('Vision Ball', 'cut_sensitivity_seg', str(self.__cut_sensitivity_seg_input)+'\t;Quao sensivel o corte do frame deve ser para segmentacao\n;Tratamento de ruido\n')
+		self.Config.set('Vision Ball', 'cut_sensitivity_seg', str(self.__cut_sensitivity_seg_input)+'\t;Quao sensivel o corte do frame deve ser para segmentacao\n')
 
 		self.Config.set('Vision Ball', 'minSize_HaarBall',str(self.__minSize_HaarBall)+'\t\t\t\t\t;Minimo tamanho do quadro')
 		self.Config.set('Vision Ball', 'maxSize_HaarBall',str(self.__maxSize_HaarBall)+'\t\t\t\t;Maximo tamanho do quadro')
 		self.Config.set('Vision Ball', 'neighbours_HaarBall', str(self.__neighbours_HaarBall)+'\t\t\t\t;Vizinhos proximos')
 		self.Config.set('Vision Ball', 'scaleFactor_HaarBall', str(self.__scaleFactor_HaarBall)+'\t\t;Fator de escala')
-		self.Config.set('Vision Ball', 'cut_sensitivity_HaarBall', str(self.__cut_sensitivity_haar_input)+'\t;Quao sensivel o corte do frame deve ser para Haar\n;Parametros do haar para a bola\n')
+		self.Config.set('Vision Ball', 'cut_sensitivity_HaarBall', str(self.__cut_sensitivity_haar_input)+'\t;Quao sensivel o corte do frame deve ser para Haar\n')
 
 		with open('../Data/config.ini', 'wb') as configfile:
 			self.Config.write(configfile)

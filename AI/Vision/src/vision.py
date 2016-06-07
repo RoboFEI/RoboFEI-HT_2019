@@ -16,7 +16,7 @@ sys.path.append('../../Blackboard/src/')
 from SharedMemory import SharedMemory 
 
 try:
-    from configparser import ConfigParser
+    from ConfigParser import ConfigParser
 except ImportError:
     from ConfigParser import ConfigParser  # ver. < 3.0
 
@@ -25,7 +25,7 @@ bkb = SharedMemory()
 config = ConfigParser()
 # looking for the file config.ini:
 config.read('../../Control/Data/config.ini')
-mem_key = int(config.get('Communication', 'no_player_robofei'))*100
+mem_key = 100 #int(config.get('Communication', 'no_player_robofei'))*100
 Mem = bkb.shd_constructor(mem_key)
 
 
@@ -180,7 +180,8 @@ os.system("v4l2-ctl -d /dev/video0 -c focus_auto=0 && v4l2-ctl -d /dev/video0 -c
 while True:
 	#Salva o frame
 	
-	ret, frame = cap.read()
+	for i in xrange(0,3):
+		ret, frame = cap.read()
 	
 	positionballframe = ball.detect(frame,np.array([resolutions[atualres,0],resolutions[atualres,1]]))
 	

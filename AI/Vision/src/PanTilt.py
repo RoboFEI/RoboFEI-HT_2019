@@ -10,17 +10,17 @@ import sys
 sys.path.append('../../Blackboard/src/')
 from SharedMemory import SharedMemory 
 
-try:
-    from configparser import ConfigParser
-except ImportError:
-    from ConfigParser import ConfigParser  # ver. < 3.0
+#try:
+#    from configparser import ConfigParser
+#except ImportError:
+from ConfigParser import ConfigParser  # ver. < 3.0
 
 
 bkb = SharedMemory()
 config = ConfigParser()
 # looking for the file config.ini:
 config.read('../../Control/Data/config.ini')
-mem_key = int(config.get('Communication', 'no_player_robofei'))*100
+mem_key = 100#int(config.get('Communication', 'no_player_robofei'))*100
 #Mem = bkb.shd_constructor(mem_key)
 #Mem = bkb.shd_constructor(200)
 
@@ -262,11 +262,11 @@ class Pantilt (object):
 					#print "size ",len(posHead)
 					self.servo.writeWord(self.__SERVO_PAN,
 														self.__GOAL_POS,
-														self.cen_posPAN + self.__list_varredura[self.__cont_varredura-1][0])
+														self.servo.readWord(self.__SERVO_PAN,self.__PRESENT_POS))
 				if self.__args.head == False or self.servo.readByte(self.__SERVO_TILT,self.__STATUS) == 1:
 					self.servo.writeWord(self.__SERVO_TILT,
 														self.__GOAL_POS,
-														self.cen_posTILT + self.__list_varredura[self.__cont_varredura-1][1])
+														self.servo.readWord(self.__SERVO_TILT,self.__PRESENT_POS))
 				self.__lost = 0
 				#self.__cont_varredura = 0
 				#print "PosHead1 ", posHead[1]
@@ -297,7 +297,7 @@ class Pantilt (object):
 
 			else:
 				self.cen_posTILT = self.__Config.getint('Offset', 'ID_19')
-				self.cen_posPAN = int(self.__Config.get('Offset', 'ID_20').rpartition(';')[0])
+				self.cen_posPAN = int(self.__Config.get('Offset', 'ID_20'))
 				break
 			
 		while True:
@@ -324,9 +324,9 @@ class Pantilt (object):
 				self.__d_pan = self.__Config.getfloat('Head', 'i_pan')
 				self.__p_tilt = self.__Config.getfloat('Head', 'p_tilt')
 				self.__i_tilt = self.__Config.getfloat('Head', 'i_tilt')
-				self.__d_tilt = float(self.__Config.get('Head', 'd_tilt').rpartition(';')[0])
+				self.__d_tilt = float(self.__Config.get('Head', 'd_tilt'))
 			
-				self.__min_speed = int(self.__Config.get('Head', 'min_vel').rpartition(';')[0])
+				self.__min_speed = int(self.__Config.get('Head', 'min_vel'))
 				break
 
 		while True:
@@ -463,7 +463,7 @@ class Pantilt (object):
 			self.servo.writeWord(self.__SERVO_PAN, self.__SPEED, self.__min_speed)
 			self.servo.writeWord(self.__SERVO_PAN,
 								self.__GOAL_POS,
-								int(self.servo.readWord(self.__SERVO_PAN,self.__PRESENT_POS) + self.__ControllerPan.update(status[1])))
+								int(self.servo.readWord(self.__SERVO_PAN,self.__PRESENT_POS) + self.__ControllerPan.update(10*status[1])))
 		
 		
 		# Tilt
@@ -472,7 +472,7 @@ class Pantilt (object):
 			self.servo.writeWord(self.__SERVO_TILT, self.__SPEED, self.__min_speed)
 			self.servo.writeWord(self.__SERVO_TILT,
 							self.__GOAL_POS,
-							int(self.servo.readWord(self.__SERVO_TILT,self.__PRESENT_POS) - self.__ControllerTilt.update(status[2])))
+							int(self.servo.readWord(self.__SERVO_TILT,self.__PRESENT_POS) - self.__ControllerTilt.update(10*status[2])))
 		
 		bkb.write_float(Mem, 'VISION_TILT_DEG', (self.max_posTILT - self.servo.readWord(self.__SERVO_TILT, self.__PRESENT_POS) )*0.29)
 		bkb.write_float(Mem, 'VISION_PAN_DEG', (self.servo.readWord(self.__SERVO_PAN , self.__PRESENT_POS) - self.cen_posPAN )*0.29)
@@ -553,16 +553,16 @@ class Pantilt (object):
 
 	def finalize(self):
 		self.__Config.set('Offset', 'ID_19', str(self.cen_posTILT)+'\t;Offset Tilt')
-		self.__Config.set('Offset', 'ID_20', str(self.cen_posPAN)+'\t;Offset Pan\n;Valores para o robo olhando para frente')
+		self.__Config.set('Offset', 'ID_20', str(self.cen_posPAN)+'\t;Offset Pan\n')
 		
 		self.__Config.set('Head', 'p_pan', str(self.__p_pan)+'\t;Ganho proporcinal para controle da posicao no pan')
 		self.__Config.set('Head', 'i_pan', str(self.__i_pan)+'\t;Ganho integral para controle da posicao no pan')
 		self.__Config.set('Head', 'd_pan', str(self.__d_pan)+'\t;Ganho derivativo para controle da posicao no pan\n')
 		self.__Config.set('Head', 'p_tilt', str(self.__p_tilt)+'\t;Ganho proporcinal para controle da posicao no tilt')
 		self.__Config.set('Head', 'i_tilt', str(self.__i_tilt)+'\t;Ganho integral para controle da posicao no tilt')
-		self.__Config.set('Head', 'd_tilt', str(self.__d_tilt)+'\t;Ganho derivativo para controle da posicao no tilt\n;Ganho PID para a posicao\n')
+		self.__Config.set('Head', 'd_tilt', str(self.__d_tilt)+'\t;Ganho derivativo para controle da posicao no tilt\n')
 		
-		self.__Config.set('Head', 'min_vel', str(self.__min_speed)+'\t;Velocidade minima\n;Ganho P para a velocidade e velocidade minima')
+		self.__Config.set('Head', 'min_vel', str(self.__min_speed)+'\t;Velocidade minima\n')
 
 #----------------------------------------------------------------------------------------------------------------------------------
 
