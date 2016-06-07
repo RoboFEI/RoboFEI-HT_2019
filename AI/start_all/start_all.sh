@@ -6,8 +6,8 @@ sudo echo "starting all processes"
 # export PATH=$PATH:~/RoboFEI-HT/build/bin
 # source #HOME/.bashrc
 
-while true
-do
+#while true
+#do
     #if [ ! "$(pidof imu)" ] 
     #then
     #   mate-terminal --title="IMU" -x sh -c './start_imu.sh' &
@@ -15,33 +15,33 @@ do
 
    if [ ! "$(pidof -x start_vision.sh)" ] 
    then
-        mate-terminal --title="VISION" -x sh -c './start_vision.sh' &
+        gnome-terminal --title="VISION" -x sh -c './start_vision.sh' &
    fi
 
     if [ ! "$(pidof -x start_decision.sh)" ]  
     then
-        mate-terminal --title="DECISION" -x sh -c './start_decision.sh' &
+        gnome-terminal --title="DECISION" -x sh -c './start_decision.sh' &
     fi
 
     if [ ! "$(pidof control)" ] 
     then
-       mate-terminal --title="CONTROL" -x sh -c 'echo 123456 | sudo -S ./start_control.sh' &
+       gnome-terminal --title="CONTROL" -x sh -c 'echo 123456 | sudo -S ./start_control.sh' &
     fi
 
     if [ ! "$(pidof communication)" ] 
     then
-       mate-terminal --title="REFEREE" -x sh -c './start_comm.sh' &
+       gnome-terminal --title="REFEREE" -x sh -c './start_comm.sh' &
     fi
 
     if [ ! "$(pidof -x start_commServer.sh)" ] 
     then
-       mate-terminal --title="COMM_SERVER" -x sh -c './start_commServer.sh' &
+       gnome-terminal --title="COMM_SERVER" -x sh -c './start_commServer.sh' &
     fi
 
     if [ ! "$(pidof -x start_commClient.sh)" ] 
     then
-       mate-terminal --title="COMM_CLIENT" -x sh -c './start_commClient.sh' &
+       gnome-terminal --title="COMM_CLIENT" -x sh -c './start_commClient.sh' &
     fi
 
-    sleep 4
-done
+#    sleep 4
+#done

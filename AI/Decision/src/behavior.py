@@ -277,7 +277,8 @@ class Naive(TreatingRawData):
                     else:
                         self.set_gait()
                         # time.sleep(0.5)
-                        # self.set_stand_still()        else:
+                        # self.set_stand_still()        
+        else:
             print 'Invalid argument received from referee!'
 
             #############################################################################
