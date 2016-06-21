@@ -2,10 +2,9 @@ import ctypes
 
 """Describes Class Servo - Communicate, Write and read from Vision Servo-motors"""
 class Servo(object):
-
 	"""Initializes the communication with the servos"""
 	def __init__(self,posTILT,posPAN):
-	"""print Start the Class Servo"""
+		"""print Start the Class Servo"""
 		print "Start the Class Servo"
 		""" Using shared memory from C++ functions"""
 		""" Loads Vision library in the path /build/lib/libvision.so (Needs compilation and build) """
@@ -16,7 +15,7 @@ class Servo(object):
 		self.visionlib.initServo.restype = ctypes.c_bool 
 		"""Conects to Pan and tilt servos"""
 		if self.visionlib.initServo(ctypes.c_int(posTILT), ctypes.c_int(posPAN)):
-		""" Error treatament, if not connected to servos exit(0)"""  
+			""" Error treatament, if not connected to servos exit(0)"""  
 			exit (0)
 		""" Define return type of the method dxlReadByte (int)"""
 		self.visionlib.dxlReadByte.restype = ctypes.c_int 

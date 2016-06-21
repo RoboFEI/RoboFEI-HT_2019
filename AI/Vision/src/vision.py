@@ -19,11 +19,11 @@ sys.path.append('../../Blackboard/src/')
 from SharedMemory import SharedMemory 
 """ Treatment exception: Try to import configparser from python. Write and Read from config.ini file"""
 try:
-"""There are differences in versions of the config parser"""
-"""For versions > 3.0 """
+    """There are differences in versions of the config parser
+    For versions > 3.0 """
     from ConfigParser import ConfigParser
 except ImportError:
-"""For versions < 3.0 """
+    """For versions < 3.0 """
     from ConfigParser import ConfigParser 
 
 """ Instantiate bkb as a shared memory """
@@ -33,7 +33,7 @@ config = ConfigParser()
 """ Path for the file config.ini:"""
 config.read('../../Control/Data/config.ini')
 """ Mem_key is for all processes to know where the blackboard is. It is robot number times 100"""
-mem_key = 100 
+mem_key = int(config.get('Communication', 'no_player_robofei'))*100 
 """Memory constructor in mem_key"""
 Mem = bkb.shd_constructor(mem_key)
 
@@ -71,7 +71,7 @@ def statusBall(positionballframe):
 		print mens
 	if positionballframe[0] == 2:
 		if bkb.read_float(Mem, 'VISION_TILT_DEG') < 50:
-			lista.append(8.48048735*exp(0.042451235*bkb.read_float(Mem, 'VISION_TILT_DEG')))
+			lista.append(8.48048735*exp(0.042451235*bkb.read_float(Mem, 'VISION_TILT_DEG'))-7)
 			##bkb.write_float(Mem, 'VISION_BALL_DIST', 430*tan(radians(bkb.read_float(Mem, 'VISION_TILT_DEG'))))
 			print 'Dist using tilt angle: ', bkb.read_float(Mem, 'VISION_BALL_DIST')
 			#0.0848048735*exp(0.042451235*bkb.read_int('VISION_TILT_DEG')

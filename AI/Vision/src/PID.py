@@ -16,7 +16,7 @@
 
 class PID:
 
-"""Initial conditions for PID"""
+	"""Initial conditions for PID"""
 	def __init__(self, P=2.0, I=0.0, D=1.0, Derivator=0, Integrator=0, Integrator_max=500, Integrator_min=-500):
 		""" Initial Porportional Gain = 2"""	
 		self.Kp=P
@@ -53,11 +53,11 @@ class PID:
 
 		""" Checks if the integrator exceeds maximum value"""
 		if self.Integrator > self.Integrator_max:
-		""" If exceeds integrator gets maximum value"""
+			""" If exceeds integrator gets maximum value"""
 			self.Integrator = self.Integrator_max
-		""" Checks if the integrator exceeds minimum value"""
+			""" Checks if the integrator exceeds minimum value"""
 		elif self.Integrator < self.Integrator_min:
-		""" If exceeds integrator gets minimum value"""
+			""" If exceeds integrator gets minimum value"""
 			self.Integrator = self.Integrator_min
 			
 		""" I_value gets current integrator times Integrative Gain"""
@@ -69,47 +69,47 @@ class PID:
 
 	"""	Initilize the setpoint of PID """
 	def setPoint(self,set_point):
-	""" Defines SetPoint"""
+		""" Defines SetPoint"""
 		self.set_point = set_point
-	"""	Defines Integrator = 0"""
+		"""	Defines Integrator = 0"""
 		self.Integrator=0
-	"""	Defines Derivator = 0"""
+		"""	Defines Derivator = 0"""
 		self.Derivator=0
 		
-	"""	Set integrator """
+		"""	Set integrator """
 	def setIntegrator(self, Integrator):
-	"""	Defines Integrator"""
+		"""	Defines Integrator"""
 		self.Integrator = Integrator
 	"""	Set Derivator """
 	def setDerivator(self, Derivator):
-	"""	Defines Derivator"""
+		"""	Defines Derivator"""
 		self.Derivator = Derivator
 	""" Set Proportional Gain Kp"""
 	def setKp(self,P):
-	"""	Defines Kp"""
+		"""	Defines Kp"""
 		self.Kp=P
 	""" Set Integrative Gain Ki"""
 	def setKi(self,I):
-	"""	Defines Ki"""
+		"""	Defines Ki"""
 		self.Ki=I
 	""" Set Derivative Gain Kd"""
 	def setKd(self,D):
-	"""	Defines Kd"""
+		"""	Defines Kd"""
 		self.Kd=D
 	""" Get goal point"""
 	def getPoint(self):
-	""" Returns Set Point """
+		""" Returns Set Point """
 		return self.set_point
 	""" Gets error """
 	def getError(self):
-	""" Returns Error"""
+		""" Returns Error"""
 		return self.error
 	""" Get integrator """
 	def getIntegrator(self):
-	""" Returns Integrator """
+		""" Returns Integrator """
 		return self.Integrator
 	""" Get derivator """
 	def getDerivator(self):
-	""" Returns Derivator """
+		""" Returns Derivator """
 		return self.Derivator
 
