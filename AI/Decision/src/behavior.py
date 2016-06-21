@@ -27,7 +27,9 @@ from math import degrees
 #to real robots: 14 centimeters
 #to simulated robots: 28 centimeters
 
-distance_to_kick = 14
+#istance_to_kick = 14 #real robot
+distance_to_kick = 29 #simulated robot
+
 
 ###############################################################################
 
@@ -92,7 +94,7 @@ class TreatingRawData(object):
     def get_orientation(self):
         #print degrees(self.bkb.read_float(self.mem, 'IMU_EULER_Z'))
         #print self.bkb.read_float(self.mem, 'IMU_EULER_Z')
-        return degrees(self.bkb.read_float(self.mem, 'IMU_EULER_Z'))
+        return self.bkb.read_float(self.mem, 'IMU_EULER_Z')
         
     def set_stand_still(self):
         #print 'stand still'
@@ -395,8 +397,9 @@ class NaiveIMUDecTurning(TreatingRawData):
     def __init__(self):
         super(NaiveIMUDecTurning, self).__init__()
         print
-        print 'Naive behavior called'
+        print 'Naive behavior called with IMU and turning'
         print
+        self.kickoff_ctrl = 0
 
     def decision(self, referee):
         if referee == 1:  # stopped
@@ -411,10 +414,23 @@ class NaiveIMUDecTurning(TreatingRawData):
             print 'set'
             self.set_stand_still()
             self.set_vision_ball()
+            
+            
+        elif referee == 21 and self.kickoff_ctrl == 0:
+            print 'walking forward for vision to see anything'
+            self.set_vision_ball()
+            self.set_walk_forward_slow(10)
+            for i in range(0,20):
+                time.sleep(1)
+                print "time", i
+            self.kickoff_ctrl = 1
+        
+        
+        elif referee == 2 or (referee == 21 and self.kickoff_ctrl != 0):  # play
 
-        elif referee == 2:  # play
+            #print 'dist_ball', self.get_dist_ball()
+            print 'orientation', self.get_orientation()
 
-            print 'dist_ball', self.get_dist_ball()
 
             if self.get_search_status() == 1: # 1 - vision lost
                 print 'vision lost'
@@ -432,32 +448,32 @@ class NaiveIMUDecTurning(TreatingRawData):
                 else:
 
                     if self.get_dist_ball() < distance_to_kick and self.get_motor_pan_degrees() <= 0:
-                        if self.get_orientation() <= 20 and self.get_orientation() >= -20:
+                        if self.get_orientation() <= 90 and self.get_orientation() >= -90:
                             self.set_kick_right()
-                        elif self.get_orientation() > 20:
+                        elif self.get_orientation() > 90:
                             #revolve_clockwise:
                             self.set_pass_right()
                             #########
-                        elif self.get_orientation() < -20:
+                        elif self.get_orientation() < -90:
                             #revolve_anticlockwise:
                             self.set_pass_left()
                             #########
                     elif self.get_dist_ball() < distance_to_kick and self.get_motor_pan_degrees() > 0:
-                        if self.get_orientation() <= 20 and self.get_orientation() >= -20:
+                        if self.get_orientation() <= 90 and self.get_orientation() >= -90:
                             self.set_kick_left()
-                        elif self.get_orientation() > 20:
+                        elif self.get_orientation() > 90:
                             #revolve_clockwise:
                             self.set_pass_right()
                             #########
-                        elif self.get_orientation() < -20:
+                        elif self.get_orientation() < -90:
                             #revolve_anticlockwise:
                             self.set_pass_left()
                             #########
                     elif self.get_dist_ball() > 60:
                         #self.set_walk_forward()
                         self.set_walk_forward_slow((self.get_dist_ball() / 5))
-                    elif self.get_dist_ball() <= 26:
-                        self.set_stand_still()
+                    #elif self.get_dist_ball() <= 26:
+                    #    self.set_stand_still()
                     else:
                         self.set_walk_forward_slow((self.get_dist_ball() / 6))
                         
@@ -465,6 +481,7 @@ class NaiveIMUDecTurning(TreatingRawData):
                         # self.set_stand_still()
         else:
             print 'Invalid argument received from referee!'
+            print referee
 
 #############################################################################
 
@@ -486,6 +503,7 @@ class Attacker(TreatingRawData):
         elif referee == 11: #ready
             print 'ready'
             self.set_stand_still()
+            time.sleep(3)
             
         elif referee == 12: #set
             print 'set'

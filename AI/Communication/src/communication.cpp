@@ -158,6 +158,7 @@ int leia()
 	    write_int(mem, ROBOT_NUMBER, NO_PLAYER_ROBOFEI); //armazeno na memoria compartilhada o numero do robô!
 	cout<<"IP "<<SERVER<<" PORT "<<PORT<<endl;
 	cout<<"TEAM: "<<TEAM_ROBOFEI<<" Opponent: "<<TEAM_OPPONENT<<" Num FEI: "<<NO_TEAM_ROBOFEI<<" Num Robot: "<<NO_PLAYER_ROBOFEI<<endl;
+	sleep(1);
 }
 
 
@@ -221,7 +222,7 @@ void *recebendo(void* arg)
 			     }
 			else if(referre.kickOffTeam != TEAM_ROBOFEI && referre.state == STATE_PLAYING && (referre.secondaryState == STATE2_NORMAL|| referre.secondaryState == STATE2_OVERTIME)){
 				state = 4;
-				write_int(mem, COM_REFEREE, 2); ; //play  //kickOff do adversario
+				write_int(mem, COM_REFEREE, 21); //play  //kickOff do adversario
 			     }
 			else if(referre.kickOffTeam != TEAM_OPPONENT && referre.secondaryState == STATE2_PENALTYSHOOT){
 				state = 7;
@@ -306,6 +307,7 @@ void establishCommunication()
         threadInitialize(referreBox_t, recebendo, THREAD_PRIORITY_COM);
         threadInitialize(client_t, enviando, THREAD_PRIORITY_COM);
     }
+    sleep(1);
 }
 
 
