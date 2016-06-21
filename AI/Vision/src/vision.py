@@ -199,6 +199,8 @@ while True:
 	
 	if args.withoutservo == False:
 		posheadball = head.mov(positionballframe,posheadball,Mem, bkb)
+		if head.checkComm() == False:
+			break
 	
 	setResolution(positionballframe)
 	

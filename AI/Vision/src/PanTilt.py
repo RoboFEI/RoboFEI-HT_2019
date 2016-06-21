@@ -551,6 +551,14 @@ class Pantilt (object):
 
 #----------------------------------------------------------------------------------------------------------------------------------
 
+	def checkComm(self):
+		if self.__SERVO_PAN == self.servo.readByte(self.__SERVO_PAN,3):
+			return True
+		else:
+			return False
+
+#----------------------------------------------------------------------------------------------------------------------------------
+
 	def finalize(self):
 		self.__Config.set('Offset', 'ID_19', str(self.cen_posTILT)+'\t;Offset Tilt')
 		self.__Config.set('Offset', 'ID_20', str(self.cen_posPAN)+'\t;Offset Pan\n')
