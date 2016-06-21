@@ -12,20 +12,29 @@ from BallVision import *
 from PanTilt import *
 
 import sys
-sys.path.append('../../Blackboard/src/')
-from SharedMemory import SharedMemory 
 
+""" Initiate the path to blackboard (Shared Memory)"""
+sys.path.append('../../Blackboard/src/')
+"""Import the library Shared memory """
+from SharedMemory import SharedMemory 
+""" Treatment exception: Try to import configparser from python. Write and Read from config.ini file"""
 try:
+"""There are differences in versions of the config parser"""
+"""For versions > 3.0 """
     from ConfigParser import ConfigParser
 except ImportError:
-    from ConfigParser import ConfigParser  # ver. < 3.0
+"""For versions < 3.0 """
+    from ConfigParser import ConfigParser 
 
-
+""" Instantiate bkb as a shared memory """
 bkb = SharedMemory()
+""" Config is a new configparser """
 config = ConfigParser()
-# looking for the file config.ini:
+""" Path for the file config.ini:"""
 config.read('../../Control/Data/config.ini')
-mem_key = 100 #int(config.get('Communication', 'no_player_robofei'))*100
+""" Mem_key is for all processes to know where the blackboard is. It is robot number times 100"""
+mem_key = 100 
+"""Memory constructor in mem_key"""
 Mem = bkb.shd_constructor(mem_key)
 
 
