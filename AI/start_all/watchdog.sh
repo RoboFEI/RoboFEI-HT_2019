@@ -58,12 +58,6 @@ do
         echo Iniciando IMU
     fi
 
-    if [ ! "$(pidof -x start_vision.sh)" ] 
-    then
-        screen -d -m -S vision ./start_vision.sh
-        echo Iniciando vision
-    fi
-
     if [ ! "$(pidof -x start_decision.sh)" ]  
     then
         screen -d -m -S decision ./start_decision.sh
@@ -74,6 +68,12 @@ do
     then
         screen -d -m -S control ./start_control.sh
         echo Iniciando control
+    fi
+
+    if [ ! "$(pidof -x start_vision.sh)" ] 
+    then
+        screen -d -m -S vision ./start_vision.sh
+        echo Iniciando vision
     fi
 
     if [ ! "$(pidof -x start_comm.sh)" ] 
