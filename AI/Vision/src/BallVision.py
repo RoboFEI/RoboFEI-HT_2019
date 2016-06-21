@@ -70,8 +70,8 @@ class VisionBall (object):
 	def __calibrar(self):
 		passo = 0
 		cap = cv2.VideoCapture(0) #Abrindo camera
-		ret = cap.set(3,1920)
-		ret = cap.set(4,1080)
+		ret = cap.set(3,1280)
+		ret = cap.set(4,720)
 		
 		while passo != 2:
 			if passo == 0:
