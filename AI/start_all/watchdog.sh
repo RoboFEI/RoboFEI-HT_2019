@@ -94,5 +94,6 @@ do
        echo Iniciando Client communication
     fi
 
+    echo ''
     sleep 10
 done
