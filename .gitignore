@@ -5,7 +5,8 @@
 
 env/
 build/
-AI/Control/Data/
+AI/Control/Data/*.ini
+AI/Control/Data/*.bin
 develop-eggs/
 dist/
 downloads/
