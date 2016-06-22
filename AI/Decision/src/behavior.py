@@ -27,7 +27,7 @@ from math import degrees
 #to real robots: 14 centimeters
 #to simulated robots: 28 centimeters
 
-distance_to_kick = 10 #real robot
+distance_to_kick = 20 #real robot
 #distance_to_kick = 29 #simulated robot
 
 
@@ -293,6 +293,7 @@ class NaiveIMU(TreatingRawData):
         print
         print 'Naive behavior called'
         print
+        self.kickoff_ctrl = 0
         #set a far distance to robots
         self.bkb.write_float(self.mem,'DECISION_RBT01_DIST_BALL',999)
         self.bkb.write_float(self.mem,'DECISION_RBT02_DIST_BALL',999)
@@ -313,7 +314,18 @@ class NaiveIMU(TreatingRawData):
             self.set_stand_still()
             self.set_vision_ball()
 
-        elif referee == 2:  # play
+        #opponent kickoff               
+        elif referee == 21 and self.kickoff_ctrl == 0:
+            print 'walking forward for vision to see anything'
+            self.set_vision_ball()
+            self.set_walk_forward_slow(10)
+            for i in range(0,20):
+                time.sleep(1)
+                print "time", i
+            self.kickoff_ctrl = 1
+        
+        
+        elif referee == 2 or (referee == 21 and self.kickoff_ctrl != 0):  # play
             self.bkb.write_int(self.mem,'CONTROL_MESSAGES',0)
             if self.get_search_status() == 1: # 1 - vision lost
                 print 'vision lost'
@@ -351,43 +363,63 @@ class NaiveIMU(TreatingRawData):
 
                 if  int(self.bkb.read_float(self.mem,'CBR_COORDINATOR')) == self.bkb.read_int(self.mem,'ROBOT_NUMBER'):
 
-                    # align to the ball
-                    if self.get_motor_pan_degrees() > 20 and self.get_motor_pan_degrees() < 160:
-                        self.set_turn_left()
-                        #self.set_stand_still()
-                    elif self.get_motor_pan_degrees() < -20 and self.get_motor_pan_degrees() > -160:
-                        self.set_turn_right()
-                        #self.set_stand_still()
-                    else:
+                    #print 'dist_ball', self.get_dist_ball()
+                    print 'orientation', self.get_orientation()
+                    
+                    #NOT KICK TWICE
+                    if self.bkb.read_int(self.mem,'DECISION_ACTION_A') == 4 or self.bkb.read_int(self.mem,'DECISION_ACTION_A') == 5:
+                        self.set_stand_still()
 
-                        if self.get_dist_ball() < distance_to_kick and self.get_motor_pan_degrees() <= 0:
-                            if self.get_orientation() <= 20 and self.get_orientation() >= -20:
-                                self.set_kick_right()
-                            elif self.get_orientation() > 20:
-                                ####################################  #set pass until our robot doesn`t revolve around ball
-                                #self.set_revolve_around_ball_clockwise()  
-                                self.set_pass_right()
-                            elif self.get_orientation() < -20:
-                                #self.set_revolve_around_ball_anticlockwise()
-                                self.set_pass_left()
-                        elif self.get_dist_ball() < distance_to_kick and self.get_motor_pan_degrees() > 0:
-                            if self.get_orientation() <= 15 and self.get_orientation() >= -15:
-                                self.set_kick_left()
-                            elif self.get_orientation() > 15:
-                                #self.set_revolve_around_ball_clockwise()
-                                self.set_pass_right()
-                            elif self.get_orientation() < -15:
-                                #self.set_revolve_around_ball_anticlockwise()
-                                self.set_pass_left()
-                        elif self.get_dist_ball() > 50:
-                            #self.set_walk_forward()
-                            self.set_walk_forward_slow((self.get_dist_ball() / 5))
+                    if self.get_search_status() == 1: # 1 - vision lost
+                        print 'vision lost'
+                        self.set_stand_still()
+                        #self.set_vision_search()
+                        #self.set_turn_right()
+                    elif self.get_search_status() == 0: # 0 - object found
+                        # align to the ball
+                        if self.get_motor_pan_degrees() > 20 and self.get_motor_pan_degrees() < 160:
+                            self.set_turn_left()
+                            #self.set_stand_still()
+                        elif self.get_motor_pan_degrees() < -20 and self.get_motor_pan_degrees() > -160:
+                            self.set_turn_right()
+                            #self.set_stand_still()
                         else:
-                            self.set_walk_forward_slow((self.get_dist_ball() / 5))
-                            # time.sleep(0.5)
-                            # self.set_stand_still()
-        else:
-            print 'Invalid argument received from referee!'
+
+                            if self.get_dist_ball() < distance_to_kick and self.get_motor_pan_degrees() <= 0:
+                                if self.get_orientation() <= 90 and self.get_orientation() >= -90:
+                                    self.set_kick_right()
+                                elif self.get_orientation() > 90:
+                                    #revolve_clockwise:
+                                    self.set_pass_right()
+                                    #########
+                                elif self.get_orientation() < -90:
+                                    #revolve_anticlockwise:
+                                    self.set_pass_left()
+                                    #########
+                            elif self.get_dist_ball() < distance_to_kick and self.get_motor_pan_degrees() > 0:
+                                if self.get_orientation() <= 90 and self.get_orientation() >= -90:
+                                    self.set_kick_left()
+                                elif self.get_orientation() > 90:
+                                    #revolve_clockwise:
+                                    self.set_pass_right()
+                                    #########
+                                elif self.get_orientation() < -90:
+                                    #revolve_anticlockwise:
+                                    self.set_pass_left()
+                                    #########
+                            elif self.get_dist_ball() > 60:
+                                #self.set_walk_forward()
+                                self.set_walk_forward_slow((self.get_dist_ball() / 5))
+                            #elif self.get_dist_ball() <= 26:
+                            #    self.set_stand_still()
+                            else:
+                                self.set_walk_forward_slow((self.get_dist_ball() / 6))
+                                
+                                # time.sleep(0.5)
+                                # self.set_stand_still()
+                else:
+                    print 'Invalid argument received from referee!'
+                    print referee
 
 #############################################################################
 
@@ -416,22 +448,35 @@ class NaiveIMUDecTurning(TreatingRawData):
             self.set_vision_ball()
             
             
-        elif referee == 21 and self.kickoff_ctrl == 0:
-            print 'walking forward for vision to see anything'
+       # elif referee == 21 and self.kickoff_ctrl == 0:
+       #     print 'walking forward for vision to see anything'
+       #     self.set_vision_ball()
+       #     self.set_walk_forward_slow(10)
+       #     for i in range(0,20):
+       #         time.sleep(1)
+       #         print "time", i
+       #     self.kickoff_ctrl = 1
+       
+        elif referee == 2 and self.kickoff_ctrl == 0 and self.get_search_status() == 1:
+            print 'walking forward in order to see anything'
             self.set_vision_ball()
             self.set_walk_forward_slow(10)
             for i in range(0,20):
                 time.sleep(1)
-                print "time", i
+                print "Counting...", i
             self.kickoff_ctrl = 1
         
         
-        elif referee == 2 or (referee == 21 and self.kickoff_ctrl != 0):  # play
-
+       # elif referee == 2 or (referee == 21 and self.kickoff_ctrl != 0):  # play
+        elif referee == 2:  # play
+            self.kickoff_ctrl = 1
             #print 'dist_ball', self.get_dist_ball()
             print 'orientation', self.get_orientation()
 
-
+            #do not kick twice
+            if self.bkb.read_int(self.mem,'DECISION_ACTION_A') == 4 or self.bkb.read_int(self.mem,'DECISION_ACTION_A') == 5:
+                self.set_stand_still()
+                        
             if self.get_search_status() == 1: # 1 - vision lost
                 print 'vision lost'
                 self.set_stand_still()
