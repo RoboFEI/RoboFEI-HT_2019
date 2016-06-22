@@ -27,7 +27,7 @@ from math import degrees
 #to real robots: 14 centimeters
 #to simulated robots: 28 centimeters
 
-distance_to_kick = 20 #real robot
+distance_to_kick = 10 #real robot
 #distance_to_kick = 29 #simulated robot
 
 
@@ -48,7 +48,8 @@ class TreatingRawData(object):
         self.bkb = SharedMemory()
         self.mem = self.bkb.shd_constructor(self.mem_key)
 
-        
+        self.flag_move_ac = False        
+
         print
         print 'Raw data - read (get) and write (set) methods'
         print
@@ -119,10 +120,12 @@ class TreatingRawData(object):
     def set_kick_right(self):
         print 'kick right'
         self.bkb.write_int(self.mem,'DECISION_ACTION_A', 4)
+        self.flag_move_ac = True
         
     def set_kick_left(self):
         print 'kick left'
         self.bkb.write_int(self.mem,'DECISION_ACTION_A', 5)
+        self.flag_move_ac = True
         
     def set_sidle_left(self):
         print 'sidle left'
@@ -158,11 +161,12 @@ class TreatingRawData(object):
     def set_pass_left(self):
         print 'pass left'
         self.bkb.write_int(self.mem,'DECISION_ACTION_A', 12)
+        self.flag_move_ac = True
         
     def set_pass_right(self):
         print 'pass right'
         self.bkb.write_int(self.mem,'DECISION_ACTION_A', 13)
-
+        self.flag_move_ac = True
         
     def set_vision_ball(self):
         self.bkb.write_int(self.mem,'DECISION_ACTION_VISION', 0)
@@ -473,10 +477,14 @@ class NaiveIMUDecTurning(TreatingRawData):
             #print 'dist_ball', self.get_dist_ball()
             print 'orientation', self.get_orientation()
 
-            #do not kick twice
-            if self.bkb.read_int(self.mem,'DECISION_ACTION_A') == 4 or self.bkb.read_int(self.mem,'DECISION_ACTION_A') == 5:
-                self.set_stand_still()
-                        
+            #do not kick twice - it is not funcionning!!
+#            if self.bkb.read_int(self.mem,'DECISION_ACTION_A') == 4 or self.bkb.read_int(self.mem,'DECISION_ACTION_A') == 5:
+#		print 'nao chutei pq to aqui!'
+#                self.set_stand_still()
+            if self.bkb.read_int(self.mem, 'CONTROL_MOVING') == 1 and self.flag_move_ac==True:
+                self.bkb.write_int(self.mem, 'DECISION_ACTION_A', 0) # Writing in the memory
+                self.flag_move_ac=False
+                    
             if self.get_search_status() == 1: # 1 - vision lost
                 print 'vision lost'
                 self.set_stand_still()
