@@ -95,7 +95,7 @@ class TreatingRawData(object):
     def get_orientation(self):
         #print degrees(self.bkb.read_float(self.mem, 'IMU_EULER_Z'))
         #print self.bkb.read_float(self.mem, 'IMU_EULER_Z')
-        return self.bkb.read_float(self.mem, 'IMU_EULER_Z')
+        return degrees(self.bkb.read_float(self.mem, 'IMU_EULER_Z'))
         
     def set_stand_still(self):
         #print 'stand still'
@@ -438,6 +438,9 @@ class NaiveIMUDecTurning(TreatingRawData):
         self.kickoff_ctrl = 0
 
     def decision(self, referee):
+    
+        print self.get_motor_pan_degrees()
+    
         if referee == 1:  # stopped
             print 'stand'
             self.set_stand_still()
@@ -450,7 +453,6 @@ class NaiveIMUDecTurning(TreatingRawData):
             print 'set'
             self.set_stand_still()
             self.set_vision_ball()
-            
             
        # elif referee == 21 and self.kickoff_ctrl == 0:
        #     print 'walking forward for vision to see anything'
