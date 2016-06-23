@@ -162,7 +162,9 @@ class Pantilt (object):
 		[self.PanSearchLeft4,self.TiltSearchCenter], # Olhando para meio
 		[self.PanSearchLeft3,self.TiltSearchCenter], # Olhando para meio
 		[self.PanSearchLeft2,self.TiltSearchCenter], # Olhando para meio
+		[self.PanSearchLeft1,self.TiltSearchCenter], # Olhando para meio
 
+		[self.PanSearchLeft1,self.TiltSearchUp], # Olhando para meio
 		[self.PanSearchLeft2,self.TiltSearchUp], # Olhando para Cima
 		[self.PanSearchLeft3,self.TiltSearchUp], # Olhando para Cima
 		[self.PanSearchLeft4,self.TiltSearchUp], # Olhando para Cima
@@ -176,6 +178,7 @@ class Pantilt (object):
 		[self.PanSearchRight4,self.TiltSearchUp], # Olhando para baixo
 		[self.PanSearchRight3,self.TiltSearchUp], # Olhando para baixo
 		[self.PanSearchRight2,self.TiltSearchUp], # Olhando para baixo
+		[self.PanSearchRight1,self.TiltSearchUp], # Olhando para baixo
 
 		]
 	
