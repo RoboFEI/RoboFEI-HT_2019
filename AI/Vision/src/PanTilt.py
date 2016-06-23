@@ -45,8 +45,8 @@ class Pantilt (object):
 	
 	TiltSearchUp = None
 	TiltSearchCenter = None
-	TiltSearchDown = None
-	
+	TiltSearchDown1 = None
+	TiltSearchDown2 = None
 	PanSearchLeft1 = None
 	PanSearchLeft2 = None
 	PanSearchCenter3 = None
@@ -115,21 +115,39 @@ class Pantilt (object):
 		self.servo.writeWord(self.__SERVO_TILT, self.__SPEED, self.__min_speed)
 		
 		self.__list_varredura = [
-		[self.PanSearchLeft1,self.TiltSearchDown], # Olhando para baixo
-		[self.PanSearchLeft2,self.TiltSearchDown], # Olhando para baixo
-		[self.PanSearchLeft3,self.TiltSearchDown], # Olhando para baixo
-		[self.PanSearchLeft4,self.TiltSearchDown], # Olhando para baixo
-		[self.PanSearchLeft5,self.TiltSearchDown], # Olhando para baixo
-		[self.PanSearchLeft6,self.TiltSearchDown], # Olhando para baixo
 
-		[self.PanSearchCenter0,self.TiltSearchDown], # Olhando para baixo
+		[self.PanSearchRight1,self.TiltSearchDown2], # Olhando para baixo
+		[self.PanSearchRight2,self.TiltSearchDown2], # Olhando para baixo
+		[self.PanSearchRight3,self.TiltSearchDown2], # Olhando para baixo
+		[self.PanSearchRight4,self.TiltSearchDown2], # Olhando para baixo
+		[self.PanSearchRight5,self.TiltSearchDown2], # Olhando para baixo
+		[self.PanSearchRight6,self.TiltSearchDown2], # Olhando para baixo
+		
+		[self.PanSearchCenter0,self.TiltSearchDown2], # Olhando para baixo
+		
+		[self.PanSearchLeft6,self.TiltSearchDown2], # Olhando para baixo
+		[self.PanSearchLeft5,self.TiltSearchDown2], # Olhando para baixo
+		[self.PanSearchLeft4,self.TiltSearchDown2], # Olhando para baixo
+		[self.PanSearchLeft3,self.TiltSearchDown2], # Olhando para baixo
+		[self.PanSearchLeft2,self.TiltSearchDown2], # Olhando para baixo
+		[self.PanSearchLeft1,self.TiltSearchDown2], # Olhando para baixo
 
-		[self.PanSearchRight6,self.TiltSearchDown], # Olhando para baixo
-		[self.PanSearchRight5,self.TiltSearchDown], # Olhando para baixo
-		[self.PanSearchRight4,self.TiltSearchDown], # Olhando para baixo
-		[self.PanSearchRight3,self.TiltSearchDown], # Olhando para baixo
-		[self.PanSearchRight2,self.TiltSearchDown], # Olhando para baixo
-		[self.PanSearchRight1,self.TiltSearchDown], # Olhando para baixo
+		[self.PanSearchLeft1,self.TiltSearchDown1], # Olhando para baixo
+		[self.PanSearchLeft2,self.TiltSearchDown1], # Olhando para baixo
+		[self.PanSearchLeft3,self.TiltSearchDown1], # Olhando para baixo
+		[self.PanSearchLeft4,self.TiltSearchDown1], # Olhando para baixo
+		[self.PanSearchLeft5,self.TiltSearchDown1], # Olhando para baixo
+		[self.PanSearchLeft6,self.TiltSearchDown1], # Olhando para baixo
+
+		[self.PanSearchCenter0,self.TiltSearchDown1], # Olhando para baixo
+
+		[self.PanSearchRight6,self.TiltSearchDown1], # Olhando para baixo
+		[self.PanSearchRight5,self.TiltSearchDown1], # Olhando para baixo
+		[self.PanSearchRight4,self.TiltSearchDown1], # Olhando para baixo
+		[self.PanSearchRight3,self.TiltSearchDown1], # Olhando para baixo
+		[self.PanSearchRight2,self.TiltSearchDown1], # Olhando para baixo
+		[self.PanSearchRight1,self.TiltSearchDown1], # Olhando para baixo
+
 
 		[self.PanSearchRight2,self.TiltSearchCenter], # Olhando para meio
 		[self.PanSearchRight3,self.TiltSearchCenter], # Olhando para meio
@@ -144,7 +162,9 @@ class Pantilt (object):
 		[self.PanSearchLeft4,self.TiltSearchCenter], # Olhando para meio
 		[self.PanSearchLeft3,self.TiltSearchCenter], # Olhando para meio
 		[self.PanSearchLeft2,self.TiltSearchCenter], # Olhando para meio
+		[self.PanSearchLeft1,self.TiltSearchCenter], # Olhando para meio
 
+		[self.PanSearchLeft1,self.TiltSearchUp], # Olhando para meio
 		[self.PanSearchLeft2,self.TiltSearchUp], # Olhando para Cima
 		[self.PanSearchLeft3,self.TiltSearchUp], # Olhando para Cima
 		[self.PanSearchLeft4,self.TiltSearchUp], # Olhando para Cima
@@ -158,6 +178,7 @@ class Pantilt (object):
 		[self.PanSearchRight4,self.TiltSearchUp], # Olhando para baixo
 		[self.PanSearchRight3,self.TiltSearchUp], # Olhando para baixo
 		[self.PanSearchRight2,self.TiltSearchUp], # Olhando para baixo
+		[self.PanSearchRight1,self.TiltSearchUp], # Olhando para baixo
 
 		]
 	
@@ -335,7 +356,8 @@ class Pantilt (object):
 				self.__Config.add_section('Search')
 				self.__Config.set('Search', 'TiltSearchUp', str(-50)+'\t;First level tilt search')
 				self.__Config.set('Search', 'TiltSearchCenter', str(0)+'\t;Second level tilt search')
-				self.__Config.set('Search', 'TiltSearchDown', str(50)+'\t;Third level tilt search')
+				self.__Config.set('Search', 'TiltSearchDown1', str(50)+'\t;Third level tilt search')
+				self.__Config.set('Search', 'TiltSearchDown2', str(100)+'\t;Fourth level tilt search')
 				self.__Config.set('Search', 'PanSearchLeft1', str(-300)+'\t;Left First level Pan search')
 				self.__Config.set('Search', 'PanSearchLeft2', str(-250)+'\t;Left Second level Pan search')
 				self.__Config.set('Search', 'PanSearchLeft3', str(-200)+'\t;Left Third level Pan search')
@@ -357,7 +379,8 @@ class Pantilt (object):
 			else:
 				self.TiltSearchUp = self.__Config.getint('Search', 'TiltSearchUp')
 				self.TiltSearchCenter = self.__Config.getint('Search', 'TiltSearchCenter')
-				self.TiltSearchDown = self.__Config.getint('Search', 'TiltSearchDown')
+				self.TiltSearchDown1 = self.__Config.getint('Search', 'TiltSearchDown1')
+				self.TiltSearchDown2 = self.__Config.getint('Search', 'TiltSearchDown2')
 				self.PanSearchLeft1 = self.__Config.getint('Search', 'PanSearchLeft1')
 				self.PanSearchLeft2 = self.__Config.getint('Search', 'PanSearchLeft2')
 				self.PanSearchLeft3 = self.__Config.getint('Search', 'PanSearchLeft3')
