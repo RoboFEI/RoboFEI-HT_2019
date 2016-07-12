@@ -222,7 +222,7 @@ void *recebendo(void* arg)
 			     }
 			else if(referre.kickOffTeam != TEAM_ROBOFEI && referre.state == STATE_PLAYING && (referre.secondaryState == STATE2_NORMAL|| referre.secondaryState == STATE2_OVERTIME)){
 				state = 4;
-				write_int(mem, COM_REFEREE, 21); //play  //kickOff do adversario
+				write_int(mem, COM_REFEREE, 2); //play  //kickOff do adversario
 			     }
 			else if(referre.kickOffTeam != TEAM_OPPONENT && referre.secondaryState == STATE2_PENALTYSHOOT){
 				state = 7;
