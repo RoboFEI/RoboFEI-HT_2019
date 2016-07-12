@@ -89,8 +89,8 @@ bool MotionManager::Initialize(CM730 *cm730, bool fadeIn)
 
 	if(fadeIn)
 	{
-		for(int i=JointData::ID_R_SHOULDER_PITCH; i<JointData::NUMBER_OF_JOINTS; i++)
-			cm730->WriteWord(i, MX28::P_TORQUE_LIMIT_L, 0, 0);
+		//for(int i=JointData::ID_R_SHOULDER_PITCH; i<JointData::NUMBER_OF_JOINTS; i++)
+			//cm730->WriteWord(i, MX28::P_TORQUE_LIMIT_L, 0, 0);
 	}
 
 	m_fadeIn = fadeIn;
