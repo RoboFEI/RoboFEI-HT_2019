@@ -529,6 +529,7 @@ class Ui_MainWindow(object):
         self.label_6.setObjectName(_fromUtf8("label_6"))
         self.widget = SpiralWidget(self.centralwidget) 
 #        self.widget = QtGui.QWidget(self.centralwidget)
+        self.mem = self.widget.bkb.shd_constructor(self.widget.mem_key)
         self.widget.setGeometry(QtCore.QRect(530, 140, 311, 231))
         font = QtGui.QFont()
         font.setUnderline(False)
@@ -745,7 +746,7 @@ class Ui_MainWindow(object):
         #check when the robot stopped the movement------------
         if self.widget.bkb.read_int(self.widget.mem, "CONTROL_MOVING") == 1:
             self.flag_posinit=True
-        if self.widget.bkb.read_int(self.widget.mem, "CONTROL_MOVING") == 0 and self.flag_posinit==True:       
+        if self.widget.bkb.read_int(self.widget.mem, "CONTROL_MOVING") == 0 and self.flag_posinit==True:
             self.label.setText(_translate("MainWindow", "Stopped", None))
             self.flag_posinit=False
         #-----------------------------------------------------
