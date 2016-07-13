@@ -97,6 +97,8 @@ int main(int argc, char **argv)
 
     unsigned int tensaomedia = 0;
 
+    change_current_dir();
+
     minIni* ini;
     ini = new minIni((char *)INI_FILE_PATH);
 
@@ -114,8 +116,6 @@ int main(int argc, char **argv)
 	int idServo;
 
     printf( "\n===== ROBOFEI-HT Control Process =====\n\n");
-
-    change_current_dir();
 
     Action::GetInstance()->LoadFile((char *)MOTION_FILE_PATH);
 
@@ -549,6 +549,7 @@ void move_gait(float X_amplitude, float Y_amplitude, float A_amplitude, bool &st
 			move_action(9, 0, stop_gait);
 			stop_gait = 0;
 		}
+                write_int(mem, CONTROL_MOVING, 1);
 		cout << "Stop com gait" << endl;
 		configGait->changeParam(Walking::GetInstance()); //volta para os parametros padrao do gait
 		Action::GetInstance()->Stop();
@@ -730,7 +731,7 @@ int check_servo(CM730 *cm730, int idServo, bool &stop_gait)
 //==============================================================================
 void robot_stop(ReadConfig *gait , bool &stop_gait)
 {
-    write_int(mem, CONTROL_MOVING, 1);
+    //write_int(mem, CONTROL_MOVING, 1);
     if (Walking::GetInstance()->IsRunning()!=0)
     {
 		move_gait(gait->walk_foward, gait->sidle, gait->turn_angle, stop_gait, gait, gait);
