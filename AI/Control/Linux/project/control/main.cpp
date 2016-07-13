@@ -777,14 +777,18 @@ void kick_left_strong(CM730 *cm730, bool &stop_gait)
 	cm730->WriteWord(16, 30, MotionManager::GetInstance()->m_Offset[16]+501, &erro);
 	cm730->WriteWord(18, 30, MotionManager::GetInstance()->m_Offset[18]+478, &erro);
 
-	//Esperando movimento
-	cm730->ReadWord(16, 36, &value, 0);
-	while(abs(value-(MotionManager::GetInstance()->m_Offset[16]+501))>10)
+		//Esperando  completar o movimento
+	unsigned int count_s = 0;
+	cm730->ReadWord(16, 46, &value, 0);
+	while(value!=0)
 	{
-	    cm730->ReadWord(16, 36, &value, 0);
-	    //cout<<"position: "<<MotionManager::GetInstance()->m_Offset[14]+409<<" value: "<<value<<" dif: "<<abs(value-(MotionManager::GetInstance()->m_Offset[14]+409))<<endl;
+	    count_s++;
+		cm730->ReadWord(16, 46, &value, 0);
 		usleep(8*1000);
+		if(count_s>100)
+		    break; //Evita de ficar parado neste laco
 	}
+	//std::cout<<count_s<<std::endl;
 
 	Action::GetInstance()->m_Joint.SetEnableBody(true);
 	MotionManager::GetInstance()->SetEnable(true);
@@ -822,14 +826,18 @@ void kick_right_strong(CM730 *cm730, bool &stop_gait)
 	cm730->WriteWord(15, 30, MotionManager::GetInstance()->m_Offset[15]+448, &erro);
 	cm730->WriteWord(17, 30, MotionManager::GetInstance()->m_Offset[17]+545, &erro);
 					
-	//Esperando movimento
-	cm730->ReadWord(15, 36, &value, 0);
-	while(abs(value-(MotionManager::GetInstance()->m_Offset[15]+448))>10)
+		//Esperando  completar o movimento
+	unsigned int count_s = 0;
+	cm730->ReadWord(15, 46, &value, 0);
+	while(value!=0)
 	{
-	    cm730->ReadWord(15, 36, &value, 0);
-		//cout<<"position: "<<MotionManager::GetInstance()->m_Offset[15]+448<<" value: "<<value<<" dif: "<<abs(value-(MotionManager::GetInstance()->m_Offset[15]+448))<<endl;
+	    count_s++;
+		cm730->ReadWord(15, 46, &value, 0);
 		usleep(8*1000);
+		if(count_s>100)
+		    break; //Evita de ficar parado neste laco
 	}
+	//std::cout<<count_s<<std::endl;
 
 	Action::GetInstance()->m_Joint.SetEnableBody(true);
 	MotionManager::GetInstance()->SetEnable(true);
