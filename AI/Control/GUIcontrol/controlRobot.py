@@ -585,7 +585,7 @@ class Ui_MainWindow(object):
         QtCore.QObject.connect(self.pushButton_19, QtCore.SIGNAL(_fromUtf8("clicked()")), self.greetings)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
         self.rotation = 0
-        self.widget.bkb.write_int("DECISION_ACTION_A", 0) # Init the robot stopped
+        self.widget.bkb.write_int(self.widget.mem, "DECISION_ACTION_A", 0) # Init the robot stopped
 
         #Create a thread to update the IMU values
         # adding by emitting signal in different thread
@@ -598,93 +598,93 @@ class Ui_MainWindow(object):
 
     def walkf(self):
         self.label.setText(_translate("MainWindow", "Walking Fast", None))
-        self.widget.bkb.write_int("DECISION_ACTION_A", 1) # Writing in the memory to the robot walk foward fast
+        self.widget.bkb.write_int(self.widget.mem, "DECISION_ACTION_A", 1) # Writing in the memory to the robot walk foward fast
 
     def walks(self):
         self.label.setText(_translate("MainWindow", "Walking Slow", None))
-        self.widget.bkb.write_int("DECISION_ACTION_A", 8) # Writing in the memory to the robot walk foward slow
+        self.widget.bkb.write_int(self.widget.mem, "DECISION_ACTION_A", 8) # Writing in the memory to the robot walk foward slow
 
     def sidlel(self):
         self.label.setText(_translate("MainWindow", "Sidling to the Left", None))
-        self.widget.bkb.write_int("DECISION_ACTION_A", 6) # Writing in the memory
+        self.widget.bkb.write_int(self.widget.mem, "DECISION_ACTION_A", 6) # Writing in the memory
 
     def sidler(self):
         self.label.setText(_translate("MainWindow", "Sidling to the Right", None))
-        self.widget.bkb.write_int("DECISION_ACTION_A", 7) # Writing in the memory
+        self.widget.bkb.write_int(self.widget.mem, "DECISION_ACTION_A", 7) # Writing in the memory
 
     def turnL(self):
         self.label.setText(_translate("MainWindow", "Turning to the Left", None))
-        self.widget.bkb.write_int("DECISION_ACTION_A", 2) # Writing in the memory
+        self.widget.bkb.write_int(self.widget.mem, "DECISION_ACTION_A", 2) # Writing in the memory
 
     def turnR(self):
         self.label.setText(_translate("MainWindow", "Turning to the Right", None))
-        self.widget.bkb.write_int("DECISION_ACTION_A", 3) # Writing in the memory
+        self.widget.bkb.write_int(self.widget.mem, "DECISION_ACTION_A", 3) # Writing in the memory
 
     def aroundL(self):
         self.label.setText(_translate("MainWindow", "Turning Around the ball Left", None))
-        self.widget.bkb.write_int("DECISION_ACTION_A", 9) # Writing in the memory
+        self.widget.bkb.write_int(self.widget.mem, "DECISION_ACTION_A", 9) # Writing in the memory
 
     def aroundR(self):
         self.label.setText(_translate("MainWindow", "Turning Around the ball Right", None))
-        self.widget.bkb.write_int("DECISION_ACTION_A", 14) # Writing in the memory
+        self.widget.bkb.write_int(self.widget.mem, "DECISION_ACTION_A", 14) # Writing in the memory
 
     def backWalk(self):
         self.label.setText(_translate("MainWindow", "Walking backward", None))
-        self.widget.bkb.write_int("DECISION_ACTION_A", 18) # Writing in the memory
+        self.widget.bkb.write_int(self.widget.mem, "DECISION_ACTION_A", 18) # Writing in the memory
 
     def stop(self):
         self.label.setText(_translate("MainWindow", "Stopped", None))
-        self.widget.bkb.write_int("DECISION_ACTION_A", 0) # Writing in the memory to the robot stop
+        self.widget.bkb.write_int(self.widget.mem, "DECISION_ACTION_A", 0) # Writing in the memory to the robot stop
 
     def gait(self):
         self.label.setText(_translate("MainWindow", "Gait", None))
-        self.widget.bkb.write_int("DECISION_ACTION_A", 11) # Writing in the memory
+        self.widget.bkb.write_int(self.widget.mem, "DECISION_ACTION_A", 11) # Writing in the memory
 
     def kickL(self):
         self.label.setText(_translate("MainWindow", "Kick Left", None))
-        self.widget.bkb.write_int("DECISION_ACTION_A", 5) # Writing in the memory
+        self.widget.bkb.write_int(self.widget.mem, "DECISION_ACTION_A", 5) # Writing in the memory
         self.flag_move_ac=True
 #        self.workThread2.start()
 
     def kickR(self):
         self.label.setText(_translate("MainWindow", "Kick Right", None))
-        self.widget.bkb.write_int("DECISION_ACTION_A", 4) # Writing in the memory
+        self.widget.bkb.write_int(self.widget.mem, "DECISION_ACTION_A", 4) # Writing in the memory
         self.flag_move_ac=True
 #        self.workThread2.start()
 
     def standupF(self):
         self.label.setText(_translate("MainWindow", "Stand up Front", None))
-        self.widget.bkb.write_int("DECISION_ACTION_A", 15) # Writing in the memory
+        self.widget.bkb.write_int(self.widget.mem, "DECISION_ACTION_A", 15) # Writing in the memory
         self.flag_move_ac=True
 #        self.workThread2.start()
 
     def standupB(self):
         self.label.setText(_translate("MainWindow", "Stand up Back", None))
-        self.widget.bkb.write_int("DECISION_ACTION_A", 16) # Writing in the memory
+        self.widget.bkb.write_int(self.widget.mem, "DECISION_ACTION_A", 16) # Writing in the memory
         self.flag_move_ac=True
 #        self.workThread2.start()
 
     def passL(self):
         self.label.setText(_translate("MainWindow", "Pass to the Left", None))
-        self.widget.bkb.write_int("DECISION_ACTION_A", 12) # Writing in the memory
+        self.widget.bkb.write_int(self.widget.mem, "DECISION_ACTION_A", 12) # Writing in the memory
         self.flag_move_ac=True
 #        self.workThread2.start()
 
     def passR(self):
         self.label.setText(_translate("MainWindow", "Pass to the Right", None))
-        self.widget.bkb.write_int("DECISION_ACTION_A", 13) # Writing in the memory
+        self.widget.bkb.write_int(self.widget.mem, "DECISION_ACTION_A", 13) # Writing in the memory
         self.flag_move_ac=True
 #        self.workThread2.start()
 
     def greetings(self):
         self.label.setText(_translate("MainWindow", "Greetings", None))
-        self.widget.bkb.write_int("DECISION_ACTION_A", 19) # Writing in the memory
+        self.widget.bkb.write_int(self.widget.mem, "DECISION_ACTION_A", 19) # Writing in the memory
         self.flag_move_ac=True
 #        self.workThread2.start()  
 
     def goodBye(self):
         self.label.setText(_translate("MainWindow", "GoodBye", None))
-        self.widget.bkb.write_int("DECISION_ACTION_A", 20) # Writing in the memory
+        self.widget.bkb.write_int(self.widget.mem, "DECISION_ACTION_A", 20) # Writing in the memory
         self.flag_move_ac=True
 #        self.workThread2.start()  
 
@@ -732,7 +732,7 @@ class Ui_MainWindow(object):
 
     def execute_stopped(self): #execute this if somebory turn off the control process
         if self.flag_posinit==True:
-            self.widget.bkb.write_int("DECISION_ACTION_A", 0) # Writing in the memory
+            self.widget.bkb.write_int(self.widget.mem, "DECISION_ACTION_A", 0) # Writing in the memory
             self.label.setText(_translate("MainWindow", "Stopped", None))
             self.flag_move_ac=False
 
@@ -743,16 +743,16 @@ class Ui_MainWindow(object):
         self.label_5.setText(_translate("MainWindow", "Pitch:       %3.1f"% self.widget.ay, None))
         self.label_6.setText(_translate("MainWindow", "Yaw:         %3.1f"% self.widget.az, None))
         #check when the robot stopped the movement------------
-        if self.widget.bkb.read_int("CONTROL_MOVING") == 1:
+        if self.widget.bkb.read_int(self.widget.mem, "CONTROL_MOVING") == 1:
             self.flag_posinit=True
-        if self.widget.bkb.read_int("CONTROL_MOVING") == 0 and self.flag_posinit==True:       
+        if self.widget.bkb.read_int(self.widget.mem, "CONTROL_MOVING") == 0 and self.flag_posinit==True:       
             self.label.setText(_translate("MainWindow", "Stopped", None))
             self.flag_posinit=False
         #-----------------------------------------------------
 
         #Check if the action move is running and clean DECISION_ACTION_A variable------
-        if self.widget.bkb.read_int("CONTROL_MOVING") == 1 and self.flag_move_ac==True:
-            self.widget.bkb.write_int("DECISION_ACTION_A", 0) # Writing in the memory
+        if self.widget.bkb.read_int(self.widget.mem, "CONTROL_MOVING") == 1 and self.flag_move_ac==True:
+            self.widget.bkb.write_int(self.widget.mem, "DECISION_ACTION_A", 0) # Writing in the memory
             self.flag_move_ac=False
         #-------------------------------------------------------------------------------
         #Check if process control is running---------------------------
