@@ -65,7 +65,7 @@ int check_servo(CM730 *cm730, int idServo, bool &stop_gait);
 
 int Initialize_servo();
 
-void Gait_in_place(bool &stop_gait);
+void Gait_in_place(ReadConfig* gait, bool &stop_gait, bool same_moviment);
 
 void move_action(int move_number, bool interrupt, bool &stop_gait); // Robot perform action move
 
@@ -82,6 +82,11 @@ void pass_left(CM730 *cm730,bool &stop_gait);
 void pass_right(CM730 *cm730,bool &stop_gait);
 
 void goalkeeper(bool &stop_gait);
+
+void kick_right_weak(bool &stop_gait);
+
+void kick_left_weak(bool &stop_gait);
+
 
 void change_current_dir()
 {
@@ -116,7 +121,7 @@ int main(int argc, char **argv)
     int idServo;
     bool flag_stop=0;
     bool same_moviment = false;
-    unsigned int buffer;
+    unsigned int buffer = 10000;
 
     printf( "\n===== ROBOFEI-HT Control Process =====\n\n");
 
@@ -263,13 +268,11 @@ int main(int argc, char **argv)
                 break;
 
                 case 99: //c
-                    cout << "Chutar direito bola laranja" << endl;
-                    move_action(12, 0, stop_gait);
+                    kick_right_weak(stop_gait);
                 break;
 
                 case 103: //g
-                    cout << "Chutar esquerdo bola laranja" << endl;
-                    move_action(61, 0, stop_gait);
+                    kick_left_weak(stop_gait);
                 break;
 
                 case 102: //f
@@ -331,8 +334,7 @@ int main(int argc, char **argv)
                 break;
 
                 case 115: //s
-                    cout << "Stop com gait" << endl;
-                    move_gait(gait.walk_foward, gait.sidle, gait.turn_angle, stop_gait, &gait, &gait);
+                    Gait_in_place(&gait, stop_gait, same_moviment);
                 break;
 
                 case 116: //t
@@ -354,13 +356,13 @@ int main(int argc, char **argv)
                  break;
 
                 case 27: //ESC (stop)
-                    cout << "Stop and shutdown code" << endl;
+                    cout << " | Stop process" << endl;
                     return 0;
                 break;
 
                 default:
                     if(key!=0)
-                        cout<< "Tecla incorreta - verifique quais teclas controlam o robo"<<endl;
+                        cout<< " | \e[1;31mTecla incorreta - verifique quais teclas controlam o robo\e[0m"<<endl;
                 break;
 
             }
@@ -384,7 +386,10 @@ int main(int argc, char **argv)
             if(buffer==read_int(mem, DECISION_ACTION_A))
                 same_moviment = true;
             else
+            {
                 same_moviment = false;
+                std::cout<< "Action " << read_int(mem, DECISION_ACTION_A); // Mostra o valor da ação
+            }
             buffer = read_int(mem, DECISION_ACTION_A);
             //------------------------------------------------------------
 
@@ -472,9 +477,7 @@ int main(int argc, char **argv)
             }
             if(read_int(mem, DECISION_ACTION_A) == 11)
             {
-                if(same_moviment == false)
-                    std::cout<<" | Stop com gait"<<std::endl;
-                move_gait(gait.walk_foward, gait.sidle, gait.turn_angle, stop_gait, &gait, &gait);
+                Gait_in_place(&gait, stop_gait, same_moviment);
             }
             if(read_int(mem, DECISION_ACTION_A) == 12)
             {            
@@ -531,6 +534,11 @@ int main(int argc, char **argv)
                 cout<<" | GoodBye"<<endl;
                 move_action(8, 0, stop_gait);
             }
+            if(read_int(mem, DECISION_ACTION_A) == 21)
+                kick_right_weak(stop_gait); //Chute fraco com pe direito
+            if(read_int(mem, DECISION_ACTION_A) == 22)
+                kick_left_weak(stop_gait); //Chute fraco com pe esquerdo
+
             usleep(50000);
             
     }
@@ -603,16 +611,11 @@ void move_gait(float X_amplitude, float Y_amplitude, float A_amplitude, bool &st
 
 //========================================================================
 //Do the gait staing int the place----------------------------------------
-void Gait_in_place(bool &stop_gait)
+void Gait_in_place(ReadConfig* gait, bool &stop_gait, bool same_moviment)
 {
-//    CONTROL_MOVING = 1;
-//    if(stop_gait == 1)
-//    {
-//        cout << "Action 9" << endl;
-//        move_action(9, 0, stop_gait);
-//        stop_gait = 0;
-//    }
-//    move_gait(0.0, 0.0, 0.0, stop_gait);
+    if(same_moviment == false) //Imprime na tela se o movimento nao foi repetido
+        std::cout<<" | Stop com gait"<<std::endl;
+    move_gait(gait->walk_foward, gait->sidle, gait->turn_angle, stop_gait, gait, gait);
 }
 
 //////////////////// Framework Initialize ////////////////////////////
@@ -783,7 +786,7 @@ void kick_left_strong(CM730 *cm730, bool &stop_gait)
     write_int(mem, CONTROL_MOVING, 1);
     int erro;
     int value;
-    cout << "Chute esquerdo bola branca" << endl;
+    cout << " | Chute forte esquerdo" << endl;
     move_action(1, 0, stop_gait);
     Action::GetInstance()->Start(62);
     while(Action::GetInstance()->IsRunning()) usleep(8*1000);
@@ -831,7 +834,7 @@ void kick_right_strong(CM730 *cm730, bool &stop_gait)
     write_int(mem, CONTROL_MOVING, 1);
     int erro;
     int value;
-    cout << "Chute direito bola branca" << endl;
+    cout << " | Chute forte direito" << endl;
     move_action(1, 0, stop_gait);
     while(Action::GetInstance()->IsRunning()) usleep(8*1000);
     Action::GetInstance()->Start(60);
@@ -881,7 +884,7 @@ void pass_left(CM730 *cm730, bool &stop_gait)
     write_int(mem, CONTROL_MOVING, 1);
     int erro;
     int value;
-    cout << "Passe Esquerda" << endl;
+    cout << " | Passe forte Esquerda" << endl;
     move_action(1, 0, stop_gait);
     Action::GetInstance()->Start(70);
     while(Action::GetInstance()->IsRunning()) usleep(8*1000);
@@ -924,7 +927,7 @@ void pass_left(CM730 *cm730, bool &stop_gait)
 void pass_right(CM730 *cm730, bool &stop_gait)
 {
     write_int(mem, CONTROL_MOVING, 1);
-    cout << "Passe Direita" << endl;
+    cout << " | Passe forte Direita" << endl;
     int erro;
     int value;
     move_action(1, 0, stop_gait);
@@ -971,6 +974,19 @@ void goalkeeper(bool &stop_gait)
     move_action(1, 0, stop_gait);    /* Init(stand up) pose */
     move_action(20, 0, stop_gait);    // colocar o action-script para cair e defender!!!
 }
+
+void kick_right_weak(bool &stop_gait)
+{
+    std::cout<<" | Chute fraco direito"<<std::endl;
+    move_action(12, 0, stop_gait);
+}
+
+void kick_left_weak(bool &stop_gait)
+{
+    std::cout<<" | Chute fraco esquerdo"<<std::endl;
+    move_action(13, 0, stop_gait);
+}
+
 
 
 
