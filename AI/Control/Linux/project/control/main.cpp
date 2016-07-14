@@ -43,6 +43,7 @@ Arquivo fonte contendo o programa que controla os servos do corpo do robô
 #include <blackboard.h>
 #include <boost/program_options.hpp> //tratamento de argumentos linha de comando
 #include "ReadConfig.hpp"
+#include "ActionMove.hpp"
 
 #ifdef MX28_1024
 #define MOTION_FILE_PATH    "../../Control/Data/motion_1024.bin"
@@ -67,25 +68,9 @@ int Initialize_servo();
 
 void Gait_in_place(ReadConfig* gait, bool &stop_gait, bool same_moviment);
 
-void move_action(int move_number, bool interrupt, bool &stop_gait); // Robot perform action move
-
 void move_gait(float X_amplitude, float Y_amplitude, float A_amplitude, bool &stop_gait, ReadConfig* configGait, ReadConfig* configP); // Robot perform gait
 
-void kick_right_strong(CM730 *cm730, bool &stop_gait);
-
-void kick_left_strong(CM730 *cm730, bool &stop_gait);
-
 void robot_stop(ReadConfig *gait , bool &stop_gait);
-
-void pass_left(CM730 *cm730,bool &stop_gait);
-
-void pass_right(CM730 *cm730,bool &stop_gait);
-
-void goalkeeper(bool &stop_gait);
-
-void kick_right_weak(bool &stop_gait);
-
-void kick_left_weak(bool &stop_gait);
 
 
 void change_current_dir()
@@ -140,6 +125,11 @@ int main(int argc, char **argv)
     ReadConfig sidleL("Sidle Left",ini);
 
     //**************************************************************************
+
+    //Criando objeto da classe do movimento de acoes----------------------------
+    ActionMove actionMove(mem);
+    //**************************************************************************
+
     //-------------para entrada de argumentos-----------------------------------
     namespace po=boost::program_options;
 
@@ -250,86 +240,84 @@ int main(int argc, char **argv)
             switch(key)
             {
                 case 97: //a
-                    cout << "Levantar quando as costas está para cima" << endl;
-                    move_action(11, 0, stop_gait);
+                    actionMove.standupFront(stop_gait);
                 break;
 
                 case 98: //b
-                    cout << "Levantar quando o peito está para cima" << endl;
-                    move_action(10, 0, stop_gait);
+                    actionMove.standupBack(stop_gait);
                 break;
                 
                 case 112: //p
-                    kick_right_strong(&cm730, stop_gait);
+                    actionMove.kick_right_strong(&cm730, stop_gait);
                 break;
 
                 case 108: //l
-                    kick_left_strong(&cm730, stop_gait);
+                    actionMove.kick_left_strong(&cm730, stop_gait);
                 break;
 
                 case 99: //c
-                    kick_right_weak(stop_gait);
+                    actionMove.kick_right_weak(stop_gait);
                 break;
 
                 case 103: //g
-                    kick_left_weak(stop_gait);
+                    actionMove.kick_left_weak(stop_gait);
                 break;
 
                 case 102: //f
-                    cout << "Andar para frente" << endl;
+                    cout << " | Andar para frente" << endl;
                     move_gait(walkfoward.walk_foward, walkfoward.sidle, walkfoward.turn_angle, stop_gait, &gait, &walkfoward);
                 break;
 
                 case 100: //d
-                    cout << "Vira para direita" << endl;
+                    cout << " | Vira para direita" << endl;
                     move_gait(turnRobot.walk_foward, turnRobot.sidle, -turnRobot.turn_angle, stop_gait, &gait, &turnRobot);
                 break;
 
                 case 105: //i
-                    pass_left(&cm730, stop_gait);
+                    actionMove.pass_left(&cm730, stop_gait);
                 break;
 
                 case 101: //e
-                    cout << "Vira para esquerda" << endl;
+                    cout << " | Vira para esquerda" << endl;
                     move_gait(turnRobot.walk_foward, turnRobot.sidle, turnRobot.turn_angle, stop_gait, &gait, &turnRobot);
                 break;
 
                 case 106: //j
-                    pass_right(&cm730, stop_gait);
+                    actionMove.pass_right(&cm730, stop_gait);
                 break;
 
                 case 109: //m
-                    cout << "Andar de lado esquerda" << endl;
+                    cout << " | Andar de lado esquerda" << endl;
                     move_gait(sidleL.walk_foward, sidleL.sidle, sidleL.turn_angle, stop_gait, &gait, &sidleL);
                 break;
 
                 case 110: //n
-                    cout << "Andar de lado direita" << endl;
+                    cout << " | Andar de lado direita" << endl;
                     move_gait(sidleR.walk_foward, -sidleR.sidle, sidleR.turn_angle, stop_gait, &gait, &sidleR);
                 break;
 
                 case 111: //o
-                    cout << "Rotacionar a esquerda em volta da bola" << endl;
+                    cout << " | Rotacionar a esquerda em volta da bola" << endl;
                     move_gait(turnBallL.walk_foward, turnBallL.sidle, turnBallL.turn_angle, stop_gait, &gait, &turnBallL);
                 break;
 
                 case 113: //q
-                    cout << "Rotacionar a direita em volta da bola" << endl;
+                    cout << " | Rotacionar a direita em volta da bola" << endl;
                     move_gait(turnBallR.walk_foward, -turnBallR.sidle, -turnBallR.turn_angle, stop_gait, &gait, &turnBallR);
                 break;
 
                 case 107: //k
-                    cout << "Andar curto para frente" << endl;
+                    cout << " | Andar curto para frente" << endl;
                     move_gait(walkslow.walk_foward, walkslow.sidle, walkslow.turn_angle, stop_gait, &gait, &walkslow);
                 break;
 
                 case 114: //r
-                    cout << "Andar curto para traz" << endl;
+                    cout << " | Andar curto para traz" << endl;
                     move_gait(-walkslow.walk_foward, walkslow.sidle, walkslow.turn_angle, stop_gait, &gait, &walkslow);
                 break;
 
                 case 118: //v
-                    cout << "Andar rapido para traz" << endl;
+                    cout << " | Andar rapido para traz" << endl;
                     move_gait(-walkfoward.walk_foward, walkfoward.sidle, walkfoward.turn_angle, stop_gait, &gait, &walkfoward);
                 break;
 
@@ -342,21 +330,19 @@ int main(int argc, char **argv)
                 break;
                 
                 case 117: //u
-                    goalkeeper(stop_gait);
+                    actionMove.goalkeeper(stop_gait);
                 break;
 
                 case 104: //h
-                    cout << "Greetings" << endl;
-                    move_action(24, 0, stop_gait);
+                    actionMove.greetings(stop_gait);
                 break;
 
                 case 122: //z
-                    cout<<" | GoodBye"<<endl;
-                    move_action(8, 0, stop_gait);
+                    actionMove.goodBye(stop_gait);
                  break;
 
                 case 27: //ESC (stop)
-                    cout << " | Stop process" << endl;
+                    cout << " | Exit process" << endl;
                     return 0;
                 break;
 
@@ -380,8 +366,6 @@ int main(int argc, char **argv)
     while(1)
     {
 
-            //std::cout<< "Action " << read_int(mem, DECISION_ACTION_A); // Mostra o valor da ação
-
             //Confere se o movimento atual e o mesmo do anterior----------
             if(buffer==read_int(mem, DECISION_ACTION_A))
                 same_moviment = true;
@@ -395,12 +379,10 @@ int main(int argc, char **argv)
 
             if (read_int(mem, IMU_STATE) && !variables.count("g")){ // Ve se esta caido
                 if(read_float(mem, IMU_ACCEL_X) > 0){  //Levanta se caido de frente
-                    std::cout<<" | Levantar de frente";
-                    move_action(10, 0, stop_gait);
+                    actionMove.standupFront(stop_gait);
                 }
                 else{  //Levanta se caido de costa
-                    std::cout<<" | Levantar de costa";
-                    move_action(11, 0, stop_gait);
+                    actionMove.standupBack(stop_gait);
                 }
                 stop_gait = 1;
                 sleep(1);
@@ -435,14 +417,13 @@ int main(int argc, char **argv)
                     std::cout<<" | Virar a direita"<<std::endl;
                 move_gait(turnRobot.walk_foward, turnRobot.sidle, -turnRobot.turn_angle, stop_gait, &gait, &turnRobot);
             }
+
             if(read_int(mem, DECISION_ACTION_A) == 4)
-            {
-                kick_right_strong(&cm730, stop_gait);
-            }
+                actionMove.kick_right_strong(&cm730, stop_gait);
+
             if(read_int(mem, DECISION_ACTION_A) == 5)
-            {
-                kick_left_strong(&cm730, stop_gait);
-            }
+                actionMove.kick_left_strong(&cm730, stop_gait);
+
             if(read_int(mem, DECISION_ACTION_A) == 6)
             {
                 if(same_moviment == false)
@@ -472,21 +453,16 @@ int main(int argc, char **argv)
             }
 
             if(read_int(mem, DECISION_ACTION_A) == 10)
-            {
-                goalkeeper(stop_gait);  // colocar o action-script para cair e defender!!!
-            }
+                actionMove.goalkeeper(stop_gait);
+
             if(read_int(mem, DECISION_ACTION_A) == 11)
-            {
                 Gait_in_place(&gait, stop_gait, same_moviment);
-            }
+
             if(read_int(mem, DECISION_ACTION_A) == 12)
-            {            
-                pass_left(&cm730, stop_gait);
-            }
+                actionMove.pass_left(&cm730, stop_gait);
+
             if(read_int(mem, DECISION_ACTION_A) == 13)
-            {            
-                pass_right(&cm730, stop_gait);
-            }
+                actionMove.pass_right(&cm730, stop_gait);
 
             if(read_int(mem, DECISION_ACTION_A) == 14)
             {
@@ -496,19 +472,15 @@ int main(int argc, char **argv)
             }
             if(read_int(mem, DECISION_ACTION_A) == 15)
             {
-                if (read_int(mem, IMU_STATE)){ // check if robot is fall
-                    std::cout<<" | Levantar de frente"<<std::endl;
-                    move_action(10, 0, stop_gait);
-                }
+                if (read_int(mem, IMU_STATE))// check if robot is fall
+                    actionMove.standupFront(stop_gait);
                 else
                     std::cout<<" | \e[1;31mRobô não está caido ou IMU está desligada\e[0m"<<std::endl;
             }
             if(read_int(mem, DECISION_ACTION_A) == 16)
             {
-                if (read_int(mem, IMU_STATE)){ // check if robot is fall
-                    std::cout<<" | Levantar de costa"<<std::endl;
-                    move_action(11, 0, stop_gait);
-                }
+                if (read_int(mem, IMU_STATE))// check if robot is fall
+                    actionMove.standupBack(stop_gait);
                 else
                     std::cout<<" | \e[1;31mRobô não está caido ou IMU está desligada\e[0m"<<std::endl;
             }
@@ -524,23 +496,20 @@ int main(int argc, char **argv)
                     cout<<" | Andar lento para traz"<<endl;
                 move_gait(-walkslow.walk_foward, walkslow.sidle, walkslow.turn_angle, stop_gait, &gait, &walkslow);
             }
-            if(read_int(mem, DECISION_ACTION_A) == 19)
-            {
-                cout<<" | Greetings"<<endl;
-                move_action(24, 0, stop_gait);
-            }
-            if(read_int(mem, DECISION_ACTION_A) == 20)
-            {
-                cout<<" | GoodBye"<<endl;
-                move_action(8, 0, stop_gait);
-            }
-            if(read_int(mem, DECISION_ACTION_A) == 21)
-                kick_right_weak(stop_gait); //Chute fraco com pe direito
-            if(read_int(mem, DECISION_ACTION_A) == 22)
-                kick_left_weak(stop_gait); //Chute fraco com pe esquerdo
 
-            usleep(50000);
-            
+            if(read_int(mem, DECISION_ACTION_A) == 19)
+                actionMove.greetings(stop_gait);
+
+            if(read_int(mem, DECISION_ACTION_A) == 20)
+                actionMove.goodBye(stop_gait);
+
+            if(read_int(mem, DECISION_ACTION_A) == 21)
+                actionMove.kick_right_weak(stop_gait); //Chute fraco com pe direito
+
+            if(read_int(mem, DECISION_ACTION_A) == 22)
+                actionMove.kick_left_weak(stop_gait); //Chute fraco com pe esquerdo
+
+            usleep(50000); //Opera em uma frequencia de 20Hz
     }
     //--------------------------------------------------------------------------------------------------
     //==================================================================
@@ -556,22 +525,6 @@ int main(int argc, char **argv)
 }
 
 //========================================================================
-//Execute the move action-------------------------------------------------
-void move_action(int move_number, bool interrupt, bool &stop_gait )
-{
-    write_int(mem, CONTROL_MOVING, 1);
-    while(Walking::GetInstance()->GetCurrentPhase()!=0 && Walking::GetInstance()->IsRunning()!=0)  usleep(8*1000);
-    Walking::GetInstance()->Stop();
-    Walking::GetInstance()->m_Joint.SetEnableBody(false);
-    Action::GetInstance()->m_Joint.SetEnableBody(true);
-    MotionManager::GetInstance()->SetEnable(true);
-    Action::GetInstance()->Start(move_number); // Realiza a ação do numero contido no move_number
-    while(Action::GetInstance()->IsRunning() && ~interrupt) usleep(8*1000); // Aguarda finalizar a ação ou para por interrupção
-    stop_gait = 1;
-    write_int(mem, CONTROL_MOVING, 0);
-}
-
-//========================================================================
 //Execute the gait generation---------------------------------------------
 void move_gait(float X_amplitude, float Y_amplitude, float A_amplitude, bool &stop_gait, ReadConfig* configGait, ReadConfig* configP)
 {
@@ -581,10 +534,15 @@ void move_gait(float X_amplitude, float Y_amplitude, float A_amplitude, bool &st
         //Gait_in_place(stop_gait); // Need performes the Gait before performe others moviments
         if(stop_gait == 1)
         {
-            move_action(9, 0, stop_gait);
+            while(Walking::GetInstance()->GetCurrentPhase()!=0 && Walking::GetInstance()->IsRunning()!=0)  usleep(8*1000);
+            Walking::GetInstance()->Stop();
+            Walking::GetInstance()->m_Joint.SetEnableBody(false);
+            Action::GetInstance()->m_Joint.SetEnableBody(true);
+            MotionManager::GetInstance()->SetEnable(true);
+            Action::GetInstance()->Start(9); // Realiza a ação do numero contido no move_number
+            while(Action::GetInstance()->IsRunning()) usleep(8*1000); // Aguarda finalizar a ação
             stop_gait = 0;
         }
-                write_int(mem, CONTROL_MOVING, 1);
         cout << "Stop com gait" << endl;
         configGait->changeParam(Walking::GetInstance()); //volta para os parametros padrao do gait
         Action::GetInstance()->Stop();
@@ -780,212 +738,7 @@ void robot_stop(ReadConfig *gait , bool &stop_gait)
     write_int(mem, CONTROL_MOVING, 0);
 }
 
-//==============================================================================
-void kick_left_strong(CM730 *cm730, bool &stop_gait)
-{
-    write_int(mem, CONTROL_MOVING, 1);
-    int erro;
-    int value;
-    cout << " | Chute forte esquerdo" << endl;
-    move_action(1, 0, stop_gait);
-    Action::GetInstance()->Start(62);
-    while(Action::GetInstance()->IsRunning()) usleep(8*1000);
-    Action::GetInstance()->Stop();
-    Action::GetInstance()->m_Joint.SetEnableBody(false);
-    MotionManager::GetInstance()->SetEnable(false);
 
-    //getchar();
-
-    // Velocidades
-    cm730->WriteWord(12, 32, 985, &erro);
-    cm730->WriteWord(14, 32, 812, &erro);
-    cm730->WriteWord(16, 32, 1023, &erro);
-    cm730->WriteWord(18, 32, 150, &erro);
-
-    cm730->WriteWord(12, 30, MotionManager::GetInstance()->m_Offset[12]+741, &erro);
-    cm730->WriteWord(14, 30, MotionManager::GetInstance()->m_Offset[14]+327, &erro);
-    cm730->WriteWord(16, 30, MotionManager::GetInstance()->m_Offset[16]+501, &erro);
-    cm730->WriteWord(18, 30, MotionManager::GetInstance()->m_Offset[18]+478, &erro);
-
-        //Esperando  completar o movimento
-    unsigned int count_s = 0;
-    cm730->ReadWord(16, 46, &value, 0);
-    while(value!=0)
-    {
-        count_s++;
-        cm730->ReadWord(16, 46, &value, 0);
-        usleep(8*1000);
-        if(count_s>100)
-            break; //Evita de ficar parado neste laco
-    }
-    //std::cout<<count_s<<std::endl;
-
-    Action::GetInstance()->m_Joint.SetEnableBody(true);
-    MotionManager::GetInstance()->SetEnable(true);
-    Action::GetInstance()->Start(63);
-    while(Action::GetInstance()->IsRunning()) usleep(8*1000);
-    stop_gait = 1;
-    write_int(mem, CONTROL_MOVING, 0);
-}
-
-//==============================================================================
-void kick_right_strong(CM730 *cm730, bool &stop_gait)
-{
-    write_int(mem, CONTROL_MOVING, 1);
-    int erro;
-    int value;
-    cout << " | Chute forte direito" << endl;
-    move_action(1, 0, stop_gait);
-    while(Action::GetInstance()->IsRunning()) usleep(8*1000);
-    Action::GetInstance()->Start(60);
-    while(Action::GetInstance()->IsRunning()) usleep(8*1000);
-    Action::GetInstance()->Stop();
-    Action::GetInstance()->m_Joint.SetEnableBody(false);
-    MotionManager::GetInstance()->SetEnable(false);
-
-    //getchar();
-
-    // Velocidades
-    cm730->WriteWord(11, 32, 399, &erro);
-    cm730->WriteWord(13, 32, 926, &erro);
-    cm730->WriteWord(15, 32, 1023, &erro);
-    cm730->WriteWord(17, 32, 97, &erro);
-
-    cm730->WriteWord(11, 30, MotionManager::GetInstance()->m_Offset[11]+294, &erro);
-    cm730->WriteWord(13, 30, MotionManager::GetInstance()->m_Offset[13]+614, &erro);
-    cm730->WriteWord(15, 30, MotionManager::GetInstance()->m_Offset[15]+448, &erro);
-    cm730->WriteWord(17, 30, MotionManager::GetInstance()->m_Offset[17]+545, &erro);
-                    
-        //Esperando  completar o movimento
-    unsigned int count_s = 0;
-    cm730->ReadWord(15, 46, &value, 0);
-    while(value!=0)
-    {
-        count_s++;
-        cm730->ReadWord(15, 46, &value, 0);
-        usleep(8*1000);
-        if(count_s>100)
-            break; //Evita de ficar parado neste laco
-    }
-    //std::cout<<count_s<<std::endl;
-
-    Action::GetInstance()->m_Joint.SetEnableBody(true);
-    MotionManager::GetInstance()->SetEnable(true);
-    Action::GetInstance()->Start(61);
-    while(Action::GetInstance()->IsRunning()) usleep(8*1000);
-    stop_gait = 1;
-    write_int(mem, CONTROL_MOVING, 0);
-
-}
-
-//==============================================================================
-void pass_left(CM730 *cm730, bool &stop_gait)
-{
-    write_int(mem, CONTROL_MOVING, 1);
-    int erro;
-    int value;
-    cout << " | Passe forte Esquerda" << endl;
-    move_action(1, 0, stop_gait);
-    Action::GetInstance()->Start(70);
-    while(Action::GetInstance()->IsRunning()) usleep(8*1000);
-    Action::GetInstance()->Stop();
-    Action::GetInstance()->m_Joint.SetEnableBody(false);
-    MotionManager::GetInstance()->SetEnable(false);
-                    
-    //getchar();
-                    
-    // Velocidades
-    cm730->WriteWord(7, 32, 255, &erro);
-    cm730->WriteWord(9, 32, 1023, &erro);
-                    
-    cm730->WriteWord(7, 30, MotionManager::GetInstance()->m_Offset[7]+603, &erro);
-    cm730->WriteWord(9, 30, MotionManager::GetInstance()->m_Offset[9]+385, &erro);
-                    
-    //Esperando  completar o movimento
-    unsigned int count_s = 0;
-    cm730->ReadWord(9, 46, &value, 0);
-    while(value!=0)
-    {
-        count_s++;
-        cm730->ReadWord(9, 46, &value, 0);
-        usleep(8*1000);
-        if(count_s>100)
-            break; //Evita de ficar parado neste laco
-    }
-    //std::cout<<count_s<<std::endl;
-
-    Action::GetInstance()->m_Joint.SetEnableBody(true);
-    MotionManager::GetInstance()->SetEnable(true);
-    Action::GetInstance()->Start(72);
-    while(Action::GetInstance()->IsRunning()) usleep(8*1000);
-    stop_gait = 1;
-    write_int(mem, CONTROL_MOVING, 0);
-    
-}
-
-//==============================================================================
-void pass_right(CM730 *cm730, bool &stop_gait)
-{
-    write_int(mem, CONTROL_MOVING, 1);
-    cout << " | Passe forte Direita" << endl;
-    int erro;
-    int value;
-    move_action(1, 0, stop_gait);
-    Action::GetInstance()->Start(71);
-    while(Action::GetInstance()->IsRunning()) usleep(8*1000);
-    Action::GetInstance()->Stop();
-    Action::GetInstance()->m_Joint.SetEnableBody(false);
-    MotionManager::GetInstance()->SetEnable(false);
-                    
-    //getchar();
-                    
-    // Velocidades
-    cm730->WriteWord(8, 32, 255, &erro);
-    cm730->WriteWord(10, 32, 1023, &erro);
-                    
-    cm730->WriteWord(8, 30, MotionManager::GetInstance()->m_Offset[8]+420, &erro);
-    cm730->WriteWord(10, 30, MotionManager::GetInstance()->m_Offset[10]+638, &erro);
-                    
-    //Esperando  completar o movimento
-    unsigned int count_s = 0;
-    cm730->ReadWord(10, 46, &value, 0);
-    while(value!=0)
-    {
-        count_s++;
-        cm730->ReadWord(10, 46, &value, 0);
-        usleep(8*1000);
-        if(count_s>100)
-            break; //Evita de ficar parado neste laco
-    }
-    //std::cout<<count_s<<std::endl;
-                    
-    Action::GetInstance()->m_Joint.SetEnableBody(true);
-    MotionManager::GetInstance()->SetEnable(true);
-    Action::GetInstance()->Start(73);
-    while(Action::GetInstance()->IsRunning()) usleep(8*1000);
-    stop_gait = 1;
-    write_int(mem, CONTROL_MOVING, 0);
-    
-}
-
-void goalkeeper(bool &stop_gait)
-{
-    std::cout<<" | Defender a bola"<<std::endl;  //------------------------------TODO
-    move_action(1, 0, stop_gait);    /* Init(stand up) pose */
-    move_action(20, 0, stop_gait);    // colocar o action-script para cair e defender!!!
-}
-
-void kick_right_weak(bool &stop_gait)
-{
-    std::cout<<" | Chute fraco direito"<<std::endl;
-    move_action(12, 0, stop_gait);
-}
-
-void kick_left_weak(bool &stop_gait)
-{
-    std::cout<<" | Chute fraco esquerdo"<<std::endl;
-    move_action(13, 0, stop_gait);
-}
 
 
 
