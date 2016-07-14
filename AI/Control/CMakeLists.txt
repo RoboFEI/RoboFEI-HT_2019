@@ -1,7 +1,7 @@
 # @author Isaac Jesus da Silva - ROBOFEI-HT - FEI
 # @version V0.0.3
 # @created 04/07/2014
-# @Modified 23/02/2016
+# @Modified 14/07/2016
 # 
 # Para Help acesse http://www.cmake.org/cmake/help/v2.8.0/cmake.html#command:link_directories
 
@@ -16,7 +16,7 @@ include_directories(
 )
 
 include_directories(include)
-add_library(libcontrol SHARED ./Linux/project/control/main.cpp ./Linux/project/control/kbhit.cpp ./Linux/project/control/ReadConfig.cpp)
+add_library(libcontrol SHARED ./Linux/project/control/main.cpp ./Linux/project/control/kbhit.cpp ./Linux/project/control/ReadConfig.cpp ./Linux/project/control/ActionMove.cpp)
 install(TARGETS libcontrol DESTINATION ${RoboFEI-HT_BINARY_DIR}/lib)
 
 #link_directories(
