@@ -44,6 +44,7 @@ Arquivo fonte contendo o programa que controla os servos do corpo do robô
 #include <boost/program_options.hpp> //tratamento de argumentos linha de comando
 #include "ReadConfig.hpp"
 #include "ActionMove.hpp"
+#include "GaitMove.hpp"
 
 #ifdef MX28_1024
 #define MOTION_FILE_PATH    "../../Control/Data/motion_1024.bin"
@@ -66,11 +67,7 @@ int check_servo(CM730 *cm730, int idServo, bool &stop_gait);
 
 int Initialize_servo();
 
-void Gait_in_place(ReadConfig* gait, bool &stop_gait, bool same_moviment);
-
 void move_gait(float X_amplitude, float Y_amplitude, float A_amplitude, bool &stop_gait, ReadConfig* configGait, ReadConfig* configP); // Robot perform gait
-
-void robot_stop(ReadConfig *gait , bool &stop_gait);
 
 
 void change_current_dir()
@@ -123,11 +120,6 @@ int main(int argc, char **argv)
     ReadConfig turnBallL("Turn Ball Left",ini);
     ReadConfig sidleR("Sidle Right",ini);
     ReadConfig sidleL("Sidle Left",ini);
-
-    //**************************************************************************
-
-    //Criando objeto da classe do movimento de acoes----------------------------
-    ActionMove actionMove(mem);
     //**************************************************************************
 
     //-------------para entrada de argumentos-----------------------------------
@@ -158,6 +150,14 @@ int main(int argc, char **argv)
         return 0;
     }
     //================================================================================== 
+
+    //Criando objeto da classe dos movimento de acoes----------------------------
+    ActionMove actionMove(mem);
+    //**************************************************************************
+
+    //Criando objeto da classe dos movimentos de caminhada----------------------
+    GaitMove gaitMove(mem, ini);
+    //**************************************************************************
 
     //======================== check temperature =======================================     
     if (variables.count("v")) //verifica se foi chamado o argumento de controle pelo teclado
@@ -264,13 +264,11 @@ int main(int argc, char **argv)
                 break;
 
                 case 102: //f
-                    cout << " | Andar para frente" << endl;
-                    move_gait(walkfoward.walk_foward, walkfoward.sidle, walkfoward.turn_angle, stop_gait, &gait, &walkfoward);
+                    gaitMove.walk_foward_fast(stop_gait, same_moviment);
                 break;
 
                 case 100: //d
-                    cout << " | Vira para direita" << endl;
-                    move_gait(turnRobot.walk_foward, turnRobot.sidle, -turnRobot.turn_angle, stop_gait, &gait, &turnRobot);
+                    gaitMove.turn_right(stop_gait, true, same_moviment);
                 break;
 
                 case 105: //i
@@ -278,8 +276,7 @@ int main(int argc, char **argv)
                 break;
 
                 case 101: //e
-                    cout << " | Vira para esquerda" << endl;
-                    move_gait(turnRobot.walk_foward, turnRobot.sidle, turnRobot.turn_angle, stop_gait, &gait, &turnRobot);
+                    gaitMove.turn_left(stop_gait, true, same_moviment);
                 break;
 
                 case 106: //j
@@ -307,8 +304,7 @@ int main(int argc, char **argv)
                 break;
 
                 case 107: //k
-                    cout << " | Andar curto para frente" << endl;
-                    move_gait(walkslow.walk_foward, walkslow.sidle, walkslow.turn_angle, stop_gait, &gait, &walkslow);
+                    gaitMove.walk_foward_slow(stop_gait, true, same_moviment);
                 break;
 
                 case 114: //r
@@ -322,11 +318,11 @@ int main(int argc, char **argv)
                 break;
 
                 case 115: //s
-                    Gait_in_place(&gait, stop_gait, same_moviment);
+                    gaitMove.Gait_in_place(stop_gait, same_moviment);
                 break;
 
                 case 116: //t
-                    robot_stop(&gait , stop_gait);
+                    gaitMove.robot_stop(stop_gait);
                 break;
                 
                 case 117: //u
@@ -393,30 +389,20 @@ int main(int argc, char **argv)
             if(read_int(mem, DECISION_ACTION_A) == 0)
             {
                 if(flag_stop==false)
-                    robot_stop(&gait , stop_gait);
+                    gaitMove.robot_stop(stop_gait);
                 flag_stop = true; //variavel que indica que o robo ja estava parado, isso evita de repetir o movimento
             }
             else
                 flag_stop = false;
 
             if(read_int(mem, DECISION_ACTION_A) == 1)
-            {
-                if(same_moviment == false)
-                    std::cout<<" | Andar para frente"<<std::endl;
-                move_gait(walkfoward.walk_foward, walkfoward.sidle, walkfoward.turn_angle, stop_gait, &gait, &walkfoward);
-            }
+                gaitMove.walk_foward_fast(stop_gait, same_moviment);
+
             if(read_int(mem, DECISION_ACTION_A) == 2)
-            {
-                if(same_moviment == false)
-                    std::cout<<" | Virar a esquerda"<<std::endl;
-                move_gait(turnRobot.walk_foward, turnRobot.sidle, turnRobot.turn_angle, stop_gait, &gait, &turnRobot);
-            }
+                gaitMove.turn_left(stop_gait, true, same_moviment);
+
             if(read_int(mem, DECISION_ACTION_A) == 3)
-            {
-                if(same_moviment == false)
-                    std::cout<<" | Virar a direita"<<std::endl;
-                move_gait(turnRobot.walk_foward, turnRobot.sidle, -turnRobot.turn_angle, stop_gait, &gait, &turnRobot);
-            }
+                gaitMove.turn_right(stop_gait, true, same_moviment);
 
             if(read_int(mem, DECISION_ACTION_A) == 4)
                 actionMove.kick_right_strong(&cm730, stop_gait);
@@ -437,14 +423,8 @@ int main(int argc, char **argv)
                 move_gait(sidleR.walk_foward, -sidleR.sidle, sidleR.turn_angle, stop_gait, &gait, &sidleR);
             }
             if(read_int(mem, DECISION_ACTION_A) == 8)
-            {
-                if(same_moviment == false)
-                    std::cout<<" | Andar lento para frente"<<std::endl;
-                if(float(read_int(mem, DECISION_ACTION_B))<walkslow.walk_foward)
-                    move_gait(float(read_int(mem, DECISION_ACTION_B)), walkslow.sidle, walkslow.turn_angle, stop_gait, &gait, &walkslow);
-                else
-                    move_gait(walkslow.walk_foward, walkslow.sidle, walkslow.turn_angle, stop_gait, &gait, &walkslow);
-            }
+                gaitMove.walk_foward_slow(stop_gait, false, same_moviment);
+
             if(read_int(mem, DECISION_ACTION_A) == 9)
             {
                 if(same_moviment == false)
@@ -456,7 +436,7 @@ int main(int argc, char **argv)
                 actionMove.goalkeeper(stop_gait);
 
             if(read_int(mem, DECISION_ACTION_A) == 11)
-                Gait_in_place(&gait, stop_gait, same_moviment);
+                gaitMove.Gait_in_place(stop_gait, same_moviment);
 
             if(read_int(mem, DECISION_ACTION_A) == 12)
                 actionMove.pass_left(&cm730, stop_gait);
@@ -567,14 +547,6 @@ void move_gait(float X_amplitude, float Y_amplitude, float A_amplitude, bool &st
     Walking::GetInstance()->Start();
 }
 
-//========================================================================
-//Do the gait staing int the place----------------------------------------
-void Gait_in_place(ReadConfig* gait, bool &stop_gait, bool same_moviment)
-{
-    if(same_moviment == false) //Imprime na tela se o movimento nao foi repetido
-        std::cout<<" | Stop com gait"<<std::endl;
-    move_gait(gait->walk_foward, gait->sidle, gait->turn_angle, stop_gait, gait, gait);
-}
 
 //////////////////// Framework Initialize ////////////////////////////
 // ---- Open USBDynamixel -----------------------------------------------{
@@ -716,27 +688,7 @@ int check_servo(CM730 *cm730, int idServo, bool &stop_gait)
     return 0;
 }
 
-//==============================================================================
-void robot_stop(ReadConfig *gait , bool &stop_gait)
-{
-    //write_int(mem, CONTROL_MOVING, 1);
-    std::cout<<" | Nada a fazer"<<std::endl;
-    if (Walking::GetInstance()->IsRunning()!=0)
-    {
-        move_gait(gait->walk_foward, gait->sidle, gait->turn_angle, stop_gait, gait, gait);
-        usleep(500000);
-    }
-    while(Walking::GetInstance()->GetCurrentPhase()!=0 && Walking::GetInstance()->IsRunning()!=0)  usleep(8*1000);
-    Walking::GetInstance()->Stop();
-    Walking::GetInstance()->m_Joint.SetEnableBody(false);
-    Action::GetInstance()->m_Joint.SetEnableBody(true);
-    MotionManager::GetInstance()->SetEnable(true);
-    usleep(500000); //Aguarda 0.5 segundos
-    Action::GetInstance()->Start(1); // Realiza a ação do numero contido no move_number
-    while(Action::GetInstance()->IsRunning()) usleep(8*1000);
-    stop_gait = 1;
-    write_int(mem, CONTROL_MOVING, 0);
-}
+
 
 
 

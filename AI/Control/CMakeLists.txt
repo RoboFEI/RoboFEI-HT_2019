@@ -16,7 +16,7 @@ include_directories(
 )
 
 include_directories(include)
-add_library(libcontrol SHARED ./Linux/project/control/main.cpp ./Linux/project/control/kbhit.cpp ./Linux/project/control/ReadConfig.cpp ./Linux/project/control/ActionMove.cpp)
+add_library(libcontrol SHARED ./Linux/project/control/main.cpp ./Linux/project/control/kbhit.cpp ./Linux/project/control/ReadConfig.cpp ./Linux/project/control/ActionMove.cpp ./Linux/project/control/GaitMove.cpp)
 install(TARGETS libcontrol DESTINATION ${RoboFEI-HT_BINARY_DIR}/lib)
 
 #link_directories(
