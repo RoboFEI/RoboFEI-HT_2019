@@ -54,6 +54,14 @@ class GaitMove
 
         void sidle_left(bool &stop_gait, bool same_moviment);
 
+        void turn_around_ball_right(bool &stop_gait, bool same_moviment);
+
+        void turn_around_ball_left(bool &stop_gait, bool same_moviment);
+
+        void walk_backward_fast(bool &stop_gait, bool same_moviment);
+
+        void walk_backward_slow(bool &stop_gait, bool max_speed, bool same_moviment);
+
     private:
         int *mem;
         ReadConfig* gait;

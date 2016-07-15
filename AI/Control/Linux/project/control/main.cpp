@@ -67,9 +67,6 @@ int check_servo(CM730 *cm730, int idServo, bool &stop_gait);
 
 int Initialize_servo();
 
-void move_gait(float X_amplitude, float Y_amplitude, float A_amplitude, bool &stop_gait, ReadConfig* configGait, ReadConfig* configP); // Robot perform gait
-
-
 void change_current_dir()
 {
     char exepath[1024] = {0};
@@ -82,8 +79,6 @@ char string1[50]; //String
 int main(int argc, char **argv)
 {
 
-    unsigned int tensaomedia = 0;
-
     change_current_dir();
 
     minIni* ini;
@@ -92,23 +87,19 @@ int main(int argc, char **argv)
       //Acopla ou cria a memoria compartilhada
     int *mem = using_shared_memory(ini->getd("Communication","no_player_robofei",-1024) * 100); //0 for real robot
 
-    bool stop_gait = 1;
+    bool stop_gait = true;
     char *Servoport;
     sprintf(string1,"echo fei 123456| sudo -S renice -20 -p %d", getpid()); // prioridade maxima do codigo
     system(string1);//prioridade
-    float turn_angle = 20;
-    float walk_foward= 15;
     int value;
-    int erro;
     int idServo;
-    bool flag_stop=0;
+    bool flag_stop = 0;
     bool same_moviment = false;
     unsigned int buffer = 10000;
 
     printf( "\n===== ROBOFEI-HT Control Process =====\n\n");
 
     Action::GetInstance()->LoadFile((char *)MOTION_FILE_PATH);
-
 
 
     //Carregando valores do config.ini -----------------------------------------
@@ -284,23 +275,19 @@ int main(int argc, char **argv)
                 break;
 
                 case 109: //m
-                    cout << " | Andar de lado esquerda" << endl;
-                    move_gait(sidleL.walk_foward, sidleL.sidle, sidleL.turn_angle, stop_gait, &gait, &sidleL);
+                    gaitMove.sidle_left(stop_gait, same_moviment);
                 break;
 
                 case 110: //n
-                    cout << " | Andar de lado direita" << endl;
-                    move_gait(sidleR.walk_foward, -sidleR.sidle, sidleR.turn_angle, stop_gait, &gait, &sidleR);
+                    gaitMove.sidle_right(stop_gait, same_moviment);
                 break;
 
                 case 111: //o
-                    cout << " | Rotacionar a esquerda em volta da bola" << endl;
-                    move_gait(turnBallL.walk_foward, turnBallL.sidle, turnBallL.turn_angle, stop_gait, &gait, &turnBallL);
+                    gaitMove.turn_around_ball_left(stop_gait, same_moviment);
                 break;
 
                 case 113: //q
-                    cout << " | Rotacionar a direita em volta da bola" << endl;
-                    move_gait(turnBallR.walk_foward, -turnBallR.sidle, -turnBallR.turn_angle, stop_gait, &gait, &turnBallR);
+                    gaitMove.turn_around_ball_right(stop_gait, same_moviment);
                 break;
 
                 case 107: //k
@@ -308,13 +295,11 @@ int main(int argc, char **argv)
                 break;
 
                 case 114: //r
-                    cout << " | Andar curto para traz" << endl;
-                    move_gait(-walkslow.walk_foward, walkslow.sidle, walkslow.turn_angle, stop_gait, &gait, &walkslow);
+                    gaitMove.walk_backward_slow(stop_gait, true, same_moviment);
                 break;
 
                 case 118: //v
-                    cout << " | Andar rapido para traz" << endl;
-                    move_gait(-walkfoward.walk_foward, walkfoward.sidle, walkfoward.turn_angle, stop_gait, &gait, &walkfoward);
+                    gaitMove.walk_backward_fast(stop_gait, same_moviment);
                 break;
 
                 case 115: //s
@@ -411,26 +396,16 @@ int main(int argc, char **argv)
                 actionMove.kick_left_strong(&cm730, stop_gait);
 
             if(read_int(mem, DECISION_ACTION_A) == 6)
-            {
-                if(same_moviment == false)
-                    std::cout<<" | Andar de Lado esquerda"<<std::endl;
-                move_gait(sidleL.walk_foward, sidleL.sidle, sidleL.turn_angle, stop_gait, &gait, &sidleL);
-            }
+                gaitMove.sidle_left(stop_gait, same_moviment);
+
             if(read_int(mem, DECISION_ACTION_A) == 7)
-            {
-                if(same_moviment == false)
-                    std::cout<<" | Andar de Lado direita"<<std::endl;
-                move_gait(sidleR.walk_foward, -sidleR.sidle, sidleR.turn_angle, stop_gait, &gait, &sidleR);
-            }
+                gaitMove.sidle_right(stop_gait, same_moviment);
+
             if(read_int(mem, DECISION_ACTION_A) == 8)
                 gaitMove.walk_foward_slow(stop_gait, false, same_moviment);
 
             if(read_int(mem, DECISION_ACTION_A) == 9)
-            {
-                if(same_moviment == false)
-                    std::cout<<" | Girar em torno da bola para esquerda"<<std::endl;
-                move_gait(turnBallL.walk_foward, turnBallL.sidle, turnBallL.turn_angle, stop_gait, &gait, &turnBallL);
-            }
+                gaitMove.turn_around_ball_left(stop_gait, same_moviment);
 
             if(read_int(mem, DECISION_ACTION_A) == 10)
                 actionMove.goalkeeper(stop_gait);
@@ -445,11 +420,8 @@ int main(int argc, char **argv)
                 actionMove.pass_right(&cm730, stop_gait);
 
             if(read_int(mem, DECISION_ACTION_A) == 14)
-            {
-                if(same_moviment == false)
-                    std::cout<<" | Girar em torno da bola para direita"<<std::endl;
-                move_gait(turnBallR.walk_foward, -turnBallR.sidle, -turnBallR.turn_angle, stop_gait, &gait, &turnBallR);
-            }
+                gaitMove.turn_around_ball_right(stop_gait, same_moviment);
+
             if(read_int(mem, DECISION_ACTION_A) == 15)
             {
                 if (read_int(mem, IMU_STATE))// check if robot is fall
@@ -466,15 +438,11 @@ int main(int argc, char **argv)
             }
             if(read_int(mem, DECISION_ACTION_A) == 17)
             {
-                if(same_moviment == false)
-                    cout<<" | Andar rapido para traz"<<endl;
-                move_gait(-walkfoward.walk_foward, walkfoward.sidle, walkfoward.turn_angle, stop_gait, &gait, &walkfoward);
+                gaitMove.walk_backward_fast(stop_gait, same_moviment);
             }
             if(read_int(mem, DECISION_ACTION_A) == 18)
             {
-                if(same_moviment == false)
-                    cout<<" | Andar lento para traz"<<endl;
-                move_gait(-walkslow.walk_foward, walkslow.sidle, walkslow.turn_angle, stop_gait, &gait, &walkslow);
+                gaitMove.walk_backward_slow(stop_gait, true, same_moviment);
             }
 
             if(read_int(mem, DECISION_ACTION_A) == 19)
@@ -502,49 +470,6 @@ int main(int argc, char **argv)
 //    while(LinuxActionScript::m_is_running == 1) sleep(10);
 
     return 0;
-}
-
-//========================================================================
-//Execute the gait generation---------------------------------------------
-void move_gait(float X_amplitude, float Y_amplitude, float A_amplitude, bool &stop_gait, ReadConfig* configGait, ReadConfig* configP)
-{
-    write_int(mem, CONTROL_MOVING, 1);
-    if(Walking::GetInstance()->IsRunning()==0)
-    {
-        //Gait_in_place(stop_gait); // Need performes the Gait before performe others moviments
-        if(stop_gait == 1)
-        {
-            while(Walking::GetInstance()->GetCurrentPhase()!=0 && Walking::GetInstance()->IsRunning()!=0)  usleep(8*1000);
-            Walking::GetInstance()->Stop();
-            Walking::GetInstance()->m_Joint.SetEnableBody(false);
-            Action::GetInstance()->m_Joint.SetEnableBody(true);
-            MotionManager::GetInstance()->SetEnable(true);
-            Action::GetInstance()->Start(9); // Realiza a ação do numero contido no move_number
-            while(Action::GetInstance()->IsRunning()) usleep(8*1000); // Aguarda finalizar a ação
-            stop_gait = 0;
-        }
-        cout << "Stop com gait" << endl;
-        configGait->changeParam(Walking::GetInstance()); //volta para os parametros padrao do gait
-        Action::GetInstance()->Stop();
-        Walking::GetInstance()->m_Joint.SetEnableBody(true);
-        Action::GetInstance()->m_Joint.SetEnableBody(false);
-        MotionStatus::m_CurrentJoints.SetEnableBodyWithoutHead(true);
-        Walking::GetInstance()->X_MOVE_AMPLITUDE = configGait->walk_foward;
-        Walking::GetInstance()->Y_MOVE_AMPLITUDE = configGait->sidle;
-        Walking::GetInstance()->A_MOVE_AMPLITUDE = configGait->turn_angle;
-        Walking::GetInstance()->Start();
-        sleep(2);
-    }
-    configP->changeParam(Walking::GetInstance()); //change the parameters
-    Action::GetInstance()->Stop();
-    MotionManager::GetInstance()->SetEnable(true);
-    Walking::GetInstance()->m_Joint.SetEnableBody(true);
-    Action::GetInstance()->m_Joint.SetEnableBody(false);
-    MotionStatus::m_CurrentJoints.SetEnableBodyWithoutHead(true);
-    Walking::GetInstance()->X_MOVE_AMPLITUDE = X_amplitude;
-    Walking::GetInstance()->Y_MOVE_AMPLITUDE = Y_amplitude;
-    Walking::GetInstance()->A_MOVE_AMPLITUDE = A_amplitude;
-    Walking::GetInstance()->Start();
 }
 
 
