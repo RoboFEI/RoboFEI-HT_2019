@@ -3,9 +3,9 @@
 ******************************************************************************
 * @file control.cpp
 * @author Isaac Jesus da Silva - ROBOFEI-HT - FEI 😛
-* @version V2.1.0
+* @version V2.2.0
 * @created 20/01/2015
-* @Modified 01/05/2016
+* @Modified 15/07/2016
 * @e-mail isaac25silva@yahoo.com.br
 * @brief control 😛
 ****************************************************************************
@@ -13,32 +13,19 @@
 Arquivo fonte contendo o programa que controla os servos do corpo do robô
 ---------------------------------------------------------------------------*/
 
-#include <unistd.h>
-#include <string.h>
-#include <libgen.h>
-#include <iostream>
+#include <unistd.h> //sleep, usleep
+#include <libgen.h> //dirname
 #include <stdio.h>
-#include <termios.h>
-#include <fcntl.h>
 #include <stdlib.h>
-#include <cstdlib>
-
-//#include <stdio.h>
-//#include <errno.h>
-//#include <sys/ipc.h>
-//#include <sys/shm.h>
 #include <signal.h>
 
 #include "minIni.h"
 #include <string>
 
-//#include "Action.h"
-//#include "Walking.h"
 #include "MX28.h"
 #include "MotionManager.h"
 #include "LinuxMotionTimer.h"
 #include "LinuxCM730.h"
-//#include "LinuxActionScript.h"
 #include <blackboard.h>
 #include <boost/program_options.hpp> //tratamento de argumentos linha de comando
 #include "ActionMove.hpp"
@@ -324,7 +311,6 @@ int main(int argc, char **argv)
     //-------------------------Controle pela decisão-----------------------------------------
     while(1)
     {
-
             //Confere se o movimento atual e o mesmo do anterior----------
             if(buffer==read_int(mem, DECISION_ACTION_A))
                 same_moviment = true;
@@ -561,7 +547,6 @@ int check_servo(CM730 *cm730, int idServo, bool &stop_gait)
             }
         }
     }
-
     else{ // Membro inferiores, do 7 em diante
         if(cm730->ReadWord(i, 34, &save, 0)!=0)
         {
