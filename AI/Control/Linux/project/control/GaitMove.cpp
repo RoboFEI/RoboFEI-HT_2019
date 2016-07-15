@@ -38,7 +38,10 @@ GaitMove::GaitMove(int *mem_t, minIni* ini)
     turnBallL = new ReadConfig("Turn Ball Left",ini);
     sidleR = new ReadConfig("Sidle Right",ini);
     sidleL = new ReadConfig("Sidle Left",ini);
-//    //**********************************************
+    //**********************************************
+
+    MotionManager::GetInstance()->LoadINISettings(ini);
+    MotionManager::GetInstance()->AddModule((MotionModule*)Walking::GetInstance());
 }
 
 //========================================================================

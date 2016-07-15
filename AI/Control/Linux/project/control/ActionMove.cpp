@@ -22,6 +22,15 @@ Arquivo fonte contendo metodos de movimentos de acoes
 #include "ActionMove.hpp"
 
 
+
+ActionMove::ActionMove(int *mem_t, char* filename)
+{
+    mem = mem_t;
+    Action::GetInstance()->LoadFile(filename);
+    Action::GetInstance()->Initialize();
+    MotionManager::GetInstance()->AddModule((MotionModule*)Action::GetInstance());
+}
+
 //========================================================================
 //Execute the move action-------------------------------------------------
 void ActionMove::move_action(int move_number, bool interrupt, bool &stop_gait)
@@ -292,6 +301,19 @@ void ActionMove::standupBack(bool &stop_gait)
     write_int(mem, CONTROL_MOVING, 0);
 }
 
+
+//========================================================================
+//Stand up pose-----------------------------------------------------------
+void ActionMove::poseStandup(bool &stop_gait)
+{
+    write_int(mem, CONTROL_MOVING, 1);
+    std::cout<<"Start Action 1"<<std::endl;
+    move_action(1, 0, stop_gait);
+    write_int(mem, CONTROL_MOVING, 0);
+}
+
+
 //*********************************************************************
 //---------------------------------------------------------------------
+
 

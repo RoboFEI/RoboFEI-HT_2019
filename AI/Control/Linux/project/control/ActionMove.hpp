@@ -31,7 +31,7 @@ class ActionMove
     public:
 
         //Construtor
-        ActionMove(int *mem_t){mem = mem_t;};
+        ActionMove(int *mem_t, char* filename);
 
         //Destrutor
         ~ActionMove(){};
@@ -57,6 +57,8 @@ class ActionMove
         void standupFront(bool &stop_gait);
 
         void standupBack(bool &stop_gait);
+
+        void poseStandup(bool &stop_gait);
 
     private:
         int *mem;
