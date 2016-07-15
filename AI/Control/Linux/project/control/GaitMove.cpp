@@ -181,10 +181,44 @@ void GaitMove::sidle_left(bool &stop_gait, bool same_moviment)
     move_gait(sidleL->walk_foward, sidleL->sidle, sidleL->turn_angle, stop_gait, gait, sidleL);
 }
 
+//========================================================================
+//The robot sidle to right-------------------------------------------------
+void GaitMove::turn_around_ball_right(bool &stop_gait, bool same_moviment)
+{
+    if(same_moviment == false)
+        std::cout<<" | Girar em torno da bola para direita"<<std::endl;
+    move_gait(turnBallR->walk_foward, -turnBallR->sidle, -turnBallR->turn_angle, stop_gait, gait, turnBallR);
+}
 
+//========================================================================
+//The robot sidle to left-------------------------------------------------
+void GaitMove::turn_around_ball_left(bool &stop_gait, bool same_moviment)
+{
+    if(same_moviment == false)
+        std::cout<<" | Girar em torno da bola para esquerda"<<std::endl;
+    move_gait(turnBallL->walk_foward, turnBallL->sidle, turnBallL->turn_angle, stop_gait, gait, turnBallL);
+}
 
+//========================================================================
+//gait backward fast--------------------------------------------------
+void GaitMove::walk_backward_fast(bool &stop_gait, bool same_moviment)
+{
+    if(same_moviment == false)
+        std::cout<<" | Andar rapido para traz"<<std::endl;
+    move_gait(-walkfoward->walk_foward, walkfoward->sidle, walkfoward->turn_angle, stop_gait, gait, walkfoward);
+}
 
-
+//========================================================================
+//gait backward slow------------------------------------------------------
+void GaitMove::walk_backward_slow(bool &stop_gait, bool max_speed, bool same_moviment)
+{
+    if(same_moviment == false)
+        std::cout<<" | Andar lento para traz"<<std::endl;
+    if(float(read_int(mem, DECISION_ACTION_B))<walkslow->walk_foward && max_speed==false)
+        move_gait(-float(read_int(mem, DECISION_ACTION_B)), walkslow->sidle, walkslow->turn_angle, stop_gait, gait, walkslow);
+    else
+        move_gait(-walkslow->walk_foward, walkslow->sidle, walkslow->turn_angle, stop_gait, gait, walkslow);
+}
 
 
 
