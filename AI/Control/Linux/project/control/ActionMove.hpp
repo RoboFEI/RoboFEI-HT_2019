@@ -28,15 +28,13 @@ using namespace Robot;
 // Criação da Classe
 class ActionMove
 {
-        public:
+    public:
 
         //Construtor
         ActionMove(int *mem_t){mem = mem_t;};
 
         //Destrutor
         ~ActionMove(){};
-
-        void move_action(int move_number, bool interrupt, bool &stop_gait);
 
         void pass_left(CM730 *cm730, bool &stop_gait);
 
@@ -60,8 +58,12 @@ class ActionMove
 
         void standupBack(bool &stop_gait);
 
-        private:
-            int *mem;
+    private:
+        int *mem;
+        int erro;
+        int value;
+
+        void move_action(int move_number, bool interrupt, bool &stop_gait);
 };
 
 //*********************************************************************

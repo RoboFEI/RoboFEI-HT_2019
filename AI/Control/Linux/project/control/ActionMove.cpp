@@ -43,8 +43,6 @@ void ActionMove::move_action(int move_number, bool interrupt, bool &stop_gait)
 void ActionMove::pass_left(CM730 *cm730, bool &stop_gait)
 {
     write_int(mem, CONTROL_MOVING, 1);
-    int erro;
-    int value;
     std::cout << " | Passe forte Esquerda" << std::endl;
     move_action(1, 0, stop_gait);
     Action::GetInstance()->Start(70);
@@ -89,8 +87,6 @@ void ActionMove::pass_right(CM730 *cm730, bool &stop_gait)
 {
     write_int(mem, CONTROL_MOVING, 1);
     std::cout << " | Passe forte Direita" << std::endl;
-    int erro;
-    int value;
     move_action(1, 0, stop_gait);
     Action::GetInstance()->Start(71);
     while(Action::GetInstance()->IsRunning()) usleep(8*1000);
@@ -165,8 +161,6 @@ void ActionMove::kick_left_weak(bool &stop_gait)
 void ActionMove::kick_left_strong(CM730 *cm730, bool &stop_gait)
 {
     write_int(mem, CONTROL_MOVING, 1);
-    int erro;
-    int value;
     std::cout << " | Chute forte esquerdo" << std::endl;
     move_action(1, 0, stop_gait);
     Action::GetInstance()->Start(62);
@@ -213,8 +207,6 @@ void ActionMove::kick_left_strong(CM730 *cm730, bool &stop_gait)
 void ActionMove::kick_right_strong(CM730 *cm730, bool &stop_gait)
 {
     write_int(mem, CONTROL_MOVING, 1);
-    int erro;
-    int value;
     std::cout << " | Chute forte direito" << std::endl;
     move_action(1, 0, stop_gait);
     while(Action::GetInstance()->IsRunning()) usleep(8*1000);
