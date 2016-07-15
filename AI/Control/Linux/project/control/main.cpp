@@ -33,8 +33,8 @@ Arquivo fonte contendo o programa que controla os servos do corpo do robô
 #include "minIni.h"
 #include <string>
 
-#include "Action.h"
-#include "Walking.h"
+//#include "Action.h"
+//#include "Walking.h"
 #include "MX28.h"
 #include "MotionManager.h"
 #include "LinuxMotionTimer.h"
@@ -42,7 +42,6 @@ Arquivo fonte contendo o programa que controla os servos do corpo do robô
 #include "LinuxActionScript.h"
 #include <blackboard.h>
 #include <boost/program_options.hpp> //tratamento de argumentos linha de comando
-#include "ReadConfig.hpp"
 #include "ActionMove.hpp"
 #include "GaitMove.hpp"
 
@@ -96,22 +95,10 @@ int main(int argc, char **argv)
     bool flag_stop = 0;
     bool same_moviment = false;
     unsigned int buffer = 10000;
+    unsigned int count_read=0;
+    unsigned int step_time=20; // Determina a frequencia de leitura do blackboard
 
     printf( "\n===== ROBOFEI-HT Control Process =====\n\n");
-
-    Action::GetInstance()->LoadFile((char *)MOTION_FILE_PATH);
-
-
-    //Carregando valores do config.ini -----------------------------------------
-    ReadConfig gait("Gait",ini);
-    ReadConfig walkfoward("Walking Config",ini);
-    ReadConfig turnRobot("Turn Robot",ini);
-    ReadConfig walkslow("Walk Slow",ini);
-    ReadConfig turnBallR("Turn Ball Right",ini);
-    ReadConfig turnBallL("Turn Ball Left",ini);
-    ReadConfig sidleR("Sidle Right",ini);
-    ReadConfig sidleL("Sidle Left",ini);
-    //**************************************************************************
 
     //-------------para entrada de argumentos-----------------------------------
     namespace po=boost::program_options;
@@ -142,14 +129,6 @@ int main(int argc, char **argv)
     }
     //================================================================================== 
 
-    //Criando objeto da classe dos movimento de acoes----------------------------
-    ActionMove actionMove(mem);
-    //**************************************************************************
-
-    //Criando objeto da classe dos movimentos de caminhada----------------------
-    GaitMove gaitMove(mem, ini);
-    //**************************************************************************
-
     //======================== check temperature =======================================     
     if (variables.count("v")) //verifica se foi chamado o argumento de controle pelo teclado
     {
@@ -160,37 +139,26 @@ int main(int argc, char **argv)
     }
     //================================================================================== 
 
+//    MotionManager::GetInstance()->LoadINISettings(ini);
 
-    MotionManager::GetInstance()->LoadINISettings(ini);
+    //Criando objeto da classe dos movimento de acoes----------------------------
+    ActionMove actionMove(mem, (char *)MOTION_FILE_PATH);
+    //**************************************************************************
 
-    Walking::GetInstance()->LoadINISettings(ini); 
-    MotionManager::GetInstance()->AddModule((MotionModule*)Action::GetInstance());
-    MotionManager::GetInstance()->AddModule((MotionModule*)Walking::GetInstance());
+    //Criando objeto da classe dos movimentos de caminhada----------------------
+    GaitMove gaitMove(mem, ini);
+    //**************************************************************************
+
+//    MotionManager::GetInstance()->LoadINISettings(ini);
+//    Walking::GetInstance()->LoadINISettings(ini); 
+//    MotionManager::GetInstance()->AddModule((MotionModule*)Action::GetInstance());
+//    MotionManager::GetInstance()->AddModule((MotionModule*)Walking::GetInstance());
     LinuxMotionTimer linuxMotionTimer;
     linuxMotionTimer.Initialize(MotionManager::GetInstance());
     linuxMotionTimer.Start();
     /////////////////////////////////////////////////////////////////////
 
-//    printf("Pronto 3\n");
-//    getchar();
-
-    Action::GetInstance()->Initialize();
-    Walking::GetInstance()->m_Joint.SetEnableBody(false);
-    Action::GetInstance()->m_Joint.SetEnableBody(true);
-    MotionManager::GetInstance()->SetEnable(true);
-
-    std::cout<<"Start Action 1"<<std::endl;
-    Action::GetInstance()->Start(1);    /* Init(stand up) pose */
-    while(Action::GetInstance()->IsRunning()) usleep(8*1000); 
-    Action* a=Action::GetInstance();
-
-//    getchar();    
-
-//    std::cout<<"Start Action 9"<<std::endl;
-//    Action::GetInstance()->Start(9);   // Posicionando para andar
-//    while(Action::GetInstance()->IsRunning()) usleep(8*1000); 
-
-    Action::GetInstance()->Stop();
+    actionMove.poseStandup(stop_gait); /* Init(stand up) pose */
 
     //====== Reset the IMU ==========
     sleep(2);
@@ -215,7 +183,6 @@ int main(int argc, char **argv)
             k++;
         }
     }
-
     //===============================
 
     //***********************************************************************************************
@@ -353,7 +320,8 @@ int main(int argc, char **argv)
             else
             {
                 same_moviment = false;
-                std::cout<< "Action " << read_int(mem, DECISION_ACTION_A); // Mostra o valor da ação
+                std::cout<< "\nAction " << read_int(mem, DECISION_ACTION_A); // Mostra o valor da ação
+                count_read=0;
             }
             buffer = read_int(mem, DECISION_ACTION_A);
             //------------------------------------------------------------
@@ -457,7 +425,10 @@ int main(int argc, char **argv)
             if(read_int(mem, DECISION_ACTION_A) == 22)
                 actionMove.kick_left_weak(stop_gait); //Chute fraco com pe esquerdo
 
-            usleep(50000); //Opera em uma frequencia de 20Hz
+            count_read++;
+            std::cout << "\rReading BlackBoard" <<"[\e[38;5;43m"<< count_read<<"\e[0m] | Tempo ocioso"<<"[\e[38;5;82m"<< count_read*step_time/1000<<"s\e[0m]";
+            fflush (stdout);
+            usleep(step_time*1000); //Operando na frequencia de 1/step_time Hertz
     }
     //--------------------------------------------------------------------------------------------------
     //==================================================================
