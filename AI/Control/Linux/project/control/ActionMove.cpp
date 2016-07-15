@@ -5,7 +5,7 @@
 * @author Isaac Jesus da Silva - ROBOFEI-HT - FEI 😛
 * @version V1.0.5
 * @created 14/07/2016
-* @Modified 14/07/2016
+* @Modified 15/07/2016
 * @e-mail isaac25silva@yahoo.com.br
 * @revisor Isaac Jesus da Silva
 * @e-mail isaac25silva@yahoo.com.br
@@ -20,7 +20,6 @@ Arquivo fonte contendo metodos de movimentos de acoes
 #include <unistd.h>
 #include "MotionManager.h"
 #include "ActionMove.hpp"
-
 
 
 ActionMove::ActionMove(int *mem_t, char* filename)
@@ -52,7 +51,7 @@ void ActionMove::move_action(int move_number, bool interrupt, bool &stop_gait)
 void ActionMove::pass_left(CM730 *cm730, bool &stop_gait)
 {
     write_int(mem, CONTROL_MOVING, 1);
-    std::cout << " | Passe forte Esquerda" << std::endl;
+    std::cout << " | \e[38;5;45mPasse forte Esquerda\e[0m" << std::endl;
     move_action(1, 0, stop_gait);
     Action::GetInstance()->Start(70);
     while(Action::GetInstance()->IsRunning()) usleep(8*1000);
@@ -95,7 +94,7 @@ void ActionMove::pass_left(CM730 *cm730, bool &stop_gait)
 void ActionMove::pass_right(CM730 *cm730, bool &stop_gait)
 {
     write_int(mem, CONTROL_MOVING, 1);
-    std::cout << " | Passe forte Direita" << std::endl;
+    std::cout << " | \e[38;5;45mPasse forte Direita\e[0m" << std::endl;
     move_action(1, 0, stop_gait);
     Action::GetInstance()->Start(71);
     while(Action::GetInstance()->IsRunning()) usleep(8*1000);
@@ -139,7 +138,7 @@ void ActionMove::pass_right(CM730 *cm730, bool &stop_gait)
 void ActionMove::goalkeeper(bool &stop_gait)
 {
     write_int(mem, CONTROL_MOVING, 1);
-    std::cout<<" | Defender a bola"<<std::endl;  //------------------------------TODO
+    std::cout<<" | \e[38;5;45mDefender a bola\e[0m"<<std::endl;  //------------------------------TODO
     move_action(1, 0, stop_gait);    /* Init(stand up) pose */
     move_action(20, 0, stop_gait);    // colocar o action-script para cair e defender!!!
     write_int(mem, CONTROL_MOVING, 0);
@@ -150,7 +149,7 @@ void ActionMove::goalkeeper(bool &stop_gait)
 void ActionMove::kick_right_weak(bool &stop_gait)
 {
     write_int(mem, CONTROL_MOVING, 1);
-    std::cout<<" | Chute fraco direito"<<std::endl;
+    std::cout<<" | \e[38;5;45mChute fraco direito\e[0m"<<std::endl;
     move_action(12, 0, stop_gait);
     write_int(mem, CONTROL_MOVING, 0);
 }
@@ -160,7 +159,7 @@ void ActionMove::kick_right_weak(bool &stop_gait)
 void ActionMove::kick_left_weak(bool &stop_gait)
 {
     write_int(mem, CONTROL_MOVING, 1);
-    std::cout<<" | Chute fraco esquerdo"<<std::endl;
+    std::cout<<" | \e[38;5;45mChute fraco esquerdo\e[0m"<<std::endl;
     move_action(13, 0, stop_gait);
     write_int(mem, CONTROL_MOVING, 0);
 }
@@ -170,7 +169,7 @@ void ActionMove::kick_left_weak(bool &stop_gait)
 void ActionMove::kick_left_strong(CM730 *cm730, bool &stop_gait)
 {
     write_int(mem, CONTROL_MOVING, 1);
-    std::cout << " | Chute forte esquerdo" << std::endl;
+    std::cout << " | \e[38;5;45mChute forte esquerdo\e[0m" << std::endl;
     move_action(1, 0, stop_gait);
     Action::GetInstance()->Start(62);
     while(Action::GetInstance()->IsRunning()) usleep(8*1000);
@@ -216,7 +215,7 @@ void ActionMove::kick_left_strong(CM730 *cm730, bool &stop_gait)
 void ActionMove::kick_right_strong(CM730 *cm730, bool &stop_gait)
 {
     write_int(mem, CONTROL_MOVING, 1);
-    std::cout << " | Chute forte direito" << std::endl;
+    std::cout << " | \e[38;5;45mChute forte direito\e[0m" << std::endl;
     move_action(1, 0, stop_gait);
     while(Action::GetInstance()->IsRunning()) usleep(8*1000);
     Action::GetInstance()->Start(60);
@@ -266,7 +265,7 @@ void ActionMove::kick_right_strong(CM730 *cm730, bool &stop_gait)
 void ActionMove::goodBye(bool &stop_gait)
 {
     write_int(mem, CONTROL_MOVING, 1);
-    std::cout<<" | GoodBye"<<std::endl;
+    std::cout<<" | \e[38;5;45mGoodBye\e[0m"<<std::endl;
     move_action(8, 0, stop_gait);
     write_int(mem, CONTROL_MOVING, 0);
 }
@@ -276,7 +275,7 @@ void ActionMove::goodBye(bool &stop_gait)
 void ActionMove::greetings(bool &stop_gait)
 {
     write_int(mem, CONTROL_MOVING, 1);
-    std::cout<<" | Greetings"<<std::endl;
+    std::cout<<" | \e[38;5;45mGreetings\e[0m"<<std::endl;
     move_action(24, 0, stop_gait);
     write_int(mem, CONTROL_MOVING, 0);
 }
@@ -286,7 +285,7 @@ void ActionMove::greetings(bool &stop_gait)
 void ActionMove::standupFront(bool &stop_gait)
 {
     write_int(mem, CONTROL_MOVING, 1);
-    std::cout<<" | Levantar de frente"<<std::endl;
+    std::cout<<" | \e[38;5;45mLevantar de frente\e[0m"<<std::endl;
     move_action(10, 0, stop_gait);
     write_int(mem, CONTROL_MOVING, 0);
 }
@@ -296,7 +295,7 @@ void ActionMove::standupFront(bool &stop_gait)
 void ActionMove::standupBack(bool &stop_gait)
 {
     write_int(mem, CONTROL_MOVING, 1);
-    std::cout<<" | Levantar de costa"<<std::endl;
+    std::cout<<" | \e[38;5;45mLevantar de costa\e[0m"<<std::endl;
     move_action(11, 0, stop_gait);
     write_int(mem, CONTROL_MOVING, 0);
 }

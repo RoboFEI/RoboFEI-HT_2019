@@ -16,7 +16,6 @@ Arquivo fonte contendo o programa que controla os servos do corpo do robô
 #include <unistd.h>
 #include <string.h>
 #include <libgen.h>
-#include <unistd.h>
 #include <iostream>
 #include <stdio.h>
 #include <termios.h>
@@ -24,11 +23,11 @@ Arquivo fonte contendo o programa que controla os servos do corpo do robô
 #include <stdlib.h>
 #include <cstdlib>
 
-#include <stdio.h>
-#include <errno.h>
-#include <sys/ipc.h>
-#include <sys/shm.h>
-
+//#include <stdio.h>
+//#include <errno.h>
+//#include <sys/ipc.h>
+//#include <sys/shm.h>
+#include <signal.h>
 
 #include "minIni.h"
 #include <string>
@@ -39,7 +38,7 @@ Arquivo fonte contendo o programa que controla os servos do corpo do robô
 #include "MotionManager.h"
 #include "LinuxMotionTimer.h"
 #include "LinuxCM730.h"
-#include "LinuxActionScript.h"
+//#include "LinuxActionScript.h"
 #include <blackboard.h>
 #include <boost/program_options.hpp> //tratamento de argumentos linha de comando
 #include "ActionMove.hpp"
@@ -73,6 +72,12 @@ void change_current_dir()
         chdir(dirname(exepath));
 }
 
+void sighandler(int sig)
+{
+    cout<< "\nProgram being closed!" << endl;
+    exit(1); 
+}
+
 char string1[50]; //String
 
 int main(int argc, char **argv)
@@ -82,6 +87,12 @@ int main(int argc, char **argv)
 
     minIni* ini;
     ini = new minIni((char *)INI_FILE_PATH);
+
+    //Detecta o Ctrl+C-----------
+    signal(SIGABRT, &sighandler);
+    signal(SIGTERM, &sighandler);
+    signal(SIGINT, &sighandler);
+    //---------------------------
 
       //Acopla ou cria a memoria compartilhada
     int *mem = using_shared_memory(ini->getd("Communication","no_player_robofei",-1024) * 100); //0 for real robot
@@ -425,14 +436,15 @@ int main(int argc, char **argv)
             if(read_int(mem, DECISION_ACTION_A) == 22)
                 actionMove.kick_left_weak(stop_gait); //Chute fraco com pe esquerdo
 
+            //Imprime na tela o tempo que esta ocioso por nao receber uma nova instrucao da decisao-------
             count_read++;
-            std::cout << "\rReading BlackBoard" <<"[\e[38;5;43m"<< count_read<<"\e[0m] | Tempo ocioso"<<"[\e[38;5;82m"<< count_read*step_time/1000<<"s\e[0m]";
+            std::cout << "\rReading BlackBoard" <<"[\e[38;5;82m"<< count_read<<"\e[0m] | Tempo ocioso"<<"[\e[38;5;82m"<< count_read*step_time/1000<<"s\e[0m]";
             fflush (stdout);
             usleep(step_time*1000); //Operando na frequencia de 1/step_time Hertz
+            //--------------------------------------------------------------------------------------------
     }
     //--------------------------------------------------------------------------------------------------
     //==================================================================
-
 
     std::cout<<"Press some key to end!\n"<<std::endl;
     getchar();
