@@ -93,3 +93,22 @@ def collision_robot_vs_robot(robot1, robot2):
         return 2 * cos(reaction_angle), 2 * sin(reaction_angle)
 
     return 0, 0
+
+def telemetry_collision(tele1, tele2):
+    if tele1.x >= tele2.x and tele1.x <= tele2.x + 260 and tele1.y >= tele2.y and tele1.y <= tele2.y + 20:
+        tele1.x += 1
+        tele2.x -= 1
+    elif tele1.x + 260 >= tele2.x and tele1.x + 260 <= tele2.x + 260 and tele1.y >= tele2.y and tele1.y <= tele2.y + 20:
+        tele1.x -= 1
+        tele2.x += 1
+
+    if tele1.x < 0:
+        tele1.x = 0
+    elif tele1.x > 782:
+        tele1.x = 782
+
+    if tele2.x < 0:
+        tele2.x = 0
+    elif tele2.x > 782:
+        tele2.x = 782
+
