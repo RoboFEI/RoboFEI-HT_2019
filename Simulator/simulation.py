@@ -6,6 +6,7 @@ from helpmenu import *
 from random import random
 from random import randrange
 from setupmatch import *
+from telemetry import *
 
 class Simulation():
     def __init__(self, screen):
@@ -29,12 +30,49 @@ class Simulation():
         self.draw_vision_control = True
         self.eopra_view = False
 
+        self.tele = []
+
     def update_mouse_pos(self):
         self.mx, self.my = pygame.mouse.get_pos()
 
     def perform_events(self):
         for event in pygame.event.get():
             try:
+
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_a:
+                    self.update_mouse_pos()
+
+                    if pygame.key.get_mods() & pygame.KMOD_CTRL:
+                        self.update_mouse_pos()
+                        robot = Robot(self.mx, self.my, 180, (len(self.robots)+1) * self.screen.KEY_BKB, self.screen.MAGENTA)
+                        robot.imu_initial_value = 180
+
+                    elif pygame.key.get_mods() & pygame.KMOD_LSHIFT:
+                        robot = Robot(self.mx, self.my,0,(len(self.robots)+1) * self.screen.KEY_BKB, self.screen.YELLOW)
+                        robot.imu_initial_value = 0
+
+                    elif pygame.key.get_mods() & pygame.KMOD_LALT:
+                        robot = Robot(self.mx, self.my,180,(len(self.robots)+1) * self.screen.KEY_BKB, self.screen.BLACK)
+                        robot.imu_initial_value = 180
+
+                    elif pygame.key.get_mods() & pygame.KMOD_RSHIFT:
+                        robot = Robot(self.mx, self.my,180,(len(self.robots)+1) * self.screen.KEY_BKB, self.screen.ORANGE)
+                        robot.imu_initial_value = 180
+
+                    else:
+                        robot = Robot(self.mx, self.my, 0, (len(self.robots) + 1) * self.screen.KEY_BKB, self.screen.CYAN)
+                        robot.imu_initial_value = 0
+
+                    robot.bkb.write_int(robot.Mem, 'DECISION_ACTION_A', 0)
+                    robot.ball = self.ball
+                    self.robots.append(robot)
+                    self.group_robots.add(robot)
+                    #print len(self.robots)
+
+                    self.tele.append(Telemetry())
+
+                    robot.set_errors(0,0,0,0,0,0,0,0,0,0,0,0.01)
+
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_k:
                         self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 8)
                         self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem,
@@ -84,38 +122,6 @@ class Simulation():
 
                 if event.type == pygame.KEYUP and event.key == pygame.K_j:
                     self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 13)
-
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_a:
-                    self.update_mouse_pos()
-
-                    if pygame.key.get_mods() & pygame.KMOD_CTRL:
-                        self.update_mouse_pos()
-                        robot = Robot(self.mx, self.my, 180, (len(self.robots)+1) * self.screen.KEY_BKB, self.screen.MAGENTA)
-                        robot.imu_initial_value = 180
-
-                    elif pygame.key.get_mods() & pygame.KMOD_LSHIFT:
-                        robot = Robot(self.mx, self.my,0,(len(self.robots)+1) * self.screen.KEY_BKB, self.screen.YELLOW)
-                        robot.imu_initial_value = 0
-
-                    elif pygame.key.get_mods() & pygame.KMOD_LALT:
-                        robot = Robot(self.mx, self.my,180,(len(self.robots)+1) * self.screen.KEY_BKB, self.screen.BLACK)
-                        robot.imu_initial_value = 180
-
-                    elif pygame.key.get_mods() & pygame.KMOD_RSHIFT:
-                        robot = Robot(self.mx, self.my,180,(len(self.robots)+1) * self.screen.KEY_BKB, self.screen.ORANGE)
-                        robot.imu_initial_value = 180
-
-                    else:
-                        robot = Robot(self.mx, self.my, 0, (len(self.robots) + 1) * self.screen.KEY_BKB, self.screen.CYAN)
-                        robot.imu_initial_value = 0
-
-                    robot.bkb.write_int(robot.Mem, 'DECISION_ACTION_A', 0)
-                    robot.ball = self.ball
-                    self.robots.append(robot)
-                    self.group_robots.add(robot)
-                    #print len(self.robots)
-
-                    robot.set_errors(0,0,0,0,0,0,0,0,0,0,0,0.01)
 
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_b:
                     self.update_mouse_pos()
@@ -226,6 +232,9 @@ class Simulation():
                 if event.type == pygame.KEYUP and event.key == pygame.K_F7:
                     self.eopra_view = not self.eopra_view
 
+                if event.type == pygame.KEYUP and event.key == pygame.K_F12:
+                    pass
+
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_y:
                     self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem,
                                                                         'DECISION_SEARCH_ON', 1)
@@ -235,15 +244,31 @@ class Simulation():
                                                                         'DECISION_SEARCH_ON', 0)
 
             except:
-                pass
+                print "Error!"
 
             if event.type == pygame.QUIT:
                 sys.exit()
+            try:
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    self.update_mouse_pos()
+                    for tele in self.tele:
+                        if self.mx > tele.x and self.mx < tele.x+260 and self.my > tele.y and self.my < tele.y+20+tele.size:
+                            if event.button == 1:
+                                tele.click(self.mx, self.my)
+                            elif event.button == 4:
+                                tele.scroll(True)
+                            elif event.button == 5:
+                                tele.scroll(False)
 
+                if event.type == pygame.MOUSEBUTTONUP:
+                    for tele in self.tele:
+                        tele.stop_drag()
+                        tele.stop_resize()
+            except:
+                print "Telemetry Error"
 
     def update_pos(self):
         for robot in self.robots:
-
             robot.motion_model(self.field.LimitLines, self.field.goalpost_list, self.robots)
             robot.control.control_update()
 
@@ -267,6 +292,12 @@ class Simulation():
 
         if self.Help:
             help(self.screen)
+
+        for tele in self.tele:
+            for auxtele in self.tele:
+                if tele != auxtele:
+                    telemetry_collision(tele, auxtele)
+            tele.draw(self.screen.background)
 
 
         if not self.field.GameStop:
