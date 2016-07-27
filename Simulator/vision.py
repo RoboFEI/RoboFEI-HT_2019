@@ -85,11 +85,11 @@ class Vision():
 
         #d=random.gauss(d,0.1*d/10)
 
-        print 'Distance ', d
-        print 'Rotate ', -r
-        print 'self.vision_dist', self.vision_dist
-        print 'self.compAng(r,rotate)', self.compAng(r, view_rot)
-        print '-------------'
+        # print 'Distance ', d
+        # print 'Rotate ', -r
+        # print 'self.vision_dist', self.vision_dist
+        # print 'self.compAng(r,rotate)', self.compAng(r, view_rot)
+        # print '-------------'
 
         if((d < self.vision_dist) and self.compAng(r,view_rot)):
             #print 'Inside'
@@ -159,7 +159,7 @@ class Vision():
                     return self.pan(view_rot, rotate)
 
         else:
-            print 'lost!'
+            # print 'lost!'
             bkb.write_int(mem, 'VISION_LOST', 1)  # ball is lost
 
 
@@ -200,7 +200,7 @@ class Vision():
             if (int(view_rot_aux) % 360) >= int(view_rot) - 1 and (int(view_rot_aux) % 360) <= int(view_rot) + 1:
                 bkb.write_int(mem, 'DECISION_SEARCH_ON', 0)  # stop searching
 
-                print 'Robot', selfID, 'found robot: ', robotID + 1, 'rot', rot, 'dist', dist
+                # print 'Robot', selfID, 'found robot: ', robotID + 1, 'rot', rot, 'dist', dist
                 self.write_bkb_robot_position(mem, bkb, rot + random.gauss(0.0, 2), dist + random.gauss(0.0, 10),
                                                   robotID)
 

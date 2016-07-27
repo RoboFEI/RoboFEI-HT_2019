@@ -31,6 +31,13 @@ class Simulation():
         self.eopra_view = False
 
         self.tele = []
+        self.timestamp = 0
+        self.sock = []
+        for c in range(4):
+            self.sock.append(socket.socket(socket.AF_INET, socket.SOCK_DGRAM))
+            self.sock[c].bind(('255.255.255.255', 1241+c))
+            self.sock[c].settimeout(0.001)
+            # sock[c].setblocking(0)
 
     def update_mouse_pos(self):
         self.mx, self.my = pygame.mouse.get_pos()
@@ -68,8 +75,6 @@ class Simulation():
                     self.robots.append(robot)
                     self.group_robots.add(robot)
                     #print len(self.robots)
-
-                    self.tele.append(Telemetry())
 
                     robot.set_errors(0,0,0,0,0,0,0,0,0,0,0,0.01)
 
@@ -299,6 +304,10 @@ class Simulation():
                     telemetry_collision(tele, auxtele)
             tele.draw(self.screen.background)
 
+        timer = time.time() - self.timestamp
+        if timer > 0.5:
+            TelemetryControl(self.tele, self.sock)
+            self.timestamp = time.time()
 
         if not self.field.GameStop:
             self.field.Counter += self.screen.clock.get_time()

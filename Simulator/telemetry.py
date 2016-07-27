@@ -1,8 +1,10 @@
 import pygame
 import random as rnd
+import socket
+import time
 
 class Telemetry(object):
-    def __init__(self):
+    def __init__(self, n):
         self.x = 0  # absolute X position
         self.y = 0  # absolute Y position
 
@@ -11,23 +13,36 @@ class Telemetry(object):
 
         self.roll = 0 # used to scroll text
         self.maxscroll = 0 # used to scroll text
-        self.name = "ROBO HETERUS" # robot name
+
+        self.number = n
+        self.name = "ROBO " + str(n) # robot name
 
         self.size = 20 # screen size
 
         self.minimize = True    # toogles the minimized screen
         self.hide = True        # toogles the hidden variables
 
-        self.variables = [['SOMETHING1', True],
-                          ['SOMETHING2', False],
-                          ['SOMETHING3', True]]
+        self.variables = [['SOMETHING1', True, 'void'],
+                          ['SOMETHING2', False, 'void'],
+                          ['SOMETHING3', True, 'void']]
 
         self.resizing = False   # toogles the resizing function
         self.dragging = False    # toogles the dragging function
 
         self.font = pygame.font.SysFont('Arial', 12)
 
+        self.timestamp = time.time()
+
         self.Body = pygame.Surface((260, 742), pygame.SRCALPHA) # surface where everything will be drawn
+
+    def change(self, data):
+        self.variables[1][2] = data[1]
+        self.variables[2][2] = data[2]
+        self.timestamp = time.time()
+
+    def timeout(self):
+        timer = time.time() - self.timestamp
+        return timer
 
     def draw(self, where):
         self.Body.fill(pygame.Color(255,255,255,0)) # Clear the surface
@@ -75,7 +90,7 @@ class Telemetry(object):
         for x in self.variables: # for each variable
 
             if not(x[1]): # if it is not hidden
-                txt = x[0] + " = " + str(100) # reads the variable in the memory...
+                txt = x[0] + " = " + x[2] # reads the variable in the memory...
                 TextBody.blit(self.font.render(txt, 1, (255,255,255)), (10, pos)) # print the variable
                 pos += 16 # makes a space
 
@@ -162,3 +177,39 @@ class Telemetry(object):
 
     def stop_drag(self):
         self.dragging = False # stops dragging function
+
+def TelemetryControl(tele, sock):
+    for s in sock:
+        try:
+            data = s.recv(1024, socket.MSG_DONTWAIT)
+            data = data.split()
+            test = True
+
+            # print data
+
+            for t in tele:
+                if t.number == int(data[0]):
+                    t.change(data)
+                    test = False
+                    break
+
+            if test:
+                tele.append(Telemetry(int(data[0])))
+
+        except socket.timeout:
+            # print "Timeout"
+            pass
+        except:
+            # print "OTHER ERROR"
+            pass
+    pop = []
+    a = 0
+    for t in tele:
+        timer = t.timeout()
+        if timer > 10:
+            # print "Disconnect ",t.number, " time ", timer
+            pop.append(a)
+        a += 1
+
+    for p in pop:
+        tele.pop(p)
