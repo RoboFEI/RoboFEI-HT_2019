@@ -1,7 +1,7 @@
 # @author Isaac Jesus da Silva - ROBOFEI-HT - FEI
 # @version V0.0.3
 # @created 04/07/2014
-# @Modified 23/02/2016
+# @Modified 14/07/2016
 # 
 # Para Help acesse http://www.cmake.org/cmake/help/v2.8.0/cmake.html#command:link_directories
 
@@ -16,7 +16,7 @@ include_directories(
 )
 
 include_directories(include)
-add_library(libcontrol SHARED ./Linux/project/control/main.cpp ./Linux/project/control/kbhit.cpp ./Linux/project/control/ReadConfig.cpp)
+add_library(libcontrol SHARED ./Linux/project/control/main.cpp ./Linux/project/control/kbhit.cpp ./Linux/project/control/ReadConfig.cpp ./Linux/project/control/ActionMove.cpp ./Linux/project/control/GaitMove.cpp)
 install(TARGETS libcontrol DESTINATION ${RoboFEI-HT_BINARY_DIR}/lib)
 
 #link_directories(
@@ -36,7 +36,7 @@ add_dependencies(control libcontrol blackboard)
 
 set(LIB_DARWIN ${RoboFEI-HT_SOURCE_DIR}/Control/Linux/lib/darwin.a)
 
-target_link_libraries(control libcontrol blackboard ${LIB_DARWIN} -Wno-write-strings -lpthread -ljpeg -lrt  ${Boost_LIBRARIES})
+target_link_libraries(control libcontrol blackboard ${LIB_DARWIN} -Wno-write-strings -lpthread ${Boost_LIBRARIES})
 
 #install(TARGETS control DESTINATION ${RoboFEI-HT_BINARY_DIR}/bin)
 #install(TARGETS control DESTINATION /usr/local/bin)

@@ -6,7 +6,18 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtOpenGL import *
-from SharedMemory import SharedMemory as blackboard
+
+try:
+    from configparser import ConfigParser
+except ImportError:
+    from ConfigParser import ConfigParser  # ver. < 3.0
+
+#looking for the library SharedMemory
+import sys
+sys.path.append('../../Blackboard/src/')
+from SharedMemory import SharedMemory
+
+#from SharedMemory import SharedMemory as blackboard
 #from pygame.locals import *
 #from controlRobot import *
 #import pygame
@@ -19,12 +30,26 @@ class SpiralWidget(QGLWidget):
     '''
     Widget for drawing two spirals.
     '''
+    #import os
+    #os.system("pwd")
 
-    bkb = blackboard() #Init class BlackBoard
+    # instantiate:
+    config = ConfigParser()
 
-    ax = bkb.read_float("IMU_EULER_X")
-    ay = -bkb.read_float("IMU_EULER_Y")
-    az = bkb.read_float("IMU_EULER_Z")
+    # looking for the file config.ini:
+    config.read('../Data/config.ini')
+
+    mem_key = int(config.get('Communication', 'no_player_robofei'))*100
+
+    #Instantiate the BlackBoard's class:
+    bkb = SharedMemory()
+    mem = bkb.shd_constructor(mem_key)
+
+    #bkb = SharedMemory() #Init class BlackBoard
+
+    ax = bkb.read_float(mem, "IMU_EULER_X")
+    ay = -bkb.read_float(mem, "IMU_EULER_Y")
+    az = bkb.read_float(mem, "IMU_EULER_Z")
 
     def __init__(self, parent):
         QGLWidget.__init__(self, parent)
@@ -133,9 +158,9 @@ class SpiralWidget(QGLWidget):
 #        print self.ax
              
     def read_data(self):
-        self.ax = self.bkb.read_float("IMU_EULER_X")
-        self.ay = -self.bkb.read_float("IMU_EULER_Y")
-        self.az = self.bkb.read_float("IMU_EULER_Z")
+        self.ax = self.bkb.read_float(self.mem, "IMU_EULER_X")
+        self.ay = -self.bkb.read_float(self.mem, "IMU_EULER_Y")
+        self.az = self.bkb.read_float(self.mem, "IMU_EULER_Z")
         line_done = 0
 
         # request data by sending a dot

@@ -95,8 +95,8 @@ void Action::Initialize()
 {
 	m_Playing = false;
 
-    for( int id=JointData::ID_MIN; id<=JointData::ID_MAX; id++ )
-        m_Joint.SetValue(id, MotionStatus::m_CurrentJoints.GetValue(id));
+    //for( int id=JointData::ID_MIN; id<=JointData::ID_MAX; id++ )
+        //m_Joint.SetValue(id, MotionStatus::m_CurrentJoints.GetValue(id));
 }
 
 bool Action::LoadFile( char* filename )

@@ -89,8 +89,8 @@ bool MotionManager::Initialize(CM730 *cm730, bool fadeIn)
 
 	if(fadeIn)
 	{
-		for(int i=JointData::ID_R_SHOULDER_PITCH; i<JointData::NUMBER_OF_JOINTS; i++)
-			cm730->WriteWord(i, MX28::P_TORQUE_LIMIT_L, 0, 0);
+		//for(int i=JointData::ID_R_SHOULDER_PITCH; i<JointData::NUMBER_OF_JOINTS; i++)
+			//cm730->WriteWord(i, MX28::P_TORQUE_LIMIT_L, 0, 0);
 	}
 
 	m_fadeIn = fadeIn;
@@ -542,7 +542,8 @@ void MotionManager::SetJointDisable(int index)
 
 void MotionManager::adaptTorqueToVoltage()
 {
-	static int count_fail=0; 
+	static int count_fail=0;
+	static int count_volt=0;
     const int DEST_TORQUE = 1023;
     const int FULL_TORQUE_VOLTAGE = 210; // 13V - at 13V darwin will make no adaptation as the standard 3 cell battery is always below this voltage, this implies Nimbro-OP runs on 4 cells
 
@@ -562,10 +563,16 @@ void MotionManager::adaptTorqueToVoltage()
 
     if(voltage < 160)
     {
-		printf("Tensão Abaixo do recomendado | Tensão = %2.1fV\n", (float)voltage/(float)10);
-		printf("A bateria deve ser trocada\n");
-		exit(0);
+        count_volt++;
+        if(count_volt>=4)
+        {
+		    printf("Tensão Abaixo do recomendado | Tensão = %2.1fV\n", (float)voltage/(float)10);
+		    printf("A bateria deve ser trocada\n");
+		    exit(0);
+		}
     }
+    else
+        count_volt=0;
 
     if(m_CM730->ReadByte(200, CM730::P_VOLTAGE, &voltage, 0) != CM730::SUCCESS)
         return;
