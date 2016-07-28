@@ -604,6 +604,7 @@ class Ui_MainWindow(object):
     def walks(self):
         self.label.setText(_translate("MainWindow", "Walking Slow", None))
         self.widget.bkb.write_int(self.widget.mem, "DECISION_ACTION_A", 8) # Writing in the memory to the robot walk foward slow
+        self.widget.bkb.write_int(self.widget.mem, "DECISION_ACTION_B", 15) # Writing in the memory to the robot walk foward slow
 
     def sidlel(self):
         self.label.setText(_translate("MainWindow", "Sidling to the Left", None))
