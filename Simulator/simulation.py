@@ -257,7 +257,7 @@ class Simulation():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     self.update_mouse_pos()
                     for tele in self.tele:
-                        if self.mx > tele.x and self.mx < tele.x+260 and self.my > tele.y and self.my < tele.y+20+tele.size:
+                        if self.mx > tele.x and self.mx < tele.x+260 and self.my > tele.y and self.my < tele.y + 20 + tele.size * (not(tele.minimize)):
                             if event.button == 1:
                                 tele.click(self.mx, self.my)
                             elif event.button == 4:
