@@ -2,9 +2,9 @@
  ******************************************************************************
  * @file imu.cpp
  * @author Isaac Jesus da Silva - ROBOFEI-HT - FEI 😛
- * @version V0.2.0
+ * @version V0.2.1
  * @created 24/08/2015
- * @Modified 01/05/2016
+ * @Modified 13/07/2016
  * @e-mail isaac25silva@yahoo.com.br
  * @brief serial imu 😛
  ****************************************************************************
@@ -72,6 +72,7 @@ sudo make install
 #include <stdlib.h>
 #include <blackboard.h>
 #include <unistd.h>
+#include <libgen.h> //dirname
 
 #include <serial.h>
 #include "um7/comms.h"
@@ -115,6 +116,14 @@ void sendCommand(um7::Comms* sensor, const um7::Accessor<RegT>& reg, std::string
   {
     throw std::runtime_error("Command to device failed.");
   }
+}
+
+
+void change_current_dir()
+{
+    char exepath[1024] = {0};
+    if(readlink("/proc/self/exe", exepath, sizeof(exepath)) != -1)
+        chdir(dirname(exepath));
 }
 
 
@@ -246,6 +255,8 @@ void publishMsgs(um7::Registers& r)
  */
 int main(int argc, char **argv)
 {
+
+    change_current_dir();
 
     INIReader reader(INI_FILE_PATH);
     if (reader.ParseError() < 0) {
