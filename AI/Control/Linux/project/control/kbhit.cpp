@@ -31,7 +31,7 @@ int kbhit()
   if(ch != EOF)
   {
    // ungetc(ch, stdin);
-    cout << ch << endl;
+    cout << ch ;
     return ch;
   }
 
