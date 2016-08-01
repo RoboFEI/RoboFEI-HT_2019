@@ -28,8 +28,8 @@ class Telemetry(object):
 
         self.size = 90 # screen size
 
-        self.minimize = True    # toogles the minimized screen
-        self.hide = True        # toogles the hidden variables
+        self.minimize = False    # toogles the minimized screen
+        self.hide = False        # toogles the hidden variables
 
         # Variables to be shown in the window
         self.variables = [['SOMETHING1', True, 'void'],

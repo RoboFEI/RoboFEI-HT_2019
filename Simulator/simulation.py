@@ -253,24 +253,6 @@ class Simulation():
 
             if event.type == pygame.QUIT:
                 sys.exit()
-            try:
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    self.update_mouse_pos()
-                    for tele in self.tele:
-                        if self.mx > tele.x and self.mx < tele.x+260 and self.my > tele.y and self.my < tele.y + 20 + tele.size * (not(tele.minimize)):
-                            if event.button == 1:
-                                tele.click(self.mx, self.my)
-                            elif event.button == 4:
-                                tele.scroll(True)
-                            elif event.button == 5:
-                                tele.scroll(False)
-
-                if event.type == pygame.MOUSEBUTTONUP:
-                    for tele in self.tele:
-                        tele.stop_drag()
-                        tele.stop_resize()
-            except:
-                print "Telemetry Error"
 
     def update_pos(self):
         for robot in self.robots:
@@ -297,17 +279,6 @@ class Simulation():
 
         if self.Help:
             help(self.screen)
-
-        for tele in self.tele:
-            for auxtele in self.tele:
-                if tele != auxtele:
-                    telemetry_collision(tele, auxtele)
-            tele.draw(self.screen.background)
-
-        timer = time.time() - self.timestamp
-        if timer > 0.5:
-            TelemetryControl(self.tele, self.sock)
-            self.timestamp = time.time()
 
         if not self.field.GameStop:
             self.field.Counter += self.screen.clock.get_time()
