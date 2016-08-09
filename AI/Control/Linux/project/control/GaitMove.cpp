@@ -164,7 +164,7 @@ void GaitMove::walk_foward_fast(bool &stop_gait, bool same_moviment, bool &enabl
 
     if(soft_starter_value<walkfoward->walk_foward)
     {
-        soft_starter_value+=0.10; // aproximadamente 2 segundos para atingir o pico em 50 hz de frequencia
+        soft_starter_value+=0.05; // aproximadamente 2 segundos para atingir o pico em 50 hz de frequencia
         move_gait(soft_starter_value, walkfoward->sidle, walkfoward->turn_angle, stop_gait, gait, walkfoward);
     }
     else
