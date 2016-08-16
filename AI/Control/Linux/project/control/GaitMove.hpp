@@ -40,11 +40,11 @@ class GaitMove
 
         void Gait_in_place(bool &stop_gait, bool same_moviment);
 
-        void walk_foward_slow(bool &stop_gait, bool max_speed, bool same_moviment);
+        void walk_foward_slow(bool &stop_gait, bool max_speed, bool same_moviment, bool &enable_soft_starter);
 
         void robot_stop(bool &stop_gait);
 
-        void walk_foward_fast(bool &stop_gait, bool same_moviment);
+        void walk_foward_fast(bool &stop_gait, bool same_moviment, bool &enable_soft_starter);
 
         void turn_right(bool &stop_gait, bool max_angle, bool same_moviment);
 
@@ -64,6 +64,7 @@ class GaitMove
 
     private:
         int *mem;
+        double soft_starter_value;
         ReadConfig* gait;
         ReadConfig* walkfoward;
         ReadConfig* turnRobot;

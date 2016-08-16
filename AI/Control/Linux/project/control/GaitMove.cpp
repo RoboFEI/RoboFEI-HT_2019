@@ -98,14 +98,34 @@ void GaitMove::Gait_in_place(bool &stop_gait, bool same_moviment)
 
 //========================================================================
 //Execute the gait generation---------------------------------------------
-void GaitMove::walk_foward_slow(bool &stop_gait, bool max_speed, bool same_moviment)
+void GaitMove::walk_foward_slow(bool &stop_gait, bool max_speed, bool same_moviment, bool &enable_soft_starter)
 {
+    if(enable_soft_starter==true)
+        soft_starter_value=0;
+
     if(same_moviment == false)
         std::cout<<" | \e[38;5;45mAndar lento para frente\e[0m"<<std::endl;
     if(float(read_int(mem, DECISION_ACTION_B))<walkslow->walk_foward && max_speed==false)
-        move_gait(float(read_int(mem, DECISION_ACTION_B)), walkslow->sidle, walkslow->turn_angle, stop_gait, gait, walkslow);
+    {
+        if(soft_starter_value<double(read_int(mem, DECISION_ACTION_B)))
+        {
+            soft_starter_value+=0.10; // aproximadamente 2 segundos para atingir o pico em 50 hz de frequencia
+            move_gait(soft_starter_value, walkslow->sidle, walkslow->turn_angle, stop_gait, gait, walkslow);
+        }
+        else
+            move_gait(float(read_int(mem, DECISION_ACTION_B)), walkslow->sidle, walkslow->turn_angle, stop_gait, gait, walkslow);
+    }
     else
-        move_gait(walkslow->walk_foward, walkslow->sidle, walkslow->turn_angle, stop_gait, gait, walkslow);
+    {
+        if(soft_starter_value<walkslow->walk_foward)
+        {
+            soft_starter_value+=0.10; // aproximadamente 2 segundos para atingir o pico em 50 hz de frequencia
+            move_gait(soft_starter_value, walkslow->sidle, walkslow->turn_angle, stop_gait, gait, walkslow);
+        }
+        else
+            move_gait(walkslow->walk_foward, walkslow->sidle, walkslow->turn_angle, stop_gait, gait, walkslow);
+    }
+    enable_soft_starter=false;
 }
 
 
@@ -134,11 +154,22 @@ void GaitMove::robot_stop(bool &stop_gait)
 
 //========================================================================
 //Andar rapido para frente------------------------------------------------
-void GaitMove::walk_foward_fast(bool &stop_gait, bool same_moviment)
+void GaitMove::walk_foward_fast(bool &stop_gait, bool same_moviment, bool &enable_soft_starter)
 {
+    if(enable_soft_starter==true)
+        soft_starter_value=0;
+
     if(same_moviment == false)
         std::cout<<" | \e[38;5;45mAndar para frente\e[0m"<<std::endl;
-    move_gait(walkfoward->walk_foward, walkfoward->sidle, walkfoward->turn_angle, stop_gait, gait, walkfoward);
+
+    if(soft_starter_value<walkfoward->walk_foward)
+    {
+        soft_starter_value+=0.05; // aproximadamente 2 segundos para atingir o pico em 50 hz de frequencia
+        move_gait(soft_starter_value, walkfoward->sidle, walkfoward->turn_angle, stop_gait, gait, walkfoward);
+    }
+    else
+        move_gait(walkfoward->walk_foward, walkfoward->sidle, walkfoward->turn_angle, stop_gait, gait, walkfoward);
+    enable_soft_starter=false;
 }
 
 
