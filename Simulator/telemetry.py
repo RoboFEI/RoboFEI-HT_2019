@@ -3,6 +3,27 @@ import random as rnd
 import socket
 import time
 
+'''
+Sequence of communication Protocol:
+0 - Robot Number
+----------------------------------
+1 - X position
+2 - Y position
+3 - Rotation
+4 - Belief
+5 - X ball's position
+6 - Y ball's position
+----------------------------------
+7 - Vision
+8 - Control
+9 - Decision
+10 - IMU
+----------------------------------
+11 - DECISION_ACTION_A
+12 - IMU_EULER_Z
+'''
+
+
 class Telemetry(object):
     def __init__(self, n):
         self.x = 0  # absolute X position
@@ -32,11 +53,14 @@ class Telemetry(object):
         self.hide = False        # toogles the hidden variables
 
         # Variables to be shown in the window
-        self.variables = [['SOMETHING1', True, 'void'],
-                          ['SOMETHING2', False, 'void'],
-                          ['SOMETHING3', True, 'void']]
+        self.variables = [['VISION', True, 'void'],
+                          ['CONTROL', True, 'void'],
+                          ['DECISION', True, 'void'],
+                          ['IMU', True, 'void'],
+                          ['DECISION_ACTION_A', True, 'void']]
 
-        self.othervars = [100 * n, 100 * n, 30 * n, 20 * n] # The sequence is X, Y, Rotation and Standard Deviation
+        # Variables which draws things in the screen
+        self.othervars = [100 * n, 100 * n, 30 * n, 20 * n, 450, 300]
 
         self.resizing = False   # toogles the resizing function
         self.dragging = False    # toogles the dragging function
@@ -53,8 +77,13 @@ class Telemetry(object):
         self.othervars[1] = float(data[2])
         self.othervars[2] = float(data[3])
         self.othervars[3] = float(data[4])
-        self.variables[1][2] = data[5]
-        self.variables[2][2] = data[6]
+        self.othervars[4] = float(data[5])
+        self.othervars[5] = float(data[6])
+        self.variables[0][2] = data[7]
+        self.variables[1][2] = data[8]
+        self.variables[2][2] = data[9]
+        self.variables[3][2] = data[10]
+        self.variables[4][2] = data[11]
         self.timestamp = time.time()
 
     def timeout(self): # Returns how long since the last received message
@@ -115,8 +144,15 @@ class Telemetry(object):
 
         pygame.draw.rect(self.Body, (0,0,0), (0,0,259,19), 2)
 
+        # Draw ball
+        pygame.draw.circle(where, self.color, (int(self.othervars[4]),int(self.othervars[5])), 13, 0) # Circle it
+        ball = pygame.image.load("ball.png") # Load Bitmap
+        ball = pygame.transform.scale(ball,(19,19)) # Resize it
+        where.blit(ball,(int(self.othervars[4]) - 10, int(self.othervars[5]) - 10)) # Draw on screen
+
         new.blit(aux, (int(self.othervars[0]-rr[2]/2), int(self.othervars[1]-rr[3]/2))) # Draws the Robot
         new.blit(self.Body, (int(self.x), int(self.y))) # Draws the object on screen
+
         where.blit(new, (0,0)) # Draws Telemetry on Screen
 
     def Write(self):

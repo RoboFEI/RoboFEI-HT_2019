@@ -30,15 +30,6 @@ class Simulation():
         self.draw_vision_control = True
         self.eopra_view = False
 
-        self.tele = []
-        self.timestamp = 0
-        self.sock = []
-        for c in range(4):
-            self.sock.append(socket.socket(socket.AF_INET, socket.SOCK_DGRAM))
-            self.sock[c].bind(('255.255.255.255', 1241+c))
-            self.sock[c].settimeout(0.001)
-            # sock[c].setblocking(0)
-
     def update_mouse_pos(self):
         self.mx, self.my = pygame.mouse.get_pos()
 

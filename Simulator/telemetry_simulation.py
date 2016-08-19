@@ -1,12 +1,18 @@
+
+
 from collisions import *
-import sys
 from telemetry import *
+import sys
+sys.path.append('../AI/Localization/src/')
+from particle import *
 
 class Simulation():
     def __init__(self, screen):
         self.mx = 0
         self.my = 0
         self.screen = screen
+
+        self.field = None
 
         self.tele = []
         self.timestamp = 0
@@ -15,6 +21,10 @@ class Simulation():
             self.sock.append(socket.socket(socket.AF_INET, socket.SOCK_DGRAM))
             self.sock[c].bind(('255.255.255.255', 1241+c))
             self.sock[c].settimeout(0.001)
+
+        self.gamecontroller = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.gamecontroller.bind(('255.255.255.255', 3838))
+        self.gamecontroller.settimeout(0.001)
 
     def update_mouse_pos(self):
         self.mx, self.my = pygame.mouse.get_pos()
@@ -43,6 +53,7 @@ class Simulation():
                 print "Telemetry Error"
 
     def display_update(self):
+
         for tele in self.tele:
             for auxtele in self.tele:
                 if tele != auxtele:
@@ -53,5 +64,31 @@ class Simulation():
         if timer > 0.5:
             TelemetryControl(self.tele, self.sock)
             self.timestamp = time.time()
+
+        try:
+            data = self.gamecontroller.recv(1024, socket.MSG_DONTWAIT) # Reads GameController
+            v = memoryview(data) # Gets the memory address
+            x = v.tolist() # Converts the memory into useful data
+            if len(x) == 158:
+                State = x[7] # Gets game state
+                Time = x[15]*256 + x[14] # Gets remaining time, in seconds.
+                if x[18] == 18: # Find the first team
+                    FGoal = x[20] # Saves the team's score
+                    EGoal = x[90] # Saves the opponent's score
+                else:
+                    FGoal = x[90] # Saves the team's score
+                    EGoal = x[20] # Saves the opponent's score
+
+                if State == 3:
+                    self.field.GameStop = False
+                else:
+                    self.field.GameStop = True
+
+                self.field.Counter = Time * 1000
+
+                self.field.FriendGoals = FGoal
+                self.field.EnemyGoals = EGoal
+        except:
+            pass
 
         pygame.display.flip()
