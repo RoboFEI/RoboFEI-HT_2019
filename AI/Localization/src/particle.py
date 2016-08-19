@@ -179,7 +179,7 @@ class Particle: # Class implementing a particle
                 self.w *= max(w)
 
             elif m[0] == 5: # Likelihood of the opponent robots {type, distance, angle}
-
+                pass
 
 
 
