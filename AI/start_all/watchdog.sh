@@ -10,37 +10,37 @@ echo Matando processos
 
 if [ "$(pidof -x start_imu.sh)" ]
 then
-    kill $(pidof -x start_imu.sh)
+    sudo kill $(pidof -x start_imu.sh)
 fi
 
 if [ "$(pidof -x start_vision.sh)" ]
 then
-    kill $(pidof -x start_vision.sh)
+    sudo kill $(pidof -x start_vision.sh)
 fi
 
 if [ "$(pidof -x start_decision.sh)" ]
 then
-    kill $(pidof -x start_decision.sh)
+    sudo kill $(pidof -x start_decision.sh)
 fi
     
 if [ "$(pidof -x start_control.sh)" ]
 then
-    kill $(pidof -x start_control.sh)
+    sudo kill $(pidof -x start_control.sh)
 fi
     
 if [ "$(pidof -x start_comm.sh)" ]
 then
-    kill $(pidof -x start_comm.sh)
+    sudo kill $(pidof -x start_comm.sh)
 fi
     
 if [ "$(pidof -x start_commServer.sh)" ]
 then
-    kill $(pidof -x start_commServer.sh)
+    sudo kill $(pidof -x start_commServer.sh)
 fi
     
 if [ "$(pidof -x start_commClient.sh)" ]
 then
-    kill $(pidof -x start_commClient.sh)
+    sudo kill $(pidof -x start_commClient.sh)
 fi
 exit 0
 }
@@ -54,45 +54,45 @@ while true
 do
     if [ ! "$(pidof -x start_imu.sh)" ]
     then
-        screen -d -m -S imu ./start_imu.sh
+        sudo screen -d -m -S imu ./start_imu.sh
         echo Iniciando IMU
     fi
 
     if [ ! "$(pidof -x start_decision.sh)" ]  
     then
-        screen -d -m -S decision ./start_decision.sh
+        sudo screen -d -m -S decision ./start_decision.sh
         echo Iniciando decision
     fi
 
     if [ ! "$(pidof -x start_control.sh)" ] 
     then
-        screen -d -m -S control ./start_control.sh
+        sudo screen -d -m -S control ./start_control.sh
         echo Iniciando control
     fi
 
     if [ ! "$(pidof -x start_vision.sh)" ] 
     then
-        screen -d -m -S vision ./start_vision.sh
+        sudo screen -d -m -S vision ./start_vision.sh
         echo Iniciando vision
     fi
 
     if [ ! "$(pidof -x start_comm.sh)" ] 
     then
-        screen -d -m -S communication ./start_comm.sh
+        sudo screen -d -m -S communication ./start_comm.sh
         echo Iniciando communication
     fi
 
-    if [ ! "$(pidof -x start_commServer.sh)" ] 
-    then
-       screen -d -m -S commServer ./start_commServer.sh
-       echo Iniciando Server communication
-    fi
+#    if [ ! "$(pidof -x start_commServer.sh)" ] 
+#    then
+#       screen -d -m -S commServer ./start_commServer.sh
+#       echo Iniciando Server communication
+#    fi
 
-    if [ ! "$(pidof -x start_commClient.sh)" ] 
-    then
-       screen -d -m -S commClient ./start_commClient.sh
-       echo Iniciando Client communication
-    fi
+#    if [ ! "$(pidof -x start_commClient.sh)" ] 
+#    then
+#       screen -d -m -S commClient ./start_commClient.sh
+#       echo Iniciando Client communication
+#    fi
 
     echo ''
     sleep 10
