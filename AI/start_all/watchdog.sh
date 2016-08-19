@@ -82,17 +82,17 @@ do
         echo Iniciando communication
     fi
 
-#    if [ ! "$(pidof -x start_commServer.sh)" ] 
-#    then
-#       screen -d -m -S commServer ./start_commServer.sh
-#       echo Iniciando Server communication
-#    fi
+    if [ ! "$(pidof -x start_commServer.sh)" ] 
+    then
+        sudo screen -d -m -S commServer ./start_commServer.sh
+        echo Iniciando Server communication
+    fi
 
-#    if [ ! "$(pidof -x start_commClient.sh)" ] 
-#    then
-#       screen -d -m -S commClient ./start_commClient.sh
-#       echo Iniciando Client communication
-#    fi
+    if [ ! "$(pidof -x start_commClient.sh)" ] 
+    then
+        sudo screen -d -m -S commClient ./start_commClient.sh
+        echo Iniciando Client communication
+    fi
 
     echo ''
     sleep 10
