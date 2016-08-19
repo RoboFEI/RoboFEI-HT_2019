@@ -45,6 +45,7 @@ This program was tested in Ubuntu 14.04 LTS 64 bits
     * python-pygame
     * python-numpy
     * python-opencv
+    * screen
     
 ## License
 
