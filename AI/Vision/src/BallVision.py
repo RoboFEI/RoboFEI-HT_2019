@@ -538,7 +538,12 @@ class VisionBall (object):
 			
 			balls = self.__detectCircles(img)
 			
-			raw_input(balls)
+			if balls is not None:
+				print(balls)
+				balls = np.array([[int(balls[0,0][0]-balls[0,0][2]), int(balls[0,0][1]-balls[0,0][2]), int(2*balls[0,0][2]), int(2*balls[0,0][2])]])
+	#			raw_input(balls)
+			else:
+				balls = ()
 			
 		except cv2.error as e:
 			balls = ()
