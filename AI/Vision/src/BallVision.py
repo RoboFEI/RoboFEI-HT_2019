@@ -1,6 +1,9 @@
+# -*- coding: utf-8 -*-
+
 import numpy as np
 import os
 import cv2
+import cv2.cv as cv
 import ctypes
 
 try:
@@ -147,7 +150,7 @@ class VisionBall (object):
 						if frame_campo.shape[0] < 10 or frame_campo.shape[1] < 10:#This is for error control
 							print "Calibration Error: Frame too small for Segmentation"
 						else:
-						        cv2.imshow('Frame cortado  - Bola', frame_campo)
+								cv2.imshow('Frame cortado  - Bola', frame_campo)
 					
 					if cv2.waitKey(1) & 0xFF == ord('q'):
 						break
@@ -241,7 +244,7 @@ class VisionBall (object):
 							print "Calibration Error: Frame too small to cut"
 							pass
 												
-    					#cv2.imshow('Corte - Bola', frame_cut)
+						#cv2.imshow('Corte - Bola', frame_cut)
 						
 						balls = self.__haarBall(frame_cut)
 						if balls is not ():
@@ -528,16 +531,80 @@ class VisionBall (object):
 
 	def __haarBall(self,frame):
 		try:
-			balls = self.__ball_cascade.detectMultiScale(frame,
-														minNeighbors=self.__neighbours_HaarBall,
-														scaleFactor=self.__scaleFactor_HaarBall,
-														minSize=(self.__minSize_HaarBall,self.__minSize_HaarBall),
-														maxSize=(self.__maxSize_HaarBall,self.__maxSize_HaarBall))
+			mask_branco = self.__segColor(frame)
+			mask_bola = self.__maskDilate(mask_branco)
+			
+			img = cv2.bitwise_and(frame,frame,mask=mask_bola) # Gerando mascara para a bola
+			
+			balls = self.__detectCircles(img)
+			
+			raw_input(balls)
+			
 		except cv2.error as e:
 			balls = ()
 			print 'Falha no Haar'
 			
 		return balls
+
+#----------------------------------------------------------------------------------------------------------------------------------
+
+	def __detectCircles(self, img):
+		media = cv2.medianBlur(img,9) # Media blur para suavisar transições
+		cimg = cv2.cvtColor(media,cv.CV_BGR2GRAY) # Imagem em tons de cinza
+		
+		circles = cv2.HoughCircles(cimg, # Imagem a ser aplicada
+									 cv.CV_HOUGH_GRADIENT, # Tecnica usada
+									 2.5, # 
+									 100, # Distancia minima entre centros
+									 param1 = 200,
+									 param2 = 70,
+									 minRadius = 0, # Raio minimo
+									 maxRadius = 0) # Raio maximo
+		return circles
+
+#----------------------------------------------------------------------------------------------------------------------------------
+
+	def __maskDilate(self, mask_branco):
+		## dilation
+		mask_bola = cv2.dilate(mask_branco, # Aonde sera aplicada
+								 np.ones((10,10),np.uint8), # Tamanho do ES
+								 iterations = 10 # Número de iterações
+								)
+	
+		## erosion
+		mask_bola = cv2.erode(mask_bola, # Aonde sera aplicada
+								 np.ones((10,10),np.uint8), # Tamanho do ES
+								 iterations = 10 - 2 # Número de iterações
+								)
+
+		mask_bola = cv2.blur(mask_bola, # Aonde sera aplicada
+							 (9,9) # Tamanho do ES
+							)
+		return mask_bola
+
+#----------------------------------------------------------------------------------------------------------------------------------
+
+	def __segColor(self,frame):
+		media = cv2.medianBlur(frame, 5) # Media blur tentar homogeneizar as cores
+		hsv = cv2.cvtColor(media, cv2.COLOR_BGR2HSV) # Convertendo de RGB para HSV
+		
+		mask_campo = cv2.inRange(hsv, # imagem a ser aplicada
+			np.array([000, 000, 000]), # Valores mínimos do HSV
+			np.array([022, 255, 255]), # Valores máximos do HSV
+			) # Segmentando a cor
+		
+		## erosion
+		mask_campo = cv2.erode(mask_campo, # Aonde sera aplicada
+								 np.ones((2,2),np.uint8), # Tamanho do ES
+								 iterations = 3 # Número de iterações
+								)
+		
+		## dilation
+		mask_campo = cv2.dilate(mask_campo, # Aonde sera aplicada
+								 np.ones((2,2),np.uint8), # Tamanho do ES
+								 iterations = 3 # Número de iterações
+								)
+		return mask_campo
 
 #----------------------------------------------------------------------------------------------------------------------------------
 
