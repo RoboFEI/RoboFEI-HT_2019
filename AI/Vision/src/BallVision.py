@@ -4,9 +4,9 @@ import cv2
 import ctypes
 
 try:
-    from ConfigParser import ConfigParser
+	from ConfigParser import ConfigParser
 except ImportError:
-    from ConfigParser import ConfigParser  # ver. < 3.0
+	from ConfigParser import ConfigParser  # ver. < 3.0
 
 
 class VisionBall (object):
