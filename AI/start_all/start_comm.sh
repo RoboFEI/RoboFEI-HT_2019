@@ -6,4 +6,4 @@ echo "communication"
 cd ../
 cd build/Communication/
 
-./communication
+sudo ./communication
