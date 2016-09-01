@@ -67,7 +67,8 @@ class GaitMove
         double soft_starter_value;
         ReadConfig* gait;
         ReadConfig* walkfoward;
-        ReadConfig* turnRobot;
+        ReadConfig* turnRobotLeft;
+        ReadConfig* turnRobotRight;
         ReadConfig* walkslow;
         ReadConfig* turnBallR;
         ReadConfig* turnBallL;
