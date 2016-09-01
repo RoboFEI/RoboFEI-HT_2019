@@ -32,7 +32,8 @@ GaitMove::GaitMove(int *mem_t, minIni* ini)
     //Carregando valores do config.ini ---------------
     gait = new ReadConfig("Gait",ini);
     walkfoward = new ReadConfig("Walking Config",ini);
-    turnRobot = new ReadConfig("Turn Robot",ini);
+    turnRobotRight = new ReadConfig("Turn Robot Right",ini);
+    turnRobotLeft = new ReadConfig("Turn Robot Left",ini);
     walkslow = new ReadConfig("Walk Slow",ini);
     turnBallR = new ReadConfig("Turn Ball Right",ini);
     turnBallL = new ReadConfig("Turn Ball Left",ini);
@@ -179,10 +180,10 @@ void GaitMove::turn_right(bool &stop_gait, bool max_angle, bool same_moviment)
 {
     if(same_moviment == false)
         std::cout << " | \e[38;5;45mVirar a direita\e[0m" << std::endl;
-    if(float(read_int(mem, DECISION_ACTION_B))<turnRobot->turn_angle && max_angle==false)
-        move_gait(turnRobot->walk_foward, turnRobot->sidle, -float(read_int(mem, DECISION_ACTION_B)), stop_gait, gait, turnRobot);
+    if(float(read_int(mem, DECISION_ACTION_B))<turnRobotRight->turn_angle && max_angle==false)
+        move_gait(turnRobotRight->walk_foward, turnRobotRight->sidle, -float(read_int(mem, DECISION_ACTION_B)), stop_gait, gait, turnRobotRight);
     else
-        move_gait(turnRobot->walk_foward, turnRobot->sidle, -turnRobot->turn_angle, stop_gait, gait, turnRobot);
+        move_gait(turnRobotRight->walk_foward, turnRobotRight->sidle, -turnRobotRight->turn_angle, stop_gait, gait, turnRobotRight);
 }
 
 //========================================================================
@@ -191,10 +192,10 @@ void GaitMove::turn_left(bool &stop_gait, bool max_angle, bool same_moviment)
 {
     if(same_moviment == false)
         std::cout<<" | \e[38;5;45mVirar a esquerda\e[0m"<<std::endl;
-    if(float(read_int(mem, DECISION_ACTION_B))<turnRobot->turn_angle && max_angle==false)
-        move_gait(turnRobot->walk_foward, turnRobot->sidle, -float(read_int(mem, DECISION_ACTION_B)), stop_gait, gait, turnRobot);
+    if(float(read_int(mem, DECISION_ACTION_B))<turnRobotLeft->turn_angle && max_angle==false)
+        move_gait(turnRobotLeft->walk_foward, turnRobotLeft->sidle, -float(read_int(mem, DECISION_ACTION_B)), stop_gait, gait, turnRobotLeft);
     else
-        move_gait(turnRobot->walk_foward, turnRobot->sidle, turnRobot->turn_angle, stop_gait, gait, turnRobot);
+        move_gait(turnRobotLeft->walk_foward, turnRobotLeft->sidle, turnRobotLeft->turn_angle, stop_gait, gait, turnRobotLeft);
 }
 
 //========================================================================
