@@ -539,7 +539,7 @@ class VisionBall (object):
 			balls = self.__detectCircles(img)
 			
 			if balls is not None:
-				print(balls)
+				#print(balls)
 				balls = np.array([[int(balls[0,0][0]-balls[0,0][2]), int(balls[0,0][1]-balls[0,0][2]), int(2*balls[0,0][2]), int(2*balls[0,0][2])]])
 	#			raw_input(balls)
 			else:
@@ -594,8 +594,8 @@ class VisionBall (object):
 		hsv = cv2.cvtColor(media, cv2.COLOR_BGR2HSV) # Convertendo de RGB para HSV
 		
 		mask_campo = cv2.inRange(hsv, # imagem a ser aplicada
-			np.array([000, 000, 000]), # Valores mínimos do HSV
-			np.array([022, 255, 255]), # Valores máximos do HSV
+			np.array([000, 037, 165]), # Valores mínimos do HSV
+			np.array([024, 255, 255]), # Valores máximos do HSV
 			) # Segmentando a cor
 		
 		## erosion

@@ -7,6 +7,8 @@ import ctypes
 import argparse
 import time
 from math import log,exp,tan,radians
+import datetime
+import random
 
 from BallVision import *
 from PanTilt import *
@@ -49,7 +51,7 @@ def statusBall(positionballframe):
 	global lista
 	if positionballframe[0] == 0:
 		lista = []
-		print "Campo nao encontrado"
+		#print "Campo nao encontrado"
 		
 	if positionballframe[0] == 1:
 		lista = []
@@ -68,12 +70,12 @@ def statusBall(positionballframe):
 			mens += " baixo"
 		else:
 			mens += " centro"
-		print mens
+		###print mens
 	if positionballframe[0] == 2:
 		if bkb.read_float(Mem, 'VISION_TILT_DEG') < 50:
 			lista.append(8.48048735*exp(0.042451235*bkb.read_float(Mem, 'VISION_TILT_DEG'))-7)
 			##bkb.write_float(Mem, 'VISION_BALL_DIST', 430*tan(radians(bkb.read_float(Mem, 'VISION_TILT_DEG'))))
-			print 'Dist using tilt angle: ', bkb.read_float(Mem, 'VISION_BALL_DIST')
+			###print 'Dist using tilt angle: ', bkb.read_float(Mem, 'VISION_BALL_DIST')
 			#0.0848048735*exp(0.042451235*bkb.read_int('VISION_TILT_DEG')
 			#print "Distancia da Bola func 1 em metros: " + str(0.0848048735*exp(0.042451235*bkb.read_int('VISION_MOTOR1_ANGLE')))
 			#print "Bola encontrada na posicao x: " + str(round(positionballframe[1],2)) + " y: " + str(round(positionballframe[2],2)) + " e diametro de: " + str(round(positionballframe[3],2))
@@ -81,7 +83,7 @@ def statusBall(positionballframe):
 			#print "Bola encontrada na posicao x: " + str(round(positionballframe[1],2)) + " y: " + str(round(positionballframe[2],2)) + " e diametro de: " + str(round(positionballframe[3],2))
 			#print "Distancia da Bola func 2 em metros: " + str(4.1813911146*pow(positionballframe[3],-1.0724682465))
 			lista.append(418.13911146*pow(positionballframe[3],-1.0724682465))
-			print 'Dist using pixel size: ', bkb.read_float(Mem, 'VISION_BALL_DIST')
+			###print 'Dist using pixel size: ', bkb.read_float(Mem, 'VISION_BALL_DIST')
 		if len(lista) == 1:
 			dist_media = lista[0]
 		else:
@@ -189,13 +191,15 @@ os.system("v4l2-ctl -d /dev/video0 -c focus_auto=0 && v4l2-ctl -d /dev/video0 -c
 while True:
 	#Salva o frame
 	
-	for i in xrange(0,3):
-		ret, frame = cap.read()
+	#for i in xrange(0,3):
+	ret, frame = cap.read()
 	
 	positionballframe = ball.detect(frame,np.array([resolutions[atualres,0],resolutions[atualres,1]]))
 	
 	#status
 	statusBall(positionballframe)
+	
+	print datetime.datetime.now() , head.servo.readWord(19, 36) ,  head.servo.readWord(20, 36) , int((positionballframe[1]+10)*64) , int((positionballframe[2]+10)*36) , head.servo.readWord(19,30) ,head.servo.readWord(20,30) 
 	
 	if args.withoutservo == False:
 		posheadball = head.mov(positionballframe,posheadball,Mem, bkb)
