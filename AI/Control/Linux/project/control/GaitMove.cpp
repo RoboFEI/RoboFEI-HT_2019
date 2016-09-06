@@ -175,6 +175,16 @@ void GaitMove::walk_foward_fast(bool &stop_gait, bool same_moviment, bool &enabl
 
 
 //========================================================================
+//Andar rapido para frente------------------------------------------------
+void GaitMove::walk_foward_fast_direct(bool &stop_gait, bool same_moviment)
+{
+    if(same_moviment == false)
+        std::cout<<" | \e[38;5;45mAndar para frente\e[0m"<<std::endl;
+
+    move_gait(walkfoward->walk_foward, walkfoward->sidle, walkfoward->turn_angle, stop_gait, gait, walkfoward);
+}
+
+//========================================================================
 //O robo vira para a direita----------------------------------------------
 void GaitMove::turn_right(bool &stop_gait, bool max_angle, bool same_moviment)
 {
