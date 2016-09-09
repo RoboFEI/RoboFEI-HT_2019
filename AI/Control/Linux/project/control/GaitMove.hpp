@@ -44,6 +44,8 @@ class GaitMove
 
         void robot_stop(bool &stop_gait);
 
+        void walk_foward_fast_direct(bool &stop_gait, bool same_moviment);
+
         void walk_foward_fast(bool &stop_gait, bool same_moviment, bool &enable_soft_starter);
 
         void turn_right(bool &stop_gait, bool max_angle, bool same_moviment);
@@ -67,7 +69,8 @@ class GaitMove
         double soft_starter_value;
         ReadConfig* gait;
         ReadConfig* walkfoward;
-        ReadConfig* turnRobot;
+        ReadConfig* turnRobotLeft;
+        ReadConfig* turnRobotRight;
         ReadConfig* walkslow;
         ReadConfig* turnBallR;
         ReadConfig* turnBallL;

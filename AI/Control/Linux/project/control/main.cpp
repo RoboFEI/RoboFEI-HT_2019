@@ -290,7 +290,7 @@ int main(int argc, char **argv)
                 case 116: //t
                     gaitMove.robot_stop(stop_gait);
                 break;
-                
+
                 case 117: //u
                     actionMove.goalkeeper(stop_gait);
                 break;
@@ -302,6 +302,10 @@ int main(int argc, char **argv)
                 case 122: //z
                     actionMove.goodBye(stop_gait);
                  break;
+                
+                case 120: //z
+                    gaitMove.walk_foward_fast_direct(stop_gait, same_moviment);
+                break;
 
                 case 27: //ESC (stop)
                     cout << " | Exit process" << endl;
