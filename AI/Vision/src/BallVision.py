@@ -594,7 +594,7 @@ class VisionBall (object):
 		hsv = cv2.cvtColor(media, cv2.COLOR_BGR2HSV) # Convertendo de RGB para HSV
 		
 		mask_campo = cv2.inRange(hsv, # imagem a ser aplicada
-			np.array([000, 037, 165]), # Valores mínimos do HSV
+			np.array([000, 037, 130]), # Valores mínimos do HSV
 			np.array([024, 255, 255]), # Valores máximos do HSV
 			) # Segmentando a cor
 		

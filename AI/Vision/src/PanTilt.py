@@ -280,11 +280,11 @@ class Pantilt (object):
 			if status[1] != 0 and status[2] != 0 and self.__lost == 0:
 				#self.__segue(status,Mem, bkb)
 				if ((self.servo.readByte(self.__SERVO_PAN,self.__ISMOVING) == 0) and (self.servo.readByte(self.__SERVO_TILT,self.__ISMOVING) == 0)):
-					self.servo.writeWord(self.__SERVO_PAN, self.__SPEED, 80) # Velocidade maxima do servo (CHECAR)
-					self.servo.writeWord(self.__SERVO_TILT, self.__SPEED, 80) # Velocidade maxima do servo (CHECAR)
+					self.servo.writeWord(self.__SERVO_PAN, self.__SPEED, 60) # Velocidade maxima do servo (CHECAR)
+					self.servo.writeWord(self.__SERVO_TILT, self.__SPEED, 60) # Velocidade maxima do servo (CHECAR)
 				
-					xr = random.randint(300, 533)
-					yr = random.randint(715, 803)
+					xr = random.randint(338, 488)
+					yr = random.randint(635, 731)
 					#print xr , yr
 					self.servo.writeWord(self.__SERVO_PAN ,self.__GOAL_POS,xr)
 					self.servo.writeWord(self.__SERVO_TILT,self.__GOAL_POS,yr)
