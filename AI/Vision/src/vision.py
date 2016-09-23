@@ -187,7 +187,7 @@ ret = cap.set(4,resolutions[atualres,1])
 
 if args.withoutservo == False:
 	posheadball = np.array([head.cen_posTILT,head.cen_posPAN]) #Iniciando valores iniciais da posicao da bola
-os.system("v4l2-ctl -d /dev/video0 -c focus_auto=0 && v4l2-ctl -d /dev/video0 -c focus_absolute=0")
+os.system("v4l2-ctl -d /dev/video0 -c focus_auto=0 && v4l2-ctl -d /dev/video0 -c focus_absolute=0") #Desligando Auto-foco
 
 while True:
 	#Salva o frame
@@ -200,26 +200,16 @@ while True:
 	#status
 	statusBall(positionballframe)
 	
-	print datetime.datetime.now() , head.servo.readWord(19, 36) ,  head.servo.readWord(20, 36) , int((positionballframe[1]+10)*64) , int((positionballframe[2]+10)*36) , head.servo.readWord(19,30) ,head.servo.readWord(20,30) 
-	
-	
 	if args.withoutservo == False:
 		posheadball = head.mov(positionballframe,posheadball,Mem, bkb)
 		if head.checkComm() == False:
 			print "Out of communication with servos!"
 			break
 	
-
-
-	
 	setResolution(positionballframe)
-	
-#	if args.visionball == True or args.head == True:
-#		print "Resolucao: " + str(resolutions[atualres,0]) + "x" + str(resolutions[atualres,1])
 	
 	if cv2.waitKey(1) & 0xFF == ord('q'):
 		break
-#	raw_input("Pressione enter pra continuar")
 
 if args.withoutservo == False:
 	head.finalize()
