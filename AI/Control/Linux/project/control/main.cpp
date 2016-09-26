@@ -201,9 +201,13 @@ int main(int argc, char **argv)
                     buffer=key;
                 else
                     buffer=0;
+		same_moviment=false;
             }
             else
+	    {
                 key=buffer;
+		same_moviment=true;
+	    }
             //-------------------------------------------------------------------------
 
             if(key != 0 && key != 102 && key != 107) // verifica se foi pressionada uma tecla diferente do
