@@ -107,6 +107,7 @@ int main(int argc, char **argv)
     ("help", "produce help message")
     ("k", "Inicia com o controle do robô pelo teclado")
     ("v", "Verifica a tensao nos servos do corpo")
+    ("t", "Verifica a temperatura dos servos do corpo")
     ("g", "Inicia o controle para usar com a interface grafica")
     ;
   
@@ -128,12 +129,25 @@ int main(int argc, char **argv)
     }
     //================================================================================== 
 
-    //======================== check temperature =======================================     
+    //======================== check voltage ===========================================     
     if (variables.count("v")) //verifica se foi chamado o argumento de controle pelo teclado
     {
-        if(cm730.ReadByte(12, 42, &value, 0) != CM730::SUCCESS)
+        if(cm730.ReadByte(12, MX28::P_PRESENT_VOLTAGE, &value, 0) != CM730::SUCCESS)
             std::cout<<"Erro na leitura da tensao"<<std::endl;
         std::cout<<"Tensao = "<<float(value)/10<<"V"<<std::endl;
+        return 0;
+    }
+    //================================================================================== 
+    
+    //======================== check temperature =======================================     
+    if (variables.count("t")) //verifica se foi chamado o argumento de controle pelo teclado
+    {
+        for(int id = 0; id < JointData::NUMBER_OF_JOINTS-2; id++)
+        {
+            if(cm730.ReadByte(id, MX28::P_PRESENT_TEMPERATURE, &value, 0) != CM730::SUCCESS)
+                std::cout<<"Erro na leitura da temperatura no motor "<<id<<std::endl;
+            std::cout<<"Temperatura motor "<< id<<" = "<<value<<"°"<<std::endl;
+        }
         return 0;
     }
     //================================================================================== 
