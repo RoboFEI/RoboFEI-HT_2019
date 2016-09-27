@@ -507,10 +507,10 @@ int Initialize_servo()
         }
         else
         {
-            cm730->ReadByte(1, 3, &idServo, 0); // Read the servo id of servo 1
+            cm730->ReadByte(1, MX28::P_ID, &idServo, 0); // Read the servo id of servo 1
             servoConectado = idServo == 1;
             usleep(1000);
-            cm730->ReadByte(1, 3, &idServo, 0);//Try again because of fail
+            cm730->ReadByte(1, MX28::P_ID, &idServo, 0);//Try again because of fail
             servoConectado = idServo == 1;
             if(servoConectado)
             {
@@ -550,15 +550,15 @@ int check_servo(CM730 *cm730, int idServo, bool &stop_gait)
     int save=-1;
     for(int erro,j=1 ; i==0 && j<=18; j++)
     {
-        cm730->WriteByte(j, 11, LIMITE_TEMP, &erro);
+        cm730->WriteByte(j, MX28::P_HIGH_LIMIT_TEMPERATURE, LIMITE_TEMP, &erro);
     }
 
     i++;
-    if (i==19) //Ultimo motor: 18
+    if (i==JointData::NUMBER_OF_JOINTS-2) //Ultimo motor: 18
         i=1;
 
     if (i<=6){ // Membro superiores ate 6
-        if(cm730->ReadWord(i, 34, &save, 0)!=0)
+        if(cm730->ReadWord(i, MX28::P_TORQUE_LIMIT_L, &save, 0)!=0)
         {
             cout<<"Perda na comunicação com o motor "<<i<<" - Membro superior"<<endl;
             usleep(500000);
@@ -566,7 +566,7 @@ int check_servo(CM730 *cm730, int idServo, bool &stop_gait)
         }
         if (save<=0)// Testa o torque
         {
-            if(cm730->ReadWord(i, 43, &save, 0)!=0)
+            if(cm730->ReadWord(i, MX28::P_PRESENT_TEMPERATURE, &save, 0)!=0)
             {
                 cout<<"Perda na comunicação com o motor "<<i<<" - Membro superior"<<endl;
                 usleep(500000);
@@ -588,7 +588,7 @@ int check_servo(CM730 *cm730, int idServo, bool &stop_gait)
         }
     }
     else{ // Membro inferiores, do 7 em diante
-        if(cm730->ReadWord(i, 34, &save, 0)!=0)
+        if(cm730->ReadWord(i, MX28::P_TORQUE_LIMIT_L, &save, 0)!=0)
         {
             cout<<"Perda na comunicação com o motor "<<i<<" - Membro inferior"<<endl;
             usleep(500000);
@@ -596,7 +596,7 @@ int check_servo(CM730 *cm730, int idServo, bool &stop_gait)
         }
         if (save<=0)// Testa o torque
         {
-            if(cm730->ReadWord(i, 43, &save, 0)!=0)
+            if(cm730->ReadWord(i, MX28::P_PRESENT_TEMPERATURE, &save, 0)!=0)
             {
                 cout<<"Perda na comunicação com o motor "<<i<<" - Membro inferior"<<endl;
                 usleep(500000);
