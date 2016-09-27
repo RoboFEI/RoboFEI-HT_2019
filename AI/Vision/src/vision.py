@@ -191,7 +191,7 @@ os.system("v4l2-ctl -d /dev/video0 -c focus_auto=0 && v4l2-ctl -d /dev/video0 -c
 
 while True:
 	#Salva o frame
-	
+	bkb.write_int(robot.mem, 'VISION_WORKING', 1)
 	for i in xrange(0,3):
 		ret, frame = cap.read()
 	
