@@ -422,6 +422,9 @@ int main(int argc, char **argv)
             if(read_int(mem, DECISION_ACTION_A) == 22)
                 actionMove.kick_left_weak(stop_gait); //Chute fraco com pe esquerdo
 
+            // Escreve na variável de telemetria.
+            write_int(mem, CONTROL_WORKING, 1)
+
             //Imprime na tela o tempo que esta ocioso por nao receber uma nova instrucao da decisao-------
             count_read++;
             std::cout << "\rReading BlackBoard" <<"[\e[38;5;82m"<< count_read<<"\e[0m] | Tempo ocioso"<<"[\e[38;5;82m"<< count_read*step_time/1000<<"s\e[0m]";

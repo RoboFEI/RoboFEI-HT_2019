@@ -394,5 +394,8 @@ int main(int argc, char **argv)
       first_failure = false;
       usleep(50000);
     }
+
+    // Escreve na variável de telemetria.
+    write_int(mem, IMU_WORKING, 1)
   }
 }

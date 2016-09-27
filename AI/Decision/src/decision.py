@@ -70,8 +70,10 @@ while True:
     if robot.get_referee_usage() == 'yes':
         robot.decision(robot.get_referee()) #will read the referee 
     else:
-        robot.decision(2) #always on play 
-   
+        robot.decision(2) #always on play
+
+    robot.bkb.write_int(robot.mem, 'DECISION_WORKING', 1)
+
     time.sleep(0.05) 
     
     
