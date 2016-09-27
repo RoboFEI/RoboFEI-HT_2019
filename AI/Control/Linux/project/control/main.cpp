@@ -18,6 +18,8 @@ Arquivo fonte contendo o programa que controla os servos do corpo do robô
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
+#include <fstream>
+#include <time.h>
 
 #include "minIni.h"
 #include <string>
@@ -51,6 +53,8 @@ int kbhit(); //Function kbhit.cpp
 int check_servo(CM730 *cm730, int idServo, bool &stop_gait);
 
 int Initialize_servo();
+
+void logInit();
 
 void change_current_dir()
 {
@@ -347,6 +351,7 @@ int main(int argc, char **argv)
 
     //***************************************************************************************
     //-------------------------Controle pela decisão-----------------------------------------
+    logInit(); // save the time when start the control process
     while(1)
     {
             //Confere se o movimento atual e o mesmo do anterior----------
@@ -621,7 +626,22 @@ int check_servo(CM730 *cm730, int idServo, bool &stop_gait)
     return 0;
 }
 
-
+void logInit()
+{
+        std::fstream File;
+        time_t _tm =time(NULL);
+        struct tm * curtime = localtime ( &_tm );
+        File.open("../../Control/Control.log", std::ios::app | std::ios::out);
+        if (File.good() && File.is_open())
+        {
+            File << "Inicializando o processo do controle "<<" --- ";
+            File << asctime(curtime);
+            File.flush();
+            File.close();
+        }
+        else
+	    printf("Erro ao Salvar o arquivo\n");
+}
 
 
 
