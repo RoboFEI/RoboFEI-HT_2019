@@ -2,6 +2,7 @@ import pygame
 import random as rnd
 import socket
 import time
+from collections import defaultdict
 
 '''
 Sequence of communication Protocol:
@@ -14,17 +15,26 @@ Sequence of communication Protocol:
 5 - X ball's position
 6 - Y ball's position
 ----------------------------------
-7 - Vision
-8 - Control
-9 - Decision
-10 - IMU
+7 - Control
+8 - Vision
+9 - Localization
+10 - Decision
+11 - IMU
 ----------------------------------
-11 - DECISION_ACTION_A
-12 - IMU_EULER_Z
+12 - DECISION_ACTION_A
+13 - IMU_EULER_Z
 '''
 
+#--------------------------------------------------------------------------------------------------
+#   TELEMETRY CLASS
+#--------------------------------------------------------------------------------------------------
 
 class Telemetry(object):
+
+    #----------------------------------------------------------------------------------------------
+    #   CLASS CONSTRUCTOR
+    #----------------------------------------------------------------------------------------------
+
     def __init__(self, n):
         self.x = 0  # absolute X position
         self.y = 0  # absolute Y position
@@ -53,12 +63,39 @@ class Telemetry(object):
         self.hide = False        # toogles the hidden variables
 
         # Variables to be shown in the window
-        self.variables = [['VISION', True, 'void'],
-                          ['CONTROL', True, 'void'],
-                          ['DECISION', True, 'void'],
-                          ['IMU', True, 'void'],
-                          ['DECISION_ACTION_A', True, 'void']]
+        self.variables = [['CONTROL_WORKING', True, 'NO'],
+                          ['VISION_WORKING', True, 'NO'],
+                          ['LOCALIZATION_WORKING', True, 'NO'],
+                          ['DECISION_WORKING', True, 'NO'],
+                          ['IMU_WORKING', True, 'NO'],
+                          ['DECISION_ACTION_A', True, '---'],
+                          ['IMU_EULER_Z', True, '---']]
 
+        # Controls Dictionary...
+        self.dictcontrol = {0: 'Nada a fazer',
+                            1: 'Andar para frente',
+                            2: 'Virar a esquerda',
+                            3: 'Virar a direita',
+                            4: 'Chute forte direito',
+                            5: 'Chute forte esquerdo',
+                            6: 'Andar de Lado esquerda',
+                            7: 'Andar de Lado direita',
+                            8: 'Andar lento para frente',
+                            9: 'Girar em torno da bola para esquerda',
+                            10: 'Defender a bola',
+                            11: 'Stop com gait',
+                            12: 'Passe forte Esquerda',
+                            13: 'Passe forte Direita',
+                            14: 'Girar em torno da bola para direita',
+                            15: 'Levantar de frente',
+                            16: 'Levantar de costa',
+                            17: 'Andar rapido para traz',
+                            18: 'Andar lento para traz',
+                            19: 'Greetings',
+                            20: 'GoodBye',
+                            21: 'Chute fraco direito',
+                            22: 'Chute fraco esquerdo'}
+        self.dictcontrol = defaultdict(lambda:'ERRO NO DICIONARIO DA TELEMETRIA', self.dictcontrol)
         # Variables which draws things in the screen
         self.othervars = [100 * n, 100 * n, 30 * n, 20 * n, 450, 300]
 
@@ -72,23 +109,67 @@ class Telemetry(object):
         self.Body = pygame.Surface((260, 742), pygame.SRCALPHA) # surface to draw the interactive window
         self.Robot = pygame.Surface((26,26), pygame.SRCALPHA) # surface to draw robot
 
+    #----------------------------------------------------------------------------------------------
+    #   METHOD WHICH UPDATES THE VARS USED IN THE FLOAT PANELS
+    #----------------------------------------------------------------------------------------------
+
     def change(self, data): # Distributes the received messages into the variables.
-        self.othervars[0] = float(data[1])
-        self.othervars[1] = float(data[2])
-        self.othervars[2] = float(data[3])
-        self.othervars[3] = float(data[4])
-        self.othervars[4] = float(data[5])
-        self.othervars[5] = float(data[6])
-        self.variables[0][2] = data[7]
-        self.variables[1][2] = data[8]
-        self.variables[2][2] = data[9]
-        self.variables[3][2] = data[10]
-        self.variables[4][2] = data[11]
+        # Localization Vars
+        try:
+            self.othervars[0] = float(data[1])
+            self.othervars[1] = float(data[2])
+            self.othervars[2] = float(data[3])
+            self.othervars[3] = float(data[4])
+            self.othervars[4] = float(data[5])
+            self.othervars[5] = float(data[6])
+        except:
+            print 'ERROR on telemetry.change() for LOCALIZATION variables!'
+
+        # Panel Vars
+
+        # Variables for the control variables.
+        try:
+            for i in range(5):
+                if data[i+7] == '0':
+                    self.variables[i][2] = 'NO'
+                else:
+                    self.variables[i][2] = 'YES'
+        except:
+            print 'ERROR on telemetry.change() for FLAGS!'
+
+        # Gets the Decision Action
+        try:
+            self.variables[5][2] = self.dictcontrol[int(data[12])]
+        except:
+            print 'ERROR on telemetry.change() for ACTION_DECISION_A!'
+
+        # Gets the IMU orientation
+        try:
+            self.variables[6][2] = data[13]
+        except:
+            print 'ERROR on telemetry.change() for IMU_EULER_Z!'
+
+        # Test if the Telemetry is updated.
+        try:
+            if data[14] != 'OUT':
+                print 'TELEMETRY IS OUTDATED!'
+        except:
+            print 'ERROR on telemetry.change()!'
+
+        # Saves a time stamp
         self.timestamp = time.time()
+
+    #----------------------------------------------------------------------------------------------
+    #   METHOD THAT RETURNS THE ELAPSED TIME SINCE THE LAST TIMESTAMP
+    #----------------------------------------------------------------------------------------------
 
     def timeout(self): # Returns how long since the last received message
         timer = time.time() - self.timestamp
         return timer
+
+    #----------------------------------------------------------------------------------------------
+    #   METHOD THAT DRAWS THINGS ON SCREEN
+    #----------------------------------------------------------------------------------------------
 
     def draw(self, where):
         new = pygame.Surface((1042, 742), pygame.SRCALPHA) # Surface of the Telemetry
@@ -155,6 +236,10 @@ class Telemetry(object):
 
         where.blit(new, (0,0)) # Draws Telemetry on Screen
 
+    #----------------------------------------------------------------------------------------------
+    #   METHOD THAT WRITE ON THE FLOATING PANELS
+    #----------------------------------------------------------------------------------------------
+
     def Write(self):
         pos = self.roll # initial text position
 
@@ -175,6 +260,10 @@ class Telemetry(object):
 
         self.maxscroll = pos
         self.Body.blit(TextBody, (0,20)) # draws the texts to the window
+
+    #----------------------------------------------------------------------------------------------
+    #   CALLBACK METHOD OF THE KEYBOARD
+    #----------------------------------------------------------------------------------------------
 
     def click(self, mx, my):
         # Tests where is the mouse click
@@ -198,6 +287,10 @@ class Telemetry(object):
         else:
             self.start_drag() # starts the dragging function
 
+    #----------------------------------------------------------------------------------------------
+    #   METHOD USED FOR THE SCROLLBAR
+    #----------------------------------------------------------------------------------------------
+
     def scroll(self, up):
         # Scrolls only if there are things not seen on the screen...
         if up and not(self.minimize) and self.maxscroll > self.size:
@@ -206,9 +299,17 @@ class Telemetry(object):
         elif not(up) and not(self.minimize) and self.roll < 0:
             self.roll += 5
 
+    #----------------------------------------------------------------------------------------------
+    #   METHOD TO START RESIZING THE FLOATING PANEL
+    #----------------------------------------------------------------------------------------------
+
     def start_resize(self):
         self.px, self.py = pygame.mouse.get_pos() # Saves mouse initial position
         self.resizing = True # starts resizing
+
+    #----------------------------------------------------------------------------------------------
+    #   METHOD THAT RESIZES THE FLOATING PANEL SIZE
+    #----------------------------------------------------------------------------------------------
 
     def resize(self):
         dx, dy = pygame.mouse.get_pos() # gets actual mouse position
@@ -223,12 +324,24 @@ class Telemetry(object):
 
         self.px, self.py = dx, dy # save actual mouse position
 
+    #----------------------------------------------------------------------------------------------
+    #   METHOD TO FINISH THE RESIZING OF THE FLOATING PANEL
+    #----------------------------------------------------------------------------------------------
+
     def stop_resize(self):
         self.resizing = False # stops resizing
+
+    #----------------------------------------------------------------------------------------------
+    #   METHOD USED TO START DRAGGING THE FLOATING PANEL
+    #----------------------------------------------------------------------------------------------
 
     def start_drag(self):
         self.px, self.py = pygame.mouse.get_pos() # saves mouse initial position
         self.dragging = True # starts dragging
+
+    #----------------------------------------------------------------------------------------------
+    #   METHOD USED TO DRAG THE FLOATING PANEL AROUND
+    #----------------------------------------------------------------------------------------------
 
     def drag(self):
         dx, dy = pygame.mouse.get_pos() # gets actual mouse position
@@ -251,8 +364,17 @@ class Telemetry(object):
 
         self.px, self.py = dx, dy # saves actual mouse position
 
+    #----------------------------------------------------------------------------------------------
+    #   METHOD THAT FINALIZES THE DRAGGING OF A FLOATING PANEL
+    #----------------------------------------------------------------------------------------------
+
     def stop_drag(self):
         self.dragging = False # stops dragging function
+
+
+#--------------------------------------------------------------------------------------------------
+#   FUNCTION WHICH MANAGES THE TELEMETRY CLASS
+#--------------------------------------------------------------------------------------------------
 
 def TelemetryControl(tele, sock): # Function to Control the Telemetry Screens
     # Iterates through all ports searching messages
