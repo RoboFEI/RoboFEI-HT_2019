@@ -5,8 +5,8 @@
   * @version      V0.0.1
   * @created      24/04/2014
   * @Modified by  Isaac Jesus da Silva - ROBOFEI-HT - FEI
-  * @Modified     25/11/2015
-  * @e-mail
+  * @Modified     28/09/2016
+  * @e-mail       isaac25silva@yahoo.com.br
   * @brief        Vision
   ****************************************************************************
 /--------------------------------------------------------------------*/
@@ -23,46 +23,31 @@ extern "C" bool initServo(int pos1, int pos2)
     int deviceIndex = 0; //endereça a USB
     int baudnum = DEFAULT_BAUDNUM; //velocidade de transmissao
 	// ---- Open USBDynamixel -----------------------------------------------{
-		bool servoComunica = false;
+    bool servoComunica = false;
 
-		while(deviceIndex<3)// laço que percorre o servo 0, 1 e 2.
+	if( dxl_initialize(deviceIndex, baudnum) == 0 )
+	{
+		printf( "Failed to open servo!\n");
+		printf("\e[1;31mNão há nenhuma placa USB/RS-485 conectada no computador.\n\n\e[0m");
+		return true;
+	}
+	else
+	{
+		servoComunica = true;
+		printf( "Succeed to open Servo!\n");
+		if(dxl_read_byte( HEAD_TILT, 3 ) == HEAD_TILT)
 		{
-			if( dxl_initialize(deviceIndex, baudnum) == 0 )
-			{
-				printf( "Failed to open servo%d!\n", deviceIndex );
-				if(deviceIndex==2)  // Não encontrou nenhum
-				{
-					if(servoComunica)
-						printf("Conectou-se a uma placa mas não conseguiu se comunicar com o servo\n");
-					else
-						printf("Não encontrou nenhuma placa do servo conectada a porta USB\n");
-					return true;
-				}
-				deviceIndex++;      // Não conecta na placa do servo e tenta a proxima porta.
-			}
-			else
-			{
-				servoComunica = true;
-				printf( "Succeed to open Servo%d!\n", deviceIndex );
-					if(dxl_read_byte( HEAD_TILT, 3 ) == HEAD_TILT)
-				{
-		   			 	printf("Servo%d okay - Connected and communicated!\n", deviceIndex);
-				 	dxl_write_word(19, 30, pos1);
-				 	dxl_write_word(20, 30, pos2);
-				 	return false;
-				}
-					else
-					{
-					printf("Servo wrong or not communicated!\n");
-					if(deviceIndex==2)
-					{
-						printf("Conectou-se a uma placa mas não conseguiu se comunicar com o servo\n");
-						return true;
-					}
-					deviceIndex++;
-				}
-			}
+		   	printf("Connected and communicating with the head of the robot!\n");
+			dxl_write_word(19, 30, pos1);
+			dxl_write_word(20, 30, pos2);
+			return false;
 		}
+		else
+		{
+			printf("\e[0;31mConectou-se a placa USB/RS-485 mas não conseguiu se comunicar com o servo.\e[0m\n");
+			printf("\e[0;36mVerifique se a chave que liga os servos motores está na posição ligada.\n\n\e[0m");
+		}
+	}
 	//-----------------------------------------------------------------------------}
 }
 

@@ -99,7 +99,7 @@ else
 	cmake ../
 	make all
 	make install
-
+	cd ../../
 	sudo echo  -e "Creating rules for recognizing device${red} IMU${NC}"
 	cat <<EOF > 41-ftdi-imu.rules
 	KERNEL=="ttyUSB?", SUBSYSTEMS=="usb", ATTRS{idVendor}=="067b",  ATTRS{idProduct}=="2303", MODE="0777", SYMLINK+="robot/imu"
@@ -107,22 +107,15 @@ EOF
 	chmod +x 41-ftdi-imu.rules
 	sudo echo  -e "Copying file${blue} 41-ftdi-imu.rules${NC} to ${green}/etc/udev/rules.d${NC}"
 	sudo cp  41-ftdi-imu.rules  /etc/udev/rules.d
+    rm 41-ftdi-imu.rules
 
 	sudo echo  -e "Creating rules for recognizing devices${red} Servo${NC}"
-	cat <<EOF > 41-ftdi-servo.rules
-	KERNEL=="ttyUSB?", SUBSYSTEM=="tty", ATTRS{idVendor}=="0403",  ATTRS{idProduct}=="6001", ATTRS{serial}!="A501VRKI", ATTRS{serial}!="A501VROG", ATTRS{serial}!="A501VM7A", ATTRS{product}=="FT232R USB UART", MODE="0777", SYMLINK+="robot/servo%n"
-EOF
-	chmod +x 41-ftdi-servo.rules
-	sudo echo  -e "Copying file${blue} 41-ftdi-servo.rules${NC} to ${green}/etc/udev/rules.d${NC}"
-	sudo cp 41-ftdi-servo.rules /etc/udev/rules.d
+    sudo python ./AI/Control/Linux/device/renamePort.py
 
 	sudo echo  "Restarting udev"
 	sudo service udev restart
 
-	cd ..
-
-	cd  Control/Data/
-	pwd
+	cd  AI/Control/Data/
 
 	sudo echo "Starting robots configuration" 
 	sudo echo "Insert robot number: "
