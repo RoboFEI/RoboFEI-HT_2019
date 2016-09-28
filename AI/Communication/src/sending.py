@@ -83,7 +83,7 @@ while(True):
     # Other Variables
     message += str(bkb.read_int(mem, 'DECISION_ACTION_A')) + ' ' # Sends the movement the decision is executing.
     message += str(bkb.read_float(mem, 'IMU_EULER_Z')) + ' ' # Sends the orientation of the IMU
-
+    message += str(bkb.read_int(mem, 'VOLTAGE')) + ' ' # Sends the Voltage on motors.
     # End of Message
     message += 'OUT'
     # Send the message in broadcast for Telemetry

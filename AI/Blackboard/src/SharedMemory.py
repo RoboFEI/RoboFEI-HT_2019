@@ -142,6 +142,7 @@ class SharedMemory(object):
     'LOCALIZATION_WORKING': 103,
     'DECISION_WORKING': 104,
     'IMU_WORKING': 105,
+    'VOLTAGE': 106,
     }
 
     variable_float = {
