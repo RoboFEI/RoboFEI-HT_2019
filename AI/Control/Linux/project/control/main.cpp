@@ -497,51 +497,42 @@ int Initialize_servo()
     bool servoComunica = false;
     bool servoConectado = false;
     bool connectedRS = false;
-    int * deviceIndex = new int;
     int idServo;
-    char string_buffer[100]="";
-    *deviceIndex = 0;         //endereça o Servo
-    while(*deviceIndex<3)// laço que percorre o servo 0, 1 e 2.
-    {
-        sprintf(string1,"/dev/robot/servo%d", *deviceIndex);
-        LinuxCM730* linux_cm730;
-        linux_cm730 = new LinuxCM730(string1);
-        CM730* cm730;
-        cm730 = new CM730(linux_cm730);
+    sprintf(string1,"/dev/robot/body");
+    LinuxCM730* linux_cm730;
+    linux_cm730 = new LinuxCM730(string1);
+    CM730* cm730;
+    cm730 = new CM730(linux_cm730);
 
-        if( MotionManager::GetInstance()->Initialize(cm730) == 0)
-        { // not connect with board rs485
+    if( MotionManager::GetInstance()->Initialize(cm730) == 0)
+    { // not connect with board rs485
             
+    }
+    else
+    {
+        cm730->ReadByte(1, MX28::P_ID, &idServo, 0); // Read the servo id of servo 1
+        servoConectado = idServo == 1;
+        usleep(1000);
+        cm730->ReadByte(1, MX28::P_ID, &idServo, 0);//Try again because of fail
+        servoConectado = idServo == 1;
+        if(servoConectado)
+        {
+            cout<<"Connected and communicating with the body of the robot!\n";
+            return 0;
         }
         else
-        {
-            cm730->ReadByte(1, MX28::P_ID, &idServo, 0); // Read the servo id of servo 1
-            servoConectado = idServo == 1;
-            usleep(1000);
-            cm730->ReadByte(1, MX28::P_ID, &idServo, 0);//Try again because of fail
-            servoConectado = idServo == 1;
-            if(servoConectado)
-            {
-                   cout<<"Connected and communicating with the body of the robot!\n";
-                 return 0;
-            }
-            else
-            {// connected with board rs485 but it's not communicating
-                sprintf(string_buffer,"%s/dev/robot/servo%d\n", string_buffer, *deviceIndex);
-                connectedRS = true;
-            }            
-        }
-        *deviceIndex = *deviceIndex + 1;
-        delete cm730;
-        delete linux_cm730;
+        {// connected with board rs485 but it's not communicating
+            connectedRS = true;
+        }            
     }
-    delete deviceIndex; //desalocando da memória
+    delete cm730;
+    delete linux_cm730;
     
     if(connectedRS == true)
     {
         printf("\e[0;31mConectou-se a placa USB/RS-485 mas não conseguiu se comunicar com o servo.\e[0m\n");
         cout<<"Endereços encontrado:"<<endl;
-        cout<<string_buffer<<endl;
+        cout<<"/dev/robot/body"<<endl;
         cout<<"\e[0;36mVerifique se a chave que liga os servos motores está na posição ligada.\n\n\e[0m"<<endl;
     }
     else
@@ -549,7 +540,6 @@ int Initialize_servo()
         cout<<"\e[1;31mNão há nenhuma placa USB/RS-485 conectada no computador.\n\n\e[0m"<<endl;
     }
     return 1;
-
 }
 
 int check_servo(CM730 *cm730, int idServo, bool &stop_gait)
