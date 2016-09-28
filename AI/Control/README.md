@@ -1,8 +1,7 @@
 RoboFEI-HT
 =================
 
-
-This is an early push and is missing major features such as a REST API to expose higher level functions of the framework library. 
+This folder have a source code of control body robot, the code was based from robot DARwIn-OP and Jimmy. 
 
 All code within project is GPL GNU v3.
 
@@ -14,8 +13,10 @@ https://github.com/21stCenturyRobot/HROS5-Framework
 Notes
 ==================
 * Operating systems supported & verified: Ubuntu 14.04 LTS
-* rme (robot motion editor) is an improved version of action_editor developed by 21stCenturyRobot project (http://www.21stcenturyrobot.com/). Additional features such as individual limb on/off torque control implemented (see wiki). Robot MUST be in sitting position and/or spotted when launching rme, as servos go into low-torque mode upon launching rme followed by the robot sitting down. Currently rme is the only way to create motion pages/files.
-* Autonomous blob tracking demos/Vision modules from original Darwin-OP framework have been disabled and deleted.
+* Robot MUST be in stand up position when launching control process. 
+* Currently action_editor is the only way to create motion pages/files.
+* ServoTool.py is a alternative to setting the dynamixel servo motors instead use RoboPlus.
+* controlRobot.py can be used to control the robot using a graphic interface.
 
 
 Ubuntu Build Notes
@@ -35,7 +36,11 @@ Make Instructions
 
 'make clean && make all' in /Linux/build_Framework any time changes are made to core libraries.
 
-demos & utils are found in /Linux/project 'make clean && make all' for all /project programs
+action_editor & control are found in /Linux/project
+
+ServoTool.py are found in /Linux/ServoTool-master/src
+
+controlRobot.py are found in /GUIcontrol
 
 
 

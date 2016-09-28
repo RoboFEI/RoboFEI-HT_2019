@@ -77,7 +77,7 @@ class GaitMove
         ReadConfig* sidleR;
         ReadConfig* sidleL;
 
-       void move_gait(float X_amplitude, float Y_amplitude, float A_amplitude, bool &stop_gait, ReadConfig* configGait, ReadConfig* configP);
+       void move_gait(float X_amplitude, float Y_amplitude, float A_amplitude, bool &stop_gait, ReadConfig* configP);
 
 };
 

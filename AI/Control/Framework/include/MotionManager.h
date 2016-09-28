@@ -52,6 +52,10 @@ namespace Robot
 	MotionManager();
 	
 	void adaptTorqueToVoltage();
+	
+	void logVoltage(int voltage);
+	
+	void logServo();
 
 	protected:
 

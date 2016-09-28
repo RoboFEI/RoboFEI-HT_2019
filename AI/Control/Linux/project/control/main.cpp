@@ -18,6 +18,8 @@ Arquivo fonte contendo o programa que controla os servos do corpo do robô
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
+#include <fstream>
+#include <time.h>
 
 #include "minIni.h"
 #include <string>
@@ -51,6 +53,8 @@ int kbhit(); //Function kbhit.cpp
 int check_servo(CM730 *cm730, int idServo, bool &stop_gait);
 
 int Initialize_servo();
+
+void logInit();
 
 void change_current_dir()
 {
@@ -107,6 +111,7 @@ int main(int argc, char **argv)
     ("help", "produce help message")
     ("k", "Inicia com o controle do robô pelo teclado")
     ("v", "Verifica a tensao nos servos do corpo")
+    ("t", "Verifica a temperatura dos servos do corpo")
     ("g", "Inicia o controle para usar com a interface grafica")
     ;
   
@@ -128,12 +133,25 @@ int main(int argc, char **argv)
     }
     //================================================================================== 
 
-    //======================== check temperature =======================================     
+    //======================== check voltage ===========================================     
     if (variables.count("v")) //verifica se foi chamado o argumento de controle pelo teclado
     {
-        if(cm730.ReadByte(12, 42, &value, 0) != CM730::SUCCESS)
+        if(cm730.ReadByte(12, MX28::P_PRESENT_VOLTAGE, &value, 0) != CM730::SUCCESS)
             std::cout<<"Erro na leitura da tensao"<<std::endl;
         std::cout<<"Tensao = "<<float(value)/10<<"V"<<std::endl;
+        return 0;
+    }
+    //================================================================================== 
+    
+    //======================== check temperature =======================================     
+    if (variables.count("t")) //verifica se foi chamado o argumento de controle pelo teclado
+    {
+        for(int id = 0; id < JointData::NUMBER_OF_JOINTS-2; id++)
+        {
+            if(cm730.ReadByte(id, MX28::P_PRESENT_TEMPERATURE, &value, 0) != CM730::SUCCESS)
+                std::cout<<"Erro na leitura da temperatura no motor "<<id<<std::endl;
+            std::cout<<"Temperatura motor "<< id<<" = "<<value<<"°"<<std::endl;
+        }
         return 0;
     }
     //================================================================================== 
@@ -201,9 +219,13 @@ int main(int argc, char **argv)
                     buffer=key;
                 else
                     buffer=0;
+		same_moviment=false;
             }
             else
+	    {
                 key=buffer;
+		same_moviment=true;
+	    }
             //-------------------------------------------------------------------------
 
             if(key != 0 && key != 102 && key != 107) // verifica se foi pressionada uma tecla diferente do
@@ -329,6 +351,7 @@ int main(int argc, char **argv)
 
     //***************************************************************************************
     //-------------------------Controle pela decisão-----------------------------------------
+    logInit(); // save the time when start the control process
     while(1)
     {
             //Confere se o movimento atual e o mesmo do anterior----------
@@ -489,10 +512,10 @@ int Initialize_servo()
         }
         else
         {
-            cm730->ReadByte(1, 3, &idServo, 0); // Read the servo id of servo 1
+            cm730->ReadByte(1, MX28::P_ID, &idServo, 0); // Read the servo id of servo 1
             servoConectado = idServo == 1;
             usleep(1000);
-            cm730->ReadByte(1, 3, &idServo, 0);//Try again because of fail
+            cm730->ReadByte(1, MX28::P_ID, &idServo, 0);//Try again because of fail
             servoConectado = idServo == 1;
             if(servoConectado)
             {
@@ -532,15 +555,15 @@ int check_servo(CM730 *cm730, int idServo, bool &stop_gait)
     int save=-1;
     for(int erro,j=1 ; i==0 && j<=18; j++)
     {
-        cm730->WriteByte(j, 11, LIMITE_TEMP, &erro);
+        cm730->WriteByte(j, MX28::P_HIGH_LIMIT_TEMPERATURE, LIMITE_TEMP, &erro);
     }
 
     i++;
-    if (i==19) //Ultimo motor: 18
+    if (i==JointData::NUMBER_OF_JOINTS-2) //Ultimo motor: 18
         i=1;
 
     if (i<=6){ // Membro superiores ate 6
-        if(cm730->ReadWord(i, 34, &save, 0)!=0)
+        if(cm730->ReadWord(i, MX28::P_TORQUE_LIMIT_L, &save, 0)!=0)
         {
             cout<<"Perda na comunicação com o motor "<<i<<" - Membro superior"<<endl;
             usleep(500000);
@@ -548,7 +571,7 @@ int check_servo(CM730 *cm730, int idServo, bool &stop_gait)
         }
         if (save<=0)// Testa o torque
         {
-            if(cm730->ReadWord(i, 43, &save, 0)!=0)
+            if(cm730->ReadWord(i, MX28::P_PRESENT_TEMPERATURE, &save, 0)!=0)
             {
                 cout<<"Perda na comunicação com o motor "<<i<<" - Membro superior"<<endl;
                 usleep(500000);
@@ -570,7 +593,7 @@ int check_servo(CM730 *cm730, int idServo, bool &stop_gait)
         }
     }
     else{ // Membro inferiores, do 7 em diante
-        if(cm730->ReadWord(i, 34, &save, 0)!=0)
+        if(cm730->ReadWord(i, MX28::P_TORQUE_LIMIT_L, &save, 0)!=0)
         {
             cout<<"Perda na comunicação com o motor "<<i<<" - Membro inferior"<<endl;
             usleep(500000);
@@ -578,7 +601,7 @@ int check_servo(CM730 *cm730, int idServo, bool &stop_gait)
         }
         if (save<=0)// Testa o torque
         {
-            if(cm730->ReadWord(i, 43, &save, 0)!=0)
+            if(cm730->ReadWord(i, MX28::P_PRESENT_TEMPERATURE, &save, 0)!=0)
             {
                 cout<<"Perda na comunicação com o motor "<<i<<" - Membro inferior"<<endl;
                 usleep(500000);
@@ -603,7 +626,22 @@ int check_servo(CM730 *cm730, int idServo, bool &stop_gait)
     return 0;
 }
 
-
+void logInit()
+{
+        std::fstream File;
+        time_t _tm =time(NULL);
+        struct tm * curtime = localtime ( &_tm );
+        File.open("../../Control/Control.log", std::ios::app | std::ios::out);
+        if (File.good() && File.is_open())
+        {
+            File << "Inicializando o processo do controle "<<" --- ";
+            File << asctime(curtime);
+            File.flush();
+            File.close();
+        }
+        else
+	    printf("Erro ao Salvar o arquivo\n");
+}
 
 
 
