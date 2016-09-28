@@ -394,6 +394,7 @@ void MotionManager::adaptTorqueToVoltage()
     }
     else
         count_volt=0;
+    write_int(mem, VOLTAGE, voltage);
 
     if(m_CM730->ReadByte(200, CM730::P_VOLTAGE, &voltage, 0) != CM730::SUCCESS)
         return;
