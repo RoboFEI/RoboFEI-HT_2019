@@ -36,19 +36,58 @@ UDP_PORT2 = 1232
 UDP_PORT3 = 1233
 UDP_PORT4 = 1234
 
+UDP_PORT_TELE = 1240 + rbt_number
+
+# Opens only once the socket for communication
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
+sock.setsockopt(socket.SOL_SOCKET,socket.SO_BROADCAST,1) # Broadcast
 
 bkb.write_int(mem, 'CONTROL_MESSAGES', 0)
+bkb.write_int(mem, 'CONTROL_WORKING', 0) # Sets the flag
+bkb.write_int(mem, 'VISION_WORKING', 0) # Sets the flag
+bkb.write_int(mem, 'LOCALIZATION_WORKING', 0) # Sets the flag
+bkb.write_int(mem, 'DECISION_WORKING', 0) # Sets the flag
+bkb.write_int(mem, 'IMU_WORKING', 0) # Sets the flag
 
 while(True):
     if bkb.read_int(mem,'CONTROL_MESSAGES') == 2: #code #2 - sends distance value
         message = '2' + ' ' + str(bkb.read_int(mem,'ROBOT_NUMBER')) + ' ' + str(bkb.read_floatDynamic(mem,'DECISION_RBT01_DIST_BALL',bkb.read_int(mem,'ROBOT_NUMBER')-1))
         #message = str(bkb.read_int(mem,'ROBOT_NUMBER')) + ' ' + str(bkb.read_int(mem,'SEND_ACTION'))
         print "message:", message
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # UDP
-        sock.setsockopt(socket.SOL_SOCKET,socket.SO_BROADCAST,1)#broadcast
         sock.sendto(message, (UDP_IP, UDP_PORT1))
         sock.sendto(message, (UDP_IP, UDP_PORT2))
         sock.sendto(message, (UDP_IP, UDP_PORT3))
         sock.sendto(message, (UDP_IP, UDP_PORT4))
         bkb.write_int(mem,'CONTROL_MESSAGES',0)
+
+    # Used for Telemetry
+    message = str(rbt_number) + ' ' # Robot number
+    # Localization Variables
+    message += str(rbt_number * 300) + ' ' # X Position - not yet implemented
+    message += str(rbt_number * 300) + ' ' # Y Position - not yet implemented
+    message += str(0) + ' '  # Rotation - not yet implemented
+    message += str(30) + ' ' # Belief - not yet implemented
+    message += str(bkb.read_float(mem, 'VISION_BALL_DIST')) + ' ' # Distance Ball's Position - not yet implemented
+    message += str(bkb.read_float(mem, 'VISION_BALL_ANGLE')) + ' ' # Angle Ball's Position - not yet implemented
+    # Flags of Execution
+    message += str(bkb.read_int(mem,'CONTROL_WORKING')) + ' ' # Return 1 if Control is working
+    bkb.write_int(mem, 'CONTROL_WORKING', 0) # Resets the flag for Control
+    message += str(bkb.read_int(mem, 'VISION_WORKING')) + ' ' # Equal previous
+    bkb.write_int(mem, 'VISION_WORKING', 0) # Equal previous
+    message += str(bkb.read_int(mem, 'LOCALIZATION_WORKING')) + ' ' # Equal previous
+    bkb.write_int(mem, 'LOCALIZATION_WORKING', 0) # Equal previous
+    message += str(bkb.read_int(mem, 'DECISION_WORKING')) + ' ' # Equal previous
+    bkb.write_int(mem, 'DECISION_WORKING', 0) # Equal previous
+    message += str(bkb.read_int(mem, 'IMU_WORKING')) + ' ' # Equal previous
+    bkb.write_int(mem, 'IMU_WORKING', 0) # Equal previous
+    # Other Variables
+    message += str(bkb.read_int(mem, 'DECISION_ACTION_A')) + ' ' # Sends the movement the decision is executing.
+    message += str(bkb.read_float(mem, 'IMU_EULER_Z')) + ' ' # Sends the orientation of the IMU
+    message += str(bkb.read_int(mem, 'VOLTAGE')) + ' ' # Sends the Voltage on motors.
+    
+    # End of Message
+    message += 'OUT'
+    # Send the message in broadcast for Telemetry
+    sock.sendto(message, (UDP_IP, UDP_PORT_TELE))
+
     time.sleep(1)
