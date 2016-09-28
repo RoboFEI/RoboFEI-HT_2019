@@ -137,6 +137,11 @@ class SharedMemory(object):
     'ASKED_RELATED_ROBOT': 83,
     'CONTROL_MOVING': 84,
     'ROBOT_VIEW_ROTATE': 100,
+    'CONTROL_WORKING': 101,
+    'VISION_WORKING': 102,
+    'LOCALIZATION_WORKING': 103,
+    'DECISION_WORKING': 104,
+    'IMU_WORKING': 105,
     }
 
     variable_float = {
