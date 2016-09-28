@@ -131,6 +131,7 @@ int main(int argc, char **argv)
         printf("Fail to initialize Motion Manager!\n");
         return 0;
     }
+    MotionManager::GetInstance()->memBB = mem;
     //================================================================================== 
 
     //======================== check voltage ===========================================     
