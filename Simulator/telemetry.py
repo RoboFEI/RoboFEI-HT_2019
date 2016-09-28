@@ -154,7 +154,7 @@ class Telemetry(object):
 
         # Gets the voltage from the servos.
         try:
-            self.variables[7][2] = str(float(data[14])/10)
+            self.variables[7][2] = str(float(data[14])/10) + 'V'
         except:
             print 'ERROR of telemetry.change() for VOLTAGE!'
 
