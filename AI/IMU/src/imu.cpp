@@ -349,6 +349,9 @@ int main(int argc, char **argv)
 
             if(t > 40)
             {
+                // Escreve na variável de telemetria.
+                write_int(mem, IMU_WORKING, 1);
+                
                 std::cout << "Robo caido = " << std::fixed << read_int(mem,IMU_STATE) << std::endl;
                 std::cout << "med_acc_z = " << std::fixed << med_accel_z << std::endl;
                 std::cout << "giros_x = " << std::fixed << read_float(mem, IMU_GYRO_X) << std::endl;
@@ -394,8 +397,5 @@ int main(int argc, char **argv)
       first_failure = false;
       usleep(50000);
     }
-
-    // Escreve na variável de telemetria.
-    write_int(mem, IMU_WORKING, 1)
   }
 }
