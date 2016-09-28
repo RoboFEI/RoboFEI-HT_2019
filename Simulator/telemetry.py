@@ -1,5 +1,6 @@
 import pygame
 import random as rnd
+from math import cos, sin
 import socket
 import time
 from collections import defaultdict
@@ -120,8 +121,8 @@ class Telemetry(object):
             self.othervars[1] = float(data[2])
             self.othervars[2] = int(float(data[13]) * 180 / 3.1614)
             self.othervars[3] = float(data[4])
-            self.othervars[4] = float(data[5])
-            self.othervars[5] = float(data[6])
+            self.othervars[4] = float(data[1]) + float(data[5]) * cos(float(data[6]))
+            self.othervars[5] = float(data[2]) + float(data[5]) * sin(float(data[6]))
         except:
             print 'ERROR on telemetry.change() for LOCALIZATION variables!'
 
