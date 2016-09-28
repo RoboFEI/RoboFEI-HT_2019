@@ -93,6 +93,12 @@ Arquivo de cabeçalho contendo as funções e definições do black board
 #define ASKED_RELATED_ROBOT 83
 #define CONTROL_MOVING 84
 #define ROBOT_VIEW_ROTATE 100
+#define CONTROL_WORKING 101
+#define VISION_WORKING 102
+#define LOCALIZATION_WORKING 103
+#define DECISION_WORKING 104
+#define IMU_WORKING 105
+#define VOLTAGE 106
 
 #define IMU_GYRO_X 1
 #define IMU_GYRO_Y 2
