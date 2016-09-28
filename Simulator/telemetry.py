@@ -24,6 +24,7 @@ Sequence of communication Protocol:
 ----------------------------------
 12 - DECISION_ACTION_A
 13 - IMU_EULER_Z
+14 - VOLTAGE
 '''
 
 #--------------------------------------------------------------------------------------------------
@@ -70,7 +71,8 @@ class Telemetry(object):
                           ['DECISION_WORKING', True, 'NO'],
                           ['IMU_WORKING', True, 'NO'],
                           ['DECISION_ACTION_A', True, '---'],
-                          ['IMU_EULER_Z', True, '---']]
+                          ['IMU_EULER_Z', True, '---'],
+                          ['VOLTAGE', True, '---']]
 
         # Controls Dictionary...
         self.dictcontrol = {0: 'Nada a fazer',
@@ -152,7 +154,7 @@ class Telemetry(object):
 
         # Gets the voltage from the servos.
         try:
-            self.variables[7][2] = float(data[14])/10
+            self.variables[7][2] = str(float(data[14])/10)
         except:
             print 'ERROR of telemetry.change() for VOLTAGE!'
 

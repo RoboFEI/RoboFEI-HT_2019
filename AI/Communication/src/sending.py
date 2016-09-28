@@ -30,6 +30,20 @@ mem = bkb.shd_constructor(mem_key)
 rbt_number = int(config.get('Communication', 'no_player_robofei'))
 bkb.write_int(mem,'ROBOT_NUMBER',rbt_number)
 
+# Used to centralize the robot somewhere, given it's number.
+X_ROBOT = 0
+Y_ROBOT = 0
+if rbt_number % 2 == 1:
+    X_ROBOT = 295
+else:
+    X_ROBOT = 745
+
+if rbt_number > 2:
+    Y_ROBOT = 520
+else:
+    Y_ROBOT = 220
+# This will be removed after Localization is finished.
+
 UDP_IP = "255.255.255.255"
 UDP_PORT1 = 1231
 UDP_PORT2 = 1232
@@ -63,8 +77,8 @@ while(True):
     # Used for Telemetry
     message = str(rbt_number) + ' ' # Robot number
     # Localization Variables
-    message += str(rbt_number * 300) + ' ' # X Position - not yet implemented
-    message += str(rbt_number * 300) + ' ' # Y Position - not yet implemented
+    message += str(X_ROBOT) + ' ' # X Position - not yet implemented
+    message += str(Y_ROBOT) + ' ' # Y Position - not yet implemented
     message += str(0) + ' '  # Rotation - not yet implemented
     message += str(30) + ' ' # Belief - not yet implemented
     message += str(bkb.read_float(mem, 'VISION_BALL_DIST')) + ' ' # Distance Ball's Position - not yet implemented
@@ -84,7 +98,7 @@ while(True):
     message += str(bkb.read_int(mem, 'DECISION_ACTION_A')) + ' ' # Sends the movement the decision is executing.
     message += str(bkb.read_float(mem, 'IMU_EULER_Z')) + ' ' # Sends the orientation of the IMU
     message += str(bkb.read_int(mem, 'VOLTAGE')) + ' ' # Sends the Voltage on motors.
-    
+
     # End of Message
     message += 'OUT'
     # Send the message in broadcast for Telemetry
