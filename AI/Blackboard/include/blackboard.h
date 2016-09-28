@@ -98,6 +98,7 @@ Arquivo de cabeçalho contendo as funções e definições do black board
 #define LOCALIZATION_WORKING 103
 #define DECISION_WORKING 104
 #define IMU_WORKING 105
+#define VOLTAGE 106
 
 #define IMU_GYRO_X 1
 #define IMU_GYRO_Y 2

@@ -149,9 +149,15 @@ class Telemetry(object):
         except:
             print 'ERROR on telemetry.change() for IMU_EULER_Z!'
 
+        # Gets the voltage from the servos.
+        try:
+            self.variables[7][2] = float(data[14])/10
+        except:
+            print 'ERROR of telemetry.change() for VOLTAGE!'
+
         # Test if the Telemetry is updated.
         try:
-            if data[14] != 'OUT':
+            if data[15] != 'OUT':
                 print 'TELEMETRY IS OUTDATED!'
         except:
             print 'ERROR on telemetry.change()!'
