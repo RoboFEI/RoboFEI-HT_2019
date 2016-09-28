@@ -62,6 +62,7 @@ namespace Robot
 	public:
 		bool DEBUG_PRINT;
     	int m_Offset[JointData::NUMBER_OF_JOINTS];
+    	int *memBB;
 
 		~MotionManager();
 
