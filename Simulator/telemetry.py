@@ -118,7 +118,7 @@ class Telemetry(object):
         try:
             self.othervars[0] = float(data[1])
             self.othervars[1] = float(data[2])
-            self.othervars[2] = float(data[3])
+            self.othervars[2] = int(float(data[13]) * 180 / 3.1614)
             self.othervars[3] = float(data[4])
             self.othervars[4] = float(data[5])
             self.othervars[5] = float(data[6])
