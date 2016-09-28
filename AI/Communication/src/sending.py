@@ -63,12 +63,12 @@ while(True):
     # Used for Telemetry
     message = str(rbt_number) + ' ' # Robot number
     # Localization Variables
-    message += str(rbt_number * 100) + ' ' # X Position - not yet implemented
-    message += str(rbt_number * 100) + ' ' # Y Position - not yet implemented
+    message += str(rbt_number * 300) + ' ' # X Position - not yet implemented
+    message += str(rbt_number * 300) + ' ' # Y Position - not yet implemented
     message += str(0) + ' '  # Rotation - not yet implemented
-    message += str(10) + ' ' # Belief - not yet implemented
-    message += str(rbt_number * 100 + 50) + ' ' # X Ball's Position - not yet implemented
-    message += str(rbt_number * 100 + 50) + ' ' # Y Ball's Position - not yet implemented
+    message += str(30) + ' ' # Belief - not yet implemented
+    message += str(bkb.read_float(mem, 'VISION_BALL_DIST')) + ' ' # Distance Ball's Position - not yet implemented
+    message += str(bkb.read_float(mem, 'VISION_BALL_ANGLE')) + ' ' # Angle Ball's Position - not yet implemented
     # Flags of Execution
     message += str(bkb.read_int(mem,'CONTROL_WORKING')) + ' ' # Return 1 if Control is working
     bkb.write_int(mem, 'CONTROL_WORKING', 0) # Resets the flag for Control
@@ -84,6 +84,7 @@ while(True):
     message += str(bkb.read_int(mem, 'DECISION_ACTION_A')) + ' ' # Sends the movement the decision is executing.
     message += str(bkb.read_float(mem, 'IMU_EULER_Z')) + ' ' # Sends the orientation of the IMU
     message += str(bkb.read_int(mem, 'VOLTAGE')) + ' ' # Sends the Voltage on motors.
+    
     # End of Message
     message += 'OUT'
     # Send the message in broadcast for Telemetry
