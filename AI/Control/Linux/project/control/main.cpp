@@ -18,6 +18,8 @@ Arquivo fonte contendo o programa que controla os servos do corpo do robô
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
+#include <fstream>
+#include <time.h>
 
 #include "minIni.h"
 #include <string>
@@ -51,6 +53,8 @@ int kbhit(); //Function kbhit.cpp
 int check_servo(CM730 *cm730, int idServo, bool &stop_gait);
 
 int Initialize_servo();
+
+void logInit();
 
 void change_current_dir()
 {
@@ -107,6 +111,7 @@ int main(int argc, char **argv)
     ("help", "produce help message")
     ("k", "Inicia com o controle do robô pelo teclado")
     ("v", "Verifica a tensao nos servos do corpo")
+    ("t", "Verifica a temperatura dos servos do corpo")
     ("g", "Inicia o controle para usar com a interface grafica")
     ;
   
@@ -126,14 +131,28 @@ int main(int argc, char **argv)
         printf("Fail to initialize Motion Manager!\n");
         return 0;
     }
+    MotionManager::GetInstance()->memBB = mem;
     //================================================================================== 
 
-    //======================== check temperature =======================================     
+    //======================== check voltage ===========================================     
     if (variables.count("v")) //verifica se foi chamado o argumento de controle pelo teclado
     {
-        if(cm730.ReadByte(12, 42, &value, 0) != CM730::SUCCESS)
+        if(cm730.ReadByte(12, MX28::P_PRESENT_VOLTAGE, &value, 0) != CM730::SUCCESS)
             std::cout<<"Erro na leitura da tensao"<<std::endl;
         std::cout<<"Tensao = "<<float(value)/10<<"V"<<std::endl;
+        return 0;
+    }
+    //================================================================================== 
+    
+    //======================== check temperature =======================================     
+    if (variables.count("t")) //verifica se foi chamado o argumento de controle pelo teclado
+    {
+        for(int id = 0; id < JointData::NUMBER_OF_JOINTS-2; id++)
+        {
+            if(cm730.ReadByte(id, MX28::P_PRESENT_TEMPERATURE, &value, 0) != CM730::SUCCESS)
+                std::cout<<"Erro na leitura da temperatura no motor "<<id<<std::endl;
+            std::cout<<"Temperatura motor "<< id<<" = "<<value<<"°"<<std::endl;
+        }
         return 0;
     }
     //================================================================================== 
@@ -201,9 +220,13 @@ int main(int argc, char **argv)
                     buffer=key;
                 else
                     buffer=0;
+		same_moviment=false;
             }
             else
+	    {
                 key=buffer;
+		same_moviment=true;
+	    }
             //-------------------------------------------------------------------------
 
             if(key != 0 && key != 102 && key != 107) // verifica se foi pressionada uma tecla diferente do
@@ -329,6 +352,7 @@ int main(int argc, char **argv)
 
     //***************************************************************************************
     //-------------------------Controle pela decisão-----------------------------------------
+    logInit(); // save the time when start the control process
     while(1)
     {
             //Confere se o movimento atual e o mesmo do anterior----------
@@ -444,6 +468,9 @@ int main(int argc, char **argv)
             if(read_int(mem, DECISION_ACTION_A) == 22)
                 actionMove.kick_left_weak(stop_gait); //Chute fraco com pe esquerdo
 
+            // Escreve na variável de telemetria.
+            write_int(mem, CONTROL_WORKING, 1);
+
             //Imprime na tela o tempo que esta ocioso por nao receber uma nova instrucao da decisao-------
             count_read++;
             std::cout << "\rReading BlackBoard" <<"[\e[38;5;82m"<< count_read<<"\e[0m] | Tempo ocioso"<<"[\e[38;5;82m"<< count_read*step_time/1000<<"s\e[0m]";
@@ -471,51 +498,42 @@ int Initialize_servo()
     bool servoComunica = false;
     bool servoConectado = false;
     bool connectedRS = false;
-    int * deviceIndex = new int;
     int idServo;
-    char string_buffer[100]="";
-    *deviceIndex = 0;         //endereça o Servo
-    while(*deviceIndex<3)// laço que percorre o servo 0, 1 e 2.
-    {
-        sprintf(string1,"/dev/robot/servo%d", *deviceIndex);
-        LinuxCM730* linux_cm730;
-        linux_cm730 = new LinuxCM730(string1);
-        CM730* cm730;
-        cm730 = new CM730(linux_cm730);
+    sprintf(string1,"/dev/robot/body");
+    LinuxCM730* linux_cm730;
+    linux_cm730 = new LinuxCM730(string1);
+    CM730* cm730;
+    cm730 = new CM730(linux_cm730);
 
-        if( MotionManager::GetInstance()->Initialize(cm730) == 0)
-        { // not connect with board rs485
+    if( MotionManager::GetInstance()->Initialize(cm730) == 0)
+    { // not connect with board rs485
             
+    }
+    else
+    {
+        cm730->ReadByte(1, MX28::P_ID, &idServo, 0); // Read the servo id of servo 1
+        servoConectado = idServo == 1;
+        usleep(1000);
+        cm730->ReadByte(1, MX28::P_ID, &idServo, 0);//Try again because of fail
+        servoConectado = idServo == 1;
+        if(servoConectado)
+        {
+            cout<<"Connected and communicating with the body of the robot!\n";
+            return 0;
         }
         else
-        {
-            cm730->ReadByte(1, 3, &idServo, 0); // Read the servo id of servo 1
-            servoConectado = idServo == 1;
-            usleep(1000);
-            cm730->ReadByte(1, 3, &idServo, 0);//Try again because of fail
-            servoConectado = idServo == 1;
-            if(servoConectado)
-            {
-                   cout<<"Connected and communicating with the body of the robot!\n";
-                 return 0;
-            }
-            else
-            {// connected with board rs485 but it's not communicating
-                sprintf(string_buffer,"%s/dev/robot/servo%d\n", string_buffer, *deviceIndex);
-                connectedRS = true;
-            }            
-        }
-        *deviceIndex = *deviceIndex + 1;
-        delete cm730;
-        delete linux_cm730;
+        {// connected with board rs485 but it's not communicating
+            connectedRS = true;
+        }            
     }
-    delete deviceIndex; //desalocando da memória
+    delete cm730;
+    delete linux_cm730;
     
     if(connectedRS == true)
     {
         printf("\e[0;31mConectou-se a placa USB/RS-485 mas não conseguiu se comunicar com o servo.\e[0m\n");
         cout<<"Endereços encontrado:"<<endl;
-        cout<<string_buffer<<endl;
+        cout<<"/dev/robot/body"<<endl;
         cout<<"\e[0;36mVerifique se a chave que liga os servos motores está na posição ligada.\n\n\e[0m"<<endl;
     }
     else
@@ -523,7 +541,6 @@ int Initialize_servo()
         cout<<"\e[1;31mNão há nenhuma placa USB/RS-485 conectada no computador.\n\n\e[0m"<<endl;
     }
     return 1;
-
 }
 
 int check_servo(CM730 *cm730, int idServo, bool &stop_gait)
@@ -532,15 +549,15 @@ int check_servo(CM730 *cm730, int idServo, bool &stop_gait)
     int save=-1;
     for(int erro,j=1 ; i==0 && j<=18; j++)
     {
-        cm730->WriteByte(j, 11, LIMITE_TEMP, &erro);
+        cm730->WriteByte(j, MX28::P_HIGH_LIMIT_TEMPERATURE, LIMITE_TEMP, &erro);
     }
 
     i++;
-    if (i==19) //Ultimo motor: 18
+    if (i==JointData::NUMBER_OF_JOINTS-2) //Ultimo motor: 18
         i=1;
 
     if (i<=6){ // Membro superiores ate 6
-        if(cm730->ReadWord(i, 34, &save, 0)!=0)
+        if(cm730->ReadWord(i, MX28::P_TORQUE_LIMIT_L, &save, 0)!=0)
         {
             cout<<"Perda na comunicação com o motor "<<i<<" - Membro superior"<<endl;
             usleep(500000);
@@ -548,7 +565,7 @@ int check_servo(CM730 *cm730, int idServo, bool &stop_gait)
         }
         if (save<=0)// Testa o torque
         {
-            if(cm730->ReadWord(i, 43, &save, 0)!=0)
+            if(cm730->ReadWord(i, MX28::P_PRESENT_TEMPERATURE, &save, 0)!=0)
             {
                 cout<<"Perda na comunicação com o motor "<<i<<" - Membro superior"<<endl;
                 usleep(500000);
@@ -570,7 +587,7 @@ int check_servo(CM730 *cm730, int idServo, bool &stop_gait)
         }
     }
     else{ // Membro inferiores, do 7 em diante
-        if(cm730->ReadWord(i, 34, &save, 0)!=0)
+        if(cm730->ReadWord(i, MX28::P_TORQUE_LIMIT_L, &save, 0)!=0)
         {
             cout<<"Perda na comunicação com o motor "<<i<<" - Membro inferior"<<endl;
             usleep(500000);
@@ -578,7 +595,7 @@ int check_servo(CM730 *cm730, int idServo, bool &stop_gait)
         }
         if (save<=0)// Testa o torque
         {
-            if(cm730->ReadWord(i, 43, &save, 0)!=0)
+            if(cm730->ReadWord(i, MX28::P_PRESENT_TEMPERATURE, &save, 0)!=0)
             {
                 cout<<"Perda na comunicação com o motor "<<i<<" - Membro inferior"<<endl;
                 usleep(500000);
@@ -603,7 +620,22 @@ int check_servo(CM730 *cm730, int idServo, bool &stop_gait)
     return 0;
 }
 
-
+void logInit()
+{
+        std::fstream File;
+        time_t _tm =time(NULL);
+        struct tm * curtime = localtime ( &_tm );
+        File.open("../../Control/Control.log", std::ios::app | std::ios::out);
+        if (File.good() && File.is_open())
+        {
+            File << "Inicializando o processo do controle "<<" --- ";
+            File << asctime(curtime);
+            File.flush();
+            File.close();
+        }
+        else
+	    printf("Erro ao Salvar o arquivo\n");
+}
 
 
 

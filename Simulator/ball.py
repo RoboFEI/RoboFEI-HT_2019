@@ -20,7 +20,6 @@ class Ball():
         self.speed_x = speed * cos(radians(angle))
         self.speed_y = - speed * sin(radians(angle))
 
-
     def motion_model(self, goal_posts, limitlines, goals, field):
             # print "Motion"
             self.speed_x *= self.friction
@@ -82,7 +81,6 @@ class Ball():
                 self.put_in_motion(0, 0)
 
             return False, 0, 0
-
 
     def draw_ball(self, screen):
         #cirle

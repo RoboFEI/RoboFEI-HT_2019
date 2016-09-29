@@ -47,7 +47,7 @@ GaitMove::GaitMove(int *mem_t, minIni* ini)
 
 //========================================================================
 //Execute the gait generation---------------------------------------------
-void GaitMove::move_gait(float X_amplitude, float Y_amplitude, float A_amplitude, bool &stop_gait, ReadConfig* configGait, ReadConfig* configP)
+void GaitMove::move_gait(float X_amplitude, float Y_amplitude, float A_amplitude, bool &stop_gait, ReadConfig* configP)
 {
     write_int(mem, CONTROL_MOVING, 1);
     if(Walking::GetInstance()->IsRunning()==0)
@@ -65,14 +65,14 @@ void GaitMove::move_gait(float X_amplitude, float Y_amplitude, float A_amplitude
             stop_gait = 0;
         }
         std::cout << "Stop com gait" << std::endl;
-        configGait->changeParam(Walking::GetInstance()); //volta para os parametros padrao do gait
+        gait->changeParam(Walking::GetInstance()); //volta para os parametros padrao do gait
         Action::GetInstance()->Stop();
         Walking::GetInstance()->m_Joint.SetEnableBody(true);
         Action::GetInstance()->m_Joint.SetEnableBody(false);
-        MotionStatus::m_CurrentJoints.SetEnableBodyWithoutHead(true);
-        Walking::GetInstance()->X_MOVE_AMPLITUDE = configGait->walk_foward;
-        Walking::GetInstance()->Y_MOVE_AMPLITUDE = configGait->sidle;
-        Walking::GetInstance()->A_MOVE_AMPLITUDE = configGait->turn_angle;
+        MotionStatus::m_CurrentJoints.SetEnableBodyWithoutHead(true);	
+        Walking::GetInstance()->X_MOVE_AMPLITUDE = gait->walk_foward;
+        Walking::GetInstance()->Y_MOVE_AMPLITUDE = gait->sidle;
+        Walking::GetInstance()->A_MOVE_AMPLITUDE = gait->turn_angle;
         Walking::GetInstance()->Start();
         sleep(2);
     }
@@ -94,7 +94,7 @@ void GaitMove::Gait_in_place(bool &stop_gait, bool same_moviment)
 {
     if(same_moviment == false) //Imprime na tela se o movimento nao foi repetido
         std::cout<<" | \e[38;5;45mStop com gait\e[0m"<<std::endl;
-    move_gait(gait->walk_foward, gait->sidle, gait->turn_angle, stop_gait, gait, gait);
+    move_gait(gait->walk_foward, gait->sidle, gait->turn_angle, stop_gait, gait);
 }
 
 //========================================================================
@@ -111,20 +111,20 @@ void GaitMove::walk_foward_slow(bool &stop_gait, bool max_speed, bool same_movim
         if(soft_starter_value<double(read_int(mem, DECISION_ACTION_B)))
         {
             soft_starter_value+=0.10; // aproximadamente 2 segundos para atingir o pico em 50 hz de frequencia
-            move_gait(soft_starter_value, walkslow->sidle, walkslow->turn_angle, stop_gait, gait, walkslow);
+            move_gait(soft_starter_value, walkslow->sidle, walkslow->turn_angle, stop_gait, walkslow);
         }
         else
-            move_gait(float(read_int(mem, DECISION_ACTION_B)), walkslow->sidle, walkslow->turn_angle, stop_gait, gait, walkslow);
+            move_gait(float(read_int(mem, DECISION_ACTION_B)), walkslow->sidle, walkslow->turn_angle, stop_gait, walkslow);
     }
     else
     {
         if(soft_starter_value<walkslow->walk_foward)
         {
             soft_starter_value+=0.10; // aproximadamente 2 segundos para atingir o pico em 50 hz de frequencia
-            move_gait(soft_starter_value, walkslow->sidle, walkslow->turn_angle, stop_gait, gait, walkslow);
+            move_gait(soft_starter_value, walkslow->sidle, walkslow->turn_angle, stop_gait, walkslow);
         }
         else
-            move_gait(walkslow->walk_foward, walkslow->sidle, walkslow->turn_angle, stop_gait, gait, walkslow);
+            move_gait(walkslow->walk_foward, walkslow->sidle, walkslow->turn_angle, stop_gait, walkslow);
     }
     enable_soft_starter=false;
 }
@@ -138,7 +138,7 @@ void GaitMove::robot_stop(bool &stop_gait)
     std::cout<<" | \e[38;5;45mNada a fazer\e[0m"<<std::endl;
     if (Walking::GetInstance()->IsRunning()!=0)
     {
-        move_gait(gait->walk_foward, gait->sidle, gait->turn_angle, stop_gait, gait, gait);
+        move_gait(gait->walk_foward, gait->sidle, gait->turn_angle, stop_gait, gait);
         usleep(500000);
     }
     while(Walking::GetInstance()->GetCurrentPhase()!=0 && Walking::GetInstance()->IsRunning()!=0)  usleep(8*1000);
@@ -166,10 +166,10 @@ void GaitMove::walk_foward_fast(bool &stop_gait, bool same_moviment, bool &enabl
     if(soft_starter_value<walkfoward->walk_foward)
     {
         soft_starter_value+=0.05; // aproximadamente 2 segundos para atingir o pico em 50 hz de frequencia
-        move_gait(soft_starter_value, walkfoward->sidle, walkfoward->turn_angle, stop_gait, gait, walkfoward);
+        move_gait(soft_starter_value, walkfoward->sidle, walkfoward->turn_angle, stop_gait, walkfoward);
     }
     else
-        move_gait(walkfoward->walk_foward, walkfoward->sidle, walkfoward->turn_angle, stop_gait, gait, walkfoward);
+        move_gait(walkfoward->walk_foward, walkfoward->sidle, walkfoward->turn_angle, stop_gait, walkfoward);
     enable_soft_starter=false;
 }
 
@@ -181,7 +181,7 @@ void GaitMove::walk_foward_fast_direct(bool &stop_gait, bool same_moviment)
     if(same_moviment == false)
         std::cout<<" | \e[38;5;45mAndar para frente\e[0m"<<std::endl;
 
-    move_gait(walkfoward->walk_foward, walkfoward->sidle, walkfoward->turn_angle, stop_gait, gait, walkfoward);
+    move_gait(walkfoward->walk_foward, walkfoward->sidle, walkfoward->turn_angle, stop_gait, walkfoward);
 }
 
 //========================================================================
@@ -191,9 +191,9 @@ void GaitMove::turn_right(bool &stop_gait, bool max_angle, bool same_moviment)
     if(same_moviment == false)
         std::cout << " | \e[38;5;45mVirar a direita\e[0m" << std::endl;
     if(float(read_int(mem, DECISION_ACTION_B))<turnRobotRight->turn_angle && max_angle==false)
-        move_gait(turnRobotRight->walk_foward, turnRobotRight->sidle, -float(read_int(mem, DECISION_ACTION_B)), stop_gait, gait, turnRobotRight);
+        move_gait(turnRobotRight->walk_foward, turnRobotRight->sidle, -float(read_int(mem, DECISION_ACTION_B)), stop_gait, turnRobotRight);
     else
-        move_gait(turnRobotRight->walk_foward, turnRobotRight->sidle, -turnRobotRight->turn_angle, stop_gait, gait, turnRobotRight);
+        move_gait(turnRobotRight->walk_foward, turnRobotRight->sidle, -turnRobotRight->turn_angle, stop_gait, turnRobotRight);
 }
 
 //========================================================================
@@ -203,9 +203,9 @@ void GaitMove::turn_left(bool &stop_gait, bool max_angle, bool same_moviment)
     if(same_moviment == false)
         std::cout<<" | \e[38;5;45mVirar a esquerda\e[0m"<<std::endl;
     if(float(read_int(mem, DECISION_ACTION_B))<turnRobotLeft->turn_angle && max_angle==false)
-        move_gait(turnRobotLeft->walk_foward, turnRobotLeft->sidle, -float(read_int(mem, DECISION_ACTION_B)), stop_gait, gait, turnRobotLeft);
+        move_gait(turnRobotLeft->walk_foward, turnRobotLeft->sidle, -float(read_int(mem, DECISION_ACTION_B)), stop_gait, turnRobotLeft);
     else
-        move_gait(turnRobotLeft->walk_foward, turnRobotLeft->sidle, turnRobotLeft->turn_angle, stop_gait, gait, turnRobotLeft);
+        move_gait(turnRobotLeft->walk_foward, turnRobotLeft->sidle, turnRobotLeft->turn_angle, stop_gait, turnRobotLeft);
 }
 
 //========================================================================
@@ -214,7 +214,7 @@ void GaitMove::sidle_right(bool &stop_gait, bool same_moviment)
 {
     if(same_moviment == false)
         std::cout<<" | \e[38;5;45mAndar de Lado direita\e[0m"<<std::endl;
-    move_gait(sidleR->walk_foward, -sidleR->sidle, sidleR->turn_angle, stop_gait, gait, sidleR);
+    move_gait(sidleR->walk_foward, -sidleR->sidle, sidleR->turn_angle, stop_gait, sidleR);
 }
 
 //========================================================================
@@ -223,7 +223,7 @@ void GaitMove::sidle_left(bool &stop_gait, bool same_moviment)
 {
     if(same_moviment == false)
         std::cout<<" | \e[38;5;45mAndar de Lado esquerda\e[0m"<<std::endl;
-    move_gait(sidleL->walk_foward, sidleL->sidle, sidleL->turn_angle, stop_gait, gait, sidleL);
+    move_gait(sidleL->walk_foward, sidleL->sidle, sidleL->turn_angle, stop_gait, sidleL);
 }
 
 //========================================================================
@@ -232,7 +232,7 @@ void GaitMove::turn_around_ball_right(bool &stop_gait, bool same_moviment)
 {
     if(same_moviment == false)
         std::cout<<" | \e[38;5;45mGirar em torno da bola para direita\e[0m"<<std::endl;
-    move_gait(turnBallR->walk_foward, -turnBallR->sidle, -turnBallR->turn_angle, stop_gait, gait, turnBallR);
+    move_gait(turnBallR->walk_foward, -turnBallR->sidle, -turnBallR->turn_angle, stop_gait, turnBallR);
 }
 
 //========================================================================
@@ -241,7 +241,7 @@ void GaitMove::turn_around_ball_left(bool &stop_gait, bool same_moviment)
 {
     if(same_moviment == false)
         std::cout<<" | \e[38;5;45mGirar em torno da bola para esquerda\e[0m"<<std::endl;
-    move_gait(turnBallL->walk_foward, turnBallL->sidle, turnBallL->turn_angle, stop_gait, gait, turnBallL);
+    move_gait(turnBallL->walk_foward, turnBallL->sidle, turnBallL->turn_angle, stop_gait, turnBallL);
 }
 
 //========================================================================
@@ -250,7 +250,7 @@ void GaitMove::walk_backward_fast(bool &stop_gait, bool same_moviment)
 {
     if(same_moviment == false)
         std::cout<<" | \e[38;5;45mAndar rapido para traz\e[0m"<<std::endl;
-    move_gait(-walkfoward->walk_foward, walkfoward->sidle, walkfoward->turn_angle, stop_gait, gait, walkfoward);
+    move_gait(-walkfoward->walk_foward, walkfoward->sidle, walkfoward->turn_angle, stop_gait, walkfoward);
 }
 
 //========================================================================
@@ -260,9 +260,9 @@ void GaitMove::walk_backward_slow(bool &stop_gait, bool max_speed, bool same_mov
     if(same_moviment == false)
         std::cout<<" | \e[38;5;45mAndar lento para traz\e[0m"<<std::endl;
     if(float(read_int(mem, DECISION_ACTION_B))<walkslow->walk_foward && max_speed==false)
-        move_gait(-float(read_int(mem, DECISION_ACTION_B)), walkslow->sidle, walkslow->turn_angle, stop_gait, gait, walkslow);
+        move_gait(-float(read_int(mem, DECISION_ACTION_B)), walkslow->sidle, walkslow->turn_angle, stop_gait, walkslow);
     else
-        move_gait(-walkslow->walk_foward, walkslow->sidle, walkslow->turn_angle, stop_gait, gait, walkslow);
+        move_gait(-walkslow->walk_foward, walkslow->sidle, walkslow->turn_angle, stop_gait, walkslow);
 }
 
 

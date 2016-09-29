@@ -23,7 +23,7 @@ int dxl_hal_open(int deviceIndex, float baudrate)
 	struct serial_struct serinfo;
 	char dev_name[100] = {0, };
 
-	sprintf(dev_name, "/dev/robot/servo%d", deviceIndex);//, deviceIndex);
+	sprintf(dev_name, "/dev/robot/head");//, deviceIndex);
 
 	strcpy(gDeviceName, dev_name);
 	memset(&newtio, 0, sizeof(newtio));
