@@ -52,12 +52,17 @@ namespace Robot
 	MotionManager();
 	
 	void adaptTorqueToVoltage();
+	
+	void logVoltage(int voltage);
+	
+	void logServo();
 
 	protected:
 
 	public:
 		bool DEBUG_PRINT;
     	int m_Offset[JointData::NUMBER_OF_JOINTS];
+    	int *memBB;
 
 		~MotionManager();
 
