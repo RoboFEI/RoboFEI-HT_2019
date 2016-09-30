@@ -9,7 +9,7 @@
 #include "minIni.h"
 #include <stdlib.h>     /* system, NULL, EXIT_FAILURE */
 
-#define INI_FILE_PATH       "../../Control/Data/config.ini"
+#define INI_FILE_PATH       "../../../Data/config.ini"
 
 using namespace Robot;
 
@@ -995,7 +995,7 @@ void PlayCmd(CM730 *cm730)
 	linuxMotionTimer.Start();
 
 	minIni* ini;
-//	ini = new minIni((char *)INI_FILE_PATH);
+	ini = new minIni((char *)INI_FILE_PATH);
 	MotionManager::GetInstance()->LoadINISettings(ini);
 	//MotionManager::GetInstance()->StartThread();
 	Action::GetInstance()->m_Joint.SetEnableBody(true, true);
