@@ -1,2 +1,2 @@
 cd Simulator
-python main_telemetry.py
+exec -a telemetry python main_telemetry.py
