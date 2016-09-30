@@ -33,6 +33,8 @@ Arquivo fonte contendo o programa que grava pontos de ações do robô
 #define MOTION_FILE_PATH    "../../../Data/motion_4096.bin"
 #endif
 
+#define INI_FILE_PATH       "../../Control/Data/config.ini"
+
 using namespace Robot;
 
 LinuxMotionTimer linuxMotionTimer;
@@ -55,20 +57,76 @@ void sighandler(int sig)
     exit(0);
 }
 
+char string1[50]; //String
+
+//////////////////// Framework Initialize ////////////////////////////
+// ---- Open USBDynamixel -----------------------------------------------{
+int Initialize_servo()
+{
+    bool servoConectado = false;
+    bool connectedRS = false;
+    int idServo;
+    sprintf(string1,"/dev/robot/body");
+    LinuxCM730* linux_cm730;
+    linux_cm730 = new LinuxCM730(string1);
+    CM730* cm730;
+    cm730 = new CM730(linux_cm730);
+
+    if( MotionManager::GetInstance()->Initialize(cm730) == 0)
+    { // not connect with board rs485
+            
+    }
+    else
+    {
+        cm730->ReadByte(1, MX28::P_ID, &idServo, 0); // Read the servo id of servo 1
+        servoConectado = idServo == 1;
+        usleep(1000);
+        cm730->ReadByte(1, MX28::P_ID, &idServo, 0);//Try again because of fail
+        servoConectado = idServo == 1;
+        if(servoConectado)
+        {
+           std:: cout<<"Connected and communicating with the body of the robot!\n";
+            return 0;
+        }
+        else
+        {// connected with board rs485 but it's not communicating
+            connectedRS = true;
+        }            
+    }
+    
+    if(connectedRS == true)
+    {
+        printf("\e[0;31mConectou-se a placa USB/RS-485 mas não conseguiu se comunicar com o servo.\e[0m\n");
+        std::cout<<"Endereços encontrado:"<<std::endl;
+        std::cout<<"/dev/robot/body"<<std::endl;
+        std::cout<<"\e[0;36mVerifique se a chave que liga os servos motores está na posição ligada.\n\n\e[0m"<<std::endl;
+    }
+    else
+    {
+        std::cout<<"\e[1;31mNão há nenhuma placa USB/RS-485 conectada no computador.\n\n\e[0m"<<std::endl;
+    }
+    return 1;
+}
+
+
 int main(int argc, char *argv[])
 {
+    int ch;
+    char filename[128];
+
     signal(SIGABRT, &sighandler);
     signal(SIGTERM, &sighandler);
     signal(SIGQUIT, &sighandler);
     signal(SIGINT, &sighandler);
 
-    int ch;
-    char filename[128];
-    char string[50];
-
-	using_shared_memory();
-
     change_current_dir();
+
+    minIni* ini;
+    ini = new minIni((char *)INI_FILE_PATH);
+
+   //Acopla ou cria a memoria compartilhada
+    int *mem = using_shared_memory(ini->getd("Communication","no_player_robofei",-1024) * 100); //0 for real robot
+
     if(argc < 2)
         strcpy(filename, MOTION_FILE_PATH); // Set default motion file path
     else
@@ -94,70 +152,18 @@ int main(int argc, char *argv[])
     }
     ////////////////////////////////////////////////////////////
 
-//////////////////// Framework Initialize ////////////////////////////
-// ---- Open USBDynamixel -----------------------------------------------{
-	bool servoComunica = false;
-	bool servoConectado = false;
-	int * deviceIndex = new int;
-	int idServo;
-	*deviceIndex = 0; 		//endereça o Servo
-	while(*deviceIndex<3)// laço que percorre o servo 0, 1 e 2.
-	{
-		sprintf(string,"/dev/robot/servo%d", *deviceIndex);
-		LinuxCM730* linux_cm730;
-    	linux_cm730 = new LinuxCM730(string);
-		CM730* cm730;
-    	cm730 = new CM730(linux_cm730);
-		if( MotionManager::GetInstance()->Initialize(cm730) == 0)
-		{
-			printf( "Failed to open servo%d!\n", *deviceIndex );
-			if(*deviceIndex==2)  // Não encontrou nenhum
-			{
-				if(servoComunica)
-				    printf("Conectou-se a uma placa mas não conseguiu se comunicar com o servo\n");
-				else
-				    printf("Não encontrou nenhuma placa do servo conectada a porta USB\n");
-			        break;
-			}
-			*deviceIndex = *deviceIndex + 1;      // Não conecta na placa do servo e tenta a proxima porta.
-		}
-		else
-		{
-			servoComunica = true;
-			printf( "Succeed to open Servo%d!\n", *deviceIndex );
-			cm730->ReadByte(15, 3, &idServo, 0);
-			servoConectado = idServo == 15;
-			usleep(1000);
-			cm730->ReadByte(15, 3, &idServo, 0);//Tenta novamente caso falhe a comunicação
-			servoConectado = idServo == 15;
-    		if(servoConectado)
-			{
-       			 	printf("Servo%d okay - Connected and communicated!\n", *deviceIndex);
-			 	break;
-			}
-    		else
-    		{
-			printf("Servo wrong or not communicated!\n");
-				if(*deviceIndex==2)
-				{
-				    printf("Conectou-se a uma placa mas não conseguiu se comunicar com o servo\n");
-				    break;
-				}
-				*deviceIndex = *deviceIndex + 1;
-			}
-		}
-	}
-	delete deviceIndex; //desalocando da memória
-	//-----------------------------------------------------------------------------}
     //////////////////// Framework Initialize ////////////////////////////
-    LinuxCM730 linux_cm730(string);
+    // ---- Open USBDynamixel -----------------------------------------------{
+    Initialize_servo(); // chama a função que encontra o endereço de comunicação com o servo
+    LinuxCM730 linux_cm730(string1);
     CM730 cm730(&linux_cm730);
     if(MotionManager::GetInstance()->Initialize(&cm730) == false)
     {
         printf("Fail to initialize Motion Manager!\n");
     }
-	sleep(1);
-//================================================================================== 
+    sleep(1);
+    MotionManager::GetInstance()->memBB = mem;
+   //================================================================================== 
 
 
     MotionManager::GetInstance()->AddModule((MotionModule*)Action::GetInstance());	

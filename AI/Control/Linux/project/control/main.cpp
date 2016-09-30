@@ -495,7 +495,6 @@ int main(int argc, char **argv)
 // ---- Open USBDynamixel -----------------------------------------------{
 int Initialize_servo()
 {
-    bool servoComunica = false;
     bool servoConectado = false;
     bool connectedRS = false;
     int idServo;
