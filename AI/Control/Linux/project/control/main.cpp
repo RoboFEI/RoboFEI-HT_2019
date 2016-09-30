@@ -52,7 +52,7 @@ int kbhit(); //Function kbhit.cpp
 
 int check_servo(CM730 *cm730, int idServo, bool &stop_gait);
 
-int Initialize_servo();
+int Initialize_servo(char *string1);
 
 void logInit();
 
@@ -68,8 +68,6 @@ void sighandler(int sig)
     cout<< "\nProgram being closed!" << endl;
     exit(1); 
 }
-
-char string1[50]; //String
 
 int main(int argc, char **argv)
 {
@@ -88,10 +86,9 @@ int main(int argc, char **argv)
       //Acopla ou cria a memoria compartilhada
     int *mem = using_shared_memory(ini->getd("Communication","no_player_robofei",-1024) * 100); //0 for real robot
 
+    char string1[50]; //String
     bool stop_gait = true;
     char *Servoport;
-    sprintf(string1,"echo fei 123456| sudo -S renice -20 -p %d", getpid()); // prioridade maxima do codigo
-    system(string1);//prioridade
     int value;
     int idServo;
     bool flag_stop = 0;
@@ -100,6 +97,10 @@ int main(int argc, char **argv)
     unsigned int count_read=0;
     unsigned int step_time=20; // Determina a frequencia de leitura do blackboard
     bool enable_soft_starter = true;
+
+    //Configurando para prioridade maxima para executar este processo-------
+    sprintf(string1,"echo fei 123456| sudo -S renice -20 -p %d", getpid());
+    system(string1);//prioridade
 
     printf( "\n===== ROBOFEI-HT Control Process =====\n\n");
 
@@ -122,7 +123,7 @@ int main(int argc, char **argv)
 
     //////////////////// Framework Initialize ////////////////////////////
     // ---- Open USBDynamixel -----------------------------------------------{
-    if(Initialize_servo()==1) // chama a função que encontra o endereço de comunicação com o servo
+    if(Initialize_servo(string1)==1) // chama a função que encontra o endereço de comunicação com o servo
         return 0;
     LinuxCM730 linux_cm730(string1);
     CM730 cm730(&linux_cm730);
@@ -493,11 +494,9 @@ int main(int argc, char **argv)
 
 //////////////////// Framework Initialize ////////////////////////////
 // ---- Open USBDynamixel -----------------------------------------------{
-int Initialize_servo()
+int Initialize_servo(char *string1)
 {
-    bool servoComunica = false;
     bool servoConectado = false;
-    bool connectedRS = false;
     int idServo;
     sprintf(string1,"/dev/robot/body");
     LinuxCM730* linux_cm730;
@@ -507,39 +506,27 @@ int Initialize_servo()
 
     if( MotionManager::GetInstance()->Initialize(cm730) == 0)
     { // not connect with board rs485
-            
+        std::cout<<"\e[1;31mNão há nenhuma placa USB/RS-485 conectada no computador.\n\n\e[0m"<<std::endl;
+		return -1;
     }
     else
     {
-        cm730->ReadByte(1, MX28::P_ID, &idServo, 0); // Read the servo id of servo 1
-        servoConectado = idServo == 1;
-        usleep(1000);
-        cm730->ReadByte(1, MX28::P_ID, &idServo, 0);//Try again because of fail
-        servoConectado = idServo == 1;
-        if(servoConectado)
-        {
-            cout<<"Connected and communicating with the body of the robot!\n";
-            return 0;
-        }
-        else
-        {// connected with board rs485 but it's not communicating
-            connectedRS = true;
-        }            
+		for(int id=1; id<19; id++) //check communicating
+		{
+		    cm730->ReadByte(id, MX28::P_ID, &idServo, 0); // Read the servo id of servo 1
+		    servoConectado = idServo == id;
+		    if(servoConectado)
+		    {
+		        std:: cout<<"Connected and communicating with the body of the robot!\n";
+		        return 0;
+		    }
+			usleep(1000);
+		}
+           
     }
-    delete cm730;
-    delete linux_cm730;
-    
-    if(connectedRS == true)
-    {
-        printf("\e[0;31mConectou-se a placa USB/RS-485 mas não conseguiu se comunicar com o servo.\e[0m\n");
-        cout<<"Endereços encontrado:"<<endl;
-        cout<<"/dev/robot/body"<<endl;
-        cout<<"\e[0;36mVerifique se a chave que liga os servos motores está na posição ligada.\n\n\e[0m"<<endl;
-    }
-    else
-    {
-        cout<<"\e[1;31mNão há nenhuma placa USB/RS-485 conectada no computador.\n\n\e[0m"<<endl;
-    }
+    printf("\e[0;31mConectou-se a placa USB/RS-485 mas não conseguiu se comunicar com nenhum servo.\e[0m\n");
+    std::cout<<"Endereço: "<<"/dev/robot/body"<<std::endl;
+    std::cout<<"\e[0;36mVerifique se a chave que liga os servos motores está na posição ligada.\n\n\e[0m"<<std::endl;
     return 1;
 }
 
