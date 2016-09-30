@@ -3,9 +3,9 @@
 ****************************************************************************
 * @file main.cpp
 * @author Isaac Jesus da Silva - ROBOFEI-HT - FEI
-* @version V0.0.3
+* @version V0.0.5
 * @created 20/01/2015
-* @Modified 30/09/2015
+* @Modified 30/09/2016
 * @e-mail isaac25silva@yahoo.com.br
 * @brief Action Editor
 ****************************************************************************
@@ -57,14 +57,12 @@ void sighandler(int sig)
     exit(0);
 }
 
-char string1[50]; //String
 
 //////////////////// Framework Initialize ////////////////////////////
 // ---- Open USBDynamixel -----------------------------------------------{
-int Initialize_servo()
+int Initialize_servo(char *string1)
 {
     bool servoConectado = false;
-    bool connectedRS = false;
     int idServo;
     sprintf(string1,"/dev/robot/body");
     LinuxCM730* linux_cm730;
@@ -74,37 +72,27 @@ int Initialize_servo()
 
     if( MotionManager::GetInstance()->Initialize(cm730) == 0)
     { // not connect with board rs485
-            
-    }
-    else
-    {
-        cm730->ReadByte(1, MX28::P_ID, &idServo, 0); // Read the servo id of servo 1
-        servoConectado = idServo == 1;
-        usleep(1000);
-        cm730->ReadByte(1, MX28::P_ID, &idServo, 0);//Try again because of fail
-        servoConectado = idServo == 1;
-        if(servoConectado)
-        {
-           std:: cout<<"Connected and communicating with the body of the robot!\n";
-            return 0;
-        }
-        else
-        {// connected with board rs485 but it's not communicating
-            connectedRS = true;
-        }            
-    }
-    
-    if(connectedRS == true)
-    {
-        printf("\e[0;31mConectou-se a placa USB/RS-485 mas não conseguiu se comunicar com o servo.\e[0m\n");
-        std::cout<<"Endereços encontrado:"<<std::endl;
-        std::cout<<"/dev/robot/body"<<std::endl;
-        std::cout<<"\e[0;36mVerifique se a chave que liga os servos motores está na posição ligada.\n\n\e[0m"<<std::endl;
-    }
-    else
-    {
         std::cout<<"\e[1;31mNão há nenhuma placa USB/RS-485 conectada no computador.\n\n\e[0m"<<std::endl;
+		return -1;
     }
+    else
+    {
+		for(int id=1; id<19; id++) //check communicating
+		{
+		    cm730->ReadByte(id, MX28::P_ID, &idServo, 0); // Read the servo id of servo 1
+		    servoConectado = idServo == id;
+		    if(servoConectado)
+		    {
+		        std:: cout<<"Connected and communicating with the body of the robot!\n";
+		        return 0;
+		    }
+			usleep(1000);
+		}
+           
+    }
+    printf("\e[0;31mConectou-se a placa USB/RS-485 mas não conseguiu se comunicar com nenhum servo.\e[0m\n");
+    std::cout<<"Endereço: "<<"/dev/robot/body"<<std::endl;
+    std::cout<<"\e[0;36mVerifique se a chave que liga os servos motores está na posição ligada.\n\n\e[0m"<<std::endl;
     return 1;
 }
 
@@ -113,6 +101,7 @@ int main(int argc, char *argv[])
 {
     int ch;
     char filename[128];
+	char string1[50]; //String
 
     signal(SIGABRT, &sighandler);
     signal(SIGTERM, &sighandler);
@@ -131,6 +120,10 @@ int main(int argc, char *argv[])
         strcpy(filename, MOTION_FILE_PATH); // Set default motion file path
     else
         strcpy(filename, argv[1]);
+
+    //Configurando para prioridade maxima para executar este processo-------
+    sprintf(string1,"echo fei 123456| sudo -S renice -20 -p %d", getpid());
+    system(string1);//prioridade
 
     /////////////// Load/Create Action File //////////////////
     if(Action::GetInstance()->LoadFile(filename) == false)
@@ -154,14 +147,14 @@ int main(int argc, char *argv[])
 
     //////////////////// Framework Initialize ////////////////////////////
     // ---- Open USBDynamixel -----------------------------------------------{
-    Initialize_servo(); // chama a função que encontra o endereço de comunicação com o servo
+    Initialize_servo(string1); // chama a função que encontra o endereço de comunicação com o servo
     LinuxCM730 linux_cm730(string1);
     CM730 cm730(&linux_cm730);
     if(MotionManager::GetInstance()->Initialize(&cm730) == false)
     {
         printf("Fail to initialize Motion Manager!\n");
     }
-    sleep(1);
+    sleep(2);
     MotionManager::GetInstance()->memBB = mem;
    //================================================================================== 
 
