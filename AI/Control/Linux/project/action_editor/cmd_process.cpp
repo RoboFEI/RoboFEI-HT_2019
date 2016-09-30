@@ -995,7 +995,7 @@ void PlayCmd(CM730 *cm730)
 	linuxMotionTimer.Start();
 
 	minIni* ini;
-	ini = new minIni((char *)INI_FILE_PATH);
+//	ini = new minIni((char *)INI_FILE_PATH);
 	MotionManager::GetInstance()->LoadINISettings(ini);
 	//MotionManager::GetInstance()->StartThread();
 	Action::GetInstance()->m_Joint.SetEnableBody(true, true);
