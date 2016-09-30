@@ -74,6 +74,9 @@ class Telemetry(object):
                           ['IMU_EULER_Z', True, '---'],
                           ['VOLTAGE', True, '---']]
 
+        # Variables for probable process' situation 
+        self.probs = [0.5, 0.5, 0.5, 0.5, 0.5]
+
         # Controls Dictionary...
         self.dictcontrol = {0: 'Nada a fazer',
                             1: 'Andar para frente',
@@ -133,7 +136,14 @@ class Telemetry(object):
         # Variables for the control variables.
         try:
             for i in range(5):
+                # Computes the probability of the process been off given the observation.
                 if data[i+7] == '0':
+                    self.probs[i] = max(0.001, 0.1 * self.probs[i] / (0.99 - 0.89 * self.probs[i]))
+                else:
+                    self.probs[i] = min(0.999, 0.9 * self.probs[i] / (0.01 + 0.89 * self.probs[i]))
+
+                # Returns the max probable situation.
+                if self.probs[i] < 0.5:
                     self.variables[i][2] = 'NO'
                 else:
                     self.variables[i][2] = 'YES'
