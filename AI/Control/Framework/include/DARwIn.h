@@ -16,12 +16,10 @@
 #include "JointData.h"
 #include "Action.h"
 #include "Walking.h"
-#include "Head.h"
 #include "Point.h"
 #include "Vector.h"
 #include "Matrix.h"
 #include "Plane.h"
 #include "minIni.h"
-#include "PS3Controller.h"
 
 #endif
