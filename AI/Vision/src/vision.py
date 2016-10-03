@@ -200,8 +200,6 @@ while True:
 	#status
 	statusBall(positionballframe)
 	
-	print datetime.datetime.now() , head.servo.readWord(19, 36) ,  head.servo.readWord(20, 36) , int((positionballframe[1]+10)*64) , int((positionballframe[2]+10)*36) , head.servo.readWord(19,30) ,head.servo.readWord(20,30) 
-	
 	
 	if args.withoutservo == False:
 		posheadball = head.mov(positionballframe,posheadball,Mem, bkb)
@@ -209,8 +207,6 @@ while True:
 			print "Out of communication with servos!"
 			break
 	
-
-
 	
 	setResolution(positionballframe)
 	
