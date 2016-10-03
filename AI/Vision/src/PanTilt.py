@@ -5,7 +5,6 @@ import time
 from servo import Servo
 from PID import *
 import matplotlib.pyplot as plt
-import random
 
 import sys
 sys.path.append('../../Blackboard/src/')
@@ -87,7 +86,6 @@ class Pantilt (object):
 	__GOAL_POS = 30
 	__SPEED = 32
 	__PRESENT_POS = 36
-	__ISMOVING = 46
 
 #----------------------------------------------------------------------------------------------------------------------------------
 
@@ -278,16 +276,7 @@ class Pantilt (object):
 		if status[0] == 2:
 
 			if status[1] != 0 and status[2] != 0 and self.__lost == 0:
-				#self.__segue(status,Mem, bkb)
-				if ((self.servo.readByte(self.__SERVO_PAN,self.__ISMOVING) == 0) and (self.servo.readByte(self.__SERVO_TILT,self.__ISMOVING) == 0)):
-					self.servo.writeWord(self.__SERVO_PAN, self.__SPEED, 80) # Velocidade maxima do servo (CHECAR)
-					self.servo.writeWord(self.__SERVO_TILT, self.__SPEED, 80) # Velocidade maxima do servo (CHECAR)
-				
-					xr = random.randint(360, 515)
-					yr = random.randint(592, 700)
-					#print xr , yr
-					self.servo.writeWord(self.__SERVO_PAN ,self.__GOAL_POS,xr)
-					self.servo.writeWord(self.__SERVO_TILT,self.__GOAL_POS,yr)
+				self.__segue(status,Mem, bkb)
 			else:
 				if self.__args.head == False or self.servo.readByte(self.__SERVO_PAN,self.__STATUS) == 1:
 					#print "PosHead0 ", posHead[0]
@@ -587,7 +576,7 @@ class Pantilt (object):
 
 	def checkComm(self):
 		if self.__SERVO_PAN == self.servo.readByte(self.__SERVO_PAN,3):
-			#print "Comunicando com o servo " , self.servo.readByte(self.__SERVO_PAN,3)
+			print "Comunicando com o servo " , self.servo.readByte(self.__SERVO_PAN,3)
 			return True
 		else:
 			return False
