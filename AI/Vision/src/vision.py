@@ -188,7 +188,7 @@ os.system("v4l2-ctl -d /dev/video0 -c focus_auto=0 && v4l2-ctl -d /dev/video0 -c
 
 while True:
 
-	bkb.write_int(Mem,'VISION_WORKING', 1) # Variável da telemetria
+	bkb.write_int(Mem,'VISION_WORKING', 1) # Variavel da telemetria
 	
 	#Salva o frame
 	
