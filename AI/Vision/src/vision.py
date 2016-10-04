@@ -187,6 +187,9 @@ if args.withoutservo == False:
 os.system("v4l2-ctl -d /dev/video0 -c focus_auto=0 && v4l2-ctl -d /dev/video0 -c focus_absolute=0")
 
 while True:
+
+	bkb.write_int(Mem,'VISION_WORKING', 1) # Variável da telemetria
+	
 	#Salva o frame
 	
 	for i in xrange(0,3):
