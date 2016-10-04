@@ -1,0 +1,13 @@
+#include_directories(${RobotFEI-HT_SOURCE_DIR}/Blackboard/include)
+include_directories(include)
+add_library(blackboard SHARED src/blackboard.cpp)
+file(COPY ./src/blackboard.cpp  DESTINATION ${RoboFEI-HT_BINARY_DIR}/Blackboard)
+file(RENAME ${RoboFEI-HT_BINARY_DIR}/Blackboard/blackboard.cpp ${RoboFEI-HT_BINARY_DIR}/Blackboard/blackboard.c)
+add_library(blackboardpy SHARED ${RoboFEI-HT_BINARY_DIR}/Blackboard/blackboard.c)
+install(TARGETS blackboard DESTINATION ${RoboFEI-HT_BINARY_DIR}/lib)
+install(TARGETS blackboardpy DESTINATION ${RoboFEI-HT_BINARY_DIR}/lib)
+#install(TARGETS blackboard DESTINATION /usr/local/lib)
+#add_dependencies(blackboard blackboard)
+#target_link_libraries(blackboard blackboard -fPIC)
+#install(TARGETS blackboard DESTINATION ${RoboFEI-HT_BINARY_DIR}/lib)
+
