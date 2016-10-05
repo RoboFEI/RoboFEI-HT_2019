@@ -398,7 +398,7 @@ class VisionBall (object):
 			if cut[1]-cut[0]>=self.__minSize_HaarBall and cut[3]-cut[2]>=self.__minSize_HaarBall and np.all(cut !=-1):	# Valor aceitavel para o Haar, campo encontrado
 				frame_campo = frame[cut[2]:cut[3], cut[0]:cut[1]]
 				balls = self.__haarBall(frame_campo)
-			
+				print balls
 				if balls is not ():	# Bola encontrada
 					print balls
 					self.__updateStatus(np.array([2,	# Bola encontrada
@@ -535,7 +535,7 @@ class VisionBall (object):
 		if balls == None:
 			return ()
 		else:
-			balls = [[int(balls[0,0]-balls[0,2]), int(balls[0,1]-balls[0,2]), int(2*balls[0,2]), int(2*balls[0,2])]]
+			balls = np.array([[int(balls[0,0]-balls[0,2]), int(balls[0,1]-balls[0,2]), int(2*balls[0,2]), int(2*balls[0,2])]])
 		return balls
 
 #----------------------------------------------------------------------------------------------------------------------------------
@@ -543,7 +543,8 @@ class VisionBall (object):
 	def detectBall(self, img):
 		maskball = self.segWhite(img)
 		maskball = self.maskDilate(maskball)
-		circles = self.detectCircles(cv2.bitwise_and(img,img, mask=maskball))
+#		circles = self.detectCircles(cv2.bitwise_and(img,img, mask=maskball))
+		circles = self.detectCircles(img)
 		if circles is not None:
 			return circles[0]
 		else:
@@ -601,8 +602,8 @@ class VisionBall (object):
 #----------------------------------------------------------------------------------------------------------------------------------
 
 	def detectCircles(self, img):
-		media = cv2.medianBlur(img,self.__paramcirhough['blur'][0]) # Media blur para suavisar transições
-		cimg = cv2.cvtColor(media,cv2.COLOR_BGR2GRAY) # Imagem em tons de cinza
+#		media = cv2.medianBlur(img,self.__paramcirhough['blur'][0]) # Media blur para suavisar transições
+		cimg = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY) # Imagem em tons de cinza
 
 		circles = cv2.HoughCircles(cimg, # Imagem a ser aplicada
 									 cv.CV_HOUGH_GRADIENT, # Tecnica usada
@@ -642,25 +643,25 @@ class VisionBall (object):
 #----------------------------------------------------------------------------------------------------------------------------------
 
 	__mask_dilate = {
-		'size_element': [2, # Used value
+		'size_element': [10, # Used value
 						 'int', # Tipo do dado
 						 1, # Minimum allowed value
 						 255, # Maximum allowed value
 						 "Tamaho do elemento estruturante usado na erosão e na dilatação" # Review config.ini
 						],
-		'iterations': [2, # Used value
+		'iterations': [10, # Used value
 						 'int', # Tipo do dado
 						 1, # Minimum allowed value
 						 50, # Maximum allowed value
 						 "Número de interações que serão aplicadas na erosão e na dilatação" # Review config.ini
 						],
-		'diff': [1, # Used value
+		'diff': [2, # Used value
 				 'int', # Tipo do dado
 				 1, # Minimum allowed value
 				 50, # Maximum allowed value
 				 "Diferença entre a erosão e a dilatação" # Review config.ini
 				],
-		'blur': [5, # Used value
+		'blur': [9, # Used value
 				 'int', # Tipo do dado
 				 0, # Minimum allowed value
 				 10, # Maximum allowed value
@@ -685,13 +686,13 @@ class VisionBall (object):
 					255, # Maximum allowed value
 					"Valor do saturation mínimo usado para a segmentação do branco" # Review config.ini
 				 ],
-		'V_min': [0, # Used value
+		'V_min': [154, # Used value
 					'int', # Tipo do dado
 					0, # Minimum allowed value
 					255, # Maximum allowed value
 					"Valor do value mínimo usado para a segmentação do branco" # Review config.ini
 				 ],
-		'H_max': [255, # Used value
+		'H_max': [58, # Used value
 					'int', # Tipo do dado
 					0, # Minimum allowed value
 					255, # Maximum allowed value
@@ -709,19 +710,19 @@ class VisionBall (object):
 					255, # Maximum allowed value
 					"Valor do value máximo usado para a segmentação do branco" # Review config.ini
 				 ],
-		'size_element': [2, # Used value
+		'size_element': [3, # Used value
 						 'int', # Tipo do dado
 						 1, # Minimum allowed value
 						 255, # Maximum allowed value
 						 "Tamaho do elemento estruturante usado na erosão e na dilatação" # Review config.ini
 						],
-		'iterations': [2, # Used value
+		'iterations': [7, # Used value
 						 'int', # Tipo do dado
 						 1, # Minimum allowed value
 						 50, # Maximum allowed value
 						 "Número de interações que serão aplicadas na erosão e na dilatação" # Review config.ini
 						],
-		'blur': [0, # Used value
+		'blur': [5, # Used value
 				 'int', # Tipo do dado
 				 0, # Minimum allowed value
 				 10, # Maximum allowed value
