@@ -1,5 +1,8 @@
+# coding: utf-8
+
 import numpy as np
 import os
+import cv2.cv as cv
 import cv2
 import ctypes
 
@@ -397,6 +400,7 @@ class VisionBall (object):
 				balls = self.__haarBall(frame_campo)
 			
 				if balls is not ():	# Bola encontrada
+					print balls
 					self.__updateStatus(np.array([2,	# Bola encontrada
 															(balls[0,0]+cut[0]+balls[0,2]/2)*(20.0/res[0])-10,	# Posicao relativa do centro em x
 															(balls[0,1]+cut[2]+balls[0,3]/2)*(20.0/res[1])-10,	# Posicao relativa do centro em y
@@ -527,17 +531,230 @@ class VisionBall (object):
 #----------------------------------------------------------------------------------------------------------------------------------
 
 	def __haarBall(self,frame):
-		try:
-			balls = self.__ball_cascade.detectMultiScale(frame,
-														minNeighbors=self.__neighbours_HaarBall,
-														scaleFactor=self.__scaleFactor_HaarBall,
-														minSize=(self.__minSize_HaarBall,self.__minSize_HaarBall),
-														maxSize=(self.__maxSize_HaarBall,self.__maxSize_HaarBall))
-		except cv2.error as e:
-			balls = ()
-			print 'Falha no Haar'
-			
+		balls = self.detectBall(frame)
+		if balls == None:
+			return ()
+		else:
+			balls = [[int(balls[0,0]-balls[0,2]), int(balls[0,1]-balls[0,2]), int(2*balls[0,2]), int(2*balls[0,2])]]
 		return balls
+
+#----------------------------------------------------------------------------------------------------------------------------------
+
+	def detectBall(self, img):
+		maskball = self.segWhite(img)
+		maskball = self.maskDilate(maskball)
+		circles = self.detectCircles(cv2.bitwise_and(img,img, mask=maskball))
+		if circles is not None:
+			return circles[0]
+		else:
+			return None
+
+#----------------------------------------------------------------------------------------------------------------------------------
+
+	__paramcirhough = {
+		'dp': [2.5, # Used value
+				 'float', # Tipo do dado
+				 1, # Minimum allowed value
+				 255, # Maximum allowed value
+				 "Inverse ratio of the accumulator resolution to the image resolution. For example, if dp=1 , the accumulator has the same resolution as the input image. If dp=2 , the accumulator has half as big width and height." # Review config.ini
+				],
+		'minDist': [100, # Used value
+					'int', # Tipo do dado
+					1, # Minimum allowed value
+					50, # Maximum allowed value
+					"Minimum distance between the centers of the detected circles. If the parameter is too small, multiple neighbor circles may be falsely detected in addition to a true one. If it is too large, some circles may be missed." # Review config.ini
+					 ],
+		'param1': [200, # Used value
+					 'int', # Tipo do dado
+					 1, # Minimum allowed value
+					 50, # Maximum allowed value
+					 "First method-specific parameter. In case of CV_HOUGH_GRADIENT , it is the higher threshold of the two passed to the Canny() edge detector (the lower one is twice smaller)." # Review config.ini
+					],
+		'param2': [70, # Used value
+					 'int', # Tipo do dado
+					 1, # Minimum allowed value
+					 50, # Maximum allowed value
+					 "Second method-specific parameter. In case of CV_HOUGH_GRADIENT , it is the accumulator threshold for the circle centers at the detection stage. The smaller it is, the more false circles may be detected. Circles, corresponding to the larger accumulator values, will be returned first." # Review config.ini
+					],
+		'minRadius': [0, # Used value
+						'int', # Tipo do dado
+						1, # Minimum allowed value
+						50, # Maximum allowed value
+						"Minimum circle radius." # Review config.ini
+					 ],
+		'maxRadius': [0, # Used value
+						'int', # Tipo do dado
+						1, # Minimum allowed value
+						50, # Maximum allowed value
+						"Maximum circle radius." # Review config.ini
+					 ],
+		'blur': [9, # Used value
+				 'int', # Tipo do dado
+				 0, # Minimum allowed value
+				 10, # Maximum allowed value
+				 "Tamanho do elemento estruturante usado no medianBlur (Valor obrigatoriamente ímpar ou zero)" # Review config.ini
+				],
+		'comment': 'Valores usados para o Circulo de Hough',
+		'section': 'Circulo de Hough'
+	}
+
+#----------------------------------------------------------------------------------------------------------------------------------
+
+	def detectCircles(self, img):
+		media = cv2.medianBlur(img,self.__paramcirhough['blur'][0]) # Media blur para suavisar transições
+		cimg = cv2.cvtColor(media,cv2.COLOR_BGR2GRAY) # Imagem em tons de cinza
+
+		circles = cv2.HoughCircles(cimg, # Imagem a ser aplicada
+									 cv.CV_HOUGH_GRADIENT, # Tecnica usada
+									 self.__paramcirhough['dp'][0], # 
+									 self.__paramcirhough['minDist'][0], # Distancia minima entre centros
+									 param1 = self.__paramcirhough['param1'][0],
+									 param2 = self.__paramcirhough['param2'][0],
+									 minRadius = self.__paramcirhough['minRadius'][0], # Raio minimo
+									 maxRadius = self.__paramcirhough['maxRadius'][0]) # Raio maximo
+		return circles
+
+#----------------------------------------------------------------------------------------------------------------------------------
+
+	def segWhite(self, img): # Segmentação branco
+		return self.segColor(img, self.__seg_white)
+
+#----------------------------------------------------------------------------------------------------------------------------------
+
+	def maskDilate(self, mask_branco):
+		## dilation
+		mask_bola = cv2.dilate(mask_branco, # Aonde sera aplicada
+						 np.ones((self.__mask_dilate['size_element'][0],self.__mask_dilate['size_element'][0]),np.uint8), # Tamanho do ES
+						 iterations = self.__mask_dilate['iterations'][0] # Número de iterações
+						)
+	
+		## erosion
+		mask_bola = cv2.erode(mask_bola, # Aonde sera aplicada
+						np.ones((self.__mask_dilate['size_element'][0],self.__mask_dilate['size_element'][0]),np.uint8), # Tamanho do ES
+						iterations = self.__mask_dilate['iterations'][0] - self.__mask_dilate['diff'][0] # Número de iterações
+					 )
+
+		mask_bola = cv2.blur(mask_bola, # Aonde sera aplicada
+					 (self.__mask_dilate['blur'][0],self.__mask_dilate['blur'][0]) # Tamanho do ES
+					)
+		return mask_bola
+
+#----------------------------------------------------------------------------------------------------------------------------------
+
+	__mask_dilate = {
+		'size_element': [2, # Used value
+						 'int', # Tipo do dado
+						 1, # Minimum allowed value
+						 255, # Maximum allowed value
+						 "Tamaho do elemento estruturante usado na erosão e na dilatação" # Review config.ini
+						],
+		'iterations': [2, # Used value
+						 'int', # Tipo do dado
+						 1, # Minimum allowed value
+						 50, # Maximum allowed value
+						 "Número de interações que serão aplicadas na erosão e na dilatação" # Review config.ini
+						],
+		'diff': [1, # Used value
+				 'int', # Tipo do dado
+				 1, # Minimum allowed value
+				 50, # Maximum allowed value
+				 "Diferença entre a erosão e a dilatação" # Review config.ini
+				],
+		'blur': [5, # Used value
+				 'int', # Tipo do dado
+				 0, # Minimum allowed value
+				 10, # Maximum allowed value
+				 "Tamaho do elemento estruturante usado no medianBlur (Valor obrigatoriamente ímpar ou zero)" # Review config.ini
+				],
+		'comment': 'Valores usados para dilatação da máscara',
+		'section': 'Dilatação Máscara'
+	}
+
+#----------------------------------------------------------------------------------------------------------------------------------
+
+	__seg_white = {
+		'H_min': [0, # Used value
+					'int', # Tipo do dado
+					0, # Minimum allowed value
+					255, # Maximum allowed value
+					"Valor do hue mínimo usado para a segmentação do branco" # Review config.ini
+				 ],
+		'S_min': [0, # Used value
+					'int', # Tipo do dado
+					0, # Minimum allowed value
+					255, # Maximum allowed value
+					"Valor do saturation mínimo usado para a segmentação do branco" # Review config.ini
+				 ],
+		'V_min': [0, # Used value
+					'int', # Tipo do dado
+					0, # Minimum allowed value
+					255, # Maximum allowed value
+					"Valor do value mínimo usado para a segmentação do branco" # Review config.ini
+				 ],
+		'H_max': [255, # Used value
+					'int', # Tipo do dado
+					0, # Minimum allowed value
+					255, # Maximum allowed value
+					"Valor do hue máximo usado para a segmentação do branco" # Review config.ini
+				 ],
+		'S_max': [255, # Used value
+					'int', # Tipo do dado
+					0, # Minimum allowed value
+					255, # Maximum allowed value
+					"Valor do saturation máximo usado para a segmentação do branco" # Review config.ini
+				 ],
+		'V_max': [255, # Used value
+					'int', # Tipo do dado
+					0, # Minimum allowed value
+					255, # Maximum allowed value
+					"Valor do value máximo usado para a segmentação do branco" # Review config.ini
+				 ],
+		'size_element': [2, # Used value
+						 'int', # Tipo do dado
+						 1, # Minimum allowed value
+						 255, # Maximum allowed value
+						 "Tamaho do elemento estruturante usado na erosão e na dilatação" # Review config.ini
+						],
+		'iterations': [2, # Used value
+						 'int', # Tipo do dado
+						 1, # Minimum allowed value
+						 50, # Maximum allowed value
+						 "Número de interações que serão aplicadas na erosão e na dilatação" # Review config.ini
+						],
+		'blur': [0, # Used value
+				 'int', # Tipo do dado
+				 0, # Minimum allowed value
+				 10, # Maximum allowed value
+				 "Tamaho do elemento estruturante usado no medianBlur" # Review config.ini
+				],
+		'comment': 'Valores usados para a segmentação do branco',
+		'section': 'Seg. Branco'
+	}
+
+#----------------------------------------------------------------------------------------------------------------------------------
+
+	def segColor(self, img, seg):
+		media = cv2.medianBlur(img, seg['blur'][0]) # Média blur tentar homogeneizar as cores
+		hsv = cv2.cvtColor(media, cv2.COLOR_BGR2HSV) # Convertendo de RGB para HSV
+	
+		## Segmentando a cor
+		mask_campo = cv2.inRange(hsv, # imagem a ser aplicada
+						 np.array([seg['H_min'][0], seg['S_min'][0], seg['V_min'][0]]), # Valores mínimos do HSV
+						 np.array([seg['H_max'][0], seg['S_max'][0], seg['V_max'][0]]), # Valores máximos do HSV
+						)
+
+		## erosion
+		mask_campo = cv2.erode(mask_campo, # Aonde sera aplicada
+						 np.ones((seg['size_element'][0],seg['size_element'][0]),np.uint8), # Tamanho do ES
+						 iterations = seg['iterations'][0] # Número de iterações
+						)
+
+		## dilation
+		mask_campo = cv2.dilate(mask_campo, # Aonde sera aplicada
+						np.ones((seg['size_element'][0],seg['size_element'][0]),np.uint8), # Tamanho do ES
+						iterations = seg['iterations'][0] # Número de iterações
+						 )
+		return mask_campo
 
 #----------------------------------------------------------------------------------------------------------------------------------
 
