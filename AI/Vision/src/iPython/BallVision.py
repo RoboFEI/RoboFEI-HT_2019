@@ -30,6 +30,11 @@ except ImportError:
 class BallVision(object):
 
 
+
+#-----------------------------------------------------------------------------------------------------------------
+# Segmentation Algorithm
+
+
 ## Dictionary for white segmentation
 __seg_white = {
 	'H_min': [0, # Used value
@@ -251,8 +256,6 @@ __paramcirhough = {
 }
 
 
-
-
 ## Color segmentation function
 # Using the color dictionary to generate a mask
 def segColor(self, img, seg):
@@ -344,10 +347,7 @@ def maskDilate(self, mask_branco):
 # @param img - Receives image to detect the circumferences.
 # @retun - Returns vector with the centers and radii of all circles.
 def detectCircles(self, img):
-	media = cv2.medianBlur(img,__paramcirhough['blur'][0]) # Media blur para suavisar transições
-	cimg = cv2.cvtColor(media,cv2.COLOR_BGR2GRAY) # Imagem em tons de cinza
-
-	circles = cv2.HoughCircles(cimg, # Imagem a ser aplicada
+	circles = cv2.HoughCircles(img, # Imagem a ser aplicada
 							   cv2.HOUGH_GRADIENT, # Tecnica usada
 							   __paramcirhough['dp'][0], # 
 							   __paramcirhough['minDist'][0], # Distancia minima entre centros
@@ -370,10 +370,11 @@ def detectField(self, img):
 def detectBall(self, img):
 	maskball = segWhite(img)
 	maskball = maskDilate(maskball)
-	circles = detectCircles(cv2.bitwise_and(img,img, mask=maskball))
+	circles = detectCircles(maskball)
 	if circles is not None:
 		return circles[0]
 	else:
+		return None
 
 
 ## Dictionary for Haar-cascade Detection
@@ -448,7 +449,7 @@ def confirmBall(self, img, position):
 # @retun - Returns the status of detection of the ball.
 def detect(self, condition, img):
 	if condition == 0: # initial condition - detecting field and ball
-		
+		pass
 
 # cv2.setMouseCallback('Main Calibration', self.Segment, param='MAIN')
 # def Segment(self, event, x, y, flags, param):
