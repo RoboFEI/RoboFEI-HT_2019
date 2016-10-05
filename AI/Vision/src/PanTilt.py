@@ -576,10 +576,14 @@ class Pantilt (object):
 
 	def checkComm(self):
 		if self.__SERVO_PAN == self.servo.readByte(self.__SERVO_PAN,3):
-			print "Comunicando com o servo " , self.servo.readByte(self.__SERVO_PAN,3)
 			return True
 		else:
 			return False
+		if self.__SERVO_TILT == self.servo.readByte(self.__SERVO_TILT,3):
+			return True
+		else:
+			return False
+
 
 #----------------------------------------------------------------------------------------------------------------------------------
 
