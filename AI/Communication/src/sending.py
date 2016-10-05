@@ -82,7 +82,7 @@ while(True):
     message += str(0) + ' '  # Rotation - not yet implemented
     message += str(30) + ' ' # Belief - not yet implemented
     message += str(bkb.read_float(mem, 'VISION_BALL_DIST')) + ' ' # Distance Ball's Position - not yet implemented
-    message += str(bkb.read_float(mem, 'VISION_BALL_ANGLE')) + ' ' # Angle Ball's Position - not yet implemented
+    message += str(bkb.read_float(mem, 'VISION_PAN_DEG')) + ' ' # Angle Ball's Position - not yet implemented
     # Flags of Execution
     message += str(bkb.read_int(mem,'CONTROL_WORKING')) + ' ' # Return 1 if Control is working
     bkb.write_int(mem, 'CONTROL_WORKING', 0) # Resets the flag for Control
