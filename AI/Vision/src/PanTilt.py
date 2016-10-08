@@ -273,8 +273,20 @@ class Pantilt (object):
 				self.__ControllerTilt.setDerivator(0)
 				self.lastmod = mod
 		
+		if bkb.read_int(Mem, 'IMU_STATE') == 1:
+			self.servo.writeByte(self.__SERVO_PAN,self.__SPEED, 1023)
+			self.servo.writeByte(self.__SERVO_TILT,self.__SPEED, 1023)
+			self.servo.writeWord(self.__SERVO_TILT,
+														self.__GOAL_POS,
+														0)
+			self.servo.writeWord(self.__SERVO_PAN,
+														self.__GOAL_POS,
+														self.cen_posPAN)
+			self.servo.writeByte(self.__SERVO_PAN,self.__STATUS, 0)
+			self.servo.writeByte(self.__SERVO_TILT,self.__STATUS, 0)
+			return [self.servo.readWord(self.__SERVO_PAN, self.__PRESENT_POS), self.servo.readWord(self.__SERVO_TILT, self.__PRESENT_POS)]
+		
 		if status[0] == 2:
-
 			if status[1] != 0 and status[2] != 0 and self.__lost == 0:
 				self.__segue(status,Mem, bkb)
 			else:
