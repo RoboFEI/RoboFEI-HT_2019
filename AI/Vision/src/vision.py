@@ -71,7 +71,7 @@ def statusBall(positionballframe):
 		print mens
 	if positionballframe[0] == 2:
 		if bkb.read_float(Mem, 'VISION_TILT_DEG') < 50:
-			lista.append(8.48048735*exp(0.042451235*bkb.read_float(Mem, 'VISION_TILT_DEG'))-7)
+			lista.append(21.62629757*exp(0.042451235*bkb.read_float(Mem, 'VISION_TILT_DEG')))#8.48048735
 			##bkb.write_float(Mem, 'VISION_BALL_DIST', 430*tan(radians(bkb.read_float(Mem, 'VISION_TILT_DEG'))))
 			print 'Dist using tilt angle: ', bkb.read_float(Mem, 'VISION_BALL_DIST')
 			#0.0848048735*exp(0.042451235*bkb.read_int('VISION_TILT_DEG')
