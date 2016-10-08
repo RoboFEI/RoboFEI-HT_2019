@@ -202,9 +202,9 @@ while True:
 	
 	if args.withoutservo == False:
 		posheadball = head.mov(positionballframe,posheadball,Mem, bkb)
-		if head.checkComm() == False:
-			print "Out of communication with servos!"
-			break
+#		if head.checkComm() == False:
+#			print "Out of communication with servos!"
+#			break
 	
 	setResolution(positionballframe)
 	
