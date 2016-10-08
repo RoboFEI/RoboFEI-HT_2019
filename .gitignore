@@ -5,6 +5,7 @@
 
 env/
 build/
+AI/Vision/Data/*.ini
 AI/Control/Data/*.ini
 AI/Control/Data/*.bin
 develop-eggs/
