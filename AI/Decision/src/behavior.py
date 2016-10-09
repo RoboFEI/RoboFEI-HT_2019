@@ -27,7 +27,7 @@ from math import degrees
 #to real robots: 14 centimeters
 #to simulated robots: 28 centimeters
 
-distance_to_kick = 10 #real robot
+distance_to_kick = 50 #real robot
 #distance_to_kick = 29 #simulated robot
 
 
@@ -210,10 +210,10 @@ class Ordinary(TreatingRawData):
                 self.set_turn_right()
             elif self.get_search_status() == 0: # 0 - object found
                 # align to the ball
-                if self.get_motor_pan_degrees() > 20 and self.get_motor_pan_degrees() < 160:
+                if self.get_motor_pan_degrees() > 40 and self.get_motor_pan_degrees() < 160:
                     self.set_turn_left()
                     #self.set_stand_still()
-                elif self.get_motor_pan_degrees() < -20 and self.get_motor_pan_degrees() > -160:
+                elif self.get_motor_pan_degrees() < -40 and self.get_motor_pan_degrees() > -160:
                     self.set_turn_right()
                     #self.set_stand_still()
                 else:
@@ -264,13 +264,14 @@ class Naive(TreatingRawData):
                 self.set_turn_right()
             elif self.get_search_status() == 0: # 0 - object found
                 # align to the ball
-                if self.get_motor_pan_degrees() > 20 and self.get_motor_pan_degrees() < 160:
+                if self.get_motor_pan_degrees() > 40 and self.get_motor_pan_degrees() < 160:
                     self.set_turn_left()
                     #self.set_stand_still()
-                elif self.get_motor_pan_degrees() < -20 and self.get_motor_pan_degrees() > -160:
+                elif self.get_motor_pan_degrees() < -40 and self.get_motor_pan_degrees() > -160:
                     self.set_turn_right()
                     #self.set_stand_still()
                 else:
+                    print self.get_motor_pan_degrees()
                     if self.get_dist_ball() < distance_to_kick and self.get_motor_pan_degrees() <= 0:
                         self.set_kick_right()
                     elif self.get_dist_ball() < distance_to_kick and self.get_motor_pan_degrees() > 0:
