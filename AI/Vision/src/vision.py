@@ -85,7 +85,7 @@ def statusBall(positionballframe):
 		if len(lista) == 1:
 			dist_media = lista[0]
 		else:
-			if len(lista) >= 20:
+			if len(lista) >= 10:
 				lista.pop(0)
 			dist_media = float(sum(lista)/len(lista))
 		bkb.write_float(Mem, 'VISION_BALL_DIST', dist_media)
