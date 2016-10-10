@@ -27,12 +27,7 @@ from math import degrees
 #to real robots: 14 centimeters
 #to simulated robots: 28 centimeters
 
-config_global = ConfigParser()
-config_global.read('../../Control/Data/config.ini')
-config_global.get('Decision', 'distance_to_kick')
-
-
-distance_to_kick = config_global.get('Decision', 'distance_to_kick') #real robot
+distance_to_kick = 35 #real robot
 #distance_to_kick = 29 #simulated robot
 
 
