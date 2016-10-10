@@ -27,7 +27,12 @@ from math import degrees
 #to real robots: 14 centimeters
 #to simulated robots: 28 centimeters
 
-distance_to_kick = 50 #real robot
+config_global = ConfigParser()
+config_global.read('../../Control/Data/config.ini')
+config_global.get('Decision', 'distance_to_kick')
+
+
+distance_to_kick = config_global.get('Decision', 'distance_to_kick') #real robot
 #distance_to_kick = 29 #simulated robot
 
 
@@ -62,6 +67,9 @@ class TreatingRawData(object):
     def get_orientation_usage(self):
         return self.config.get('Decision', 'orientation')
                     
+    def get_distance_to_kick(self):
+        return self.config.get('Decision', 'distance_to_kick')
+
     def get_referee(self):
         return self.bkb.read_int(self.mem, 'COM_REFEREE')
 
