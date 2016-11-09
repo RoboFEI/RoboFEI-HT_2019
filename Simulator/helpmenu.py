@@ -92,3 +92,5 @@ def help(screen):
     screen.background.blit(font.render('F6 - toggle field of view', 1, color), (10, a))
     a += space
     screen.background.blit(font.render('F7 - toggle EOPRA representation', 1, color), (10, a))
+    a += space
+    screen.background.blit(font.render('F8 - toggle StarVars representation', 1, color), (10, a))

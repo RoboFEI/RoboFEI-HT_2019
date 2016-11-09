@@ -89,9 +89,9 @@ class Robot(pygame.sprite.Sprite,Vision):
         self.orientation_error = 0
         self.imu_initial_value = 0
 
-        #EOPRA
+        #EOPRA // StarVars
         self.delta_eopra = 100 # 1 meter
-        self.m = 6 # 6 or 4
+        self.m = 8 # 4 // 6 // 8
 
     def draw_robot(self,robot_index, screen):
         self.image.fill(screen.GREEN)
@@ -380,6 +380,21 @@ class Robot(pygame.sprite.Sprite,Vision):
             # delta * m / (2m-e)
             pygame.draw.circle(screen.background, self.color, (int(self.x), int(self.y)),
                                self.delta_eopra * self.m / (2 * self.m - 6), 1)
+            # qualitative direction
+            pygame.draw.line(screen.background, self.color, (int(self.x), int(self.y)), (
+                cos(radians(self.rotate)) * farthest_boundary + int(self.x), int(self.y) -
+                sin(radians(self.rotate)) * farthest_boundary), 3)
+            for i in range(resolution, 360, resolution):
+                pygame.draw.line(screen.background, self.color, (int(self.x), int(self.y)), (
+                    cos(radians(self.rotate + i)) * farthest_boundary + int(self.x), int(self.y) -
+                    sin(radians(self.rotate + i)) * farthest_boundary), 1)
+                    
+                    
+    def draw_starvars(self,screen):
+        resolution = 180 / (self.m/2)
+        half_resolution = resolution / 2
+        farthest_boundary = 1000
+        if self.m == 8:
             # qualitative direction
             pygame.draw.line(screen.background, self.color, (int(self.x), int(self.y)), (
                 cos(radians(self.rotate)) * farthest_boundary + int(self.x), int(self.y) -
