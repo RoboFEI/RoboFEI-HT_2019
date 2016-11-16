@@ -1,6 +1,6 @@
 import pygame
 import random as rnd
-from math import cos, sin, radians
+from math import cos, sin, radians, degrees
 import socket
 import time
 from collections import defaultdict
@@ -13,8 +13,8 @@ Sequence of communication Protocol:
 2 - Y position
 3 - Rotation
 4 - Belief
-5 - X ball's position
-6 - Y ball's position
+5 - Ball Distance
+6 - Ball Angle
 ----------------------------------
 7 - Control
 8 - Vision
@@ -103,6 +103,13 @@ class Telemetry(object):
                             22: 'Chute fraco esquerdo'}
         self.dictcontrol = defaultdict(lambda:'ERRO NO DICIONARIO DA TELEMETRIA', self.dictcontrol)
         # Variables which draws things in the screen
+        # ------------------------------------------
+        # 0 - Robot's X position
+        # 1 - Robot's Y position
+        # 2 - Robot's rotation
+        # 3 - Robot's belief
+        # 4 - Ball's X position
+        # 5 - Ball's Y position
         self.othervars = [100 * n, 100 * n, 30 * n, 20 * n, 450, 300]
 
         self.resizing = False   # toogles the resizing function
@@ -124,10 +131,11 @@ class Telemetry(object):
         try:
             self.othervars[0] = float(data[1])
             self.othervars[1] = float(data[2])
-            self.othervars[2] = int(float(data[13]) * 180 / 3.1614)
+            self.othervars[2] = int(float(data[3]))
             self.othervars[3] = float(data[4])
-            self.othervars[4] = float(data[1]) + (float(data[5]) + 20) * cos(float(data[13]) + radians(float(data[6])))
-            self.othervars[5] = float(data[2]) + (float(data[5]) + 20) * sin(float(data[13]) + radians(float(data[6])))
+            self.othervars[4] = float(data[1]) + float(data[5]) * cos(-radians(float(data[3]) + float(data[6])))
+            self.othervars[5] = float(data[2]) + float(data[5]) * sin(-radians(float(data[3]) + float(data[6])))
+            print data[3]
         except:
             print 'ERROR on telemetry.change() for LOCALIZATION variables!'
 
@@ -399,7 +407,8 @@ def TelemetryControl(tele, sock): # Function to Control the Telemetry Screens
     # Iterates through all ports searching messages
     for s in sock:
         try:
-            data = s.recv(1024, socket.MSG_DONTWAIT) # Get's the message from the buffer
+            data = Flush(s)
+            # data = s.recv(1024, socket.MSG_DONTWAIT) # Get's the message from the buffer
             data = data.split() # Splits it into a list
             test = True # Assumes the message is from a new robot
 
@@ -426,3 +435,11 @@ def TelemetryControl(tele, sock): # Function to Control the Telemetry Screens
     for p in pop:
         tele.pop(p-a) # Erases all robots that do not exist anymore
         a += 1 # adjust factor for pop values...
+
+def Flush(sock):
+    data = None
+    try:
+        while True:
+            data = sock.recv(1024, socket.MSG_DONTWAIT)
+    except:
+        return data
