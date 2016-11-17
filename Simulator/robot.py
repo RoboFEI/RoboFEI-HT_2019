@@ -1,6 +1,7 @@
 from screen import *
 from control import *
 from vision import *
+from vision_loc import *
 import pygame
 from math import cos
 from math import sin
@@ -65,6 +66,7 @@ class Robot(pygame.sprite.Sprite,Vision):
         self.drift_turn_speed = 15
 
         self.control = CONTROL(self)
+        self.vision = VISION(self)
         self.ball = None
 
         # Errors
