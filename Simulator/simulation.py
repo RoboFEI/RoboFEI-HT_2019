@@ -27,9 +27,10 @@ class Simulation():
 
         self.Help = False
 
-        self.draw_vision_control = True
+        self.draw_vision_control = False
         self.starvars_view = False
         self.eopra_view = False
+        self.vision_localization = False
 
     def update_mouse_pos(self):
         self.mx, self.my = pygame.mouse.get_pos()
@@ -37,7 +38,7 @@ class Simulation():
     def perform_events(self):
         for event in pygame.event.get():
             try:
-
+            # if True:
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_a:
                     self.update_mouse_pos()
 
@@ -232,6 +233,9 @@ class Simulation():
                 if event.type == pygame.KEYUP and event.key == pygame.K_F8:
                     self.starvars_view = not self.starvars_view
 
+                if event.type == pygame.KEYUP and event.key == pygame.K_F9:
+                    self.vision_localization = not self.vision_localization
+
                 if event.type == pygame.KEYUP and event.key == pygame.K_F12:
                     pass
 
@@ -271,6 +275,8 @@ class Simulation():
                     self.robots[robot].draw_eopra(self.screen)
                 if self.starvars_view:
                     self.robots[robot].draw_starvars(self.screen)
+                if self.vision_localization:
+                    self.robots[robot].vision.Draw(self.screen.background)
                 self.robots[robot].vision_process(self.ball.x, self.ball.y, self.robots)
         self.ball.draw_ball(self.screen)
 

@@ -61,6 +61,8 @@ class Telemetry(object):
 
         self.size = 90 # screen size
 
+        self.todraw = True # indicates if it will be drown
+
         self.minimize = False    # toogles the minimized screen
         self.hide = False        # toogles the hidden variables
 
@@ -110,7 +112,8 @@ class Telemetry(object):
         # 3 - Robot's belief
         # 4 - Ball's X position
         # 5 - Ball's Y position
-        self.othervars = [450, 300, 0, 10, 0, 0]
+        # 6 - Battery's Voltage
+        self.othervars = [450, 300, 0, 10, 0, 0, 0]
 
         self.resizing = False   # toogles the resizing function
         self.dragging = False    # toogles the dragging function
@@ -172,6 +175,7 @@ class Telemetry(object):
         # Gets the voltage from the servos.
         try:
             self.variables[7][2] = str(float(data[14])/10) + 'V'
+            self.othervars[6] = int(data[14])
         except:
             print 'ERROR of telemetry.change() for VOLTAGE!'
 
@@ -198,6 +202,9 @@ class Telemetry(object):
     #----------------------------------------------------------------------------------------------
 
     def draw(self, where, side):
+        if not self.todraw:
+            return None # Do not let the frame be drown
+
         new = pygame.Surface((1042, 742), pygame.SRCALPHA) # Surface of the Telemetry
 
         if self.dragging:
@@ -250,12 +257,29 @@ class Telemetry(object):
         else:
             pygame.draw.rect(self.Body, (255,255,255), (224,4,11,11), 0)
 
+        cg = 51*self.othervars[6] - 8925
+        cg = int(min(max(cg, 0), 255))
+
+        cr = (51*self.othervars[6]-8160) * (self.othervars[6] < 170) + (-51*self.othervars[6]+9945) * (self.othervars[6] >= 170)
+        cr = int(min(max(cr, 0), 255))
+
+        b = self.othervars[6]/3 - 49
+        b = int(min(max(b,1),21))
+
+        pygame.draw.rect(self.Body, (cr,cg,0), (194,4,b,11), 0)
+
         pygame.draw.line(self.Body, (255,255,255), (244, 9), (255, 9), 2)
         pygame.draw.rect(self.Body, (255,255,255), (244,4,11,11), 2)
         pygame.draw.rect(self.Body, (255,255,255), (224,4,11,11), 2)
+        pygame.draw.rect(self.Body, (255,255,255), (194,4,21,11), 2)
+        pygame.draw.line(self.Body, (255,255,255), (216, 6), (216, 13), 4)
 
         self.font.set_bold(True)
-        self.Body.blit(self.font.render(self.name, 1, self.color), (10, 4))
+        timer = self.timeout()
+        if timer < 1:
+            self.Body.blit(self.font.render(self.name, 1, self.color), (10, 4))
+        else:
+            self.Body.blit(self.font.render(self.name + ' [TIMEOUT = ' + str(int(timer)) + ' SEC]', 1, self.color), (10, 4))
 
         pygame.draw.rect(self.Body, (0,0,0), (0,0,259,19), 2)
 
@@ -274,7 +298,7 @@ class Telemetry(object):
         new.blit(self.Body, (int(self.x), int(self.y))) # Draws the object on screen
 
         where.blit(new, (0,0)) # Draws Telemetry on Screen
-        where.blit(self.font.render("PRESS SPACE TO INVERT FIELD VIEW", 1, (255,255,255)), (400,690))
+        where.blit(self.font.render("PRESS SPACE TO INVERT FIELD VIEW", 1, (255,255,255)), (400,690)) # Print message on screen
 
     #----------------------------------------------------------------------------------------------
     #   METHOD THAT WRITE ON THE FLOATING PANELS
@@ -427,6 +451,7 @@ def TelemetryControl(tele, sock): # Function to Control the Telemetry Screens
             for t in tele: # Iterates through all opened screens
                 if t.number == int(data[0]): # Eventually if the robot exists
                     t.change(data) # Saves the received message into the Telemetry variables
+                    t.todraw = True # Turn on the screen telemetry
                     test = False # Confirms the existing robot
                     break # Stops iterations
 
@@ -435,18 +460,14 @@ def TelemetryControl(tele, sock): # Function to Control the Telemetry Screens
         except:
             pass
 
-    pop = []
-    a = 0
     for t in tele: # For all robots
         timer = t.timeout()  # Get's how long since the last received message
         if timer > 10: # If it is ore than 10 seconds
-            pop.append(a) # It will be erased
-        a += 1
+            t.todraw = False
 
-    a = 0
-    for p in pop:
-        tele.pop(p-a) # Erases all robots that do not exist anymore
-        a += 1 # adjust factor for pop values...
+#--------------------------------------------------------------------------------------------------
+#   FUNCTION WHICH CLEARS THE COMMUNICATION BUFFER
+#--------------------------------------------------------------------------------------------------
 
 def Flush(sock):
     data = None # Initializes a void Data variable
