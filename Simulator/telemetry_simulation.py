@@ -15,6 +15,7 @@ class Simulation():
         self.field = None
 
         self.tele = []
+        self.side = False
         self.timestamp = 0
         self.sock = []
         for c in range(4):
@@ -33,6 +34,10 @@ class Simulation():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
+
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                self.side = not self.side
+
             try:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     self.update_mouse_pos()
@@ -58,7 +63,7 @@ class Simulation():
             for auxtele in self.tele:
                 if tele != auxtele:
                     telemetry_collision(tele, auxtele)
-            tele.draw(self.screen.background)
+            tele.draw(self.screen.background, self.side)
 
         timer = time.time() - self.timestamp
         if timer > 0.5:

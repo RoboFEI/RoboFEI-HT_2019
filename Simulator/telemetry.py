@@ -110,7 +110,7 @@ class Telemetry(object):
         # 3 - Robot's belief
         # 4 - Ball's X position
         # 5 - Ball's Y position
-        self.othervars = [100 * n, 100 * n, 30 * n, 20 * n, 450, 300]
+        self.othervars = [450, 300, 0, 10, 0, 0]
 
         self.resizing = False   # toogles the resizing function
         self.dragging = False    # toogles the dragging function
@@ -135,7 +135,6 @@ class Telemetry(object):
             self.othervars[3] = float(data[4])
             self.othervars[4] = float(data[1]) + float(data[5]) * cos(-radians(float(data[3]) + float(data[6])))
             self.othervars[5] = float(data[2]) + float(data[5]) * sin(-radians(float(data[3]) + float(data[6])))
-            print data[3]
         except:
             print 'ERROR on telemetry.change() for LOCALIZATION variables!'
 
@@ -198,13 +197,23 @@ class Telemetry(object):
     #   METHOD THAT DRAWS THINGS ON SCREEN
     #----------------------------------------------------------------------------------------------
 
-    def draw(self, where):
+    def draw(self, where, side):
         new = pygame.Surface((1042, 742), pygame.SRCALPHA) # Surface of the Telemetry
 
-        pygame.draw.line(new, self.color,(int((2*self.x+260)/2),int((2*self.y+20+self.size*(not(self.minimize)))/2)),(int(self.othervars[0]),int(self.othervars[1])), 3) # Draws a line
+        if self.dragging:
+            self.drag()     # Drags the object around
+        if self.resizing:
+            self.resize()   # Resizes the object
+
+        if side:
+            pygame.draw.line(new, self.color,(int((2*self.x+260)/2),int((2*self.y+20+self.size*(not(self.minimize)))/2)),(970-int(self.othervars[0]),670-int(self.othervars[1])), 3) # Draws a line
+            pygame.draw.circle(new, (0,0,0,0), (970 - int(self.othervars[0]), 670 - int(self.othervars[1])), int(self.othervars[3]), 0) # Cuts a circle
+            pygame.draw.circle(new, self.color, (970 - int(self.othervars[0]), 670 - int(self.othervars[1])), int(self.othervars[3]), 3) # Draws a circle
+        else:
+            pygame.draw.line(new, self.color,(int((2*self.x+260)/2),int((2*self.y+20+self.size*(not(self.minimize)))/2)),(int(self.othervars[0])+70,int(self.othervars[1])+70), 3) # Draws a line
+            pygame.draw.circle(new, (0,0,0,0), (70 + int(self.othervars[0]), 70 + int(self.othervars[1])), int(self.othervars[3]), 0) # Cuts a circle
+            pygame.draw.circle(new, self.color, (70 + int(self.othervars[0]), 70 + int(self.othervars[1])), int(self.othervars[3]), 3) # Draws a circle
         pygame.draw.rect(new, (0,0,0,0), (self.x, self.y, 260, 20+self.size*(not(self.minimize))), 0) # Cuts a square
-        pygame.draw.circle(new, (0,0,0,0), (int(self.othervars[0]), int(self.othervars[1])), int(self.othervars[3]), 0) # Cuts a circle
-        pygame.draw.circle(new, self.color, (int(self.othervars[0]), int(self.othervars[1])), int(self.othervars[3]), 3) # Draws a circle
 
         self.Body.fill(pygame.Color(255,255,255,0)) # Clear the window surface
         self.Robot.fill(pygame.Color(255,255,255,0)) # Clear the robot surface
@@ -218,13 +227,11 @@ class Telemetry(object):
         pygame.draw.rect(self.Robot, (0, 0, 0), (19, 14, 5, 10), 1)
 
         # Rotates robot
-        aux = pygame.transform.rotate(self.Robot, self.othervars[2])
+        if side:
+            aux = pygame.transform.rotate(self.Robot, self.othervars[2] + 180)
+        else:
+            aux = pygame.transform.rotate(self.Robot, self.othervars[2])
         rr = aux.get_rect()
-
-        if self.dragging:
-            self.drag()     # Drags the object around
-        if self.resizing:
-            self.resize()   # Resizes the object
 
         if self.minimize:
             pygame.draw.rect(self.Body, (0,0,0,150), (0,0,260,20))
@@ -253,15 +260,21 @@ class Telemetry(object):
         pygame.draw.rect(self.Body, (0,0,0), (0,0,259,19), 2)
 
         # Draw ball
-        pygame.draw.circle(where, self.color, (int(self.othervars[4]),int(self.othervars[5])), 13, 0) # Circle it
         ball = pygame.image.load("ball.png") # Load Bitmap
         ball = pygame.transform.scale(ball,(19,19)) # Resize it
-        where.blit(ball,(int(self.othervars[4]) - 10, int(self.othervars[5]) - 10)) # Draw on screen
-
-        new.blit(aux, (int(self.othervars[0]-rr[2]/2), int(self.othervars[1]-rr[3]/2))) # Draws the Robot
+        if side:
+            pygame.draw.circle(where, self.color, (970 - int(self.othervars[4]), 670 - int(self.othervars[5])), 13, 0) # Circle it
+            where.blit(ball,(970 - int(self.othervars[4]) - 10, 670 - int(self.othervars[5]) - 10)) # Draw on screen
+            new.blit(aux, (int(970 - self.othervars[0]-rr[2]/2), int(670 - self.othervars[1]-rr[3]/2))) # Draws the Robot
+        else:
+            pygame.draw.circle(where, self.color, (70+int(self.othervars[4]),70+int(self.othervars[5])), 13, 0) # Circle it
+            where.blit(ball,(70 + int(self.othervars[4]) - 10, 70 + int(self.othervars[5]) - 10)) # Draw on screen
+            new.blit(aux, (70 + int(self.othervars[0]-rr[2]/2), 70 + int(self.othervars[1]-rr[3]/2))) # Draws the Robot
+        
         new.blit(self.Body, (int(self.x), int(self.y))) # Draws the object on screen
 
         where.blit(new, (0,0)) # Draws Telemetry on Screen
+        where.blit(self.font.render("PRESS SPACE TO INVERT FIELD VIEW", 1, (255,255,255)), (400,690))
 
     #----------------------------------------------------------------------------------------------
     #   METHOD THAT WRITE ON THE FLOATING PANELS
@@ -407,8 +420,7 @@ def TelemetryControl(tele, sock): # Function to Control the Telemetry Screens
     # Iterates through all ports searching messages
     for s in sock:
         try:
-            data = Flush(s)
-            # data = s.recv(1024, socket.MSG_DONTWAIT) # Get's the message from the buffer
+            data = Flush(s) # Clears buffer and returns the last data
             data = data.split() # Splits it into a list
             test = True # Assumes the message is from a new robot
 
@@ -437,9 +449,9 @@ def TelemetryControl(tele, sock): # Function to Control the Telemetry Screens
         a += 1 # adjust factor for pop values...
 
 def Flush(sock):
-    data = None
+    data = None # Initializes a void Data variable
     try:
-        while True:
-            data = sock.recv(1024, socket.MSG_DONTWAIT)
+        while True: # While there is something in the buffer
+            data = sock.recv(1024, socket.MSG_DONTWAIT) # Save it into the data
     except:
-        return data
+        return data # Return the last dat in the buffer
