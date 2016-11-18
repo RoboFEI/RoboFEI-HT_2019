@@ -247,6 +247,11 @@ class Simulation():
                     self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem,
                                                                         'DECISION_SEARCH_ON', 0)
 
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                    for rob in self.robots:
+                        print rob.vision.RetLM()
+                        print 
+
             except:
                 print "Error!"
 
