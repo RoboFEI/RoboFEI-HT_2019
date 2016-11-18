@@ -137,6 +137,8 @@ class Robot(pygame.sprite.Sprite,Vision):
         textpos = (self.x - 5, self.y - 40)
         screen.background.blit(text, textpos)
 
+        self.vision.DrawLM(screen.background)
+
     '''Control'''
 
     def motion_vars(self, front, rotate, drift):

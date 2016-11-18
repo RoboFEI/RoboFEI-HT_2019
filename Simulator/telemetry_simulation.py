@@ -66,7 +66,7 @@ class Simulation():
             tele.draw(self.screen.background, self.side)
 
         timer = time.time() - self.timestamp
-        if timer > 0.5:
+        if timer > 0.5: # Period to update telemetry in seconds
             TelemetryControl(self.tele, self.sock)
             self.timestamp = time.time()
 
