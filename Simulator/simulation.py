@@ -6,7 +6,6 @@ from helpmenu import *
 from random import random
 from random import randrange
 from setupmatch import *
-from telemetry import *
 
 class Simulation():
     def __init__(self, screen):
