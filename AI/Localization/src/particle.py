@@ -4,7 +4,6 @@ __license__ = "GNU General Public License v3.0"
 
 from math import *
 import random as rnd
-import pygame
 
 #--------------------------------------------------------------------------------------------------
 #   Class implementing a particle used on Particle Filter Localization
@@ -14,7 +13,7 @@ class Particle(object):
     #----------------------------------------------------------------------------------------------
     #   Particle constructor
     #----------------------------------------------------------------------------------------------
-    def __init__(self, x = None, y = None, rotation = None, weight = 0, normals = None, regions = None):
+    def __init__(self, x=None, y=None, rotation=None, weight=1, normals=None, regions=None, a=None, std=None):
         
         # This block sets the initial position values of the particles.
         # If there was any given value, adopt it;
@@ -62,7 +61,16 @@ class Particle(object):
         # a0: ordem(-2), a1: ordem(1)
         # a2: ordem(-4), a3: ordem(-1)
         # a4: ordem(-4), a4: ordem(-1)
-        self.a = (0, 0, 0, 0, 0, 0)
+        if a == None:
+            self.a = (0.007, 0.7, 0.00007, 0.07, 0.00007, 0.07)
+        else:
+            self.a = a
+
+        # Standard deviation used for computing angles likelihoods, in degrees.
+        if std == None:
+            self.std = 0
+        else:
+            self.std == std
 
     #----------------------------------------------------------------------------------------------
     #   Method which moves particles around. (Probabilistic Robotics, pg 124, table 5.1)
@@ -95,5 +103,54 @@ class Particle(object):
         # line 7:
         self.rotation = degrees(theta + w*dt + g*dt)
 
-    def pos(self):
-        return self.x, self.y, self.rotation
+    #----------------------------------------------------------------------------------------------
+    #   Likelihood computation
+    #----------------------------------------------------------------------------------------------
+    def Sensor(self, Measures=None, weight=1):
+        # Compute the angles the particle should be perceiving the landmark
+        Blue = -degrees(atan2(-self.y, -self.x)) - self.rotation
+        Red = -degrees(atan2(-self.y, 900-self.x)) - self.rotation
+        Yellow = -degrees(atan2(600-self.y, -self.x)) - self.rotation
+        Purple = -degrees(atan2(600-self.y, 900-self.x)) - self.rotation
+        
+        # Generate a vector with the measures
+        M = [Blue, Red, Yellow, Purple]
+
+        # Computes the cumulative likelihood of all particles.
+        for i in range(4):
+            if Measures[i] != None:
+                weight *= ComputeAngLikelihoodDeg(Measures[i], M[i], self.std)
+
+        self.weight = weight
+        return weight
+
+#--------------------------------------------------------------------------------------------------
+#   Computes the likelihood between two angles in degrees.
+#--------------------------------------------------------------------------------------------------
+def ComputeAngLikelihoodDeg(ang, base, std_deviation=0):
+    # Note: the standard deviation also is in degrees
+
+    # If the standard deviation is null
+    if std_deviation == 0: 
+        # return a binary answer.
+        if ang == base:
+            return 1
+        else:
+            return 0
+    else:
+        # else computes the cartesian points based on the angles,
+        xa = cos(radians(ang))
+        ya = sin(radians(ang))
+        xb = cos(radians(base))
+        yb = sin(radians(base))
+
+        # computes the distance between these points,
+        d = hypot(xa-xb, ya-yb)
+
+        # converts the standard deviation into aa distance measure,
+        sa = cos(radians(std_deviation))
+        sb = sin(radians(std_deviation))
+        s = hypot(sa-1, sb)
+
+        # returns the likelihood between the given angles.
+        return exp(-(d)/(2*s**2))/sqrt(2*pi*s**2)

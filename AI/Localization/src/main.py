@@ -17,8 +17,9 @@ def main():
 
     parts = []
 
-    for i in range(1):
+    for i in range(10000):
         parts.append(Particle(450, 300, 0))
+        # parts[i].a = (0.005, 5, 0.00005, 0.05, 0.00005, 0.05)
 
     simul.particles = parts
 
@@ -28,7 +29,8 @@ def main():
         #Process events
         simul.perform_events()
 
-        parts[0].Motion(0, 10, 1.0/60)
+        for part in parts:
+            part.Motion(100, 90, 1.0/60)
 
          #update soccer field
         field.draw_soccer_field()
