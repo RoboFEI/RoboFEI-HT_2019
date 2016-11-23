@@ -11,16 +11,14 @@ class Simulation():
 
         self.field = None
 
-        self.particles = []
-
     def perform_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
 
-    def display_update(self):
+    def display_update(self, particles):
         
-        for particle in self.particles:
+        for particle in particles:
             xi = particle.x + 70
             yi = particle.y + 70
             xm = xi + 2 * cos(radians(-particle.rotation))

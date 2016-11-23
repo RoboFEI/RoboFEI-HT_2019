@@ -62,13 +62,19 @@ class Particle(object):
         # a2: ordem(-4), a3: ordem(-1)
         # a4: ordem(-4), a4: ordem(-1)
         if a == None:
-            self.a = (0.007, 0.7, 0.00007, 0.07, 0.00007, 0.07)
+            a0 = rnd.gauss(0.007, 0.002)
+            a1 = rnd.gauss(7, 2)
+            a2 = rnd.gauss(0.00007, 0.00002)
+            a3 = rnd.gauss(0.07, 0.02)
+            a4 = rnd.gauss(0.00007, 0.00002)
+            a5 = rnd.gauss(0.07, 0.02)
+            self.a = (a0, a1, a2, a3, a4, a5)
         else:
             self.a = a
 
         # Standard deviation used for computing angles likelihoods, in degrees.
         if std == None:
-            self.std = 0
+            self.std = 10
         else:
             self.std == std
 
@@ -122,6 +128,7 @@ class Particle(object):
                 weight *= ComputeAngLikelihoodDeg(Measures[i], M[i], self.std)
 
         self.weight = weight
+        # print M, '\t', weight
         return weight
 
 #--------------------------------------------------------------------------------------------------
