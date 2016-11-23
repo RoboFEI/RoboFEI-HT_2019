@@ -26,7 +26,7 @@ class MonteCarlo():
 
         for i in range(self.qtd):
             # Randomly generates n particles
-            self.particles.append(Particle())
+            self.particles.append(Particle(a=(0.02,20,0.0002,0.2,0.002,0.2)))
 
         self.totalweight = 0
 
@@ -44,10 +44,11 @@ class MonteCarlo():
     #----------------------------------------------------------------------------------------------
     def Update(self, z=None):
         # If there was any measure, run the update step
+        self.totalweight = 0
+
         if z != None:
             for particle in self.particles:
                 self.totalweight += particle.Sensor(z)
-
     
     #----------------------------------------------------------------------------------------------
     #   Resample step
