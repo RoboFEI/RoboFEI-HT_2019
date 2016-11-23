@@ -48,7 +48,7 @@ class Particle(object):
             self.y = rnd.randint(regions[1][0], regions[1][1])
 
         if rotation != None:
-            self.rotation = rotation
+            self.rotation = -rotation
         elif normals:
             self.rotation = rnd.gauss(normals[2][0], normals[2][1])
         else:
@@ -74,7 +74,7 @@ class Particle(object):
 
         # Standard deviation used for computing angles likelihoods, in degrees.
         if std == None:
-            self.std = 10
+            self.std = 30
         else:
             self.std == std
 
@@ -128,7 +128,7 @@ class Particle(object):
                 weight *= ComputeAngLikelihoodDeg(Measures[i], M[i], self.std)
 
         self.weight = weight
-        # print M, '\t', weight
+        # print M, Measures, '\t', weight
         return weight
 
 #--------------------------------------------------------------------------------------------------
