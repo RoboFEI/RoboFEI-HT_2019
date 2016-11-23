@@ -4,8 +4,11 @@ __license__ = "GNU General Public License v3.0"
 
 from Viewer import *
 from particle import *
+from multiprocessing import Pool 
 
 def main():
+
+    pool = Pool()
 
     screen = Screen()
 
@@ -29,8 +32,13 @@ def main():
         #Process events
         simul.perform_events()
 
-        for part in parts:
-            part.Motion(100, 90, 1.0/60)
+        for i in range(10000/4):
+            pool.map(parts[i*4].Motion(), (100, 90, 1.0/60))
+            pool.map(parts[i*4+1].Motion(), (100, 90, 1.0/60))
+            pool.map(parts[i*4+2].Motion(), (100, 90, 1.0/60))
+            pool.map(parts[i*4+3].Motion(), (100, 90, 1.0/60))
+        # for part in parts:
+        #     part.Motion(100, 90, 1.0/60)
 
          #update soccer field
         field.draw_soccer_field()

@@ -5,7 +5,6 @@ __license__ = "GNU General Public License v3.0"
 from math import *
 import random as rnd
 from particle import *
-from Viewer import *
 
 #--------------------------------------------------------------------------------------------------
 #   This class implements the Monte Carlo's Particle Filter
@@ -48,6 +47,7 @@ class MonteCarlo():
         if z != None:
             for particle in self.particles:
                 self.totalweight += particle.Sensor(z)
+
     
     #----------------------------------------------------------------------------------------------
     #   Resample step
@@ -58,11 +58,11 @@ class MonteCarlo():
         step = self.totalweight / qtd # Computes the step size
         s = step/2 # the first step is given by half the total.
 
-        for x in self.particles: # For each particle,
-            while s < x.weight: # while the particles weight is grater than the step,
+        for p in self.particles: # For each particle,
+            while s < p.weight: # while the particles weight is grater than the step,
                 s += step # rises the step size,
-                parts.append(x) # adds the particle to the list.
-            s -= x.weight # Removes the used steps.
+                parts.append(Particle(p.x, p.y, p.rotation)) # adds the particle to the list.
+            s -= p.weight # Removes the used steps.
 
         self.particles = parts # Overwrites the previous particles.
 
@@ -72,4 +72,4 @@ class MonteCarlo():
     def main(self, u=None, z=None):
         self.Prediction(u)
         self.Update(z)
-        self.Resample(max_qtd)
+        self.Resample(self.max_qtd)
