@@ -36,8 +36,8 @@ class Simulation():
 
     def perform_events(self):
         for event in pygame.event.get():
-            try:
-            # if True:
+            # try:
+            if True:
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_a:
                     self.update_mouse_pos()
 
@@ -248,11 +248,14 @@ class Simulation():
 
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                     for rob in self.robots:
-                        print rob.vision.RetLM()
-                        print 
+                        z = rob.vision.RetLM()
+                        rob.bkb.write_float(rob.Mem,'VISION_BLUE_LANDMARK_DEG', z[0])
+                        rob.bkb.write_float(rob.Mem,'VISION_RED_LANDMARK_DEG', z[1])
+                        rob.bkb.write_float(rob.Mem,'VISION_YELLOW_LANDMARK_DEG', z[2])
+                        rob.bkb.write_float(rob.Mem,'VISION_PURPLE_LANDMARK_DEG', z[3])
 
-            except:
-                print "Error!"
+            # except:
+            #     print "Error!"
 
             if event.type == pygame.QUIT:
                 sys.exit()

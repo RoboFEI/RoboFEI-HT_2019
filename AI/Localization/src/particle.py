@@ -58,6 +58,7 @@ class Particle(object):
         
         self.weight = weight # Holds particles weight, can come from previous iterations
 
+        spread = 1
         # Motion error coefficients
         if a == None:
             a = []

@@ -58,7 +58,7 @@ class VISION():
             if CompAng(ang, 0, self.fov/2.0):
                 y.append(rnd.gauss(ang, 3))
             else:
-                y.append(None)
+                y.append(-999)
         return y
 
 def CompAng(ang, base, rng):
