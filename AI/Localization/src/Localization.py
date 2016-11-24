@@ -146,20 +146,27 @@ def Test():
 
     simul.field = field
 
-    PF = MonteCarlo(1000)
-    u = (10, 1, 1.0)
+    PF = MonteCarlo(5000)
+    # u = (0, 0, 0, 1.0/60)
+    # z = [58.90350285991855, -8.292980444757765, None, -51.1515784530202]
+    # z = [-68.5667128132698, None, -383.98066009226767, -292.3215153042386]
+    # z = [None, -6.055309739945574, None, None]
+
+    # z = [None, None, None, None]
+
     # PF.main(u, z)
-    i = 0
+    # i = 0
     #Main loop
     while True:
 
         #Process events
         simul.perform_events()
 
-        z = Meas[i]
+        # z = Meas[i]
         PF.main(u, z)
         
-        i+=1
+        # u = (0, 0, 0, 1.0/60)
+        # i+=1
         # print len(PF.particles)
         #update soccer field
         field.draw_soccer_field()
@@ -168,7 +175,7 @@ def Test():
         simul.display_update(PF.particles)
 
         #Pause for the next frame
-        screen.clock.tick(1)
+        screen.clock.tick(60)
 
 #Call the main function, start up the simulation
 if __name__ == "__main__":
