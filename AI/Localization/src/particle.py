@@ -13,7 +13,7 @@ class Particle(object):
     #----------------------------------------------------------------------------------------------
     #   Particle constructor
     #----------------------------------------------------------------------------------------------
-    def __init__(self, x=None, y=None, rotation=None, weight=1, normals=None, regions=None, a=None, std=None):
+    def __init__(self, x=None, y=None, rotation=None, weight=1, normals=None, regions=None, a=None, std=None, spread=1):
         
         # This block sets the initial position values of the particles.
         # If there was any given value, adopt it;
@@ -29,6 +29,8 @@ class Particle(object):
         # the first line presents the min and max values of the x position
         # the second line presents the min and max values of the y position
         # the third line presents the min and max values of the rotation
+
+        # Note3: spread determines how much the particles will spread
 
         if regions == None:
             regions = ((0, 900), (0, 600), (-180, 180))
@@ -48,7 +50,7 @@ class Particle(object):
             self.y = rnd.randint(regions[1][0], regions[1][1])
 
         if rotation != None:
-            self.rotation = -rotation
+            self.rotation = rotation
         elif normals:
             self.rotation = rnd.gauss(normals[2][0], normals[2][1])
         else:
@@ -57,25 +59,35 @@ class Particle(object):
         self.weight = weight # Holds particles weight, can come from previous iterations
 
         # Motion error coefficients
-        # a0: ordem(), a1: ordem(), a2: ordem(), a3: ordem()
-        # a4: ordem(), a5: ordem(), a6: ordem(), a7: ordem()
-        # a8: ordem(), a9: ordem(), a10: ordem(), a11: ordem()
-        # a12: ordem(), a13: ordem(), a14: ordem(), a15: ordem()
-
         if a == None:
-            a0 = rnd.gauss(0.007, 0.002)
-            a1 = rnd.gauss(7, 2)
-            a2 = rnd.gauss(0.00007, 0.00002)
-            a3 = rnd.gauss(0.07, 0.02)
-            a4 = rnd.gauss(0.00007, 0.00002)
-            a5 = rnd.gauss(0.07, 0.02)
-            self.a = (a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15)
+            a = []
+            a.append(rnd.gauss(spread*0.0007,0.0002*spread)) # a0 e-3
+            a.append(rnd.gauss(spread*0.0007,0.0002*spread)) # a1 e-3
+            a.append(rnd.gauss(spread*7,2*spread)) # a2 e+1
+            a.append(rnd.gauss(spread*7,2*spread)) # a3 e+1
+
+            a.append(rnd.gauss(spread*0.0007,0.0002*spread)) # a4 e-3
+            a.append(rnd.gauss(spread*0.0007,0.0002*spread)) # a5 e-3
+            a.append(rnd.gauss(spread*7,2*spread)) # a6 e+1
+            a.append(rnd.gauss(spread*7,2*spread)) # a7 e+1
+
+            a.append(rnd.gauss(spread*0.000007,0.000002*spread)) # a8 e-5  
+            a.append(rnd.gauss(spread*0.000007,0.000002*spread)) # a9 e-5 
+            a.append(rnd.gauss(spread*0.07,0.02*spread)) # a10 e-1
+            a.append(rnd.gauss(spread*0.07,0.02*spread)) # a11 e-1
+
+            a.append(rnd.gauss(spread*0.000007,0.000002*spread)) # a12 e-5
+            a.append(rnd.gauss(spread*0.000007,0.000002*spread)) # a13 e-5
+            a.append(rnd.gauss(spread*0.07,0.02*spread)) # a14 e-1
+            a.append(rnd.gauss(spread*0.07,0.02*spread)) # a15 e-1
+            # self.a = (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+            self.a = a
         else:
             self.a = a
 
         # Standard deviation used for computing angles likelihoods, in degrees.
         if std == None:
-            self.std = 30
+            self.std = 10
         else:
             self.std == std
 
@@ -91,31 +103,24 @@ class Particle(object):
         rtt = radians(rotational) # converts rotational from degrees to radians
         
         # Adds a gaussian error to thhe forward speed
-        F = rnd.gauss(straight, self.a[0]*straight**2 + self.a[1]*drift**2 + self.a[2]*rotational + self.a[3]*moving)
+        F = rnd.gauss(straight, self.a[0]*straight**2 + self.a[1]*drift**2 + self.a[2]*rtt**2 + self.a[3]*moving)
         # Adds a gaussian error to the drift speed
-        D = rnd.gauss(drift, self.a[4]*straight**2 + self.a[5]*drift**2 + self.a[6]*rotational + self.a[7]*moving)
+        D = rnd.gauss(drift, self.a[4]*straight**2 + self.a[5]*drift**2 + self.a[6]*rtt**2 + self.a[7]*moving)
         # Adds a gaussian error to the rotational speed
-        W = rnd.gauss(rotational, self.a[8]*straight**2 + self.a[9]*drift**2 + self.a[10]*rotational + self.a[11]*moving)
+        W = rnd.gauss(rtt, self.a[8]*straight**2 + self.a[9]*drift**2 + self.a[10]*rtt**2 + self.a[11]*moving)
         # Adds an error to the final rotational position
-        g = rnd.gauss(0, self.a[12]*straight**2 + self.a[13]*drift**2 + self.a[14]*rotational + self.a[15]*moving)
-
+        g = rnd.gauss(0, self.a[12]*straight**2 + self.a[13]*drift**2 + self.a[14]*rtt**2 + self.a[15]*moving)        
 
         theta = radians(self.rotation) # converts particle's rotation to radians.
 
         # In case of angle been smaller than 1 degree, execute this part
         if degrees(abs(W)) < 1:
-            self.y += (D*sin(theta) + F*cos(theta))*dt # X position motion
-            self.y += (D*cos(theta) + F*sin(theta))*dt # Y position motion
+            self.x += (D*sin(theta) + F*cos(theta))*dt # X position motion
+            self.y += (D*cos(theta) - F*sin(theta))*dt # Y position motion
         else:
-            # Auxiliar pre-computation
-            st = sin(theta)
-            sw = sin(W*dt)
-            ct = cos(theta)
-            cw = cos(W*dt)
+            self.x += - F/W*sin(theta) + F/W*sin(theta+W*dt) - D/W*cos(-theta) + D/W*cos(-theta+W*dt)
+            self.y += -F/W*cos(theta) + F/W*cos(theta+W*dt) - D/W*sin(-theta) + D/W*sin(-theta+W*dt)
 
-            self.x += (D*st*sw - D*ct*cw + F*st*cw + F*ct*sw)/W # X position motion
-            self.y += (D*st*cw + D*ct*sw + F*st*sw - F*ct*cw)/W # Y position motion
-        
         # Final particle rotation
         self.rotation = degrees(theta + W*dt + g*dt)
 

@@ -21,10 +21,10 @@ class Simulation():
         for particle in particles:
             xi = particle.x + 70
             yi = particle.y + 70
-            xm = xi + 2 * cos(radians(-particle.rotation))
-            ym = yi - 2 * sin(radians(-particle.rotation))
-            xf = xm + 3 * cos(radians(-particle.rotation))
-            yf = ym - 3 * sin(radians(-particle.rotation))
+            xm = xi + 2 * cos(radians(particle.rotation))
+            ym = yi - 2 * sin(radians(particle.rotation))
+            xf = xm + 3 * cos(radians(particle.rotation))
+            yf = ym - 3 * sin(radians(particle.rotation))
             pygame.draw.line(self.screen.background,(0,0,0),(xi,yi),(xm,ym), 1)
             pygame.draw.line(self.screen.background,(0,0,255),(xm,ym),(xf,yf), 1)
 

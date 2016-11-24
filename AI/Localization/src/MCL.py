@@ -26,7 +26,7 @@ class MonteCarlo():
 
         for i in range(self.qtd):
             # Randomly generates n particles
-            self.particles.append(Particle(a=(0.02,20,0.0002,0.2,0.002,0.2)))
+            self.particles.append(Particle())
 
         self.totalweight = 0
 
@@ -37,7 +37,7 @@ class MonteCarlo():
         # If there was movement, run the predction step
         if u != None:
             for particle in self.particles:
-                particle.Motion(u[0], u[1], u[2])
+                particle.Motion(u[0], u[1], u[2], 1, u[3])
 
     #----------------------------------------------------------------------------------------------
     #   Update step
