@@ -37,7 +37,7 @@ class MonteCarlo():
         # If there was movement, run the predction step
         if u != None:
             for particle in self.particles:
-                particle.Motion(u[0], u[1], u[2], 1, u[3])
+                particle.Motion(u[0], u[1], u[2], u[3], u[4])
 
     #----------------------------------------------------------------------------------------------
     #   Update step
