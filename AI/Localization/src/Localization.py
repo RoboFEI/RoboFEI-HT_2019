@@ -11,7 +11,7 @@ import argparse
 # Import a shared memory
 import sys
 sys.path.append('../../Blackboard/src/')
-from SharedMemory import SharedMemory 
+from SharedMemory import SharedMemory
 try:
     from configparser import ConfigParser
 except ImportError:
@@ -42,14 +42,10 @@ class Localization():
 
         # To parse arguments on execution
         parser = argparse.ArgumentParser(description='Robot Localization', epilog= 'Implements particle filters to self-localize a robot on the field.')
-        parser.add_argument('--nothing', '--n', action="store_true", help='Nothing yet.')
+        parser.add_argument('-g', '--graphs', action="store_true", help='Shows graphical interface which visualizes the particles.')
+        parser.add_argument('-l', '--log', action="store_true", help='Print variable logs.')
 
-        args = parser.parse_args()
-
-        if args.nothing:
-            print "DO NOTHING"
-        else:
-            print "DO NOT DO NOTHING"
+        self.args = parser.parse_args()
 
         # Timestamp to use on the time step used for motion
         self.timestamp = time.time()
@@ -64,15 +60,16 @@ class Localization():
     #   Localization's main method.
     #----------------------------------------------------------------------------------------------
     def main(self):
-        screen = Screen() # Creates a new screen
+        screen = Screen(self.args.graphs) # Creates a new screen
 
-        simul = Simulation(screen) # Creates the interface structure
-
-        field = SoccerField(screen) # Draws the field
-
-        simul.field = field # Passes the field to the simulation
+        if self.args.graphs:
+            simul = Simulation(screen) # Creates the interface structure
+            field = SoccerField(screen) # Draws the field
+            simul.field = field # Passes the field to the simulation
 
         PF = MonteCarlo(5000) # Starts the Particle Filter
+
+        print
 
         # Main loop
         while True:
@@ -80,7 +77,8 @@ class Localization():
             self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 1) # Sets the flag for telemetry
 
             # Process interactions events
-            simul.perform_events()
+            if self.args.graphs:
+                simul.perform_events()
 
             # Gets the motion command from the blackboard.
             u = self.GetU(self.bkb.read_int(self.Mem, 'DECISION_ACTION_A'))
@@ -96,32 +94,31 @@ class Localization():
             z3 = self.bkb.read_float(self.Mem, 'VISION_PURPLE_LANDMARK_DEG')
             self.bkb.write_float(self.Mem, 'VISION_PURPLE_LANDMARK_DEG', -999)
 
-            # TODO - Pass this convertion to the Particle.Sensor() method.
-            # if z0 == -999:
-            #     z0 = None
-            # if z1 == -999:
-            #     z1 = None
-            # if z2 == -999:
-            #     z2 = None
-            # if z3 == -999:
-            #     z3 = None
-
             # Mounts the vector to be sent
             z = [z0, z1, z2, z3]
                     
             # Performs Particle Filter's Update
             pos, std = PF.main(u,z)
 
+            if self.args.log:
+                print '\t\x1b[32mRobot at', # Prints header
+                print '\x1b[32m[x:\x1b[34m{} cm'.format(int(pos[0])), #  Prints the x position
+                print '\x1b[32m| y:\x1b[34m{} cm'.format(int(pos[1])), # Prints the y position
+                print u'\x1b[32m| \u03B8:\x1b[34m{}\u00B0'.format(int(pos[2])), # Prints the theta
+                print u'\x1b[32m| \u03C3:\x1b[34m{} cm\x1b[32m]'.format(int(std)) # Prints the standard deviation
+
+            # Wirte the robot's position on Black Board to be read by telemetry
             self.bkb.write_int(self.Mem, 'LOCALIZATION_X', int(pos[0]))
             self.bkb.write_int(self.Mem, 'LOCALIZATION_Y', int(pos[1]))
             self.bkb.write_int(self.Mem, 'LOCALIZATION_THETA', int(pos[2]))
             self.bkb.write_float(self.Mem, 'LOCALIZATION_RBT01_X', std)
 
-            # Redraws the screen background
-            field.draw_soccer_field()
+            if self.args.graphs:
+                # Redraws the screen background
+                field.draw_soccer_field()
 
-            # Draws all particles on screen
-            simul.display_update(PF.particles)
+                # Draws all particles on screen
+                simul.display_update(PF.particles)
 
             # Updates for the next clock
             screen.clock.tick(60)
