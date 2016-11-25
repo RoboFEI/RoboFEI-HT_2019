@@ -58,7 +58,7 @@ class VISION():
             if CompAng(ang, 0, self.fov/2.0):
                 y.append(rnd.gauss(ang, 3))
             else:
-                y.append(-999)
+                y.append(-999) # Return this if not seen the ball
         return y
 
 def CompAng(ang, base, rng):

@@ -119,6 +119,7 @@ class Particle(object):
             self.x += (D*sin(theta) + F*cos(theta))*dt # X position motion
             self.y += (D*cos(theta) - F*sin(theta))*dt # Y position motion
         else:
+            # Computes new x and y position using movement in arcs.
             self.x += - F/W*sin(theta) + F/W*sin(theta+W*dt) - D/W*cos(-theta) + D/W*cos(-theta+W*dt)
             self.y += -F/W*cos(theta) + F/W*cos(theta+W*dt) - D/W*sin(-theta) + D/W*sin(-theta+W*dt)
 
@@ -140,11 +141,10 @@ class Particle(object):
 
         # Computes the cumulative likelihood of all particles.
         for i in range(4):
-            if Measures[i] != None:
+            if Measures[i] != -999:
                 weight *= ComputeAngLikelihoodDeg(Measures[i], M[i], self.std)
 
         self.weight = weight
-        # print M, Measures, '\t', weight
         return weight
 
 #--------------------------------------------------------------------------------------------------
