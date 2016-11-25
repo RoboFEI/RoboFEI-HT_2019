@@ -2,10 +2,11 @@ __author__ = "RoboFEI-HT"
 __authors__ = "Aislan C. Almeida"
 __license__ = "GNU General Public License v3.0"
 
-from Viewer import *
-from MCL import *
-import time
+from Viewer import * # Imports the environment of the viewer
+from MCL import * # Imports the Particle Filter Class
+import time 
 
+# To pass arguments to the function
 import argparse
 # Import a shared memory
 import sys
@@ -16,23 +17,30 @@ try:
 except ImportError:
     from ConfigParser import ConfigParser
 
-class Localization():
-    def __init__(self):
+#--------------------------------------------------------------------------------------------------
+#   Class implementing the Core of the Localization Process
+#--------------------------------------------------------------------------------------------------
 
-        self.bkb = SharedMemory()
-        config = ConfigParser()
+class Localization():
+    #----------------------------------------------------------------------------------------------
+    #   Class constructor and pre-processing.
+    #----------------------------------------------------------------------------------------------
+    def __init__(self):
+        self.bkb = SharedMemory() # Instance of a blackboard
+        config = ConfigParser()   # Configuration file
 
         try:
-            config.read('../../Control/Data/config.ini')
-            mem_key = int(config.get('Communication', 'no_player_robofei'))*100
+            config.read('../../Control/Data/config.ini') # Reads the config archive
+            mem_key = int(config.get('Communication', 'no_player_robofei'))*100 # Get the memory key
         except:
             print "#----------------------------------#"
             print "#   Error loading config parser.   #"
             print "#----------------------------------#"
             sys.exit()
 
-        self.Mem = self.bkb.shd_constructor(mem_key)
+        self.Mem = self.bkb.shd_constructor(mem_key) # Create the link to the blackboard
 
+        # To parse arguments on execution
         parser = argparse.ArgumentParser(description='Robot Localization', epilog= 'Implements particle filters to self-localize a robot on the field.')
         parser.add_argument('--nothing', '--n', action="store_true", help='Nothing yet.')
 
@@ -43,32 +51,42 @@ class Localization():
         else:
             print "DO NOT DO NOTHING"
 
+        # Timestamp to use on the time step used for motion
         self.timestamp = time.time()
 
+        # Clears the variables in the blackboard
         self.bkb.write_float(self.Mem, 'VISION_BLUE_LANDMARK_DEG', -999)
         self.bkb.write_float(self.Mem, 'VISION_RED_LANDMARK_DEG', -999)
         self.bkb.write_float(self.Mem, 'VISION_YELLOW_LANDMARK_DEG', -999)
         self.bkb.write_float(self.Mem, 'VISION_PURPLE_LANDMARK_DEG', -999)
 
+    #----------------------------------------------------------------------------------------------
+    #   Localization's main method.
+    #----------------------------------------------------------------------------------------------
     def main(self):
-        screen = Screen()
+        screen = Screen() # Creates a new screen
 
-        simul = Simulation(screen)
+        simul = Simulation(screen) # Creates the interface structure
 
-        field = SoccerField(screen)
+        field = SoccerField(screen) # Draws the field
 
-        simul.field = field
+        simul.field = field # Passes the field to the simulation
 
-        PF = MonteCarlo(5000)
+        PF = MonteCarlo(5000) # Starts the Particle Filter
 
-        #Main loop
+        # Main loop
         while True:
 
-            #Process events
+            self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 1) # Sets the flag for telemetry
+
+            # Process interactions events
             simul.perform_events()
 
+            # Gets the motion command from the blackboard.
             u = self.GetU(self.bkb.read_int(self.Mem, 'DECISION_ACTION_A'))
 
+            # Gets the measured variable from the blackboard,
+            # and free them.
             z0 = self.bkb.read_float(self.Mem, 'VISION_BLUE_LANDMARK_DEG')
             self.bkb.write_float(self.Mem, 'VISION_BLUE_LANDMARK_DEG', -999)
             z1 = self.bkb.read_float(self.Mem, 'VISION_RED_LANDMARK_DEG')
@@ -78,142 +96,75 @@ class Localization():
             z3 = self.bkb.read_float(self.Mem, 'VISION_PURPLE_LANDMARK_DEG')
             self.bkb.write_float(self.Mem, 'VISION_PURPLE_LANDMARK_DEG', -999)
 
-            if z0 == -999:
-                z0 = None
-            if z1 == -999:
-                z1 = None
-            if z2 == -999:
-                z2 = None
-            if z3 == -999:
-                z3 = None
+            # TODO - Pass this convertion to the Particle.Sensor() method.
+            # if z0 == -999:
+            #     z0 = None
+            # if z1 == -999:
+            #     z1 = None
+            # if z2 == -999:
+            #     z2 = None
+            # if z3 == -999:
+            #     z3 = None
 
+            # Mounts the vector to be sent
             z = [z0, z1, z2, z3]
                     
-            # Perform Motion Update
-            PF.main(u,z)
+            # Performs Particle Filter's Update
+            pos, std = PF.main(u,z)
 
-            #update soccer field
+            self.bkb.write_int(self.Mem, 'LOCALIZATION_X', int(pos[0]))
+            self.bkb.write_int(self.Mem, 'LOCALIZATION_Y', int(pos[1]))
+            self.bkb.write_int(self.Mem, 'LOCALIZATION_THETA', int(pos[2]))
+            self.bkb.write_float(self.Mem, 'LOCALIZATION_RBT01_X', std)
+
+            # Redraws the screen background
             field.draw_soccer_field()
 
-            #Draw robots, ball and update the current frame
+            # Draws all particles on screen
             simul.display_update(PF.particles)
 
-            #Pause for the next frame
+            # Updates for the next clock
             screen.clock.tick(60)
 
+    #----------------------------------------------------------------------------------------------
+    #   This method returns a command instruction to the particles.
+    #----------------------------------------------------------------------------------------------
     def GetU(self, Action):
         if Action == 0:
-            return self.ctrl_Stop()
+            return (0,0,0,0,self.dt()) # Stop
         elif Action == 11:
-            return self.ctrl_Gait()
+            return (0,0,0,1,self.dt()) # Gait
         elif Action == 1:
-            return self.ctrl_FFWalk()
+            return (20,0,0,1,self.dt()) # Fast Walk Forward
         elif Action == 8:
-            return self.ctrl_SFWalk()
+            return (10,0,0,1,self.dt()) # Slow Walk Forward
         elif Action == 17:
-            return self.ctrl_FBWalk()
+            return (-20,0,0,1,self.dt()) # Fast Walk Backward
         elif Action == 18:
-            return self.ctrl_SBWalk()
+            return (-10,0,0,1,self.dt()) # Slow Walk Backward
         elif Action == 6:
-            return self.ctrl_LWalk()
+            return (0,-10,0,1,self.dt()) # Walk Left
         elif Action == 7:
-            return self.ctrl_RWalk()
+            return (0,10,0,1,self.dt()) # Walk Right
         elif Action == 2:
-            return self.ctrl_LTurn()
+            return (0,0,20,1,self.dt()) # Turn Right
         elif Action == 3:
-            return self.ctrl_RTurn()
+            return (0,0,-20,1,self.dt()) # Turn Left
         elif Action == 9:
-            return self.ctrl_LATurn()
+            return (0,-10,-20,1,self.dt()) # Turn Left Around the Ball
         elif Action == 14:
-            return self.ctrl_RATurn()
+            return (0,10,20,1,self.dt()) # Turn Right Around the Ball
 
+    #----------------------------------------------------------------------------------------------
+    #   This method returns the time since the last update
+    #----------------------------------------------------------------------------------------------
     def dt(self):
         auxtime = time.time()
         timer = auxtime - self.timestamp
         self.timestamp = auxtime
         return timer
 
-    def ctrl_Stop(self):
-        return (0,0,0,0,self.dt())
-
-    def ctrl_Gait(self):
-        return (0,0,0,1,self.dt())
-
-    def ctrl_FFWalk(self):
-        return (20,0,0,1,self.dt())
-
-    def ctrl_SFWalk(self):
-        return (10,0,0,1,self.dt())
-
-    def ctrl_FBWalk(self):
-        return (-20,0,0,1,self.dt())
-
-    def ctrl_SBWalk(self):
-        return (-10,0,0,1,self.dt())
-
-    def ctrl_LWalk(self):
-        return (0,-10,0,1,self.dt())
-
-    def ctrl_RWalk(self):
-        return (0,10,0,1,self.dt())
-
-    def ctrl_LTurn(self):
-        return (0,0,20,1,self.dt())
-
-    def ctrl_RTurn(self):
-        return (0,0,-20,1,self.dt())
-
-    def ctrl_RATurn(self):
-        return (0,10,-20,1,self.dt())
-
-    def ctrl_LATurn(self):
-        return (0,-10,20,1,self.dt())
-
-
-def Test():
-    screen = Screen()
-
-    simul = Simulation(screen)
-
-    field = SoccerField(screen)
-
-    simul.field = field
-
-    PF = MonteCarlo(5000)
-    # u = (0, 0, 0, 1.0/60)
-    # z = [58.90350285991855, -8.292980444757765, None, -51.1515784530202]
-    # z = [-68.5667128132698, None, -383.98066009226767, -292.3215153042386]
-    # z = [None, -6.055309739945574, None, None]
-
-    # z = [None, None, None, None]
-
-    # PF.main(u, z)
-    # i = 0
-    #Main loop
-    while True:
-
-        print self.bkb.read_float(self.Mem, 'VISION_BLUE_LANDMARK_DEG')
-
-        #Process events
-        simul.perform_events()
-
-        # z = Meas[i]
-        # PF.main(u, z)
-        
-        # u = (0, 0, 0, 1.0/60)
-        # i+=1
-        # print len(PF.particles)
-        #update soccer field
-        field.draw_soccer_field()
-
-        #Draw robots, ball and update the current frame
-        simul.display_update(PF.particles)
-
-        #Pause for the next frame
-        screen.clock.tick(60)
-
 #Call the main function, start up the simulation
 if __name__ == "__main__":
     Loc = Localization()
     Loc.main()
-    # Test()
