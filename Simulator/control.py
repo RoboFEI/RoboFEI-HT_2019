@@ -84,7 +84,7 @@ class CONTROL():
             if flag == 8:
                 self.robot.in_motion = True
                 SPEED = self.bkb.read_int(self.Mem, 'DECISION_ACTION_B')
-                print SPEED
+                
                 if SPEED < self.robot.slow_walk_speed:
                     self.robot.motion_vars(self.walk_speed * SPEED,
                                            self.action_vars[flag][1],

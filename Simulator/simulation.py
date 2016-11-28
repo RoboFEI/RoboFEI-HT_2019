@@ -61,6 +61,8 @@ class Simulation():
                     else:
                         robot = Robot(self.mx, self.my, 0, (len(self.robots) + 1) * self.screen.KEY_BKB, self.screen.CYAN)
                         robot.imu_initial_value = 0
+                        robot.fast_walk_speed = -1000
+                        robot.turn_angle = 300
 
                     robot.bkb.write_int(robot.Mem, 'DECISION_ACTION_A', 0)
                     robot.ball = self.ball
@@ -71,12 +73,12 @@ class Simulation():
                     robot.set_errors(0,0,0,0,0,0,0,0,0,0,0,0.01)
 
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_k:
-                        self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 8)
-                        self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem,
+                    self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 8)
+                    self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem,
                                                                     'DECISION_ACTION_B', 10)
 
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
-                        self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 18)
+                    self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 18)
 
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_e:
                     self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 2)

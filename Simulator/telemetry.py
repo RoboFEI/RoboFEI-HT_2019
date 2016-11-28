@@ -136,7 +136,7 @@ class Telemetry(object):
             self.othervars[1] = float(data[2])
             self.othervars[2] = int(float(data[3]))
             self.othervars[3] = float(data[4])
-            
+
             if data[4] == -1:
                 self.othervars[4] = -1000
                 self.othervars[5] = -1000
@@ -281,7 +281,7 @@ class Telemetry(object):
 
         self.font.set_bold(True)
         timer = self.timeout()
-        if timer < 1:
+        if timer < 1.7:
             self.Body.blit(self.font.render(self.name, 1, self.color), (10, 4))
         else:
             self.Body.blit(self.font.render(self.name + ' [TIMEOUT = ' + str(int(timer)) + ' SEC]', 1, self.color), (10, 4))
