@@ -93,6 +93,17 @@ class Particle(object):
             self.std == std
 
     #----------------------------------------------------------------------------------------------
+    #   Method that chooses which movement should be used
+    #----------------------------------------------------------------------------------------------
+    def Movement(self, straight=0, drift=0, rotational=0, moving=1, dt=0):
+        if moving == 1:
+            self.Motion(straight, drift, rotational, moving, dt)
+        elif moving == 2:
+            self.GetUpBackUp()
+        elif moving == 3:
+            self.GetUpFrontUp()
+
+    #----------------------------------------------------------------------------------------------
     #   Method which moves particles around, reimplement.
     #----------------------------------------------------------------------------------------------
     def Motion(self, straight=0, drift=0, rotational=0, moving=1, dt=0):
@@ -125,6 +136,23 @@ class Particle(object):
 
         # Final particle rotation
         self.rotation = degrees(theta + W*dt + g*dt)
+
+    #----------------------------------------------------------------------------------------------
+    #   Method to replace particles after rising up
+    #----------------------------------------------------------------------------------------------
+    def GetUpBackUp(self):
+        self.x += rnd.gauss(0, 7)
+        self.y += rnd.gauss(0, 7)
+        self.rotation += rnd.gauss(0, 25)
+
+    #----------------------------------------------------------------------------------------------
+    #   Method which replaces particles after turning on the ground
+    #----------------------------------------------------------------------------------------------
+    def GetUpFrontUp(self):
+        self.x += rnd.gauss(-30,7)*sin(radians(self.rotation))
+        self.y += rnd.gauss(-30,7)*cos(radians(self.rotation))
+        self.rotation += rnd.gauss(0, 25)
+        self.GetUpBackUp()
 
     #----------------------------------------------------------------------------------------------
     #   Likelihood computation

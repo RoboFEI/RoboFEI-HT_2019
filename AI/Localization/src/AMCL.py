@@ -8,7 +8,7 @@ from particle import *
 
 #--------------------------------------------------------------------------------------------------
 #   This class implements the Monte Carlo's Particle Filter
-#   - Note that this is the most simples version of Monte Carlo Localization
+#   - Note that this is the augmented version, where random particles are generated when needed.
 #--------------------------------------------------------------------------------------------------
 
 class MonteCarlo():
@@ -21,8 +21,6 @@ class MonteCarlo():
 
         # Limits the quantity of particles the filter will have
         self.max_qtd = max_qtd
-
-        # Initializes with the max quantity of particles
         self.qtd = max_qtd
 
         for i in range(self.qtd):
@@ -30,6 +28,12 @@ class MonteCarlo():
             self.particles.append(Particle())
 
         self.totalweight = 0 # Holds the total sum of particles' weights.
+
+        # Coefficients used to determine if it is supposed to generate new particles.
+        self.wslow = 0
+        self.wfast = 0
+        self.aslow = 0.3 # 0 < aslow << afast
+        self.afast = 0.7
 
         self.mean = [450, 300, 0] # Holds the mean position of the estimated position.
         self.std = 0
@@ -58,7 +62,12 @@ class MonteCarlo():
     #   Resample step
     #----------------------------------------------------------------------------------------------
     def Resample(self, qtd):
-        parts = [] # Starts a empty list.
+        parts = [] # Starts a empty list, which will hold copies of old particles
+        new = [] # Starts a empty list, whihc will hold new random particles
+
+        # Coefficients adjusments
+        self.wslow += self.aslow * (self.totalweight/len(self.particles) - self.wslow)
+        self.wfast += self.afast * (self.totalweight/len(self.particles) - self.wfast)
 
         step = self.totalweight / qtd # Computes the step size
         s = step/2 # the first step is given by half the total.
@@ -67,31 +76,39 @@ class MonteCarlo():
         m_y = 0 # Sum of y
         m_s = 0 # Sum of sin of rotation
         m_c = 0 # Sum of cos of rotation
+        m_count = 0 # Quantity counter
 
         for p in self.particles: # For each particle,
             while s < p.weight: # while the particles weight is grater than the step,
                 s += step # rises the step size,
-                parts.append(Particle(p.x, p.y, p.rotation)) # adds the particle to the list.
-                # Do the summing process for the mean computation
-                m_x += p.x 
-                m_y += p.y 
-                m_s += sin(radians(p.rotation))
-                m_c += cos(radians(p.rotation))
+                if max(0, 1.0-self.wfast/self.wslow) > rnd.random():
+                    new.append(Particle()) # generates a new random particle
+                else:
+                    parts.append(Particle(p.x, p.y, p.rotation)) # adds the particle to the list.
+                    # Do the summing process for the mean computation
+                    m_x += p.x 
+                    m_y += p.y 
+                    m_s += sin(radians(p.rotation))
+                    m_c += cos(radians(p.rotation))
             s -= p.weight # Removes the used steps.
 
-        self.particles = parts # Overwrites the previous particles.
-        self.qtd = len(self.particles) # Saves the quantity of particles.
+        oldqtd = len(parts) # Saves the quantity of particles.
 
         # Computes the mean dividing the sum for the quantity
-        self.mean[0] = m_x / self.qtd
-        self.mean[1] = m_y / self.qtd
+        self.mean[0] = m_x / oldqtd
+        self.mean[1] = m_y / oldqtd
         # computes mean rotation by finding the arctan of the sum of sins over cossins
         self.mean[2] = degrees(atan2(m_s,m_c))
 
+        # Computes the standard deviation of particles
         sum_std = 0
-        for p in self.particles:
+        for p in parts:
             sum_std += (p.x - self.mean[0])**2 + (p.y - self.mean[1])**2
-        self.std = sqrt(sum_std / self.qtd)
+        self.std = sqrt(sum_std / oldqtd)
+
+        # Saves the particles for the next iteration
+        self.particles = parts + new
+        self.qtd = len(self.particles)
 
     #----------------------------------------------------------------------------------------------
     #   Main algorithm

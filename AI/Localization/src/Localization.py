@@ -3,7 +3,7 @@ __authors__ = "Aislan C. Almeida"
 __license__ = "GNU General Public License v3.0"
 
 from Viewer import * # Imports the environment of the viewer
-from MCL import * # Imports the Particle Filter Class
+from AMCL import * # Imports the Particle Filter Class
 import time 
 
 # To pass arguments to the function
@@ -104,7 +104,7 @@ class Localization():
                 self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', 1)
             elif std < 30: # Se for pequeno o bastante ele acha a bola
                 self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', 0)
-
+            
             if self.args.log:
                 print '\t\x1b[32mRobot at', # Prints header
                 print '\x1b[32m[x:\x1b[34m{} cm'.format(int(pos[0])), #  Prints the x position
@@ -132,8 +132,8 @@ class Localization():
     #   This method returns a command instruction to the particles.
     #----------------------------------------------------------------------------------------------
     def GetU(self, Action):
-        if Action == 0:
-            return (0,0,0,0,self.dt()) # Stop
+        if Action in [0, 4, 5, 12, 13, 19, 20, 21, 22]:
+            return (0,0,0,0,self.dt()) # Stop or kick
         elif Action == 11:
             return (0,0,0,1,self.dt()) # Gait
         elif Action == 1:
@@ -156,6 +156,10 @@ class Localization():
             return (0,-10,-20,1,self.dt()) # Turn Left Around the Ball
         elif Action == 14:
             return (0,10,20,1,self.dt()) # Turn Right Around the Ball
+        elif Action == 16:
+            return (0,0,0,2,self.dt()) # Get up, back up
+        elif Action == 15:
+            return (0,0,0,3,self.dt()) # Get up, front up
 
     #----------------------------------------------------------------------------------------------
     #   This method returns the time since the last update
