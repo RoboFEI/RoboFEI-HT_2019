@@ -36,8 +36,8 @@ class Simulation():
 
     def perform_events(self):
         for event in pygame.event.get():
-            # try:
-            if True:
+            try:
+            # if True:
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_a:
                     self.update_mouse_pos()
 
@@ -246,17 +246,8 @@ class Simulation():
                     self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem,
                                                                         'DECISION_SEARCH_ON', 0)
 
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                    for rob in self.robots:
-                        # Saves robots perception on the black board
-                        z = rob.vision.RetLM()
-                        rob.bkb.write_float(rob.Mem,'VISION_BLUE_LANDMARK_DEG', z[0])
-                        rob.bkb.write_float(rob.Mem,'VISION_RED_LANDMARK_DEG', z[1])
-                        rob.bkb.write_float(rob.Mem,'VISION_YELLOW_LANDMARK_DEG', z[2])
-                        rob.bkb.write_float(rob.Mem,'VISION_PURPLE_LANDMARK_DEG', z[3])
-
-            # except:
-            #     print "Error!"
+            except:
+                print "Error!"
 
             if event.type == pygame.QUIT:
                 sys.exit()
@@ -265,6 +256,7 @@ class Simulation():
         for robot in self.robots:
             robot.motion_model(self.field.LimitLines, self.field.goalpost_list, self.robots)
             robot.control.control_update()
+            robot.vision.VisionProcess()
 
         # ball
         GS, F, E = self.ball.motion_model(self.field.goalpost_list, self.field.LimitLines, self.field.Goals, self.field.PlayField)

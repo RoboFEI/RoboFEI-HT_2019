@@ -56,10 +56,36 @@ class VISION():
         for x in ('B', 'R', 'Y', 'P'):
             ang = self.GetLM(x)[1]
             if CompAng(ang, 0, self.fov/2.0):
-                y.append(rnd.gauss(ang, 3))
+                y.append(rnd.gauss(ang, 3.0))
             else:
                 y.append(-999) # Return this if not seen the ball
         return y
+
+    def GetBall(self):
+        dist = hypot(self.robot.x-self.robot.ball.x, self.robot.y-self.robot.ball.y)
+        ang = -degrees(atan2(self.robot.ball.y-self.robot.y, self.robot.ball.x-self.robot.x))-self.robot.rotate
+        if CompAng(ang, 0, self.fov/2.0):
+            return dist, ang
+        else:
+            return -1, -1
+
+    def VisionProcess(self):
+        control = self.bkb.read_int(self.Mem, 'DECISION_LOCALIZATION') # Variable which controls what the Localization does
+        if control == 0:
+            dist, ang = self.GetBall() # Returns the distance and angle to the ball
+            dist = rnd.gauss(dist, dist/10.0) # Adds a gaussian error to the distance
+            ang = rnd.gauss(ang, 3.0) # Adds a gaussian error to the angle measure
+
+            self.bkb.write_float(self.Mem, 'VISION_BALL_DIST', dist) # Writes to the Black Board
+            self.bkb.write_float(self.Mem, 'VISION_PAN_DEG', ang) # Writes to the Black Board
+        elif control == 1:
+            y = self.RetLM() # Gets the landmarks angles
+
+            # Writes to the Black Board
+            self.bkb.write_float(self.Mem,'VISION_BLUE_LANDMARK_DEG', y[0]) 
+            self.bkb.write_float(self.Mem,'VISION_RED_LANDMARK_DEG', y[1])
+            self.bkb.write_float(self.Mem,'VISION_YELLOW_LANDMARK_DEG', y[2])
+            self.bkb.write_float(self.Mem,'VISION_PURPLE_LANDMARK_DEG', y[3])
 
 def CompAng(ang, base, rng):
     xa = cos(radians(ang))
