@@ -100,6 +100,11 @@ class Localization():
             # Performs Particle Filter's Update
             pos, std = PF.main(u,z)
 
+            if std > 50: # Se o erro for muito alto ele acha landmarks
+                self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', 1)
+            elif std < 30: # Se for pequeno o bastante ele acha a bola
+                self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', 0)
+
             if self.args.log:
                 print '\t\x1b[32mRobot at', # Prints header
                 print '\x1b[32m[x:\x1b[34m{} cm'.format(int(pos[0])), #  Prints the x position
