@@ -135,9 +135,9 @@ class Telemetry(object):
             self.othervars[0] = float(data[1])
             self.othervars[1] = float(data[2])
             self.othervars[2] = int(float(data[3]))
-            self.othervars[3] = float(data[4])
+            self.othervars[3] = max(float(data[4]), 15)
 
-            if data[4] == -1:
+            if data[4] == "-1":
                 self.othervars[4] = -1000
                 self.othervars[5] = -1000
             else:

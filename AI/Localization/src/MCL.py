@@ -32,7 +32,7 @@ class MonteCarlo():
         self.totalweight = 0 # Holds the total sum of particles' weights.
 
         self.mean = [450, 300, 0] # Holds the mean position of the estimated position.
-        self.std = 0
+        self.std = 1
 
     #----------------------------------------------------------------------------------------------
     #   Prediction step
@@ -41,7 +41,7 @@ class MonteCarlo():
         # If there was movement, run the predction step
         if u != None:
             for particle in self.particles:
-                particle.Motion(u[0], u[1], u[2], u[3], u[4])
+                particle.Motion(*u)
 
     #----------------------------------------------------------------------------------------------
     #   Update step
