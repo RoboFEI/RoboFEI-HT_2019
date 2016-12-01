@@ -46,15 +46,19 @@ class Calibration():
             self.thrs = 5
             print "\n>>> Threshold creation successful! <<<\n"
 
-        self.cap = cv2.VideoCapture(1) # Try opening any different device, other than the main
-        if not self.cap.isOpened(): # if there is only one device
-            self.cap = cv2.VideoCapture(0) # opens the main device
-
         self.img = None # holds the captured frame
         self.hsv = None # holds the frame after changing the color segment
         self.pos = (0, 0) # holds mouse position
 
         self.color = 'BLUE' # Color being segmented
+
+    #----------------------------------------------------------------------------------------------
+    #   Method which will initialize camera
+    #----------------------------------------------------------------------------------------------
+    def InitCap(self):
+        self.cap = cv2.VideoCapture(1) # Try opening any different device, other than the main
+        if not self.cap.isOpened(): # if there is only one device
+            self.cap = cv2.VideoCapture(0) # opens the main device
 
     #----------------------------------------------------------------------------------------------
     #   Method that captures the image for the next frame
@@ -159,6 +163,7 @@ class Calibration():
     #   Method used to calibrate colors
     #----------------------------------------------------------------------------------------------
     def Calibration(self):
+        self.InitCap()
         flag = None
         # Creates and sets trackbar positions.
         cv2.namedWindow('Trackbars')
@@ -248,6 +253,7 @@ class Calibration():
     #   Method to see the results of calibration process
     #----------------------------------------------------------------------------------------------
     def Verify(self):
+        self.InitCap()
         cv2.namedWindow('Calibration') # Creates a window
         flag = None # Control flag
         while True:
