@@ -40,7 +40,7 @@ class LocalizationVision():
         self.Tilt = int(config.get('Offset', 'ID_20'))
 
         self.servo = Servo(self.Pan, self.Tilt) # Initializes servos
-        self.limit = (self.Pan-307, self.Pan+307) # Limits the head turning to only 90 degrees
+        self.limit = (self.Pan-307, self.Pan, self.Pan+307) # Limits the head turning to only 90 degrees
 
         # If calibration is requested it executes calibration
         if self.args.calibrate:
@@ -79,7 +79,7 @@ class LocalizationVision():
 
         self.img = None # holds the captured frame
         self.hsv = None # holds the frame after changing the color segment
-        self.pos = 0 # holds the position which the frame was generated
+        self.pos = self.Pan # holds the position which the frame was generated
         self.pandirection = 0 # Changing step for pan.
 
         self.Main()
@@ -103,7 +103,7 @@ class LocalizationVision():
             _, self.img = self.cap.read()  # Get image from camera
             imgblur = cv2.medianBlur(self.img, self.blur) # Blurs image
             self.hsv = cv2.cvtColor(imgblur, cv2.COLOR_BGR2HSV) # Convert to HSV
-            self.pos = self.Pan # Saves pan position
+            self.pos = self.limit[1] # Saves pan position
         except:
             print "ERROR ON FRAME CAPTURE!"
 
@@ -111,26 +111,26 @@ class LocalizationVision():
     #   Method which changes head's position
     #----------------------------------------------------------------------------------------------
     def PanHead(self):
-        if self.pos < self.limit[0] and self.pandirection < 0:
+        if self.Pan < self.limit[0] and self.pandirection < 0:
             self.pandirection *= -1
-        elif self.pos > self.limit[1] and self.pandirection > 0:
+        elif self.Pan > self.limit[2] and self.pandirection > 0:
             self.pandirection *= -1
-        self.pos += self.pandirection 
-        self.servo.writeWord(19, 30, self.pos)
+        self.Pan += self.pandirection
+        self.servo.writeWord(19, 30, int(self.Pan))
 
     #----------------------------------------------------------------------------------------------
     #   Method which converts a relative position on pixels into degrees
     #----------------------------------------------------------------------------------------------
     def IsIn(self, value):
-        x = value - self.img[0]/2
-        y = (0.1 * x * 640)/(65 * self.img[0])
+        x = value - len(self.img[0])/2
+        y = (0.1 * x * 640)/(65 * len(self.img[0]))
         return degrees(atan(y)) 
 
     #----------------------------------------------------------------------------------------------
     #   Method which returns the head's angle
     #----------------------------------------------------------------------------------------------
     def GetAng(self):
-        return (self.Pan-self.pos)*300/1024.0
+        return (self.limit[1]-self.Pan)*300/1024.0
 
     #----------------------------------------------------------------------------------------------
     #   Main method
@@ -138,47 +138,59 @@ class LocalizationVision():
     def Main(self):
         if self.args.show:
             cv2.namedWindow('ROBOT VISION')
-
-        self.pandirection = 1
+        
+        self.InitCap()
+        
+        self.pandirection = 7
 
         thrs = [self.Blue, self.Red, self.Yellow, self.Purple]
         c = [(255,255,100), (100,100,255), (100,255,255), (200,100,200)]
 
         while True:
-            ret = []
+            ret = [-999, -999, -999, -999]
+            
+            self.Capture()
 
             for i in range(4):
-                mask = cv2.inRange(self.hsv, thrs[i][0:3], thrs[i][3:6])
-                kern = np.ones((self.krnl, self.krnl), np.uint8)
-                erod = cv2.erode(mask, kern, iterations=self.ersn)
-                dila = cv2.dilate(erod, kern, iterations=self.dltn)
-                cnt,_ = cv2.findContours(dila, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-                areas = [cv2.contourArea(aux) for aux in cnt]
-                max_index = np.argmax(areas)
-                cnt = cnt[max_index]
-                x,y,w,h = cv2.boundingRect(cnt)
-                M = cv2.moments(cnt)
-                cx = int(M['m10']/M['m00'])
-                cy = int(M['m01']/M['m00'])
+                try:
+                    mask = cv2.inRange(self.hsv, thrs[i][0:3], thrs[i][3:6])
+                    kern = np.ones((self.krnl, self.krnl), np.uint8)
+                    erod = cv2.erode(mask, kern, iterations=self.ersn)
+                    dila = cv2.dilate(erod, kern, iterations=self.dltn)
+                    cnt,_ = cv2.findContours(dila, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+                    areas = [cv2.contourArea(aux) for aux in cnt]
+                    max_index = np.argmax(areas)
+                    cnt = cnt[max_index]
+                    x,y,w,h = cv2.boundingRect(cnt)
+                    M = cv2.moments(cnt)
+                    cx = int(M['m10']/M['m00'])
+                    cy = int(M['m01']/M['m00'])
+                    
+                    if cnt != None:
+                        ret[i] = -self.IsIn(cx)-self.GetAng()
 
-                if self.args.show:
-                    cv2.rectangle(self.img, (x,y), (x+w,y+h), c[i], 2)
-                    cv2.circle(self.img, (cx, cy), 5, c[i], -1)
-                    cv2.imshow('ROBOT VISION', self.img)
-
-                if cnt:
-                    ret.append(self.IsIn(cy)+self.GetAng())
-                else:
-                    ret.append(-999)
-
+                    if self.args.show:
+                        cv2.rectangle(self.img, (x,y), (x+w,y+h), c[i], 2)
+                        cv2.circle(self.img, (cx, cy), 5, c[i], -1)
+                except:
+                    pass
+                    
             self.bkb.write_float(self.Mem,'VISION_BLUE_LANDMARK_DEG', ret[0]) 
             self.bkb.write_float(self.Mem,'VISION_RED_LANDMARK_DEG', ret[1])
             self.bkb.write_float(self.Mem,'VISION_YELLOW_LANDMARK_DEG', ret[2])
             self.bkb.write_float(self.Mem,'VISION_PURPLE_LANDMARK_DEG', ret[3])
+            
+            print ret
+            
+            if self.args.show:
+                cv2.line(self.img, (len(self.img[0])/2,0), (len(self.img[0])/2,len(self.img)),(0,255,0))
+                cv2.imshow('ROBOT VISION', self.img)
 
             self.PanHead()
 
-            cv2.waitKey(15)
+            k = cv2.waitKey(15) & 0xFF
+            if k == 27:
+                break
 
         cv2.destroyAllWindows()
 

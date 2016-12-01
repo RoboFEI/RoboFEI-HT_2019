@@ -62,7 +62,7 @@ class Calibration():
 
     #----------------------------------------------------------------------------------------------
     #   Method that captures the image for the next frame
-    #----------------------------------------------------------------------------------------------    
+    #----------------------------------------------------------------------------------------------
     def capture(self):
         try:
             # self.img = cv2.imread('../../../../VsnTst/resize1.jpg') # Get image from archive
@@ -202,7 +202,7 @@ class Calibration():
             self.capture() # Captures the image
 
             # Creates a image showing the color been segmented
-            track = np.zeros((10, 100, 3), np.uint8)
+            track = np.zeros((50, 300, 3), np.uint8)
             c = [(255,255,100), (100,100,255), (100,255,255), (200,100,200)]
             track[:,:] = c[auxcolor]
             
