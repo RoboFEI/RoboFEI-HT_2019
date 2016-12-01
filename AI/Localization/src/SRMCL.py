@@ -8,7 +8,7 @@ from particle import *
 
 #--------------------------------------------------------------------------------------------------
 #   This class implements the Monte Carlo's Particle Filter
-#   - Note that this is the augmented version, where random particles are generated when needed.
+#   - Implementation of Sensor Reseting Monte Carlo Localization
 #--------------------------------------------------------------------------------------------------
 
 class MonteCarlo():
@@ -37,6 +37,12 @@ class MonteCarlo():
 
         self.mean = [450, 300, 0] # Holds the mean position of the estimated position.
         self.std = 0
+
+    #----------------------------------------------------------------------------------------------
+    #   Method that returns a probable position for the robot given its sensoring
+    #----------------------------------------------------------------------------------------------
+    def SensorReseting(self, z=None):
+        
 
     #----------------------------------------------------------------------------------------------
     #   Prediction step

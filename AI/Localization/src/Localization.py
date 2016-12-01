@@ -3,7 +3,7 @@ __authors__ = "Aislan C. Almeida"
 __license__ = "GNU General Public License v3.0"
 
 from Viewer import * # Imports the environment of the viewer
-from AMCL import * # Imports the Particle Filter Class
+# from AMCL import * # Imports the Particle Filter Class
 import time 
 
 # To pass arguments to the function
@@ -16,6 +16,21 @@ try:
     from configparser import ConfigParser
 except ImportError:
     from ConfigParser import ConfigParser
+
+# To parse arguments on execution
+parser = argparse.ArgumentParser(description='Robot Localization', epilog= 'Implements particle filters to self-localize a robot on the field.')
+parser.add_argument('-g', '--graphs', action="store_true", help='Shows graphical interface which visualizes the particles.')
+parser.add_argument('-l', '--log', action="store_true", help='Print variable logs.')
+parser.add_argument('-m', '--mcl', action="store_true", help='Uses Monte-Carlo Localization')
+parser.add_argument('-a', '--amcl', action="store_true", help='Uses Augmented Monte-Carlo Localization')
+
+args = parser.parse_args()
+
+if args.mcl:
+    from MCL import *
+elif args.amcl:
+    from AMCL import *
+
 
 #--------------------------------------------------------------------------------------------------
 #   Class implementing the Core of the Localization Process
@@ -39,11 +54,6 @@ class Localization():
             sys.exit()
 
         self.Mem = self.bkb.shd_constructor(mem_key) # Create the link to the blackboard
-
-        # To parse arguments on execution
-        parser = argparse.ArgumentParser(description='Robot Localization', epilog= 'Implements particle filters to self-localize a robot on the field.')
-        parser.add_argument('-g', '--graphs', action="store_true", help='Shows graphical interface which visualizes the particles.')
-        parser.add_argument('-l', '--log', action="store_true", help='Print variable logs.')
 
         self.args = parser.parse_args()
 
@@ -94,8 +104,10 @@ class Localization():
             z3 = self.bkb.read_float(self.Mem, 'VISION_PURPLE_LANDMARK_DEG')
             self.bkb.write_float(self.Mem, 'VISION_PURPLE_LANDMARK_DEG', -999)
 
+            z4 = degrees(self.bkb.read_float(self.Mem, 'IMU_EULER_Z'))
+
             # Mounts the vector to be sent
-            z = [z0, z1, z2, z3]
+            z = (z0, z1, z2, z3, z4)
                     
             # Performs Particle Filter's Update
             pos, std = PF.main(u,z)

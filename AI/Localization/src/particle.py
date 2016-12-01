@@ -88,7 +88,7 @@ class Particle(object):
 
         # Standard deviation used for computing angles likelihoods, in degrees.
         if std == None:
-            self.std = 10
+            self.std = 5
         else:
             self.std == std
 
@@ -171,6 +171,8 @@ class Particle(object):
         for i in range(4):
             if Measures[i] != -999:
                 weight *= ComputeAngLikelihoodDeg(Measures[i], M[i], self.std)
+        # Computes the likelihood given the IMU angle
+        weight *= ComputeAngLikelihoodDeg(Measures[4], self.rotation, self.std)
 
         self.weight = weight
         return weight
