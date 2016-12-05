@@ -12,6 +12,7 @@ import argparse
 import sys
 sys.path.append('../../Blackboard/src/')
 from SharedMemory import SharedMemory
+
 try:
     from configparser import ConfigParser
 except ImportError:
@@ -23,6 +24,7 @@ parser.add_argument('-g', '--graphs', action="store_true", help='Shows graphical
 parser.add_argument('-l', '--log', action="store_true", help='Print variable logs.')
 parser.add_argument('-m', '--mcl', action="store_true", help='Uses Monte-Carlo Localization')
 parser.add_argument('-a', '--amcl', action="store_true", help='Uses Augmented Monte-Carlo Localization')
+parser.add_argument('-s', '--srmcl', action="store_true", help='Uses Sensor Reseting Monte-Carlo Localization')
 
 args = parser.parse_args()
 
@@ -30,6 +32,11 @@ if args.mcl:
     from MCL import *
 elif args.amcl:
     from AMCL import *
+elif args.srmcl:
+    from SRMCL import *
+else:
+    print 'Please choose a version of MCL to be used!'
+    exit()
 
 
 #--------------------------------------------------------------------------------------------------
@@ -108,13 +115,13 @@ class Localization():
 
             # Mounts the vector to be sent
             z = (z0, z1, z2, z3, z4)
-                    
+               
             # Performs Particle Filter's Update
             pos, std = PF.main(u,z)
 
-            if std > 50: # Se o erro for muito alto ele acha landmarks
+            if std > 20: # Se o erro for muito alto ele acha landmarks
                 self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', 1)
-            elif std < 30: # Se for pequeno o bastante ele acha a bola
+            elif std < 20: # Se for pequeno o bastante ele acha a bola
                 self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', 0)
             
             if self.args.log:

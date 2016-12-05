@@ -69,6 +69,8 @@ class MonteCarlo():
         self.wslow += self.aslow * (self.totalweight/len(self.particles) - self.wslow)
         self.wfast += self.afast * (self.totalweight/len(self.particles) - self.wfast)
 
+        # print self.wslow, self.wfast, self.wfast < self.wslow
+
         step = self.totalweight / qtd # Computes the step size
         s = step/2 # the first step is given by half the total.
 

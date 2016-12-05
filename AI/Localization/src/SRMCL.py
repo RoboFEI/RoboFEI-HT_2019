@@ -42,7 +42,51 @@ class MonteCarlo():
     #   Method that returns a probable position for the robot given its sensoring
     #----------------------------------------------------------------------------------------------
     def SensorReseting(self, z=None):
-        
+        x = [0, 100, 200, 300, 400, 500, 600, 700, 800, 900] # Grid in X position
+        y = [0, 100, 200, 300, 400, 500, 600] # Grid in Y position
+        k = [(0, 0), (900, 0), (0, 600), (900, 600)] # Coefficients of distance for blue, red, yellow and purple
+        n = None # Landmark index
+
+        # Return the index of the first seen landmark
+        for m in range(4):
+            if z[m] != -999:
+                n = m
+                break
+
+        if n == None:
+            return []
+
+        P = [] # Points in the grid
+        maxP = 0  # Weight of the best particle
+
+        # For each point in the grid
+        for i in x:
+            for j in y: 
+                # Computes the possible angle for the angle
+                ang = atan2(j-k[n][1], i-k[n][0]) - radians(z[n])
+                # Create a particle on the point with the computed angle
+                aux = Particle(i,j,ang)
+                # Computes the weight given the sensors
+                weight = aux.Sensor(z)
+                # Appends the particle to the grid list
+                P.append(aux)
+                # Update with the best particle's weight
+                maxP = max(weight, maxP)
+
+        maxP /= 2.0 # Divides the best weight by 2
+
+        ret = [] # Returning with possibilities
+
+        # For each particle on the grid
+        for part in P:
+            # chooses those with the best weight
+            if part.weight > maxP:
+                ret.append(part)
+
+        # Sort the particles by the weight
+        ret.sort(key=lambda aux: aux.weight)
+
+        return ret
 
     #----------------------------------------------------------------------------------------------
     #   Prediction step
@@ -67,7 +111,7 @@ class MonteCarlo():
     #----------------------------------------------------------------------------------------------
     #   Resample step
     #----------------------------------------------------------------------------------------------
-    def Resample(self, qtd):
+    def Resample(self, qtd, z):
         parts = [] # Starts a empty list, which will hold copies of old particles
         new = [] # Starts a empty list, whihc will hold new random particles
 
@@ -82,14 +126,11 @@ class MonteCarlo():
         m_y = 0 # Sum of y
         m_s = 0 # Sum of sin of rotation
         m_c = 0 # Sum of cos of rotation
-        m_count = 0 # Quantity counter
 
         for p in self.particles: # For each particle,
             while s < p.weight: # while the particles weight is grater than the step,
                 s += step # rises the step size,
-                if max(0, 1.0-self.wfast/self.wslow) > rnd.random():
-                    new.append(Particle()) # generates a new random particle
-                else:
+                if max(0, 1.0-self.wfast/self.wslow) <= rnd.random():
                     parts.append(Particle(p.x, p.y, p.rotation)) # adds the particle to the list.
                     # Do the summing process for the mean computation
                     m_x += p.x 
@@ -99,6 +140,16 @@ class MonteCarlo():
             s -= p.weight # Removes the used steps.
 
         oldqtd = len(parts) # Saves the quantity of particles.
+
+        if oldqtd < qtd:
+            SRset = self.SensorReseting(z)
+
+            for i in range(qtd-oldqtd):
+                if SRset == []:
+                    new.append(Particle())
+                else:
+                    aux = SRset[i % len(SRset)]
+                    new.append(Particle(normals=[[aux.x,50],[aux.y,50],[aux.rotation,5]]))
 
         # Computes the mean dividing the sum for the quantity
         self.mean[0] = m_x / oldqtd
@@ -122,5 +173,5 @@ class MonteCarlo():
     def main(self, u=None, z=None):
         self.Prediction(u)
         self.Update(z)
-        self.Resample(self.max_qtd)
+        self.Resample(self.max_qtd, z)
         return self.mean, self.std
