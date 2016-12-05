@@ -87,6 +87,21 @@ class VISION():
             self.bkb.write_float(self.Mem,'VISION_YELLOW_LANDMARK_DEG', y[2])
             self.bkb.write_float(self.Mem,'VISION_PURPLE_LANDMARK_DEG', y[3])
 
+    def test(self):
+        y = []
+        for x in ('B', 'R', 'Y', 'P'):
+            ang = self.GetLM(x)[1]
+            if CompAng(ang, 0, self.fov/2.0):
+                y.append(ang)
+            else:
+                y.append(None) # Return this if not seen the ball
+        y.append(self.robot.x)
+        y.append(self.robot.y)
+        y.append(self.robot.rotate)
+        return y
+
+
+
 def CompAng(ang, base, rng):
     xa = cos(radians(ang))
     ya = sin(radians(ang))

@@ -70,7 +70,7 @@ class Simulation():
                     self.group_robots.add(robot)
                     #print len(self.robots)
 
-                    robot.set_errors(0,0,0,0,0,0,0,0,0,0,0,0.01)
+                    robot.set_errors(0,0,0,0,0,0,0,0,0,0,0.00001,0.0001)
 
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_k:
                     self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 8)
@@ -248,8 +248,17 @@ class Simulation():
                     self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem,
                                                                         'DECISION_SEARCH_ON', 0)
 
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                    x = self.robots[0].vision.test()
+                    y = self.robots[0].vision.RetLM()
+                    print 'print Comp('+str(y[0])+', '+str(y[1])+', '+str(y[3])+', 0, 0, 0, -900, -600, -900) # '+str(x[6])
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_F11:
+                    x = self.robots[0].vision.test()
+                    y = self.robots[0].vision.RetLM()
+                    print 'print Comp('+str(x[0])+', '+str(x[1])+', '+str(x[3])+', 0, 0, 0, -900, -600, -900) # '+str(x[6])
+
             except:
-                print "Error!"
+                print "Error!\n{simulation.py - Simulation.perform_events()}"
 
             if event.type == pygame.QUIT:
                 sys.exit()
@@ -259,6 +268,7 @@ class Simulation():
             robot.motion_model(self.field.LimitLines, self.field.goalpost_list, self.robots)
             robot.control.control_update()
             robot.vision.VisionProcess()
+            print robot.rotate, degrees(robot.bkb.read_float(robot.Mem, 'IMU_EULER_Z'))
 
         # ball
         GS, F, E = self.ball.motion_model(self.field.goalpost_list, self.field.LimitLines, self.field.Goals, self.field.PlayField)

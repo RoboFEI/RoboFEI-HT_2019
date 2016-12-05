@@ -172,7 +172,7 @@ class Particle(object):
             if Measures[i] != -999:
                 weight *= ComputeAngLikelihoodDeg(Measures[i], M[i], self.std)
         # Computes the likelihood given the IMU angle
-        weight *= ComputeAngLikelihoodDeg(Measures[4], self.rotation, self.std)
+        weight *= ComputeAngLikelihoodDeg(Measures[4], self.rotation, 30)
 
         self.weight = weight
         return weight
