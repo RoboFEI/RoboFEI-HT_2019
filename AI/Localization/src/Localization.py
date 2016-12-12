@@ -88,8 +88,18 @@ class Localization():
 
         print
 
+        zb = []
+        zr = []
+        zy = []
+        zp = []
+        timecount = []
+
         # Main loop
         while True:
+            z0 = 0
+            z1 = 0
+            z2 = 0
+            z3 = 0
 
             self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 1) # Sets the flag for telemetry
 
@@ -100,28 +110,48 @@ class Localization():
             # Gets the motion command from the blackboard.
             u = self.GetU(self.bkb.read_int(self.Mem, 'DECISION_ACTION_A'))
 
+            auxtime = time.time()
+            try:
+                if auxtime-timecount[0] > 0:
+                    timecount.pop(0)
+                    for zn in [zb, zr, zy, zp]:
+                        zn.pop(0)
+            except:
+                pass
+
+            # print timecount
+
+            timecount.append(auxtime)
             # Gets the measured variable from the blackboard,
             # and free them.
-            z0 = self.bkb.read_float(self.Mem, 'VISION_BLUE_LANDMARK_DEG')
+            zb.append(self.bkb.read_float(self.Mem, 'VISION_BLUE_LANDMARK_DEG'))
             self.bkb.write_float(self.Mem, 'VISION_BLUE_LANDMARK_DEG', -999)
-            z1 = self.bkb.read_float(self.Mem, 'VISION_RED_LANDMARK_DEG')
+            zr.append(self.bkb.read_float(self.Mem, 'VISION_RED_LANDMARK_DEG'))
             self.bkb.write_float(self.Mem, 'VISION_RED_LANDMARK_DEG', -999)
-            z2 = self.bkb.read_float(self.Mem, 'VISION_YELLOW_LANDMARK_DEG')
+            zy.append(self.bkb.read_float(self.Mem, 'VISION_YELLOW_LANDMARK_DEG'))
             self.bkb.write_float(self.Mem, 'VISION_YELLOW_LANDMARK_DEG', -999)
-            z3 = self.bkb.read_float(self.Mem, 'VISION_PURPLE_LANDMARK_DEG')
+            zp.append(self.bkb.read_float(self.Mem, 'VISION_PURPLE_LANDMARK_DEG'))
             self.bkb.write_float(self.Mem, 'VISION_PURPLE_LANDMARK_DEG', -999)
 
+
+            z0 = mean(zb)
+            z1 = mean(zr)
+            z2 = mean(zy)
+            z3 = mean(zp)
             z4 = degrees(self.bkb.read_float(self.Mem, 'IMU_EULER_Z'))
+
+            # print zn[0], z0         
 
             # Mounts the vector to be sent
             z = (z0, z1, z2, z3, z4)
+            # print z
                
             # Performs Particle Filter's Update
             pos, std = PF.main(u,z)
 
-            if std > 20: # Se o erro for muito alto ele acha landmarks
+            if std > 1: # Se o erro for muito alto ele acha landmarks
                 self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', 1)
-            elif std < 20: # Se for pequeno o bastante ele acha a bola
+            elif std < 1: # Se for pequeno o bastante ele acha a bola
                 self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', 0)
             
             if self.args.log:
@@ -188,6 +218,20 @@ class Localization():
         timer = auxtime - self.timestamp
         self.timestamp = auxtime
         return timer
+
+def mean(vec):
+    s = 0
+    n = 0
+    m = 0
+    for x in vec:
+        if x != -999:
+            n += 1
+            s += x*n
+            m += n
+    if n == 0:
+        return -999
+    else:
+        return s/m
 
 #Call the main function, start up the simulation
 if __name__ == "__main__":

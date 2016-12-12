@@ -9,6 +9,7 @@ from particle import *
 #--------------------------------------------------------------------------------------------------
 #   This class implements the Monte Carlo's Particle Filter
 #   - Note that this is the augmented version, where random particles are generated when needed.
+#   - As a side note, I don't like this particle reseting way, I think it is not good.
 #--------------------------------------------------------------------------------------------------
 
 class MonteCarlo():
@@ -32,8 +33,8 @@ class MonteCarlo():
         # Coefficients used to determine if it is supposed to generate new particles.
         self.wslow = 0
         self.wfast = 0
-        self.aslow = 0.01 # 0 < aslow << afast
-        self.afast = 0.7
+        self.aslow = 0.1 # 0 < aslow << afast
+        self.afast = 1
 
         self.mean = [450, 300, 0] # Holds the mean position of the estimated position.
         self.std = 0
@@ -69,7 +70,7 @@ class MonteCarlo():
         self.wslow += self.aslow * (self.totalweight/len(self.particles) - self.wslow)
         self.wfast += self.afast * (self.totalweight/len(self.particles) - self.wfast)
 
-        # print self.wslow, self.wfast, self.wfast < self.wslow
+        # print self.wslow, self.wfast, self.totalweight/len(self.particles)
 
         step = self.totalweight / qtd # Computes the step size
         s = step/2 # the first step is given by half the total.

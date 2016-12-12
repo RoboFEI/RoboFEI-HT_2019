@@ -15,7 +15,7 @@ class MonteCarlo():
     #----------------------------------------------------------------------------------------------
     #   Constructor of the particle filter
     #----------------------------------------------------------------------------------------------
-    def __init__(self, max_qtd=0):
+    def __init__(self, max_qtd=0, errstd=None):
         # Holds the particles objects
         self.particles = []
 
@@ -23,20 +23,21 @@ class MonteCarlo():
         self.max_qtd = max_qtd
         self.qtd = max_qtd
 
+        # Standard deviation used for computing angles likelihoods, in degrees.
+        if errstd == None:
+            self.errstd = [5, 30]
+        else:
+            self.errstd == errstd
+
         for i in range(self.qtd):
             # Randomly generates n particles
-            self.particles.append(Particle())
+            self.particles.append(Particle(std=errstd))
 
         self.totalweight = 0 # Holds the total sum of particles' weights.
-
-        # Coefficients used to determine if it is supposed to generate new particles.
-        self.wslow = 0
-        self.wfast = 0
-        self.aslow = 0.01 # 0 < aslow << afast
-        self.afast = 0.7
+        self.maxweight = 0 # Holds the weight of the best particle.
 
         self.mean = [450, 300, 0] # Holds the mean position of the estimated position.
-        self.std = 0
+        self.std = 10
 
     #----------------------------------------------------------------------------------------------
     #   Method that returns a probable position for the robot given its sensoring
@@ -57,13 +58,13 @@ class MonteCarlo():
             return []
 
         P = [] # Points in the grid
-        maxP = 0  # Weight of the best particle
+        sumW = 0
 
         # For each point in the grid
         for i in x:
             for j in y: 
                 # Computes the possible angle for the angle
-                ang = atan2(j-k[n][1], i-k[n][0]) - radians(z[n])
+                ang = degrees(atan2(j-k[n][1], k[n][0]-i) - radians(z[n]))
                 # Create a particle on the point with the computed angle
                 aux = Particle(i,j,ang)
                 # Computes the weight given the sensors
@@ -71,21 +72,21 @@ class MonteCarlo():
                 # Appends the particle to the grid list
                 P.append(aux)
                 # Update with the best particle's weight
-                maxP = max(weight, maxP)
-
-        maxP /= 2.0 # Divides the best weight by 2
+                sumW += weight
 
         ret = [] # Returning with possibilities
+        
 
         # For each particle on the grid
         for part in P:
             # chooses those with the best weight
-            if part.weight > maxP:
+            if part.weight > sumW/(1+len(P)):
                 ret.append(part)
 
         # Sort the particles by the weight
-        ret.sort(key=lambda aux: aux.weight)
-
+        ret.sort(key=lambda aux: aux.weight, reverse=True)
+        
+        # print threshold, '\n'
         return ret
 
     #----------------------------------------------------------------------------------------------
@@ -103,21 +104,18 @@ class MonteCarlo():
     def Update(self, z=None):
         # If there was any measure, run the update step
         self.totalweight = 0
+        self.maxweight = 0
 
         if z != None:
             for particle in self.particles:
                 self.totalweight += particle.Sensor(z)
+                self.maxweight = max(self.maxweight, particle.weight)
     
     #----------------------------------------------------------------------------------------------
     #   Resample step
     #----------------------------------------------------------------------------------------------
-    def Resample(self, qtd, z):
-        parts = [] # Starts a empty list, which will hold copies of old particles
-        new = [] # Starts a empty list, whihc will hold new random particles
-
-        # Coefficients adjusments
-        self.wslow += self.aslow * (self.totalweight/len(self.particles) - self.wslow)
-        self.wfast += self.afast * (self.totalweight/len(self.particles) - self.wfast)
+    def Resample(self, qtd):
+        parts = [] # Starts a empty list.
 
         step = self.totalweight / qtd # Computes the step size
         s = step/2 # the first step is given by half the total.
@@ -130,48 +128,42 @@ class MonteCarlo():
         for p in self.particles: # For each particle,
             while s < p.weight: # while the particles weight is grater than the step,
                 s += step # rises the step size,
-                if max(0, 1.0-self.wfast/self.wslow) <= rnd.random():
-                    parts.append(Particle(p.x, p.y, p.rotation)) # adds the particle to the list.
-                    # Do the summing process for the mean computation
-                    m_x += p.x 
-                    m_y += p.y 
-                    m_s += sin(radians(p.rotation))
-                    m_c += cos(radians(p.rotation))
+                parts.append(Particle(p.x, p.y, p.rotation)) # adds the particle to the list.
+                # Do the summing process for the mean computation
+                m_x += p.x 
+                m_y += p.y 
+                m_s += sin(radians(p.rotation))
+                m_c += cos(radians(p.rotation))
             s -= p.weight # Removes the used steps.
 
-        oldqtd = len(parts) # Saves the quantity of particles.
-
-        if oldqtd < qtd:
-            SRset = self.SensorReseting(z)
-
-            for i in range(qtd-oldqtd):
-                if SRset == []:
-                    new.append(Particle())
-                else:
-                    aux = SRset[i % len(SRset)]
-                    new.append(Particle(normals=[[aux.x,50],[aux.y,50],[aux.rotation,5]]))
+        self.particles = parts # Overwrites the previous particles.
+        self.qtd = len(self.particles) # Saves the quantity of particles.
 
         # Computes the mean dividing the sum for the quantity
-        self.mean[0] = m_x / oldqtd
-        self.mean[1] = m_y / oldqtd
+        self.mean[0] = m_x / self.qtd
+        self.mean[1] = m_y / self.qtd
         # computes mean rotation by finding the arctan of the sum of sins over cossins
         self.mean[2] = degrees(atan2(m_s,m_c))
 
-        # Computes the standard deviation of particles
         sum_std = 0
-        for p in parts:
+        for p in self.particles:
             sum_std += (p.x - self.mean[0])**2 + (p.y - self.mean[1])**2
-        self.std = sqrt(sum_std / oldqtd)
-
-        # Saves the particles for the next iteration
-        self.particles = parts + new
-        self.qtd = len(self.particles)
+        self.std = sqrt(sum_std / self.qtd)
 
     #----------------------------------------------------------------------------------------------
     #   Main algorithm
     #----------------------------------------------------------------------------------------------
     def main(self, u=None, z=None):
+        
+        SRset = self.SensorReseting(z)
+        for i in range(int(self.qtd/10)):
+            if SRset == []:
+                self.particles.append(Particle())
+            else:
+                aux = SRset[i % len(SRset)]
+                self.particles.append(Particle(normals=[[aux.x,50],[aux.y,50],[aux.rotation,5]]))
+
         self.Prediction(u)
         self.Update(z)
-        self.Resample(self.max_qtd, z)
+        self.Resample(self.qtd)
         return self.mean, self.std
