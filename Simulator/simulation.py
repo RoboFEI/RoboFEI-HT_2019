@@ -268,7 +268,7 @@ class Simulation():
             robot.motion_model(self.field.LimitLines, self.field.goalpost_list, self.robots)
             robot.control.control_update()
             robot.vision.VisionProcess()
-            print robot.rotate, degrees(robot.bkb.read_float(robot.Mem, 'IMU_EULER_Z'))
+            # print robot.rotate, degrees(robot.bkb.read_float(robot.Mem, 'IMU_EULER_Z'))
 
         # ball
         GS, F, E = self.ball.motion_model(self.field.goalpost_list, self.field.LimitLines, self.field.Goals, self.field.PlayField)

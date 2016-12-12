@@ -16,21 +16,25 @@ class Particle(object):
     def __init__(self, x=None, y=None, rotation=None, weight=1, normals=None, regions=None, a=None, std=None, spread=1):
         
         # This block sets the initial position values of the particles.
-        # If there was any given value, adopt it;
-        # else if there was a gaussian possible position given, generate a random position;
-        # else create a totally random one.
+        #    If there was any given value, adopt it;
+        #    else if there was a gaussian possible position given, generate a random position;
+        #    else create a totally random one.
 
         # Note: normals is a 3x2 matrix, where
-        # the first line presents the mean and standard deviation of the x position
-        # the second line presents the mean and standard deviation of the y position
-        # the third line presents the mean and standard deviation of the rotation
+        #    the first line presents the mean and standard deviation of the x position
+        #    the second line presents the mean and standard deviation of the y position
+        #    the third line presents the mean and standard deviation of the rotation
 
         # Note2: regions is a 3x2 matrix, where
-        # the first line presents the min and max values of the x position
-        # the second line presents the min and max values of the y position
-        # the third line presents the min and max values of the rotation
+        #    the first line presents the min and max values of the x position
+        #    the second line presents the min and max values of the y position
+        #    the third line presents the min and max values of the rotation
 
         # Note3: spread determines how much the particles will spread
+
+        # Note4: std is a vector with the values used as standard deviation for computing particles' likelihood.
+        #    the first for is used for the landmarks, in sequence blue, red, yellow, purple
+        #    the last one is used for the IMU orientation
 
         if regions == None:
             regions = ((0, 900), (0, 600), (-180, 180))
@@ -88,7 +92,7 @@ class Particle(object):
 
         # Standard deviation used for computing angles likelihoods, in degrees.
         if std == None:
-            self.std = 5
+            self.std = [5, 30]
         else:
             self.std == std
 
@@ -170,9 +174,9 @@ class Particle(object):
         # Computes the cumulative likelihood of all particles.
         for i in range(4):
             if Measures[i] != -999:
-                weight *= ComputeAngLikelihoodDeg(Measures[i], M[i], self.std)
+                weight *= ComputeAngLikelihoodDeg(Measures[i], M[i], self.std[0])
         # Computes the likelihood given the IMU angle
-        weight *= ComputeAngLikelihoodDeg(Measures[4], self.rotation, 30)
+        weight *= ComputeAngLikelihoodDeg(Measures[4], self.rotation, self.std[1])
 
         self.weight = weight
         return weight
