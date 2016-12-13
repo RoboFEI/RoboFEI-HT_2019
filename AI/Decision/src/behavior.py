@@ -27,7 +27,7 @@ from math import degrees
 #to real robots: 14 centimeters
 #to simulated robots: 28 centimeters
 
-distance_to_kick = 50 #real robot
+distance_to_kick = 40 #real robot
 #distance_to_kick = 29 #simulated robot
 
 
@@ -85,7 +85,7 @@ class TreatingRawData(object):
         return self.config.getint('Offset', 'ID_20')'''
 
     def get_search_status(self):
-        time.sleep(1)
+        time.sleep(0.1)
         return self.bkb.read_int(self.mem,'VISION_LOST')
 
         
@@ -203,6 +203,15 @@ class Ordinary(TreatingRawData):
             
         elif referee == 2: #play
             print 'play'
+            self.set_stand_still()
+            time.sleep(1)
+            self.set_walk_forward_slow(1000)
+            time.sleep(30)
+            self.set_turn_right()
+            time.sleep(5)
+            self.set_stand_still()
+            time.sleep(10)
+            
             if self.get_search_status() == 1: # 1 - vision lost
                 print 'vision lost'
                 #self.set_stand_still()
@@ -479,7 +488,13 @@ class NaiveIMUDecTurning(TreatingRawData):
             self.kickoff_ctrl = 1
             #print 'dist_ball', self.get_dist_ball()
             print 'orientation', self.get_orientation()
-
+            
+            self.set_walk_forward_slow(1000)
+            time.sleep(22)
+            self.set_turn_left()
+            time.sleep(7)
+            self.set_stand_still()
+            
             #do not kick twice - it is not funcionning!!
 #            if self.bkb.read_int(self.mem,'DECISION_ACTION_A') == 4 or self.bkb.read_int(self.mem,'DECISION_ACTION_A') == 5:
 #		print 'nao chutei pq to aqui!'
@@ -504,24 +519,24 @@ class NaiveIMUDecTurning(TreatingRawData):
                 else:
 
                     if self.get_dist_ball() < distance_to_kick and self.get_motor_pan_degrees() <= 0:
-                        if self.get_orientation() <= 90 and self.get_orientation() >= -90:
+                        if self.get_orientation() <= 40 and self.get_orientation() >= -40:
                             self.set_kick_right()
-                        elif self.get_orientation() > 90:
+                        elif self.get_orientation() > 40:
                             #revolve_clockwise:
                             self.set_pass_right()
                             #########
-                        elif self.get_orientation() < -90:
+                        elif self.get_orientation() < -40:
                             #revolve_anticlockwise:
                             self.set_pass_left()
                             #########
                     elif self.get_dist_ball() < distance_to_kick and self.get_motor_pan_degrees() > 0:
-                        if self.get_orientation() <= 90 and self.get_orientation() >= -90:
+                        if self.get_orientation() <= 40 and self.get_orientation() >= -40:
                             self.set_kick_left()
-                        elif self.get_orientation() > 90:
+                        elif self.get_orientation() > 40:
                             #revolve_clockwise:
                             self.set_pass_right()
                             #########
-                        elif self.get_orientation() < -90:
+                        elif self.get_orientation() < -40:
                             #revolve_anticlockwise:
                             self.set_pass_left()
                             #########
