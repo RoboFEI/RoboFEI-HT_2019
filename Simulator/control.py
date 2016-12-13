@@ -99,6 +99,7 @@ class CONTROL():
 
     def control_update(self):
         self.bkb.write_float(self.Mem, 'IMU_EULER_Z', radians(self.robot.get_orientation()))
+        self.bkb.write_int(self.Mem, 'CONTROL_ACTION', self.bkb.read_int(self.Mem, 'DECISION_ACTION_A'))
         
         if self.action_flag in self.action_exceptions:
             if self.action_flag == 0:
