@@ -85,7 +85,7 @@ class MonteCarlo():
 
         # Sort the particles by the weight
         ret.sort(key=lambda aux: aux.weight, reverse=True)
-        
+        # print len(ret), z
         # print threshold, '\n'
         return ret
 
@@ -114,7 +114,7 @@ class MonteCarlo():
     #----------------------------------------------------------------------------------------------
     #   Resample step
     #----------------------------------------------------------------------------------------------
-    def Resample(self, qtd):
+    def Resample(self, qtd, z):
         parts = [] # Starts a empty list.
 
         step = self.totalweight / qtd # Computes the step size
@@ -150,6 +150,9 @@ class MonteCarlo():
             sum_std += (p.x - self.mean[0])**2 + (p.y - self.mean[1])**2
         self.std = sqrt(sum_std / self.qtd)
 
+        P = Particle(*self.mean)
+        print P.Sensor(z), '\t', self.std
+
     #----------------------------------------------------------------------------------------------
     #   Main algorithm
     #----------------------------------------------------------------------------------------------
@@ -157,13 +160,15 @@ class MonteCarlo():
         
         SRset = self.SensorReseting(z)
         for i in range(int(self.qtd/10)):
-            if SRset == []:
+            # if SRset == []:
+            if True:
                 self.particles.append(Particle())
             else:
                 aux = SRset[i % len(SRset)]
-                self.particles.append(Particle(normals=[[aux.x,50],[aux.y,50],[aux.rotation,5]]))
+                self.particles.append(Particle(normals=[[aux.x,20],[aux.y,20],[aux.rotation,5]]))
 
         self.Prediction(u)
         self.Update(z)
-        self.Resample(self.qtd)
+        self.Resample(self.qtd, z)
+
         return self.mean, self.std

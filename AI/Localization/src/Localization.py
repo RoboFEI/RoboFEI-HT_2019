@@ -108,7 +108,7 @@ class Localization():
                 simul.perform_events()
 
             # Gets the motion command from the blackboard.
-            u = self.GetU(self.bkb.read_int(self.Mem, 'DECISION_ACTION_A'))
+            u = self.GetU(self.bkb.read_int(self.Mem, 'CONTROL_ACTION'))
 
             auxtime = time.time()
             try:
@@ -144,7 +144,7 @@ class Localization():
 
             # Mounts the vector to be sent
             z = (z0, z1, z2, z3, z4)
-            # print z
+            print z
                
             # Performs Particle Filter's Update
             pos, std = PF.main(u,z)
@@ -209,6 +209,9 @@ class Localization():
             return (0,0,0,2,self.dt()) # Get up, back up
         elif Action == 15:
             return (0,0,0,3,self.dt()) # Get up, front up
+        elif Action == 10:
+            print "ERROR - Please, edit Localization.GetU() for Goalkeeper before resuming!"
+            return (0,0,0,0,self.dt())
 
     #----------------------------------------------------------------------------------------------
     #   This method returns the time since the last update

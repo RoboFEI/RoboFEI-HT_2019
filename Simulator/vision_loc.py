@@ -55,7 +55,7 @@ class VISION():
         y = []
         for x in ('B', 'R', 'Y', 'P'):
             ang = self.GetLM(x)[1]
-            if CompAng(ang, 0, self.fov/2.0):
+            if CompAng(ang, 0, self.fov/2.0) and 0.25 >rnd.random():
                 y.append(rnd.gauss(ang, 5.0))
             else:
                 y.append(-999) # Return this if not seen the ball
