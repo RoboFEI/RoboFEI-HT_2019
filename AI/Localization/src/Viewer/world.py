@@ -34,10 +34,10 @@ class SoccerField():
         pygame.draw.circle(self.screen.background,(255,255,255),(970,460),10,0)
 
         #landmarks
-        pygame.draw.circle(self.screen.background,(0,200,200),(70,70),7,0)
-        pygame.draw.circle(self.screen.background,(255,90,80),(970,70),7,0)
-        pygame.draw.circle(self.screen.background,(255,255,0),(70,670),7,0)
-        pygame.draw.circle(self.screen.background,(210,0,240),(970,670),7,0)
+        # pygame.draw.circle(self.screen.background,(0,200,200),(70,70),7,0)
+        # pygame.draw.circle(self.screen.background,(255,90,80),(970,70),7,0)
+        # pygame.draw.circle(self.screen.background,(255,255,0),(70,670),7,0)
+        # pygame.draw.circle(self.screen.background,(210,0,240),(970,670),7,0)
         
 
 
