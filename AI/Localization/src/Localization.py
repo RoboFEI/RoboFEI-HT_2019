@@ -144,7 +144,7 @@ class Localization():
 
             # Mounts the vector to be sent
             z = (z0, z1, z2, z3, z4)
-            print z
+            # print z
                
             # Performs Particle Filter's Update
             pos, std = PF.main(u,z)
