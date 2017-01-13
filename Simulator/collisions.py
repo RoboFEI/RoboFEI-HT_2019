@@ -21,36 +21,38 @@ def collision_robot_vs_line(robot, line):
     return 0, 0
 
 def collision_robot_vs_goal(robot, goal):
-    dx = robot.x - goal.x
-    dy = robot.y - goal.y
+    if robot.kind != 'D':
+        dx = robot.x - goal.x
+        dy = robot.y - goal.y
 
-    d = sqrt(dx**2 + dy**2)
+        d = sqrt(dx**2 + dy**2)
 
-    if d < robot.radius + goal.radius:
-        r = atan2(dy, dx)
-        return 3*cos(r), 3*sin(r)
+        if d < robot.radius + goal.radius:
+            r = atan2(dy, dx)
+            return 3*cos(r), 3*sin(r)
 
     return 0, 0
 
 def collision_robot_vs_ball(robot, ball):
-    delta_x = ball.x - robot.x
-    delta_y = robot.y - ball.y
+    if robot.kind != 'D':
+        delta_x = ball.x - robot.x
+        delta_y = robot.y - ball.y
 
-    distance = sqrt(delta_x**2 + delta_y**2)
+        distance = sqrt(delta_x**2 + delta_y**2)
 
-    if distance < robot.radius + ball.radius:
-        reaction_angle = atan2(delta_y, delta_x)
+        if distance < robot.radius + ball.radius:
+            reaction_angle = atan2(delta_y, delta_x)
 
-        ball_speed = sqrt(ball.speed_x**2 + ball.speed_y**2)
-        ball_angle = atan2(ball.speed_y, ball.speed_x)
+            ball_speed = sqrt(ball.speed_x**2 + ball.speed_y**2)
+            ball_angle = atan2(ball.speed_y, ball.speed_x)
 
-        ball_speed_reaction_cos = ball_speed * cos(ball_angle-reaction_angle) + 1
-        ball_speed_reaction_sin = ball_speed * sin(ball_angle-reaction_angle)
+            ball_speed_reaction_cos = ball_speed * cos(ball_angle-reaction_angle) + 1
+            ball_speed_reaction_sin = ball_speed * sin(ball_angle-reaction_angle)
 
-        new_ball_speed = sqrt(ball_speed_reaction_cos**2 + ball_speed_reaction_sin**2)
-        new_ball_angle = atan2(ball_speed_reaction_sin, ball_speed_reaction_cos) + reaction_angle
+            new_ball_speed = sqrt(ball_speed_reaction_cos**2 + ball_speed_reaction_sin**2)
+            new_ball_angle = atan2(ball_speed_reaction_sin, ball_speed_reaction_cos) + reaction_angle
 
-        ball.put_in_motion(new_ball_speed, degrees(new_ball_angle))
+            ball.put_in_motion(new_ball_speed, degrees(new_ball_angle))
 
 def collision_ball_vs_goal(ball, goal):
     delta_x = ball.x - goal.x
@@ -80,17 +82,18 @@ def collision_ball_vs_line(ball, line):
             ball.speed_x = - ball.speed_x
 
 def collision_robot_vs_robot(robot1, robot2):
-    delta_x = robot1.x - robot2.x
-    delta_y = robot1.y - robot2.y
+    if robot1.kind != 'D' and robot2.kind != 'D':
+        delta_x = robot1.x - robot2.x
+        delta_y = robot1.y - robot2.y
 
-    d = sqrt(delta_x**2 + delta_y**2)
-    if d < robot1.radius + robot2.radius:
-        reaction_angle = atan2(delta_y, delta_x)
+        d = sqrt(delta_x**2 + delta_y**2)
+        if d < robot1.radius + robot2.radius:
+            reaction_angle = atan2(delta_y, delta_x)
 
-        robot2.x += cos(reaction_angle + pi)
-        robot2.y += sin(reaction_angle + pi)
+            robot2.x += cos(reaction_angle + pi)
+            robot2.y += sin(reaction_angle + pi)
 
-        return 2 * cos(reaction_angle), 2 * sin(reaction_angle)
+            return 2 * cos(reaction_angle), 2 * sin(reaction_angle)
 
     return 0, 0
 

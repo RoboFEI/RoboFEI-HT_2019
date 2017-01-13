@@ -17,7 +17,7 @@ from SharedMemory import SharedMemory
 
 
 class Robot(pygame.sprite.Sprite,Vision):
-    def __init__(self, x, y, theta, KEY, color):
+    def __init__(self, x, y, theta, KEY, color, kind='R', scale_factor=2):
         pygame.sprite.Sprite.__init__(self)
         Vision.__init__(self)
         self.x = x
@@ -27,10 +27,35 @@ class Robot(pygame.sprite.Sprite,Vision):
         self.color = color
         self.new_x = x
         self.new_y = y
-        self.robot_width = 26
-        self.robot_height = 26
-        self.radius = 13
         self.index = 0
+        #------------------------------------------------------------------------------------------
+        # Chooses what kind of graphics will represent the agent.
+        # 'R' - for Robot, is the default kind of agent.
+        # 'D' - for Drone, this one doesn't have collision.
+        # 'H' - for Husky, draws a wheeled robot, also it is not omnidiretional.
+        # 'P' - for Person, this will draw a person.
+        #------------------------------------------------------------------------------------------
+        self.kind = kind
+
+        # This changes the size of the drawing area and colision boxes
+        if kind == 'R':
+            self.robot_width = 26
+            self.robot_height = 26
+            self.radius = 13
+        elif kind == 'D':
+            self.scale_factor = scale_factor
+            self.robot_width = 20 * self.scale_factor
+            self.robot_height = 30 * self.scale_factor
+            self.radius = 10*self.scale_factor
+        elif kind == 'H':
+            self.robot_width = 77
+            self.robot_height = 77
+            self.radius = 43
+        elif kind == 'P':
+            self.scale_factor = scale_factor
+            self.robot_width = 6*self.scale_factor
+            self.robot_height = 7*self.scale_factor
+            self.radius = 3*self.scale_factor
 
         self.front = 0
         self.turn = 0
@@ -97,43 +122,218 @@ class Robot(pygame.sprite.Sprite,Vision):
         self.image.fill(screen.GREEN)
         self.image.set_colorkey(screen.GREEN)
 
-        self.rect.x = self.x - 13
-        self.rect.y = self.y - 13
+        if self.kind == 'R':
+            self.rect.x = self.x - 13
+            self.rect.y = self.y - 13
 
-        #robot's body
-        pygame.draw.rect(self.image, self.color, (3, 0, 16, 26), 0)
+            #robot's body
+            pygame.draw.rect(self.image, self.color, (3, 0, 16, 26), 0)
 
-        #feet
-        pygame.draw.rect(self.image, screen.BLACK, (19, 2, 5, 10), 0)
-        pygame.draw.rect(self.image, screen.BLACK, (19, 14, 5, 10), 0)
+            #feet
+            pygame.draw.rect(self.image, screen.BLACK, (19, 2, 5, 10), 0)
+            pygame.draw.rect(self.image, screen.BLACK, (19, 14, 5, 10), 0)
 
-        #sum time between frames
-        self.sum_time = (screen.clock.get_time() + self.sum_time) % 500
+            #sum time between frames
+            self.sum_time = (screen.clock.get_time() + self.sum_time) % 500
 
-        #feet movement while walking
-        if self.control.action_flag != 0:
-            if self.sum_time < 250:
-                pygame.draw.rect(self.image, screen.BLACK, (19, 1, 6, 12), 0)
-                pygame.draw.rect(self.image, screen.BLACK, (19, 14, 5, 10), 0)
+            #feet movement while walking
+            if self.control.action_flag != 0:
+                if self.sum_time < 250:
+                    pygame.draw.rect(self.image, screen.BLACK, (19, 1, 6, 12), 0)
+                    pygame.draw.rect(self.image, screen.BLACK, (19, 14, 5, 10), 0)
+                else:
+                    pygame.draw.rect(self.image, screen.BLACK, (19, 2, 5, 10), 0)
+                    pygame.draw.rect(self.image, screen.BLACK, (19, 13, 6, 12), 0)
+
+            image2 = pygame.transform.rotate(self.image, self.rotate)
+
+            #fix rotation to the center
+            rot_rect = image2.get_rect(center=self.rect.center)
+
+            #show
+            screen.background.blit(image2, (rot_rect))
+
+            #text
+            font = pygame.font.SysFont("Arial", 15)
+            self.index = robot_index + 1
+            robot_name = "B" + str(self.index)
+            text = font.render(robot_name, 1, (10, 10, 10))
+            textpos = (self.x - 5, self.y - 40)
+            screen.background.blit(text, textpos)
+
+        elif self.kind == 'D':
+            sf = self.scale_factor
+            # Draws Drone
+            self.rect.x = self.x - 10 * sf
+            self.rect.y = self.y - 15 * sf
+
+            #robot's body
+            pygame.draw.rect(self.image, self.color, (0, int(10*sf), int(20*sf), int(10*sf)), 0)
+            pygame.draw.rect(self.image, screen.BLACK, (0, int(10*sf), int(20*sf), int(10*sf)), 1)
+
+            #sum time between frames
+            self.sum_time = (screen.clock.get_time() + self.sum_time) % 360
+
+            pygame.draw.rect(self.image, (0, 255, 0), (int(16*sf), int(12*sf), int(4*sf), int(6*sf)), 0)
+            pygame.draw.rect(self.image, screen.BLACK, (int(16*sf), int(12*sf), int(4*sf), int(6*sf)), 1)
+
+            #helix movement
+            ax = int(5*sf * cos(radians(self.sum_time)))
+            ay = int(5*sf * sin(radians(self.sum_time)))
+            bx = int(5*sf * cos(radians(self.sum_time + 120)))
+            by = int(5*sf * sin(radians(self.sum_time + 120)))
+            cx = int(5*sf * cos(radians(self.sum_time - 120)))
+            cy = int(5*sf * sin(radians(self.sum_time - 120)))
+            
+            for i in [int(5*sf), int(15*sf)]:
+                for j in [int(5*sf), int(25*sf)]:
+                    #helix supports
+                    pygame.draw.circle(self.image, screen.BLACK, (i, j), int(5*sf), 1)
+                    for k in [[ax, ay], [bx, by], [cx, cy]]:
+                        #helixs
+                        pygame.draw.line(self.image, screen.BLACK, (i, j), (i+k[0], j+k[1]))
+            
+            image2 = pygame.transform.rotate(self.image, self.rotate)
+
+            #fix rotation to the center
+            rot_rect = image2.get_rect(center=self.rect.center)
+
+            #show
+            screen.background.blit(image2, (rot_rect))
+
+            #text
+            font = pygame.font.SysFont("Arial", 15)
+            self.index = robot_index + 1
+            robot_name = "D" + str(self.index)
+            text = font.render(robot_name, 1, (10, 10, 10))
+            fontsize = font.size(robot_name)
+            textpos = (self.x - fontsize[0]/2, self.rect.top-fontsize[1]-3)
+            screen.background.blit(text, textpos)
+        elif self.kind == 'H':
+            # Draws Drone
+            self.rect.x = self.x - 38
+            self.rect.y = self.y - 38
+
+            #robot's body
+            point_list = [[9,15], [67,15], [76,24], [76,52], [67,61], [9,61]]
+            pygame.draw.polygon(self.image, self.color, point_list, 0)
+            pygame.draw.polygon(self.image, screen.BLACK, point_list, 1)
+
+            #robot's thing
+            pygame.draw.circle(self.image, screen.BLACK, (60,38), 10, 0)
+            pygame.draw.rect(self.image, self.color, (48, 26, 12, 24), 0)
+
+            #robot's pickup
+            pygame.draw.rect(self.image, screen.BLACK, (12, 18, 45, 41), 1)
+
+            #robot's wheels
+            pygame.draw.rect(self.image, screen.BLACK, (0, 0, 30, 15), 0)
+            pygame.draw.rect(self.image, screen.BLACK, (46, 0, 30, 15), 0)
+            pygame.draw.rect(self.image, screen.BLACK, (0, 62, 30, 15), 0)
+            pygame.draw.rect(self.image, screen.BLACK, (46, 62, 30, 15), 0)
+
+            #sum time between frames
+            self.sum_time = (screen.clock.get_time() + self.sum_time) % 500
+
+            #wheels movement while moving
+            for i in [0, 46]:
+                    for j in [0, 61]:
+                        if self.control.action_flag != 0 and self.sum_time < 250:
+                            pygame.draw.rect(self.image, (30,30,30), (i+4, j+2, 3, 12), 0)
+                            pygame.draw.rect(self.image, (30,30,30), (i+12, j+2, 6, 12), 0)
+                            pygame.draw.rect(self.image, (30,30,30), (i+23, j+2, 3, 12), 0)
+                        else:
+                            pygame.draw.rect(self.image, (30,30,30), (i+2, j+2, 3, 12), 0)
+                            pygame.draw.rect(self.image, (30,30,30), (i+8, j+2, 4, 12), 0)
+                            pygame.draw.rect(self.image, (30,30,30), (i+18, j+2, 4, 12), 0)
+                            pygame.draw.rect(self.image, (30,30,30), (i+25, j+2, 3, 12), 0)
+
+            image2 = pygame.transform.rotate(self.image, self.rotate)
+
+            #fix rotation to the center
+            rot_rect = image2.get_rect(center=self.rect.center)
+
+            #show
+            screen.background.blit(image2, (rot_rect))
+
+            #text
+            font = pygame.font.SysFont("Arial", 15)
+            self.index = robot_index + 1
+            robot_name = "H" + str(self.index)
+            text = font.render(robot_name, 1, (10, 10, 10))
+            fontsize = font.size(robot_name)
+            textpos = (self.x - fontsize[0]/2, self.y - fontsize[0]/2)
+            screen.background.blit(text, textpos)
+        elif self.kind == 'P':
+            sf = self.scale_factor
+            # Draws Drone
+            self.rect.x = self.x - 2.5 * sf
+            self.rect.y = self.y - 3.5 * sf
+
+            #robot's body
+            #sum time between frames
+            self.sum_time = (screen.clock.get_time() + self.sum_time) % 1000
+            darkcolor = (int(self.color[0]/3), int(self.color[1]/3), int(self.color[2]/3))
+            if self.sum_time < 250 and self.control.action_flag != 0:
+                #feet
+                pygame.draw.ellipse(self.image, darkcolor, (2*sf, 1*sf, 4*sf, 2*sf), 0) 
+                pygame.draw.ellipse(self.image, darkcolor, (0*sf, 4*sf, 4*sf, 2*sf), 0)
+                pygame.draw.ellipse(self.image, screen.BLACK, (2*sf, 1*sf, 4*sf, 2*sf), 1) 
+                pygame.draw.ellipse(self.image, screen.BLACK, (0*sf, 4*sf, 4*sf, 2*sf), 1)
+                #arms
+                pygame.draw.ellipse(self.image, (170, 100, 30), (0*sf, 0*sf, 3*sf, 2*sf), 0) 
+                pygame.draw.ellipse(self.image, (170, 100, 30), (2*sf, 5*sf, 3*sf, 2*sf), 0)
+                pygame.draw.ellipse(self.image, screen.BLACK, (0*sf, 0*sf, 3*sf, 2*sf), 1) 
+                pygame.draw.ellipse(self.image, screen.BLACK, (2*sf, 5*sf, 3*sf, 2*sf), 1)
+                #shirt
+                pygame.draw.ellipse(self.image, self.color, (1*sf, 0, 3*sf, 7*sf), 0)
+                pygame.draw.ellipse(self.image, screen.BLACK, (1*sf, 0, 3*sf, 7*sf), 1)
+                #head
+                pygame.draw.ellipse(self.image, screen.BLACK, (1*sf, 2*sf, 4*sf, 3*sf), 0)
+            elif self.sum_time > 500 and self.sum_time < 750 and self.control.action_flag != 0:
+                #feet
+                pygame.draw.ellipse(self.image, darkcolor, (0*sf, 1*sf, 4*sf, 2*sf), 0) 
+                pygame.draw.ellipse(self.image, darkcolor, (2*sf, 4*sf, 4*sf, 2*sf), 0)
+                pygame.draw.ellipse(self.image, screen.BLACK, (0*sf, 1*sf, 4*sf, 2*sf), 1) 
+                pygame.draw.ellipse(self.image, screen.BLACK, (2*sf, 4*sf, 4*sf, 2*sf), 1)
+                #arms
+                pygame.draw.ellipse(self.image, (170, 100, 30), (2*sf, 0*sf, 3*sf, 2*sf), 0) 
+                pygame.draw.ellipse(self.image, (170, 100, 30), (0*sf, 5*sf, 3*sf, 2*sf), 0)
+                pygame.draw.ellipse(self.image, screen.BLACK, (2*sf, 0*sf, 3*sf, 2*sf), 1) 
+                pygame.draw.ellipse(self.image, screen.BLACK, (0*sf, 5*sf, 3*sf, 2*sf), 1)
+                #shirt
+                pygame.draw.ellipse(self.image, self.color, (1*sf, 0, 3*sf, 7*sf), 0)
+                pygame.draw.ellipse(self.image, screen.BLACK, (1*sf, 0, 3*sf, 7*sf), 1)
+                #head
+                pygame.draw.ellipse(self.image, screen.BLACK, (1*sf, 2*sf, 4*sf, 3*sf), 0)
             else:
-                pygame.draw.rect(self.image, screen.BLACK, (19, 2, 5, 10), 0)
-                pygame.draw.rect(self.image, screen.BLACK, (19, 13, 6, 12), 0)
+                #feet
+                pygame.draw.ellipse(self.image, darkcolor, (1*sf, 1*sf, 4*sf, 2*sf), 0) 
+                pygame.draw.ellipse(self.image, darkcolor, (1*sf, 4*sf, 4*sf, 2*sf), 0)
+                pygame.draw.ellipse(self.image, screen.BLACK, (1*sf, 1*sf, 4*sf, 2*sf), 1) 
+                pygame.draw.ellipse(self.image, screen.BLACK, (1*sf, 4*sf, 4*sf, 2*sf), 1)
+                #shirt
+                pygame.draw.ellipse(self.image, self.color, (1*sf, 0, 3*sf, 7*sf), 0)
+                pygame.draw.ellipse(self.image, screen.BLACK, (1*sf, 0, 3*sf, 7*sf), 1)
+                #head
+                pygame.draw.ellipse(self.image, screen.BLACK, (1*sf, 2*sf, 4*sf, 3*sf), 0)
+            
+            image2 = pygame.transform.rotate(self.image, self.rotate)
 
-        image2 = pygame.transform.rotate(self.image, self.rotate)
+            #fix rotation to the center
+            rot_rect = image2.get_rect(center=self.rect.center)
 
-        #fix rotation to the center
-        rot_rect = image2.get_rect(center=self.rect.center)
+            #show
+            screen.background.blit(image2, (rot_rect))
 
-        #show
-        screen.background.blit(image2, (rot_rect))
-
-        #text
-        font = pygame.font.SysFont("Arial", 15)
-        self.index = robot_index + 1
-        robot_name = "B" + str(self.index)
-        text = font.render(robot_name, 1, (10, 10, 10))
-        textpos = (self.x - 5, self.y - 40)
-        screen.background.blit(text, textpos)
+            #text
+            font = pygame.font.SysFont("Arial", 15)
+            self.index = robot_index + 1
+            robot_name = "P" + str(self.index)
+            text = font.render(robot_name, 1, (10, 10, 10))
+            fontsize = font.size(robot_name)
+            textpos = (self.x - fontsize[0]/2, self.rect.top-fontsize[1]-3)
+            screen.background.blit(text, textpos)
 
     '''Control'''
 
@@ -403,3 +603,4 @@ class Robot(pygame.sprite.Sprite,Vision):
                 pygame.draw.line(screen.background, self.color, (int(self.x), int(self.y)), (
                     cos(radians(self.rotate + i)) * farthest_boundary + int(self.x), int(self.y) -
                     sin(radians(self.rotate + i)) * farthest_boundary), 1)
+

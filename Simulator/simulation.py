@@ -42,12 +42,11 @@ class Simulation():
                     self.update_mouse_pos()
 
                     if pygame.key.get_mods() & pygame.KMOD_CTRL:
-                        self.update_mouse_pos()
-                        robot = Robot(self.mx, self.my, 180, (len(self.robots)+1) * self.screen.KEY_BKB, self.screen.MAGENTA)
+                        robot = Robot(self.mx, self.my, 180, (len(self.robots)+1) * self.screen.KEY_BKB, self.screen.MAGENTA, 'H')
                         robot.imu_initial_value = 180
 
                     elif pygame.key.get_mods() & pygame.KMOD_LSHIFT:
-                        robot = Robot(self.mx, self.my,0,(len(self.robots)+1) * self.screen.KEY_BKB, self.screen.YELLOW)
+                        robot = Robot(self.mx, self.my,0,(len(self.robots)+1) * self.screen.KEY_BKB, self.screen.YELLOW, 'D', 2)
                         robot.imu_initial_value = 0
 
                     elif pygame.key.get_mods() & pygame.KMOD_LALT:
@@ -55,7 +54,7 @@ class Simulation():
                         robot.imu_initial_value = 180
 
                     elif pygame.key.get_mods() & pygame.KMOD_RSHIFT:
-                        robot = Robot(self.mx, self.my,180,(len(self.robots)+1) * self.screen.KEY_BKB, self.screen.ORANGE)
+                        robot = Robot(self.mx, self.my,180,(len(self.robots)+1) * self.screen.KEY_BKB, self.screen.ORANGE, 'P', 10)
                         robot.imu_initial_value = 180
 
                     else:
@@ -263,16 +262,19 @@ class Simulation():
 
     def display_update(self):
         if self.robots:
-            for robot in range(0, len(self.robots)):
-                self.robots[robot].draw_robot(robot, self.screen)
-                if self.draw_vision_control:
-                    self.robots[robot].draw_vision(self.screen)
-                if self.eopra_view:
-                    self.robots[robot].draw_eopra(self.screen)
-                if self.starvars_view:
-                    self.robots[robot].draw_starvars(self.screen)
-                self.robots[robot].vision_process(self.ball.x, self.ball.y, self.robots)
-        self.ball.draw_ball(self.screen)
+            for c in range(2):
+                for robot in range(0, len(self.robots)):
+                    if self.robots[robot].kind != 'D' and c == 0 or self.robots[robot].kind == 'D' and c == 1:
+                        self.robots[robot].draw_robot(robot, self.screen)
+                        if self.draw_vision_control:
+                            self.robots[robot].draw_vision(self.screen)
+                        if self.eopra_view:
+                            self.robots[robot].draw_eopra(self.screen)
+                        if self.starvars_view:
+                            self.robots[robot].draw_starvars(self.screen)
+                        self.robots[robot].vision_process(self.ball.x, self.ball.y, self.robots)
+                if c == 0:
+                    self.ball.draw_ball(self.screen)
 
         if self.Help:
             help(self.screen)
