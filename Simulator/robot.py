@@ -401,7 +401,8 @@ class Robot(pygame.sprite.Sprite,Vision):
                 self.x += x
                 self.y += y
 
-        collision_robot_vs_ball(self, self.ball)
+        if self.ball:
+            collision_robot_vs_ball(self, self.ball)
         self.get_orientation()  # cumulative error
 
     def get_orientation(self):
@@ -429,24 +430,25 @@ class Robot(pygame.sprite.Sprite,Vision):
         self.Kick(30, 30, -90, 8) #leftlimit, rightlimit, direction, force 1 to 12
 
     def Kick(self, LeftLimit, RightLimit, Direction=0, force_limit = 12):
-        R = degrees(atan2((self.y - self.ball.y), (self.ball.x - self.x)))
-        d = sqrt((self.x - self.ball.x) ** 2 + (self.y - self.ball.y) ** 2)
-        force = min(10, force_limit * exp(-((self.radius - d) ** 2) / (force_limit) ** 2))
+        if self.ball:
+            R = degrees(atan2((self.y - self.ball.y), (self.ball.x - self.x)))
+            d = sqrt((self.x - self.ball.x) ** 2 + (self.y - self.ball.y) ** 2)
+            force = min(10, force_limit * exp(-((self.radius - d) ** 2) / (force_limit) ** 2))
 
-        r = R
-        if R < 0: r = R + 360
+            r = R
+            if R < 0: r = R + 360
 
-        if self.rotate > 360 - LeftLimit and (
-                r > self.rotate - RightLimit or r < self.rotate - 360 + LeftLimit) or self.rotate < RightLimit and (
-                r > 360 - RightLimit + self.rotate or r < self.rotate + LeftLimit) or r > self.rotate - RightLimit and r < self.rotate + LeftLimit:
-            if self.errors_on:
-                self.ball.put_in_motion(force + gauss(self.kick_error_force_mean, self.kick_error_force_variance),
-                                        self.rotate + Direction + gauss(self.kick_error_angle_mean,
-                                                                        self.kick_error_angle_variance))
-            else:
-                self.ball.put_in_motion(force, self.rotate + Direction)
+            if self.rotate > 360 - LeftLimit and (
+                    r > self.rotate - RightLimit or r < self.rotate - 360 + LeftLimit) or self.rotate < RightLimit and (
+                    r > 360 - RightLimit + self.rotate or r < self.rotate + LeftLimit) or r > self.rotate - RightLimit and r < self.rotate + LeftLimit:
+                if self.errors_on:
+                    self.ball.put_in_motion(force + gauss(self.kick_error_force_mean, self.kick_error_force_variance),
+                                            self.rotate + Direction + gauss(self.kick_error_angle_mean,
+                                                                            self.kick_error_angle_variance))
+                else:
+                    self.ball.put_in_motion(force, self.rotate + Direction)
 
-        self.control.action_select(0)
+            self.control.action_select(0)
 
     '''Vision'''
 

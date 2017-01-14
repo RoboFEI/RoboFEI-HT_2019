@@ -9,14 +9,18 @@ from setupmatch import *
 from telemetry import *
 
 class Simulation():
-    def __init__(self, screen):
+    def __init__(self, screen, rescue = False):
         self.rotate_control = 0
         '''self.front = 0
         self.rotate = 0
         self.drift = 0'''
         self.robot_index_control = -1
         self.robots = []
-        self.ball = Ball(520, 370, 0.95)
+        self.rescue = rescue
+        if self.rescue:
+            self.ball = []
+        else:
+            self.ball = Ball(520, 370, 0.95)
         self.mx = 0
         self.my = 0
         self.theta = 0
@@ -119,7 +123,7 @@ class Simulation():
                 if event.type == pygame.KEYUP and event.key == pygame.K_j:
                     self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 13)
 
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_b:
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_b and not self.rescue:
                     self.update_mouse_pos()
                     self.ball = Ball(self.mx, self.my, 0.95)
                     for robot in self.robots:
@@ -254,11 +258,12 @@ class Simulation():
             robot.control.control_update()
 
         # ball
-        GS, F, E = self.ball.motion_model(self.field.goalpost_list, self.field.LimitLines, self.field.Goals, self.field.PlayField)
-        if not self.field.GameStop and GS:
-            self.field.FriendGoals += F
-            self.field.EnemyGoals += E
-            self.field.GameStop = GS
+        if not self.rescue:
+            GS, F, E = self.ball.motion_model(self.field.goalpost_list, self.field.LimitLines, self.field.Goals, self.field.PlayField)
+            if not self.field.GameStop and GS:
+                self.field.FriendGoals += F
+                self.field.EnemyGoals += E
+                self.field.GameStop = GS
 
     def display_update(self):
         if self.robots:
@@ -272,8 +277,9 @@ class Simulation():
                             self.robots[robot].draw_eopra(self.screen)
                         if self.starvars_view:
                             self.robots[robot].draw_starvars(self.screen)
-                        self.robots[robot].vision_process(self.ball.x, self.ball.y, self.robots)
-                if c == 0:
+                        if not self.rescue:
+                            self.robots[robot].vision_process(self.ball.x, self.ball.y, self.robots)
+                if c == 0 and not self.rescue:
                     self.ball.draw_ball(self.screen)
 
         if self.Help:

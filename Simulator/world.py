@@ -118,10 +118,11 @@ class GoalPosts(SoccerField):
         self.radius = 10 #10cm
         self.x = x
         self.y = y
+        self.color = (255, 255, 255)
 
     def draw_goalposts(self, screen):
         '''draw goalposts'''
-        pygame.draw.circle(screen.background,screen.WHITE,(self.x,self.y),self.radius,0)
+        pygame.draw.circle(screen.background,self.color,(self.x,self.y),self.radius,0)
 
 class LimitLine(SoccerField):
     def __init__(self, a0, a1, b, cte_y = True):
