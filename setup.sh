@@ -45,7 +45,6 @@ then
 	fi
 	echo
 	if [ $REPLY == 1 ]; then
-		echo "foi"
 		echo -e "${blue} AI ${NC}"
 		echo -e "${blue} Installing serial ${NC}"
 	    cd AI/IMU/serial
