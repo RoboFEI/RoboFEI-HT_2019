@@ -24,6 +24,7 @@ install:
  - make all
  - make install
  - cd ../../
-
+ - cd Simulator/
+ 
 script:
  - python main_simulator.py
