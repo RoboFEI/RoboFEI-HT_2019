@@ -1,0 +1,10 @@
+language: cpp
+
+install:
+ - sudo apt-get install libboost-all-dev
+ - cd ./AI/Control/Linux/build_Framework
+ - make
+ - cd ../../../../
+
+script:
+ - ./setup.sh
