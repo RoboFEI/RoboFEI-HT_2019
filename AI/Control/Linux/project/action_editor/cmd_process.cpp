@@ -389,7 +389,9 @@ void DrawPage()
 	DrawName();
 
 	GoToCursor(PAGENUM_COL, PAGENUM_ROW);
+	std::cout<<Lverde;
 	printf( "%.4d", indexPage );
+	std::cout<<nulo;
 
 	GoToCursor(ADDR_COL, ADDR_ROW);
 	printf( "0x%.5X", (int)(indexPage*sizeof(Action::PAGE)) );
@@ -525,7 +527,7 @@ void DrawStepLine(bool erase)
 		if(erase == true)
 			printf( " " );
 		else
-			printf( "|" );
+			std::cout<<Lred<< "|"<<nulo;
 	}
 
 	GoToCursor(old_col, old_row);
