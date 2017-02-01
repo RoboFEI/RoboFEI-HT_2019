@@ -1,4 +1,7 @@
-language: cpp
+language: python
+
+python:
+- "2.7"
 
 install:
  - sudo apt-get install libboost-all-dev
@@ -13,8 +16,6 @@ install:
  - make all
  - sudo make install
  - cd ../../../..
-
-script:
  - echo -e "\e[0;34m Installing whole software \e[0m"
  - cd ./AI
  - mkdir build
@@ -23,3 +24,6 @@ script:
  - make all
  - make install
  - cd ../../
+
+script:
+ - python main_simulator.py
