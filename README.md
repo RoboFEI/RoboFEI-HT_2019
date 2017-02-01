@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.com/thiagohomem/RoboFEI-HT_Debug.svg?token=BM6ZpSsKHNz3RkbM8yxT&branch=master)](https://travis-ci.com/thiagohomem/RoboFEI-HT_Debug)
 #RoboFEI-HT: Artificial Intelligence and Simulator
 
 ## AI: Artificial Intelligence for Humanoid Robots
