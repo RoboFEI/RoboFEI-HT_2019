@@ -33,3 +33,6 @@ install:
  
 script:
  - python main_simulator.py
+
+virtualenv:
+    system_site_packages: true
