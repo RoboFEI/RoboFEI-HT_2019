@@ -16,7 +16,7 @@ install:
 
 script:
  - echo -e "\e[0;34m Installing whole software \e[0m"
- - cd AI
+ - cd ./AI
  - mkdir build
  - cd build
  - cmake ../
