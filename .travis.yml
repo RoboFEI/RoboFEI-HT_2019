@@ -3,9 +3,11 @@ language: python
 python:
 - "2.7"
 
-install:
+before_install:
  - sudo apt-get install libboost-all-dev
  - sudo apt-get install -qq python-pygame
+ 
+install:
  - cd ./AI/Control/Linux/build_Framework
  - make
  - cd ../../../../
