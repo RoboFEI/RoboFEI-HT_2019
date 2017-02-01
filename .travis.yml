@@ -5,6 +5,21 @@ install:
  - cd ./AI/Control/Linux/build_Framework
  - make
  - cd ../../../../
+ - echo -e "\e[0;34m Installing serial \e[0m"
+ - cd AI/IMU/serial
+	- mkdir build
+	- cd build
+	- cmake ../
+	- make all
+	- sudo make install
+	- cd ../../..
 
 script:
- - ./setup.sh --y
+ - echo -e "\e[0;34m Installing whole software \e[0m"
+	- cd AI
+	- mkdir build
+	- cd build
+	- cmake ../
+	- make all
+	- make install
+	- cd ../../
