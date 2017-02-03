@@ -16,7 +16,7 @@ install:
  - make all
  - cd ../../../../
  
- - ./AI/Control/Linux/project/action_editor
+ - cd ./AI/Control/Linux/project/action_editor
  - make
  - cd ../../../../../
  
