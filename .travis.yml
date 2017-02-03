@@ -12,8 +12,13 @@ before_install:
  
 install:
  - cd ./AI/Control/Linux/build_Framework
- - make
+ - make clean
+ - make all
  - cd ../../../../
+ 
+ - ./AI/Control/Linux/project/action_editor
+ - make
+ - cd ../../../../../
  
 script:
  - ./setup.sh r 1 g
