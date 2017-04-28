@@ -19,8 +19,8 @@ class Simulation():
     def display_update(self, particles):
         
         for particle in particles:
-            xi = particle.x + 70
-            yi = particle.y + 70
+            xi = particle.x
+            yi = particle.y
             xm = xi + 2 * cos(radians(particle.rotation))
             ym = yi - 2 * sin(radians(particle.rotation))
             xf = xm + 3 * cos(radians(particle.rotation))

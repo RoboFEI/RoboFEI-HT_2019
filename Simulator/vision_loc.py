@@ -8,59 +8,199 @@ from screen import *
 
 class VISION():
     #----------------------------------------------------------------------------------------------------------------------------------
-    def __init__(self, robot):
+    def __init__(self, robot, clk=30.):
         self.robot = robot # Saves the robot object's address
+        print self.robot.x, self.robot.y
+        self.robotheight = 50 # Height in centimeters
 
         self.bkb = self.robot.bkb # Holds Blackboard's address
         self.Mem = self.robot.Mem # Holds memory key
 
-        self.fov = 180 # Total field of view in degrees
+        self.vfov = 14.58 # Vertical field of view
+        self.hfov = 26.13 # Horizontal field of view
 
-    def Draw(self, where):
-        nx = self.robot.x + 1000 * cos(radians(self.fov/2.0 - self.robot.rotate))
-        ny = self.robot.y + 1000 * sin(radians(self.fov/2.0 - self.robot.rotate))
-        pygame.draw.line(where, (0, 0, 0), (self.robot.x, self.robot.y), (nx, ny), 1)
+        self.clk = clk
 
-        nx = self.robot.x + 1000 * cos(radians(-self.fov/2.0 - self.robot.rotate))
-        ny = self.robot.y + 1000 * sin(radians(-self.fov/2.0 - self.robot.rotate))
-        pygame.draw.line(where, (0, 0, 0), (self.robot.x, self.robot.y), (nx, ny), 1)
+        self.headtilt = 17.4 # Tilt position
+        self.tiltpos = 17.4 # Chosen tilt position, default 17.4
+        self.headpan = 0 # Pan position
+        self.panpos = 0 # Chosen pan position
 
-    def DrawLM(self, where):
-        pygame.draw.circle(where, (0, 200, 255), (70, 70), 10, 2) # Draw Blue
-        pygame.draw.circle(where, (255, 0, 0), (970, 70), 10, 2) # Draw Red
-        pygame.draw.circle(where, (255,255,0), (70, 670), 10, 2) # Draw Yellow
-        pygame.draw.circle(where, (100, 0, 200), (970, 670), 10, 2) # Draw Purple
+        self.maxtilt = 64 # Max tilt
+        self.mintilt = 16 # Min tilt
+        self.maxpan = 90 # Max pan
+        self.minpan = -90 # Min pan
 
-    def GetLM(self, which = None): # B R Y P
-        if which == 'B': # (00)
-            dist = hypot(self.robot.x-70, self.robot.y-70)
-            ang = -degrees(atan2(70-self.robot.y, 70-self.robot.x)) - self.robot.rotate
-            return dist, ang
-        elif which == 'R': # (10)
-            dist = hypot(self.robot.x-970, self.robot.y-70)
-            ang = -degrees(atan2(70-self.robot.y, 970-self.robot.x)) - self.robot.rotate
-            return dist, ang
-        elif which == 'Y': # (01)
-            dist = hypot(self.robot.x-70, self.robot.y-670)
-            ang = -degrees(atan2(670-self.robot.y, 70-self.robot.x)) - self.robot.rotate
-            return dist, ang
-        elif which == 'P': # (11)
-            dist = hypot(self.robot.x-970, self.robot.y-670)
-            ang = -degrees(atan2(670-self.robot.y, 970-self.robot.x)) - self.robot.rotate
-            return dist, ang
+        self.headspd = 30 # Max head speed, in degrees per second
+
+        # Observation points
+        self.vpoints = []
+        for j in [-14, -13.5]:
+            for i in [-20, -13.5, -7, 0, 7, 13.5, 20]:
+                self.vpoints.append((i, j))
+        for i in [-20, -13.5, 0, 13.5, 20]:
+            self.vpoints.append((i, -12.5))                
+        for j in [-11, -7.5]:
+            for i in [-20, -7, 7, 20]:
+                self.vpoints.append((i, j))
+        self.vpoints.append((-13.5, 0))
+        self.vpoints.append((13.5, 0))
+        self.vpoints.append((0, 9))
+
+        self.behave = 0
+
+    # Changes the tilt's position
+    def tilt(self, diff=None, pos=None):
+        if diff: # Adds a difference
+            self.tiltpos += diff
+        elif pos: # Changes the position
+            self.tiltpos = pos
+
+    # Changes the pan's position
+    def pan(self, diff=None, pos=None):
+        if diff != None: # Adds a difference
+            self.panpos += diff
+        elif pos != None: # Changes the position
+            self.panpos = pos
+
+    # Updates the head position
+    def headmotion(self):
+        self.headtilt += np.sign(self.tiltpos-self.headtilt) * np.min([abs(self.tiltpos-self.headtilt), self.headspd]) / self.clk
+        self.headpan += np.sign(self.panpos-self.headpan) * np.min([abs(self.panpos-self.headpan), self.headspd]) / self.clk
+
+        self.headtilt = np.min([self.maxtilt, np.max([self.mintilt, self.headtilt])])
+        self.headpan = np.min([self.maxpan, np.max([self.minpan, self.headpan])])
+
+    # Reactive head behavior
+    def headBehave(self):
+        x = [90,0,-90,0][self.behave]
+        self.pan(pos=x)
+
+        if self.headpan > 89 and self.behave == 0:
+            self.behave = 1
+        elif self.headpan < 1 and self.behave == 1:
+            self.behave = 2
+        elif self.headpan < -89 and self.behave == 2:
+            self.behave = 3
+        elif self.headpan > -1 and self.behave == 3:
+            self.behave = 0
+        
+
+    # Draw the field of view of the robot
+    def draw(self, where):
+        # Computes distances
+        f = self.robotheight/np.tan(np.radians(self.headtilt-self.vfov))
+        n = self.robotheight/np.tan(np.radians(self.headtilt+self.vfov))
+
+        # Computes point distances
+        dn = n/np.cos(np.radians(self.hfov))
+        df = f/np.cos(np.radians(self.hfov))
+
+        # Array of points
+        points = []
+
+        # Create points
+        for d in [dn, df]:
+            for a in [self.hfov, -self.hfov]:
+                x = self.robot.x + d * np.cos(np.radians(-self.robot.rotate + self.headpan + a))
+                y = self.robot.y + d * np.sin(np.radians(-self.robot.rotate + self.headpan + a))
+                points.append((x,y))
+
+        # Draw the points
+        for a in [0, 3]:
+            for b in [1, 2]:
+                pygame.draw.line(where, (255,255,255), points[a], points[b], 1)
+
+        for point in self.vpoints:
+            # Compute the point distance
+            dist = (self.robotheight/np.tan(np.radians(self.headtilt+point[1])))/np.cos(np.radians(point[0]))
+            # Compute the direction of the point
+            angle = -self.robot.rotate+self.headpan+point[0]
+
+            # Compute the position in the world of the point
+            x = self.robot.x + dist * np.cos(np.radians(angle))
+            y = self.robot.y + dist * np.sin(np.radians(angle))
+
+            pygame.draw.line(where, (255,255,255), (x,y), (x,y), 1)
+
+    # Return the notable variables for localization, as a vector
+    def GetField(self):
+        ret = []
+
+        # Saves the heads position
+        if self.headpan > 80: # If it is to the left
+            ret.append(0)
+            ret.append(1)
+        elif self.headpan < -80: # If it is to the right
+            ret.append(1)
+            ret.append(0)
+        elif -5 <= self.headpan and self.headpan <= 5: # If it is forward
+            ret.append(1)
+            ret.append(1)
         else:
-            return None, None
+            return 32*[0]
 
-    def RetLM(self):
-        y = []
-        for x in ('B', 'R', 'Y', 'P'):
-            ang = self.GetLM(x)[1]
-            if CompAng(ang, 0, self.fov/2.0) and 0.25 >rnd.random():
-                y.append(rnd.gauss(ang, 5.0))
+        # For each point
+        for point in self.vpoints:
+            # Compute the point distance
+            dist = (self.robotheight/np.tan(np.radians(self.headtilt+point[1])))/np.cos(np.radians(point[0]))
+            # Compute the direction of the point
+            angle = -self.robot.rotate+self.headpan+point[0]
+
+            # Compute the position in the world of the point
+            x = self.robot.x + dist * np.cos(np.radians(angle))
+            y = self.robot.y + dist * np.sin(np.radians(angle))
+
+            # Verify if it is in or out of the field
+            if 0 <= x and x <= 1040 and 0 <= y and y <= 740:
+                ret.append(1)
             else:
-                y.append(-999) # Return this if not seen the ball
-        return y
+                ret.append(0)
+                
+        # Return the points values
+        return ret
 
+    # Return the distance and direction of a given point
+    def GetPoint(self, point):
+        # Compute the vectorial distance
+        dx = point[0] - self.robot.x
+        dy = point[1] - self.robot.y
+        # Computes the scalar distance
+        dist = np.hypot(dx, dy)
+        ang = -np.degrees(np.arctan2(dy, dx))-self.robot.rotate
+
+        # Normalizes angle
+        if ang < -180:
+            ang += 360
+
+        # Verifies if the angle is inside the field of view
+        if -self.hfov <= ang and ang <= self.hfov:
+            # 
+            f = self.robotheight/np.tan(np.radians(self.headtilt-self.vfov))
+            n = self.robotheight/np.tan(np.radians(self.headtilt+self.vfov))
+
+            # Computes point distances
+            dn = n/np.cos(np.radians(ang))
+            df = f/np.cos(np.radians(ang))
+
+            # Verifies if the distance is in range
+            if dn <= dist and dist <= df:
+                return np.random.normal(ang, 3)
+        return -999
+
+    # Return the measure of all seen goalposts
+    def GetGoalPosts(self):
+        ret = []
+        # For each goal post
+        for x in [(70,280), (70,460), (970,280), (970,460)]:
+            # Computes the angle
+            ret.append(self.GetPoint(x))
+
+        # Sort the angles
+        ret.sort(reverse=True)
+        return ret
+
+    # Return the position of the ball, maybe
     def GetBall(self):
         dist = hypot(self.robot.x-self.robot.ball.x, self.robot.y-self.robot.ball.y)
         ang = -degrees(atan2(self.robot.ball.y-self.robot.y, self.robot.ball.x-self.robot.x))-self.robot.rotate
@@ -69,38 +209,16 @@ class VISION():
         else:
             return -1, -1
 
+    # Vision Process!
     def VisionProcess(self):
-        control = self.bkb.read_int(self.Mem, 'DECISION_LOCALIZATION') # Variable which controls what the Localization does
-        if control == 0:
-            dist, ang = self.GetBall() # Returns the distance and angle to the ball
-            dist = rnd.gauss(dist, dist/10.0) # Adds a gaussian error to the distance
-            ang = rnd.gauss(ang, 3.0) # Adds a gaussian error to the angle measure
+        self.headBehave()
+        self.headmotion()
+        goals = self.GetGoalPosts()
+        dots = self.GetField()
+        for x in [('VISION_FIRST_GOALPOST', goals[0]), ('VISION_SECOND_GOALPOST', goals[1]), ('VISION_THIRD_GOALPOST', goals[2]), ('VISION_FOURTH_GOALPOST', goals[3])]:
+            self.bkb.write_float(self.Mem, *x)
 
-            self.bkb.write_float(self.Mem, 'VISION_BALL_DIST', dist) # Writes to the Black Board
-            self.bkb.write_float(self.Mem, 'VISION_PAN_DEG', ang) # Writes to the Black Board
-        elif control == 1:
-            y = self.RetLM() # Gets the landmarks angles
-
-            # Writes to the Black Board
-            self.bkb.write_float(self.Mem,'VISION_BLUE_LANDMARK_DEG', y[0]) 
-            self.bkb.write_float(self.Mem,'VISION_RED_LANDMARK_DEG', y[1])
-            self.bkb.write_float(self.Mem,'VISION_YELLOW_LANDMARK_DEG', y[2])
-            self.bkb.write_float(self.Mem,'VISION_PURPLE_LANDMARK_DEG', y[3])
-
-    def test(self):
-        y = []
-        for x in ('B', 'R', 'Y', 'P'):
-            ang = self.GetLM(x)[1]
-            if CompAng(ang, 0, self.fov/2.0):
-                y.append(ang)
-            else:
-                y.append(None) # Return this if not seen the ball
-        y.append(self.robot.x)
-        y.append(self.robot.y)
-        y.append(self.robot.rotate)
-        return y
-
-
+        self.bkb.write_int(self.Mem, 'VISION_FIELD', write(dots))
 
 def CompAng(ang, base, rng):
     xa = cos(radians(ang))
@@ -114,3 +232,10 @@ def CompAng(ang, base, rng):
     c = hypot(xr-1, yr)
 
     return d < c
+
+def write(v):
+    x = 0
+    for i in range(32):
+        x += int(v[i]) << i
+    # print v
+    return x

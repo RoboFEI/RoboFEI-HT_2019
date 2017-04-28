@@ -25,7 +25,8 @@ class MonteCarlo():
         # Initializes with the max quantity of particles
         self.qtd = max_qtd
 
-        for i in range(self.qtd):
+        self.particles.append(Particle(250,370,0))
+        for i in range(self.qtd-1):
             # Randomly generates n particles
             self.particles.append(Particle())
 
@@ -52,7 +53,8 @@ class MonteCarlo():
 
         if z != None:
             for particle in self.particles:
-                self.totalweight += particle.Sensor(*z)
+                w = particle.Sensor(*z)
+                self.totalweight += w
     
     #----------------------------------------------------------------------------------------------
     #   Resample step
@@ -77,6 +79,7 @@ class MonteCarlo():
                 m_y += p.y 
                 m_s += sin(radians(p.rotation))
                 m_c += cos(radians(p.rotation))
+                print step
             s -= p.weight # Removes the used steps.
 
         self.particles = parts # Overwrites the previous particles.
