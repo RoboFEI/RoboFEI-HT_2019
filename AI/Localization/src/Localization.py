@@ -39,7 +39,7 @@ elif args.srmcl:
     from SRMCL import *
 elif args.test:
     from test import *
-    qtdparts = 10
+    qtdparts = 1
 else:
     print 'Please choose a version of MCL to be used!'
     exit()
@@ -161,10 +161,10 @@ class Localization():
             # print zn[0], z0         
 
             # Mounts the vector to be sent
-            # z = (z0, z1, z2, z3, z4)
             # z = [landmarks, fieldpoints, orientation]
             # z = [None, fieldpoints, None]
-            z = [None, fieldpoints, orientation]
+            # z = [landmarks, fieldpoints, orientation]
+            z = [landmarks, None, None]
             # print z
                
             # Performs Particle Filter's Update

@@ -4,7 +4,7 @@ __license__ = "GNU General Public License v3.0"
 
 from math import *
 import random as rnd
-from particle import *
+from newparticle import *
 
 #--------------------------------------------------------------------------------------------------
 #   This class implements the Monte Carlo's Particle Filter
@@ -25,12 +25,16 @@ class MonteCarlo():
         # Initializes with the max quantity of particles
         self.qtd = max_qtd
 
-        self.particles.append(Particle(250,370,0))
-        for i in range(self.qtd-1):
-            # Randomly generates n particles
-            self.particles.append(Particle())
+        # self.particles.append(Particle(250,370,0, 0, 1))
+        # for i in range(self.qtd-1):
+        #     # Randomly generates n particles
+        #     self.particles.append(Particle())
+        
+        for i in range(self.qtd):
+            self.particles.append(Particle(250,370,0, 0, 1))
 
         self.totalweight = 0 # Holds the total sum of particles' weights.
+        self.maxweight = 1
 
         self.mean = [450, 300, 0] # Holds the mean position of the estimated position.
         self.std = 1
@@ -50,6 +54,8 @@ class MonteCarlo():
     def Update(self, z=None):
         # If there was any measure, run the update step
         self.totalweight = 0
+
+        self.maxweight = self.particles[0].MaxWeight(*z)
 
         if z != None:
             for particle in self.particles:
@@ -73,7 +79,7 @@ class MonteCarlo():
         for p in self.particles: # For each particle,
             while s < p.weight: # while the particles weight is grater than the step,
                 s += step # rises the step size,
-                parts.append(Particle(p.x, p.y, p.rotation)) # adds the particle to the list.
+                parts.append(Particle(p.x, p.y, p.rotation, p.weight, self.maxweight)) # adds the particle to the list.
                 # Do the summing process for the mean computation
                 m_x += p.x 
                 m_y += p.y 
