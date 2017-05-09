@@ -8,6 +8,7 @@ build/
 AI/Vision/Data/*.ini
 AI/Control/Data/*.ini
 AI/Control/Data/*.bin
+AI/Vision/src/.thresholds
 develop-eggs/
 dist/
 downloads/
