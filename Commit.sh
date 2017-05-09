@@ -22,10 +22,10 @@ read name
 echo "${blue}Insira seu email do git: ${NC}"
 read email
 
-git config user.name "${name}"
-git config user.email "${email}"
+git config --global user.name "${name}"
+git config --global user.email "${email}"
 
 git cola
 
-git config --unset-all user.name
-git config --unset-all user.email
+git config --global --unset-all user.name
+git config --global --unset-all user.email
