@@ -50,7 +50,7 @@ class MINDREADER():
             # v = read(x)
 
             # print v
-
+# 
             print
             
             time.sleep(1)
@@ -61,8 +61,6 @@ def read(x):
         aux = x >> i
         x -= aux << i
         v.insert(0, abs(aux))
-
-
 
     return v
 

@@ -39,7 +39,7 @@ elif args.srmcl:
     from SRMCL import *
 elif args.test:
     from test import *
-    qtdparts = 1
+    qtdparts = 1000
 else:
     print 'Please choose a version of MCL to be used!'
     exit()
@@ -149,7 +149,11 @@ class Localization():
             
             if x == 0:
                 fieldpoints = None
-            self.bkb.write_int(self.Mem, 'VISION_FIELD', 0)
+            else:
+                self.bkb.write_int(self.Mem, 'VISION_FIELD', 0)
+
+            if sum(landmarks) == - 4 * 999:
+                landmarks = None
 
             # z0 = mean(zb)
             # z1 = mean(zr)
@@ -157,16 +161,19 @@ class Localization():
             # z3 = mean(zp)
             # z4 = degrees(self.bkb.read_float(self.Mem, 'IMU_EULER_Z'))
 
+            # fieldpoints = None
+            # orientation = None
+            landmarks = None
+            # print zn[0], z0
+            if fieldpoints != None and landmarks != None:
+                z = [landmarks, fieldpoints, orientation]
+            elif fieldpoints != None:
+                z = [None, fieldpoints, orientation]
+            elif landmarks != None:
+                z = [landmarks, None, orientation]
+            else:
+                z = [None, None, None]
 
-            # print zn[0], z0         
-
-            # Mounts the vector to be sent
-            # z = [landmarks, fieldpoints, orientation]
-            # z = [None, fieldpoints, None]
-            # z = [landmarks, fieldpoints, orientation]
-            z = [landmarks, None, None]
-            # print z
-               
             # Performs Particle Filter's Update
             pos, std = PF.main(u,z)
 
@@ -196,7 +203,7 @@ class Localization():
                 simul.display_update(PF.particles)
 
             # Updates for the next clock
-            screen.clock.tick(30)
+            screen.clock.tick(60)
 
     #----------------------------------------------------------------------------------------------
     #   This method returns a command instruction to the particles.
