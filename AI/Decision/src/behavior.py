@@ -62,6 +62,9 @@ class TreatingRawData(object):
     def get_orientation_usage(self):
         return self.config.get('Decision', 'orientation')
                     
+    def get_distance_to_kick(self):
+        return self.config.get('Decision', 'distance_to_kick')
+
     def get_referee(self):
         return self.bkb.read_int(self.mem, 'COM_REFEREE')
 

@@ -274,6 +274,7 @@ class Pantilt (object):
 				self.lastmod = mod
 		
 #		if abs(bkb.read_float(Mem, 'IMU_ACCEL_Z')) < 0.75:
+		
 #			self.servo.writeWord(self.__SERVO_PAN,self.__SPEED, 1023)
 #			self.servo.writeWord(self.__SERVO_TILT,self.__SPEED, 1023)
 #			self.servo.writeWord(self.__SERVO_PAN,34, 1023)

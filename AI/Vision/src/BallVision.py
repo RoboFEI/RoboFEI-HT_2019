@@ -139,7 +139,8 @@ class VisionBall (object):
 					
 					mostra = cv2.bitwise_and(frame,frame,mask=mask_verde)
 					mostra = cv2.resize(mostra, (0,0), fx=640.0/1920, fy=640.0/1920)
-					cv2.imshow('Mascara - Bola video', mostra)
+					
+					cv2.imshow('Mascara - Video', mostra)
 					
 #					frame_campo = cv2.resize(frame_campo, (0,0), fx=640.0/1024, fy=640.0/1024)
 					if np.all(cut != -1) == True:
