@@ -95,5 +95,5 @@ do
     fi
 
     echo ''
-    sleep 10
+    sleep 5
 done
