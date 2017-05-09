@@ -10,12 +10,11 @@ NC='\33[0m' # No Color
 #Brown/Orange	0;33		Yellow				1;33
 #Light Gray		0;37		White					1;37
 
+git config --global --unset-all user.name
+git config --global --unset-all user.email
 
-git config --global user.name ''
-git config --global user.email ''
-
-git config user.name ''
-git config user.email ''
+git config --unset-all user.name
+git config --unset-all user.email
 
 echo "${blue}Insira seu nome: ${NC}"
 read name
@@ -23,10 +22,10 @@ read name
 echo "${blue}Insira seu email do git: ${NC}"
 read email
 
-git config user.name ${name}
-git config user.email ${email}
+git config user.name "${name}"
+git config user.email "${email}"
 
 git cola
 
-git config user.name ''
-git config user.email ''
+git config --unset-all user.name
+git config --unset-all user.email
