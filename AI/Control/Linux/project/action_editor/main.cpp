@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
     {
         printf("Fail to initialize Motion Manager!\n");
     }
-    sleep(2);
+    sleep(1);
     MotionManager::GetInstance()->memBB = mem;
    //================================================================================== 
 
