@@ -81,28 +81,28 @@ class Particle(object):
         # Note5: spread determines how much the particles will spread
 
         if regions == None:
-            regions = ((0, 1040), (0, 740), (-180, 180))
+            self.regions = ((0, 1040), (0, 740), (-180, 180))
 
         if x != None:
             self.x = x
         elif normals:
             self.x = np.random.normal(normals[0][0], normals[0][1])
         else:
-            self.x = np.random.randint(regions[0][0], regions[0][1])
+            self.x = np.random.randint(self.regions[0][0], self.regions[0][1])
 
         if y != None:
             self.y = y
         elif normals:
             self.y = np.random.normal(normals[1][0], normals[1][1])
         else:
-            self.y = np.random.randint(regions[1][0], regions[1][1])
+            self.y = np.random.randint(self.regions[1][0], self.regions[1][1])
 
         if rotation != None:
             self.rotation = rotation
         elif normals:
             self.rotation = np.random.normal(normals[2][0], normals[2][1])
         else:
-            self.rotation = np.random.randint(regions[2][0], regions[2][1])
+            self.rotation = np.random.randint(self.regions[2][0], self.regions[2][1])
         
         self.weight = weight # Holds particles weight, can come from previous iterations
         self.maxweight = maxweight # Holds the previous maximum weight
@@ -184,9 +184,8 @@ class Particle(object):
             x = self.x + Forward/Omega * (np.sin(Direction)-np.sin(Theta)) - Side/Omega * (np.cos(-Theta)-np.cos(Dir2))
             y = self.y - Forward/Omega * (np.cos(Theta)-np.cos(Direction)) - Side/Omega * (np.sin(-Theta)-np.sin(Dir2))
 
-        if x < 0 or x > 1040 or y < 0 or y > 740:
+        if x < self.regions[0][0] or x > self.regions[0][1] or y < self.regions[1][0] or y > self.regions[1][1]:
             return 
-
 
         # Saves the new positions
         self.x = x
@@ -223,7 +222,7 @@ class Particle(object):
     #----------------------------------------------------------------------------------------------
     #   Likelihood computation
     #----------------------------------------------------------------------------------------------
-    def Sensor(self, landmarks=None, field=None, orientation=None, weight=1):
+    def Sensor(self, landmarks=None, field=None, orientation=None, distances=None, weight=1):
         # If it was given landmarks
         if landmarks != None:
             # Computes the landmarks positions
@@ -241,9 +240,6 @@ class Particle(object):
 
             # Computes weights using the formulas from the text
             for z in landmarks:
-                
-                # print "-----------"
-
                 # aux weight vectors
                 w = len(lm)*[1]
 
@@ -252,54 +248,9 @@ class Particle(object):
                     if z != -999:
                         w[i] *= Wdelta(lm[i][0], self.psi, self.SigmaO, self.MuF, self.SigmaF, self.MuN, self.SigmaN)
                         w[i] *= ComputeAngLikelihoodDeg(lm[i][1], z, self.SigmaA)
-                    # else:
-                    #     w[i] = 1 - Walpha(lm[i][1], self.gamma, self.Delta)
-                    #     w[i] += 1 - Wdelta(lm[i][0], self.psi, self.SigmaO, self.MuF, self.SigmaF, self.MuN, self.SigmaN)
-                    #     w[i] /= 2.
-                    # else:
-                    #     w[i] *= 1-Walpha(lm[i][1], self.gamma, self.Delta)
-                    #     w[i] *= 1-Wdelta(lm[i][0], self.psi, self.SigmaO, self.MuF, self.SigmaF, self.MuN, self.SigmaN)
-
-                    # print "real:", z, "virtual:", lm[i]
-                    # print "weight:", w[i]
-
-                    # aux = 1
-                    # W alpha
-                    # if z == -999:
-                    #     aux = 1 - Walpha(lm[i][1], self.gamma, self.Delta)
-                    #     w[i] *= aux
-                    # else:
-                        # aux = Walpha(lm[i][1], self.gamma, self.Delta)
-                        # w[i] *= aux
-
-                    # print "weight:", aux, "x",
-
-                    # # W delta
-                    # if z == -999:
-                    #     aux = 1 - Wdelta(lm[i][0], self.psi, self.SigmaO, self.MuF, self.SigmaF, self.MuN, self.SigmaN)
-                    #     w[i] *= aux
-                    # else:
-                    #     aux = Wdelta(lm[i][0], self.psi, self.SigmaO, self.MuF, self.SigmaF, self.MuN, self.SigmaN)
-                    #     w[i] *= aux
-
-                    # print aux, "x",
-
-                    # W phi
-                    # if z != -999:
-                    #     aux = ComputeAngLikelihoodDeg(lm[i][1], z, self.SigmaA)
-                    #     w[i] *= aux
-
-                    # print aux
-
-                    # print
 
                 weight *= max(w) # Maximizes the weight
                 lm.pop(w.index(max(w))) # Erases the used landmark
-            # print "-----------"
-            # print "final:", self, ">>", weight
-            # print "-----------"
-            # print
-            # exit()
 
         # If the given information is the field's points
         if field != None:
@@ -345,9 +296,50 @@ class Particle(object):
         if orientation != None:
             weight *= ComputeAngLikelihoodDeg(np.degrees(orientation), self.rotation, self.SigmaIMU)
         
+        # If its a test of VIP!
+        if distances != None:
+            d = self.GetDistances(distances[0])
+            for i in xrange(5):
+                # weight *= np.exp(-(np.power(d[i]-distances[1][i], 2))/(2*np.power(25,2)))
+                weight *= np.exp(-(np.power(d[i]-distances[1][i], 2))/(2*np.power(distances[1][i]/7.,2)))
+
+            # weight = np.power(weight, 1./5.)
+
         self.weight = max(weight, 1e-300)
         return self.weight
-        
+
+    #----------------------------------------------------------------------------------------------
+    #   Computes the distances for predicting the future.
+    #----------------------------------------------------------------------------------------------
+    def GetDistances(self, pan=0):
+        d = [] # Holds the five distances
+
+        angs = [np.radians(20.+pan-self.rotation), # Max angle to the left
+                np.radians(10.+pan-self.rotation), # Midway angle to the left
+                np.radians(pan-self.rotation), # Frontal angle
+                np.radians(-10.+pan-self.rotation), # Midway angle to the right
+                np.radians(-20.+pan-self.rotation)] # Max angle to the right
+
+        comp = [np.arctan2(self.regions[1][1] - self.y, self.regions[0][1] - self.x), # Angle in relation to X,Y
+                np.arctan2(self.regions[1][0] - self.y, self.regions[0][1] - self.x), # Angle in relation to X,0
+                np.arctan2(self.regions[1][1] - self.y, self.regions[0][0] - self.x), # Angle in relation to 0,Y
+                np.arctan2(self.regions[1][0] - self.y, self.regions[0][0] - self.x)] # Angle in relation to 0,0
+              
+        for ang in angs:
+            # Compute the distance of each "ray" in relation to the field borders
+            if comp[1] < ang and ang <= comp[0]:
+                d.append(np.abs(self.regions[0][1] - self.x)/np.cos(ang))
+            elif comp[0] < ang and ang <= comp[2]:
+                d.append(np.abs(self.regions[1][1] - self.y)/np.cos(np.radians(90)-ang))
+            elif comp[3] < ang and  ang <= comp[1]:
+                d.append(np.abs(self.regions[1][0] - self.y)/np.cos(ang+np.radians(90)))
+            elif comp[2] < ang:
+                d.append(np.abs(self.regions[0][0] - self.x)/np.cos(np.radians(180)-ang))
+            elif comp[3] >= ang:
+                d.append(np.abs(self.regions[0][0] - self.x)/np.cos(np.radians(180)+ang))
+
+        return d
+
     #----------------------------------------------------------------------------------------------
     #   Computes the max weight of the particles, generally 1.
     #----------------------------------------------------------------------------------------------

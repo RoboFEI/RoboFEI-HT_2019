@@ -93,6 +93,11 @@ class Localization():
 
         PF = MonteCarlo(qtdparts) # Starts the Particle Filter
 
+        std = 100
+        hp = -999
+        self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', -999)
+        weight = 1
+
         # z1 = []
         # z2 = []
         # z3 = []
@@ -174,13 +179,12 @@ class Localization():
             else:
                 z = [None, None, None]
 
-            # Performs Particle Filter's Update
             pos, std = PF.main(u,z)
-
-            if std > 1: # Se o erro for muito alto ele acha landmarks
-                self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', 1)
-            elif std < 1: # Se for pequeno o bastante ele acha a bola
-                self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', 0)
+            if fieldpoints != None:
+                hp = PF.PerfectInformation(u, self.bkb.read_float(self.Mem, 'VISION_PAN_DEG'), 5)
+                self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', hp)
+            if PF.meanweight < 1:                
+                weight = PF.meanweight
             
             if self.args.log:
                 print '\t\x1b[32mRobot at', # Prints header
@@ -198,6 +202,7 @@ class Localization():
             if self.args.graphs:
                 # Redraws the screen background
                 field.draw_soccer_field()
+                simul.DrawStd(pos, std, weight, hp)
 
                 # Draws all particles on screen
                 simul.display_update(PF.particles)

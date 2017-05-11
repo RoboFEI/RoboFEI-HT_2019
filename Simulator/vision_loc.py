@@ -66,13 +66,22 @@ class VISION():
 
     # Reactive head behavior
     def headBehave(self):
-        y = [90,60,30,0,-30,-60,-90]
-        x = y[self.behave]
-        self.pan(pos=x)
+        hp = self.bkb.read_int(self.Mem, 'DECISION_LOCALIZATION')
 
-        if np.abs(self.headpan-x) < 1:
-            self.behave = (self.behave + 1) % len(y)
-            self.get = True
+        if hp == -999:
+            y = [90,60,30,0,-30,-60,-90]
+            x = y[self.behave]
+            self.pan(pos=x)
+
+            if np.abs(self.headpan-x) < 1:
+                self.behave = (self.behave + 1) % len(y)
+                self.get = True
+        else:
+            self.pan(pos=hp)
+
+            if np.abs(self.headpan-hp) < 1:
+                self.get = True
+                self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', 999)
 
     # Draw the field of view of the robot
     def draw(self, where):
@@ -164,8 +173,12 @@ class VISION():
 
         # For each point
         for point in self.vpoints:
-            tilt = self.headtilt #+ np.random.normal(0,1)
-            pan = self.headpan #+ np.random.normal(0,1)
+            tilt = self.headtilt #+ np.random.normal(0,3)
+            pan = self.headpan #+ np.random.normal(0,3)
+
+            if self.bkb.read_int(self.Mem, 'CONTROL_ACTION') in [11,1,8,17,18,6,7,2,3,9,14]:
+                tilt += np.random.normal(0,0.5)
+                pan += np.random.normal(0,0.5)
 
             # Compute the point distance
             dist = (self.robotheight/np.tan(np.radians(tilt+point[1])))/np.cos(np.radians(point[0]))
@@ -269,8 +282,8 @@ class VISION():
     def VisionProcess(self):
         if time.time() % 60 < 1:
             if self.jump:
-                self.robot.x = np.random.randint(5, 1035)
-                self.robot.y = np.random.randint(5, 735)
+                self.robot.x = np.random.randint(70, 970)
+                self.robot.y = np.random.randint(70, 670)
                 self.robot.rotate = np.random.randint(-180, 180)
                 self.jump = False
         else:
@@ -292,7 +305,7 @@ class VISION():
         if sum(dots) != 0:
             self.bkb.write_int(self.Mem, 'VISION_FIELD', write(dots))
 
-        for x in [('VISION_FIRST_GOALPOST', goals[0]), ('VISION_SECOND_GOALPOST', goals[1]), ('VISION_THIRD_GOALPOST', goals[2]), ('VISION_FOURTH_GOALPOST', goals[3])]:
+        for x in [('VISION_FIRST_GOALPOST', goals[0]), ('VISION_SECOND_GOALPOST', goals[1]), ('VISION_THIRD_GOALPOST', goals[2]), ('VISION_FOURTH_GOALPOST', goals[3]), ('VISION_PAN_DEG', self.headpan)]:
             self.bkb.write_float(self.Mem, *x)
 
 def CompAng(ang, base, rng):

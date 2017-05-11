@@ -27,9 +27,11 @@ class MonteCarlo():
         for i in range(self.qtd):
             # Randomly generates n particles
             self.particles.append(Particle())
+            # self.particles.append(Particle(100,500,90))
         
         self.totalweight = 0. # Holds the total sum of particles' weights.
         self.maxweight = 1.
+        self.meanweight = 0
 
         self.mean = [0, 0, 0] # Holds the mean position of the estimated position.
         self.std = 1.
@@ -77,6 +79,7 @@ class MonteCarlo():
         i = 1 # Counts the quantity of selected particles
         j = len(self.particles) # Counts down the quantity of particles
         # Until the quantity of particles is reached or there are no more particles to be selected
+        self.meanweight = 0
         while i <= qtd and j >= 0: 
             # If the cumulative sum of steps is bigger than the cumulative sum of weights
             if step * i > s:
@@ -86,12 +89,14 @@ class MonteCarlo():
                 i += 1 # Moves one step
                 p = self.particles[j] # Gets the particle
                 parts.append(Particle(*p.copy(), maxweight=self.maxweight)) # adds the particle to the list.
+                self.meanweight += p.weight
 
                 # Saves the position for computing the standard deviation
                 poses.append([p.x, p.y, np.cos(np.radians(p.rotation))+np.sin(np.radians(p.rotation))*1j])
 
         self.particles = parts # Overwrites the previous particles.
         self.qtd = len(self.particles) # Saves the new quantity of particles.
+        self.meanweight /= self.qtd
 
         m = np.mean(poses, 0) # Computes the mean of the particles.
         
@@ -103,6 +108,67 @@ class MonteCarlo():
 
         # Compute the standard deviation of the particle set
         self.std = np.power(np.sqrt(np.abs(np.linalg.det(((poses.T * poses) / self.qtd)))), 1/3.)
+
+    #----------------------------------------------------------------------------------------------
+    #   Tests which is the best information to be acquired.
+    #----------------------------------------------------------------------------------------------
+    def PerfectInformation(self, u, hp, time=0):
+        if u[3] <= 1:
+            np.random.shuffle(self.particles) # Shuffles the particle set.
+            parts = [] 
+            
+            # Takes the first 30 particles of the set
+            for P in self.particles[0:30]:
+                parts.append(Particle(*P.copy()[0:2], weight=1, maxweight=1))
+            
+            # Moves the particles for a time!
+            uf = [u[0], u[1], u[2], time]
+            for P in parts:
+                P.Motion(*uf)
+
+            # For each possible observation, compute its utility
+            pos = [90, 60, 30, 0, -30, -60, -90]
+            uv = []
+            for i in pos:
+                aux = - np.abs(hp - i) * 7./180. + 7.
+                
+                d = [i, parts[0].GetDistances(i)]
+                tw = 0
+                # Computes the particles weight
+                for p in parts:
+                    tw += p.Sensor(distances=d)
+
+                # "Resamples"
+                s = tw/31.
+
+                i = 1
+                j = 0
+                w = parts[0].weight
+                sj = None
+                k = 0
+                while i < 31.:
+                    if s * i > w:
+                        j += 1
+                        w += parts[j].weight
+                    else:
+                        i += 1
+                        if sj != j:
+                            sj = j
+                            k += 1
+                
+                # Weight Standard Deviation
+                w = np.array([i.weight for i in parts])
+                std = np.sum(np.max(w) - w)
+               
+                aux += std
+                # Counts the losses
+                aux += 30-k
+                uv.append(aux)
+###################################################################################################
+                print std, aux, k
+###################################################################################################                
+            return pos[np.argmax(uv)]
+        return -999
 
     #----------------------------------------------------------------------------------------------
     #   Main algorithm
