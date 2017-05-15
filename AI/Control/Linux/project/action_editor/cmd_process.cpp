@@ -13,6 +13,20 @@
 
 using namespace Robot;
 
+const std::string azul = "\e[0;36m";
+const std::string azulE = "\e[0;34m";
+const std::string amare = "\e[0;33m";
+const std::string verde = "\e[0;32m";
+const std::string red = "\e[0;31m";
+const std::string gray = "\e[0;37m";
+const std::string nulo = "\e[0m";
+
+const std::string Lazul = "\e[96m";
+const std::string LazulE = "\e[94m";
+const std::string Lamare = "\e[93m";
+const std::string Lverde = "\e[92m";
+const std::string Lred = "\e[91m";
+const std::string Lgray = "\e[97m";
 
 int Col = STP7_COL;
 int Row = ID_1_ROW;
@@ -275,14 +289,16 @@ void DrawIntro(CM730 *cm730)
 
 	system("clear");
 	printf("\n");
-	printf("[Action Editor for DARwIn %s]\n", PROGRAM_VERSION);
-	printf("\n");
-	printf(" *Terminal screen size must be %d(col)x%d(row).\n", SCREEN_COL, SCREEN_ROW);
+	std::cout<<"---------------- "<<Lazul<<"RoboFEI-HT"<<nulo<<" ---------------------";
+	printf("\n\n");
+	printf(" *Terminal screen size must be %d(col)x%d(row).\n", SCREEN_COL+2, SCREEN_ROW);
     printf(" *Current terminal has %d columns and %d rows.\n", ncolumns, nrows);
 	printf("\n");
 	printf("\n");
 	printf("Press any key to start program...\n");
 	_getch();
+	
+	system("printf '\e[8;27;80t'");
 
 	Action::GetInstance()->LoadPage(indexPage, &Page);
 
@@ -373,7 +389,9 @@ void DrawPage()
 	DrawName();
 
 	GoToCursor(PAGENUM_COL, PAGENUM_ROW);
+	std::cout<<Lverde;
 	printf( "%.4d", indexPage );
+	std::cout<<nulo;
 
 	GoToCursor(ADDR_COL, ADDR_ROW);
 	printf( "0x%.5X", (int)(indexPage*sizeof(Action::PAGE)) );
@@ -509,7 +527,7 @@ void DrawStepLine(bool erase)
 		if(erase == true)
 			printf( " " );
 		else
-			printf( "|" );
+			std::cout<<Lred<< "|"<<nulo;
 	}
 
 	GoToCursor(old_col, old_row);
