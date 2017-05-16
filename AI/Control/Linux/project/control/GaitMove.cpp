@@ -35,6 +35,8 @@ GaitMove::GaitMove(int *mem_t, minIni* ini)
     turnRobotRight = new ReadConfig("Turn Robot Right",ini);
     turnRobotLeft = new ReadConfig("Turn Robot Left",ini);
     walkslow = new ReadConfig("Walk Slow",ini);
+    walkbackwardslow = new ReadConfig("Walking Backward Slow",ini);
+    walkbackward = new ReadConfig("Walking Backward",ini);
     turnBallR = new ReadConfig("Turn Ball Right",ini);
     turnBallL = new ReadConfig("Turn Ball Left",ini);
     sidleR = new ReadConfig("Sidle Right",ini);
@@ -256,15 +258,14 @@ void GaitMove::turn_around_ball_left(bool &stop_gait, bool same_moviment)
 }
 
 //========================================================================
-//gait backward fast--------------------------------------------------
+//gait backward--------------------------------------------------
 void GaitMove::walk_backward_fast(bool &stop_gait, bool same_moviment)
 {
     write_int(mem, CONTROL_ACTION, 17);
     if(same_moviment == false)
         std::cout<<" | \e[38;5;45mAndar rapido para traz\e[0m"<<std::endl;
-    move_gait(-walkfoward->walk_foward, walkfoward->sidle, walkfoward->turn_angle, stop_gait, walkfoward);
+    move_gait(-walkbackward->walk_foward, walkbackward->sidle, walkbackward->turn_angle, stop_gait, walkbackward);
 }
-
 //========================================================================
 //gait backward slow------------------------------------------------------
 void GaitMove::walk_backward_slow(bool &stop_gait, bool max_speed, bool same_moviment)
@@ -272,10 +273,10 @@ void GaitMove::walk_backward_slow(bool &stop_gait, bool max_speed, bool same_mov
     write_int(mem, CONTROL_ACTION, 18);
     if(same_moviment == false)
         std::cout<<" | \e[38;5;45mAndar lento para traz\e[0m"<<std::endl;
-    if(float(read_int(mem, DECISION_ACTION_B))<walkslow->walk_foward && max_speed==false)
-        move_gait(-float(read_int(mem, DECISION_ACTION_B)), walkslow->sidle, walkslow->turn_angle, stop_gait, walkslow);
+    if(float(read_int(mem, DECISION_ACTION_B))<walkbackwardslow->walk_foward && max_speed==false)
+        move_gait(-float(read_int(mem, DECISION_ACTION_B)), walkbackwardslow->sidle, walkbackwardslow->turn_angle, stop_gait, walkbackwardslow);
     else
-        move_gait(-walkslow->walk_foward, walkslow->sidle, walkslow->turn_angle, stop_gait, walkslow);
+        move_gait(-walkbackwardslow->walk_foward, walkbackwardslow->sidle, walkbackwardslow->turn_angle, stop_gait, walkbackwardslow);
 }
 
 
