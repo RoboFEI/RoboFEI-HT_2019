@@ -91,124 +91,122 @@ class Localization():
             field = SoccerField(screen) # Draws the field
             simul.field = field # Passes the field to the simulation
 
-        PF = MonteCarlo(1000, 1000, [1, 2, 1, 0, 1,  1, 2, 1, 0, 1.5,  1, 2, 1, 0, 1])
+        index = 0
 
-        std = 100
-        hp = -999
-        self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', -999)
-        weight = 1
+        self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', 999)
 
-        # z1 = []
-        # z2 = []
-        # z3 = []
-        # z4 = []
-        # timecount = []
-
-        # Main loop
         while True:
-            # z0 = 0
-            # z1 = 0
-            # z2 = 0
-            # z3 = 0
-            # z4 = []
+            if index < 60 or 120 <= index and index < 180:
+                PF = MonteCarlo(1000, 1000, [1, 2, 1, 0, 1,  1, 2, 1, 0, 1.5,  1, 2, 1, 0, 1]) # Starts the Particle Filter
+            elif index < 120 or 180 <= index and index < 240:
+                PF = MonteCarlo(1000, 30, [1, 2, 1, 0, 1,  1, 2, 1, 0, 1.5,  1, 2, 1, 0, 1]) # Starts the Particle Filter
+            elif index < 300 or 360 <= index and index < 420:
+                PF = MonteCarlo(1000, 1000, [1, 2, 1, 500, 1,  1, 2, 1, 500, 1.5,  1, 2, 1, 100, 1]) # Starts the Particle Filter
+            elif index < 360 or 420 <= index and index < 480:
+                PF = MonteCarlo(1000, 30, [1, 2, 1, 500, 1,  1, 2, 1, 500, 1.5,  1, 2, 1, 100, 1]) # Starts the Particle Filter
 
-            landmarks = []
+            std = 100
+            hp = -999
+            weight = 1
 
-            self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 1) # Sets the flag for telemetry
+            flag = self.bkb.read_int(self.Mem, 'LOCALIZATION_WORKING')
+            execute = False
 
-            # Process interactions events
-            if self.args.graphs:
-                simul.perform_events()
+            text = ""
 
-            # Gets the motion command from the blackboard.
-            u = self.GetU(self.bkb.read_int(self.Mem, 'CONTROL_ACTION'))
+            if flag == 11100:
+                self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 0)
+                execute = True
+            elif flag == 11111:
+                self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 0)
+                exit()
 
-            # auxtime = time.time()
-            # try:
-            #     if auxtime-timecount[0] > 0:
-            #         timecount.pop(0)
-            #         for zn in [zb, zr, zy, zp]:
-            #             zn.pop(0)
-            # except:
-            #     pass
+            count = 0
 
-            # print timecount
+            time.sleep(0.01)
 
-            # timecount.append(auxtime)
-            # Gets the measured variable from the blackboard,
-            # and free them.
-            landmarks.append(self.bkb.read_float(self.Mem, 'VISION_FIRST_GOALPOST'))
-            self.bkb.write_float(self.Mem, 'VISION_FIRST_GOALPOST', -999)
-            landmarks.append(self.bkb.read_float(self.Mem, 'VISION_SECOND_GOALPOST'))
-            self.bkb.write_float(self.Mem, 'VISION_SECOND_GOALPOST', -999)
-            landmarks.append(self.bkb.read_float(self.Mem, 'VISION_THIRD_GOALPOST'))
-            self.bkb.write_float(self.Mem, 'VISION_THIRD_GOALPOST', -999)
-            landmarks.append(self.bkb.read_float(self.Mem, 'VISION_FOURTH_GOALPOST'))
-            self.bkb.write_float(self.Mem, 'VISION_FOURTH_GOALPOST', -999)
+            # There will be 8 experiments each executed 30 times for each 2 tracks, in the end it sums up to 480 archives!
+            # - First, test the localization algorithm in its purity! 0~59
+            #   - Uses both tracks separately.
+            # - Second, test the use of standard deviation for changing particles quantity. 60~119
+            #   - Uses both tracks separately.
+            # - Third, test the Value of the Perfect Information. 120~179
+            #   - Uses both tracks separately.
+            # - Fourth, test both, the standard deviation and the VPI. 180~239
+            #   - Uses both tracks separately.
+            # - Fifth, test the particle error in function of its weight. 240~299
+            #   - Uses both tracks alternated.
+            # - Sixth, test the particle error and standard deviation. 300~359
+            #   - Uses both tracks alternated.
+            # - Seventh, test the particle error and VPI. 360~419
+            #   - Uses both tracks alternated.
+            # - Eighth, test everything at once. 420~479
+            #   - Uses both tracks alternated.
 
-            orientation = self.bkb.read_float(self.Mem, 'IMU_EULER_Z')
-            # orientation = None
+            # Main loop
+            while execute:
+                flag = self.bkb.read_int(self.Mem, 'LOCALIZATION_WORKING')
 
-            x = self.bkb.read_int(self.Mem, 'VISION_FIELD')
-            fieldpoints = read(x)
-            
-            if x == 0:
-                fieldpoints = None
-            else:
-                self.bkb.write_int(self.Mem, 'VISION_FIELD', 0)
+                if flag == 11110:
+                    index += 1
+                    with open('/home/fei/Dropbox/Masters/Experiment/local'+str(index), 'w') as file:
+                        file.write(text)
+                    text = ""
+                    self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', 999)
+                    self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 0)
+                    break
+                elif flag == 11111:
+                    self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 0)
+                    exit()
+                
+                # Process interactions events
+                if self.args.graphs:
+                    simul.perform_events()
 
-            if sum(landmarks) == - 4 * 999:
-                landmarks = None
+                # Gets the motion command from the blackboard.
+                u = self.GetU(self.bkb.read_int(self.Mem, 'CONTROL_ACTION'))
 
-            # z0 = mean(zb)
-            # z1 = mean(zr)
-            # z2 = mean(zy)
-            # z3 = mean(zp)
-            # z4 = degrees(self.bkb.read_float(self.Mem, 'IMU_EULER_Z'))
+                orientation = self.bkb.read_float(self.Mem, 'IMU_EULER_Z')
 
-            fieldpoints = None
-            # orientation = None
-            # landmarks = None
-            # print zn[0], z0
-            if fieldpoints != None and landmarks != None:
-                z = [landmarks, fieldpoints, orientation]
-            elif fieldpoints != None:
-                z = [None, fieldpoints, orientation]
-            elif landmarks != None:
-                z = [landmarks, None, orientation]
-            else:
-                z = [None, None, None]
+                landmarks = []
+                landmarks.append(self.bkb.read_float(self.Mem, 'VISION_FIRST_GOALPOST'))
+                self.bkb.write_float(self.Mem, 'VISION_FIRST_GOALPOST', -999)
+                landmarks.append(self.bkb.read_float(self.Mem, 'VISION_SECOND_GOALPOST'))
+                self.bkb.write_float(self.Mem, 'VISION_SECOND_GOALPOST', -999)
+                landmarks.append(self.bkb.read_float(self.Mem, 'VISION_THIRD_GOALPOST'))
+                self.bkb.write_float(self.Mem, 'VISION_THIRD_GOALPOST', -999)
+                landmarks.append(self.bkb.read_float(self.Mem, 'VISION_FOURTH_GOALPOST'))
+                self.bkb.write_float(self.Mem, 'VISION_FOURTH_GOALPOST', -999)
 
-            pos, std = PF.main(u,z)
-            if fieldpoints != None:
-                hp = PF.PerfectInformation(u, self.bkb.read_float(self.Mem, 'VISION_PAN_DEG'), 5)
+                if sum(landmarks) != 4*-999:
+                    z = [landmarks, None, orientation]
+                else:
+                    z = [None, None, None]
+
+                pos, std = PF.main(u,z)
+
+                text += str(time.time()) + " " + str(pos[0]) + " " + str(pos[1]) + " " + str(pos[2]) + " " + str(std) + " " + str(PF.qtd) + "\n"
+
+                if sum(landmarks) != 4*-999:
+                    if (120 <= index and index < 240 or index > 360):
+                        hp = PF.PerfectInformation(u, self.bkb.read_float(self.Mem, 'VISION_PAN_DEG'), 5)
+                    else:
+                        hp = -999
                 self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', hp)
-            if PF.meanweight < 1:                
-                weight = PF.meanweight
-            
-            if self.args.log:
-                print '\t\x1b[32mRobot at', # Prints header
-                print '\x1b[32m[x:\x1b[34m{} cm'.format(int(pos[0])), #  Prints the x position
-                print '\x1b[32m| y:\x1b[34m{} cm'.format(int(pos[1])), # Prints the y position
-                print u'\x1b[32m| \u03B8:\x1b[34m{}\u00B0'.format(int(pos[2])), # Prints the theta
-                print u'\x1b[32m| \u03C3:\x1b[34m{} cm\x1b[32m]'.format(int(std)) # Prints the standard deviation
 
-            # Write the robot's position on Black Board to be read by telemetry
-            self.bkb.write_int(self.Mem, 'LOCALIZATION_X', int(pos[0]))
-            self.bkb.write_int(self.Mem, 'LOCALIZATION_Y', int(pos[1]))
-            self.bkb.write_int(self.Mem, 'LOCALIZATION_THETA', int(pos[2]))
-            self.bkb.write_float(self.Mem, 'LOCALIZATION_RBT01_X', std)
+                if PF.meanweight < 1:                
+                    weight = PF.meanweight                
 
-            if self.args.graphs:
-                # Redraws the screen background
-                field.draw_soccer_field()
-                simul.DrawStd(pos, std, weight, hp)
+                if self.args.graphs:
+                    # Redraws the screen background
+                    field.draw_soccer_field()
+                    simul.DrawStd(pos, std, weight, hp)
 
-                # Draws all particles on screen
-                simul.display_update(PF.particles)
+                    # Draws all particles on screen
+                    simul.display_update(PF.particles)
 
-            # Updates for the next clock
-            screen.clock.tick(60)
+                # Updates for the next clock
+                screen.clock.tick(60)
 
     #----------------------------------------------------------------------------------------------
     #   This method returns a command instruction to the particles.

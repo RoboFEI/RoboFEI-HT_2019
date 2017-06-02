@@ -70,7 +70,7 @@ class Simulation():
                     self.group_robots.add(robot)
                     #print len(self.robots)
 
-                    robot.set_errors(0,0,0,0,0,0,0,0,0,0,0.00001,0.0001)
+                    # robot.set_errors(0,0,0,0,0,0,0,0,0,0,0.00001,0.0001)
 
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_k:
                     self.robots[self.robot_index_control].bkb.write_int(self.robots[self.robot_index_control].Mem, 'DECISION_ACTION_A', 8)

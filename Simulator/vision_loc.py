@@ -42,6 +42,10 @@ class VISION():
 
         self.get = True
 
+        self.text = ""
+        self.index = 0
+        self.count = -1
+
     # Changes the tilt's position
     def tilt(self, diff=None, pos=None):
         if diff: # Adds a difference
@@ -280,22 +284,53 @@ class VISION():
     jump = True
     change = True
     def VisionProcess(self):
-        if time.time() % 60 < 1:
-            if self.jump:
-                self.robot.x = np.random.randint(70, 970)
-                self.robot.y = np.random.randint(70, 670)
-                self.robot.rotate = np.random.randint(-180, 180)
-                self.jump = False
-        else:
-            self.jump = True
+        # if time.time() % 60 < 1:
+        #     if self.jump:
+        #         self.robot.x = np.random.randint(70, 970)
+        #         self.robot.y = np.random.randint(70, 670)
+        #         self.robot.rotate = np.random.randint(-180, 180)
+        #         self.jump = False
+        # else:
+        #     self.jump = True
 
-        if time.time() % 13 < 1:
-            if self.change:
-                self.bkb.write_int(self.Mem, 'DECISION_ACTION_A', [11, 1, 0, 8, 11, 17, 0, 18, 11, 6, 0, 7, 11, 2, 0, 3, 11, 9, 0, 14][np.random.randint(12)])
-                self.change = False
-        else:
-            self.change = True
+        # if time.time() % 13 < 1:
+        #     if self.change:
+        #         self.bkb.write_int(self.Mem, 'DECISION_ACTION_A', [11, 1, 0, 8, 11, 17, 0, 18, 11, 6, 0, 7, 11, 2, 0, 3, 11, 9, 0, 14][np.random.randint(12)])
+        #         self.change = False
+        # else:
+        #     self.change = True
 
+        if self.count == 0:
+            self.text += str(time.time()) + " " + str(self.robot.x) + " " + str(self.robot.y) + " " + str(self.robot.rotate) + "\n"
+            self.count = 20
+        else:
+            self.count -= 1
+
+        bhv = self.bkb.read_int(self.Mem, 'VISION_WORKING')
+        if bhv == 10101:
+            self.robot.x = 200
+            self.robot.y = 670
+            self.robot.rotate = 90
+            self.count = 0
+            self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 11100)
+            self.bkb.write_int(self.Mem, 'VISION_WORKING', 0)
+        elif bhv == 10102:
+            self.robot.x = 70
+            self.robot.y = 500
+            self.robot.rotate = 0
+            self.count = 0
+            self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 11100)
+            self.bkb.write_int(self.Mem, 'VISION_WORKING', 0)
+        elif bhv == 11011:
+            self.index += 1
+            with open('/home/fei/Dropbox/Masters/Experiment/robot'+str(self.index), 'w') as file:
+                file.write(self.text)
+            self.text = ""
+            self.count = -1
+            self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 11110)
+            self.bkb.write_int(self.Mem, 'VISION_WORKING', 0)
+        elif bhv == 11111:
+            exit()
 
         self.headBehave()
         self.headmotion()

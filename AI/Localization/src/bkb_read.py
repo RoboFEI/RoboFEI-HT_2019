@@ -40,22 +40,20 @@ class MINDREADER():
     def main(self):
         while True:
             # print "CONTROL_ACTION", self.bkb.read_int(self.Mem, 'CONTROL_ACTION')
-            # print "VISION_FIRST_GOALPOST", self.bkb.read_float(self.Mem, 'VISION_FIRST_GOALPOST')
-            # print "VISION_SECOND_GOALPOST", self.bkb.read_float(self.Mem, 'VISION_SECOND_GOALPOST')
-            # print "VISION_THIRD_GOALPOST", self.bkb.read_float(self.Mem, 'VISION_THIRD_GOALPOST')
-            # print "VISION_FOURTH_GOALPOST", self.bkb.read_float(self.Mem, 'VISION_FOURTH_GOALPOST')
-            print "VISION_FIELD", self.bkb.read_int(self.Mem, 'VISION_FIELD')
-            # print "IMU_EULER_Z", self.bkb.read_float(self.Mem, 'IMU_EULER_Z')
-            print "DECISION_LOCALIZATION", self.bkb.read_int(self.Mem, 'DECISION_LOCALIZATION')
-            print 'VISION_PAN_DEG', self.bkb.read_float(self.Mem, 'VISION_PAN_DEG')
+            print "VISION_FIRST_GOALPOST", self.bkb.read_float(self.Mem, 'VISION_FIRST_GOALPOST')
+            print "VISION_SECOND_GOALPOST", self.bkb.read_float(self.Mem, 'VISION_SECOND_GOALPOST')
+            print "VISION_THIRD_GOALPOST", self.bkb.read_float(self.Mem, 'VISION_THIRD_GOALPOST')
+            print "VISION_FOURTH_GOALPOST", self.bkb.read_float(self.Mem, 'VISION_FOURTH_GOALPOST')
+            # print "VISION_FIELD", self.bkb.read_int(self.Mem, 'VISION_FIELD')
+            print "IMU_EULER_Z", self.bkb.read_float(self.Mem, 'IMU_EULER_Z')
+            # print "DECISION_LOCALIZATION", self.bkb.read_int(self.Mem, 'DECISION_LOCALIZATION')
+            # print 'VISION_PAN_DEG', self.bkb.read_float(self.Mem, 'VISION_PAN_DEG')
             # x = self.bkb.read_int(self.Mem, 'VISION_FIELD')
             # v = read(x)
 
-            # print v
-# 
             print
-            
-            time.sleep(0.09)
+            time.sleep(0.5)
+            # print v
 
 def read(x):
     v = []

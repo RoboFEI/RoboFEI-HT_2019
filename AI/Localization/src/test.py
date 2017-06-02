@@ -14,19 +14,20 @@ class MonteCarlo():
     #----------------------------------------------------------------------------------------------
     #   Constructor of the particle filter
     #----------------------------------------------------------------------------------------------
-    def __init__(self, max_qtd=0):
+    def __init__(self, max_qtd=1000, min_qtd=30, fac=[1, 2, 1, 500, 1,  1, 2, 1, 500, 1.5,  1, 2, 1, 100, 1]):
         # Holds the particles objects
         self.particles = []
 
         # Limits the quantity of particles the filter will have
         self.max_qtd = max_qtd
+        self.min_qtd = min_qtd
 
         # Initializes with the max quantity of particles
         self.qtd = max_qtd
 
         for i in range(self.qtd):
             # Randomly generates n particles
-            self.particles.append(Particle())
+            self.particles.append(Particle(factors = fac))
             # self.particles.append(Particle(100,500,90))
         
         self.totalweight = 0. # Holds the total sum of particles' weights.
@@ -88,7 +89,7 @@ class MonteCarlo():
             else:
                 i += 1 # Moves one step
                 p = self.particles[j] # Gets the particle
-                parts.append(Particle(*p.copy(), maxweight=self.maxweight)) # adds the particle to the list.
+                parts.append(Particle(*p.copy(), maxweight=self.maxweight, factors=p.factors)) # adds the particle to the list.
                 self.meanweight += p.weight
 
                 # Saves the position for computing the standard deviation
@@ -164,9 +165,6 @@ class MonteCarlo():
                 # Counts the losses
                 aux += 30-k
                 uv.append(aux)
-###################################################################################################
-                print std, aux, k
-###################################################################################################                
             return pos[np.argmax(uv)]
         return -999
 
@@ -177,7 +175,7 @@ class MonteCarlo():
         self.Prediction(u) # Executes the prediction
         self.Update(z) # Updates particles' weights
         self.Resample(self.qtd) # Resamples the particles
-        self.qtd = Qtd(self.std, maxi=self.max_qtd) # Computes the quantity based on the standard deviation
+        self.qtd = Qtd(self.std, mini=self.min_qtd, maxi=self.max_qtd) # Computes the quantity based on the standard deviation
         
         return self.mean, self.std # Returns everything.
 

@@ -104,7 +104,7 @@ class CONTROL():
         self.bkb.write_int(self.Mem, 'CONTROL_WORKING', 1)
         self.bkb.write_int(self.Mem, 'IMU_WORKING', 1)
         self.bkb.write_int(self.Mem, 'DECISION_WORKING', 1)
-        self.bkb.write_int(self.Mem, 'VISION_WORKING', 1)
+        # self.bkb.write_int(self.Mem, 'VISION_WORKING', 1)
         
         if self.action_flag in self.action_exceptions:
             if self.action_flag == 0:
