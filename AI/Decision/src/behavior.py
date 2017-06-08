@@ -176,6 +176,15 @@ class TreatingRawData(object):
         self.bkb.write_int(self.mem,'DECISION_ACTION_VISION', 2)
         #return time.sleep(2)
 
+    def walk_to_start_position(self):
+        print 'walking forward for vision to see anything'
+        self.set_vision_ball()
+        self.set_walk_forward()
+        for i in range(0, 20):
+            time.sleep(1)
+            print "time", i
+        self.kickoff_ctrl = 1
+
 ##############################################################################
 
 class Ordinary(TreatingRawData):
@@ -231,6 +240,274 @@ class Ordinary(TreatingRawData):
             print 'Invalid argument received from referee!'
 
             #############################################################################
+
+class LocaLoca(TreatingRawData):
+    " " " Decision based on Localization class " " "
+
+    def __init__(self):
+        super(LocaLoca, self).__init__()
+        print
+        print 'Decision based on Localization behavior called'
+        print
+        self.kickoff_ctrl = 0
+        #set a far distance to robots
+        self.bkb.write_float(self.mem,'DECISION_RBT01_DIST_BALL',999)
+        self.bkb.write_float(self.mem,'DECISION_RBT02_DIST_BALL',999)
+        self.bkb.write_float(self.mem,'DECISION_RBT03_DIST_BALL',999)
+        self.bkb.write_float(self.mem,'DECISION_RBT04_DIST_BALL',999)
+
+    def decision(self, referee):
+        if referee == 1:  # stopped
+            print 'stand'
+            self.set_stand_still()
+
+        elif referee == 11:  # ready
+            print 'ready'
+            self.set_stand_still()
+
+        elif referee == 12:  # set
+            print 'set'
+            self.set_stand_still()
+            self.set_vision_ball()
+
+        #opponent kickoff: walk forward
+        elif referee == 21 and self.kickoff_ctrl == 0:
+            self.walk_to_start_position()
+
+
+        elif referee == 2 or (referee == 21 and self.kickoff_ctrl != 0):  # play
+            self.bkb.write_int(self.mem,'CONTROL_MESSAGES',0)
+            if self.get_search_status() == 1: # 1 - vision lost
+                print 'vision lost'
+                self.set_stand_still()
+                #self.set_vision_search()
+                #self.set_turn_right()
+            elif self.get_search_status() == 0: # 0 - object found
+
+                ###### this is the beginning of the strategy: the closest robot goes to the ball: ###################
+                #it reads and shares the distance from all robots
+                #it compares who is the closest to the ball and it sets as coordinator.
+                print 'robot number: ', self.bkb.read_int(self.mem,'ROBOT_NUMBER')
+
+                self.bkb.write_floatDynamic(self.mem,'DECISION_RBT01_DIST_BALL',self.bkb.read_int(self.mem,'ROBOT_NUMBER')-1,self.get_dist_ball())
+
+                self.bkb.write_int(self.mem,'CONTROL_MESSAGES',2)
+
+                print 'dist Robot 1: ',self.bkb.read_float(self.mem,'DECISION_RBT01_DIST_BALL')
+                print 'dist Robot 2: ',self.bkb.read_float(self.mem,'DECISION_RBT02_DIST_BALL')
+                print 'dist Robot 3: ',self.bkb.read_float(self.mem,'DECISION_RBT03_DIST_BALL')
+                print 'dist Robot 4: ',self.bkb.read_float(self.mem,'DECISION_RBT04_DIST_BALL')
+
+                if self.bkb.read_float(self.mem,'DECISION_RBT01_DIST_BALL') < self.bkb.read_float(self.mem,'DECISION_RBT02_DIST_BALL') and self.bkb.read_float(self.mem,'DECISION_RBT01_DIST_BALL') < self.bkb.read_float(self.mem,'DECISION_RBT03_DIST_BALL') and self.bkb.read_float(self.mem,'DECISION_RBT01_DIST_BALL') < self.bkb.read_float(self.mem,'DECISION_RBT04_DIST_BALL'):
+                    self.bkb.write_float(self.mem,'CBR_COORDINATOR',1)
+                elif self.bkb.read_float(self.mem,'DECISION_RBT02_DIST_BALL') < self.bkb.read_float(self.mem,'DECISION_RBT01_DIST_BALL') and self.bkb.read_float(self.mem,'DECISION_RBT02_DIST_BALL') < self.bkb.read_float(self.mem,'DECISION_RBT03_DIST_BALL') and self.bkb.read_float(self.mem,'DECISION_RBT02_DIST_BALL') < self.bkb.read_float(self.mem,'DECISION_RBT04_DIST_BALL'):
+                    self.bkb.write_float(self.mem,'CBR_COORDINATOR',2)
+                elif self.bkb.read_float(self.mem,'DECISION_RBT03_DIST_BALL') < self.bkb.read_float(self.mem,'DECISION_RBT02_DIST_BALL') and self.bkb.read_float(self.mem,'DECISION_RBT03_DIST_BALL') < self.bkb.read_float(self.mem,'DECISION_RBT01_DIST_BALL') and self.bkb.read_float(self.mem,'DECISION_RBT03_DIST_BALL') < self.bkb.read_float(self.mem,'DECISION_RBT04_DIST_BALL'):
+                    self.bkb.write_float(self.mem,'CBR_COORDINATOR',3)
+                elif self.bkb.read_float(self.mem,'DECISION_RBT04_DIST_BALL') < self.bkb.read_float(self.mem,'DECISION_RBT02_DIST_BALL') and self.bkb.read_float(self.mem,'DECISION_RBT04_DIST_BALL') < self.bkb.read_float(self.mem,'DECISION_RBT03_DIST_BALL') and self.bkb.read_float(self.mem,'DECISION_RBT04_DIST_BALL') < self.bkb.read_float(self.mem,'DECISION_RBT01_DIST_BALL'):
+                    self.bkb.write_float(self.mem,'CBR_COORDINATOR',4)
+                else:
+                    self.bkb.write_float(self.mem,'CBR_COORDINATOR',float(self.bkb.read_int(self.mem,'ROBOT_NUMBER')))
+
+                print 'robot_coordinator: ', self.bkb.read_float(self.mem,'CBR_COORDINATOR')
+
+                if  int(self.bkb.read_float(self.mem,'CBR_COORDINATOR')) == self.bkb.read_int(self.mem,'ROBOT_NUMBER'):
+
+                    #print 'dist_ball', self.get_dist_ball()
+                    print 'orientation', self.get_orientation()
+
+                    #NOT KICK TWICE
+                    if self.bkb.read_int(self.mem,'DECISION_ACTION_A') == 4 or self.bkb.read_int(self.mem,'DECISION_ACTION_A') == 5:
+                        self.set_stand_still()
+
+                    if self.get_search_status() == 1: # 1 - vision lost
+                        print 'vision lost'
+                        self.set_stand_still()
+                        #self.set_vision_search()
+                        #self.set_turn_right()
+                    elif self.get_search_status() == 0: # 0 - object found
+                        # align to the ball
+                        if self.get_motor_pan_degrees() > 20 and self.get_motor_pan_degrees() < 160:
+                            self.set_turn_left()
+                            #self.set_stand_still()
+                        elif self.get_motor_pan_degrees() < -20 and self.get_motor_pan_degrees() > -160:
+                            self.set_turn_right()
+                            #self.set_stand_still()
+                        else:
+
+                            if self.get_dist_ball() < distance_to_kick and self.get_motor_pan_degrees() <= 0:
+                                if self.get_orientation() <= 90 and self.get_orientation() >= -90:
+                                    self.set_kick_right()
+                                elif self.get_orientation() > 90:
+                                    #revolve_clockwise:
+                                    self.set_pass_right()
+                                    #########
+                                elif self.get_orientation() < -90:
+                                    #revolve_anticlockwise:
+                                    self.set_pass_left()
+                                    #########
+                            elif self.get_dist_ball() < distance_to_kick and self.get_motor_pan_degrees() > 0:
+                                if self.get_orientation() <= 90 and self.get_orientation() >= -90:
+                                    self.set_kick_left()
+                                elif self.get_orientation() > 90:
+                                    #revolve_clockwise:
+                                    self.set_pass_right()
+                                    #########
+                                elif self.get_orientation() < -90:
+                                    #revolve_anticlockwise:
+                                    self.set_pass_left()
+                                    #########
+                            elif self.get_dist_ball() > 60:
+                                #self.set_walk_forward()
+                                self.set_walk_forward_slow((self.get_dist_ball() / 5))
+                            #elif self.get_dist_ball() <= 26:
+                            #    self.set_stand_still()
+                            else:
+                                self.set_walk_forward_slow((self.get_dist_ball() / 6))
+
+                                # time.sleep(0.5)
+                                # self.set_stand_still()
+                else:
+                    print 'Invalid argument received from referee!'
+                    print referee
+
+
+class NaiveIMU(TreatingRawData):
+    " " " Naive class " " "
+
+    def __init__(self):
+        super(NaiveIMU, self).__init__()
+        print
+        print 'Naive behavior called'
+        print
+        self.kickoff_ctrl = 0
+        #set a far distance to robots
+        self.bkb.write_float(self.mem,'DECISION_RBT01_DIST_BALL',999)
+        self.bkb.write_float(self.mem,'DECISION_RBT02_DIST_BALL',999)
+        self.bkb.write_float(self.mem,'DECISION_RBT03_DIST_BALL',999)
+        self.bkb.write_float(self.mem,'DECISION_RBT04_DIST_BALL',999)
+
+    def decision(self, referee):
+        if referee == 1:  # stopped
+            print 'stand'
+            self.set_stand_still()
+
+        elif referee == 11:  # ready
+            print 'ready'
+            self.set_stand_still()
+
+        elif referee == 12:  # set
+            print 'set'
+            self.set_stand_still()
+            self.set_vision_ball()
+
+        #opponent kickoff
+        elif referee == 21 and self.kickoff_ctrl == 0:
+            print 'walking forward for vision to see anything'
+            self.set_vision_ball()
+            self.set_walk_forward_slow(10)
+            for i in range(0,20):
+                time.sleep(1)
+                print "time", i
+            self.kickoff_ctrl = 1
+
+
+        elif referee == 2 or (referee == 21 and self.kickoff_ctrl != 0):  # play
+            self.bkb.write_int(self.mem,'CONTROL_MESSAGES',0)
+            if self.get_search_status() == 1: # 1 - vision lost
+                print 'vision lost'
+                self.set_stand_still()
+                #self.set_vision_search()
+                #self.set_turn_right()
+            elif self.get_search_status() == 0: # 0 - object found
+
+                ###### this is the beginning of the strategy: the closest robot goes to the ball: ###################
+                #it reads and shares the distance from all robots
+                #it compares who is the closest to the ball and it sets as coordinator.
+                print 'robot number: ', self.bkb.read_int(self.mem,'ROBOT_NUMBER')
+
+                self.bkb.write_floatDynamic(self.mem,'DECISION_RBT01_DIST_BALL',self.bkb.read_int(self.mem,'ROBOT_NUMBER')-1,self.get_dist_ball())
+
+                self.bkb.write_int(self.mem,'CONTROL_MESSAGES',2)
+
+                print 'dist Robot 1: ',self.bkb.read_float(self.mem,'DECISION_RBT01_DIST_BALL')
+                print 'dist Robot 2: ',self.bkb.read_float(self.mem,'DECISION_RBT02_DIST_BALL')
+                print 'dist Robot 3: ',self.bkb.read_float(self.mem,'DECISION_RBT03_DIST_BALL')
+                print 'dist Robot 4: ',self.bkb.read_float(self.mem,'DECISION_RBT04_DIST_BALL')
+
+                if self.bkb.read_float(self.mem,'DECISION_RBT01_DIST_BALL') < self.bkb.read_float(self.mem,'DECISION_RBT02_DIST_BALL') and self.bkb.read_float(self.mem,'DECISION_RBT01_DIST_BALL') < self.bkb.read_float(self.mem,'DECISION_RBT03_DIST_BALL') and self.bkb.read_float(self.mem,'DECISION_RBT01_DIST_BALL') < self.bkb.read_float(self.mem,'DECISION_RBT04_DIST_BALL'):
+                    self.bkb.write_float(self.mem,'CBR_COORDINATOR',1)
+                elif self.bkb.read_float(self.mem,'DECISION_RBT02_DIST_BALL') < self.bkb.read_float(self.mem,'DECISION_RBT01_DIST_BALL') and self.bkb.read_float(self.mem,'DECISION_RBT02_DIST_BALL') < self.bkb.read_float(self.mem,'DECISION_RBT03_DIST_BALL') and self.bkb.read_float(self.mem,'DECISION_RBT02_DIST_BALL') < self.bkb.read_float(self.mem,'DECISION_RBT04_DIST_BALL'):
+                    self.bkb.write_float(self.mem,'CBR_COORDINATOR',2)
+                elif self.bkb.read_float(self.mem,'DECISION_RBT03_DIST_BALL') < self.bkb.read_float(self.mem,'DECISION_RBT02_DIST_BALL') and self.bkb.read_float(self.mem,'DECISION_RBT03_DIST_BALL') < self.bkb.read_float(self.mem,'DECISION_RBT01_DIST_BALL') and self.bkb.read_float(self.mem,'DECISION_RBT03_DIST_BALL') < self.bkb.read_float(self.mem,'DECISION_RBT04_DIST_BALL'):
+                    self.bkb.write_float(self.mem,'CBR_COORDINATOR',3)
+                elif self.bkb.read_float(self.mem,'DECISION_RBT04_DIST_BALL') < self.bkb.read_float(self.mem,'DECISION_RBT02_DIST_BALL') and self.bkb.read_float(self.mem,'DECISION_RBT04_DIST_BALL') < self.bkb.read_float(self.mem,'DECISION_RBT03_DIST_BALL') and self.bkb.read_float(self.mem,'DECISION_RBT04_DIST_BALL') < self.bkb.read_float(self.mem,'DECISION_RBT01_DIST_BALL'):
+                    self.bkb.write_float(self.mem,'CBR_COORDINATOR',4)
+                else:
+                    self.bkb.write_float(self.mem,'CBR_COORDINATOR',float(self.bkb.read_int(self.mem,'ROBOT_NUMBER')))
+
+                print 'robot_coordinator: ', self.bkb.read_float(self.mem,'CBR_COORDINATOR')
+
+                if  int(self.bkb.read_float(self.mem,'CBR_COORDINATOR')) == self.bkb.read_int(self.mem,'ROBOT_NUMBER'):
+
+                    #print 'dist_ball', self.get_dist_ball()
+                    print 'orientation', self.get_orientation()
+
+                    #NOT KICK TWICE
+                    if self.bkb.read_int(self.mem,'DECISION_ACTION_A') == 4 or self.bkb.read_int(self.mem,'DECISION_ACTION_A') == 5:
+                        self.set_stand_still()
+
+                    if self.get_search_status() == 1: # 1 - vision lost
+                        print 'vision lost'
+                        self.set_stand_still()
+                        #self.set_vision_search()
+                        #self.set_turn_right()
+                    elif self.get_search_status() == 0: # 0 - object found
+                        # align to the ball
+                        if self.get_motor_pan_degrees() > 20 and self.get_motor_pan_degrees() < 160:
+                            self.set_turn_left()
+                            #self.set_stand_still()
+                        elif self.get_motor_pan_degrees() < -20 and self.get_motor_pan_degrees() > -160:
+                            self.set_turn_right()
+                            #self.set_stand_still()
+                        else:
+
+                            if self.get_dist_ball() < distance_to_kick and self.get_motor_pan_degrees() <= 0:
+                                if self.get_orientation() <= 90 and self.get_orientation() >= -90:
+                                    self.set_kick_right()
+                                elif self.get_orientation() > 90:
+                                    #revolve_clockwise:
+                                    self.set_pass_right()
+                                    #########
+                                elif self.get_orientation() < -90:
+                                    #revolve_anticlockwise:
+                                    self.set_pass_left()
+                                    #########
+                            elif self.get_dist_ball() < distance_to_kick and self.get_motor_pan_degrees() > 0:
+                                if self.get_orientation() <= 90 and self.get_orientation() >= -90:
+                                    self.set_kick_left()
+                                elif self.get_orientation() > 90:
+                                    #revolve_clockwise:
+                                    self.set_pass_right()
+                                    #########
+                                elif self.get_orientation() < -90:
+                                    #revolve_anticlockwise:
+                                    self.set_pass_left()
+                                    #########
+                            elif self.get_dist_ball() > 60:
+                                #self.set_walk_forward()
+                                self.set_walk_forward_slow((self.get_dist_ball() / 5))
+                            #elif self.get_dist_ball() <= 26:
+                            #    self.set_stand_still()
+                            else:
+                                self.set_walk_forward_slow((self.get_dist_ball() / 6))
+
+                                # time.sleep(0.5)
+                                # self.set_stand_still()
+                else:
+                    print 'Invalid argument received from referee!'
+                    print referee
+
 
 
 class Naive(TreatingRawData):
