@@ -35,12 +35,11 @@ class VISION():
 
         self.headspd = 30 # Max head speed, in degrees per second
 
-        # Observation points
-        self.vpoints = points(v)
-
         self.behave = 0
 
         self.get = True
+
+        self.dots = None
 
         self.text = ""
         self.index = 0
@@ -80,6 +79,8 @@ class VISION():
             if np.abs(self.headpan-x) < 1:
                 self.behave = (self.behave + 1) % len(y)
                 self.get = True
+        elif hp == 999:
+            pass
         else:
             self.pan(pos=hp)
 
@@ -112,95 +113,46 @@ class VISION():
             for b in [1, 2]:
                 pygame.draw.line(where, (255,255,255), points[a], points[b], 1)
 
-        for point in self.vpoints:
-            # Compute the point distance
-            dist = (self.robotheight/np.tan(np.radians(self.headtilt+point[1])))/np.cos(np.radians(point[0]))
-            # Compute the direction of the point
-            angle = -self.robot.rotate+self.headpan+point[0]
+        # Draw dots
+        for p in self.dots:
+            pygame.draw.circle(where, (0,0,0), p, 2, 0)            
 
-            # Compute the position in the world of the point
-            x = self.robot.x + dist * np.cos(np.radians(angle))
-            y = self.robot.y + dist * np.sin(np.radians(angle))
+    # Return the observed integral of the world
+    def Field(self):
+        points = 1000.
 
-            pygame.draw.circle(where, (0,255,255), (int(x),int(y)), 5, 0)
+        vec = np.array(self.RndGenerate(points)).transpose() # Takes the random generated angles
+        green = 0 # Counts how many dots are green
+        
+        h = self.robotheight + np.random.normal(0,1) # Adds error to the robot's height
+        pan = np.radians(self.headpan + np.random.normal(0, 1)) # Adds error to the horizontal angles
+        tilt = np.radians(self.headtilt + np.random.normal(0,1)) # Adds error to the vertical angles
 
-    # Return the notable variables for localization, as a vector
-    def GetField(self):
-        ret = []
+        self.dots = []
 
-        # Saves the heads position
-        if self.headpan > 89: # If it is to the left
-            if self.get:
-                ret.extend([1,1,1])
-                self.get = False
-            else:
-                return 32*[0]
-        elif self.headpan < -89: # If it is to the left
-            if self.get:
-                ret.extend([1,1,0])
-                self.get = False
-            else:
-                return 32*[0]
-        elif self.headpan > 59 and self.headpan < 61: # If it is to the left
-            if self.get:
-                ret.extend([1,0,1])
-                self.get = False
-            else:
-                return 32*[0]
-        elif self.headpan < -59 and self.headpan > -61: # If it is to the left
-            if self.get:
-                ret.extend([1,0,0])
-                self.get = False
-            else:
-                return 32*[0]
-        elif self.headpan > 29 and self.headpan < 31: # If it is to the left
-            if self.get:
-                ret.extend([0,1,1])
-                self.get = False
-            else:
-                return 32*[0]
-        elif self.headpan < -29 and self.headpan > -31: # If it is to the left
-            if self.get:
-                ret.extend([0,1,0])
-                self.get = False
-            else:
-                return 32*[0]
-        elif self.headpan < 1 and self.headpan > -1: # If it is to the left
-            if self.get:
-                ret.extend([0,0,1])
-                self.get = False
-            else:
-                return 32*[0]
-        else:
-            # self.get = True
-            return 32*[0]
+        for i in vec:
+            dist = (h / np.tan(tilt + i[0]))/np.cos(i[1]) # Computes the point distance
+            ang = - np.radians(self.robot.rotate) + i[1] + pan # Computes the point angle
+            px = self.robot.x + dist * np.cos(ang) # Computes point x position
+            py = self.robot.y + dist * np.sin(ang) # Computes point y position
 
-        # For each point
-        for point in self.vpoints:
-            tilt = self.headtilt #+ np.random.normal(0,3)
-            pan = self.headpan #+ np.random.normal(0,3)
+            self.dots.append((int(px),int(py))) # Saves dots to be seen on simulator's screen
+            
+            if 0 <= px and px <= 1040 and 0 <= py and py <= 740 and np.random.random() > 0.05:
+                # If the dot is "green", save it.
+                green += 1
 
-            if self.bkb.read_int(self.Mem, 'CONTROL_ACTION') in [11,1,8,17,18,6,7,2,3,9,14]:
-                tilt += np.random.normal(0,0.5)
-                pan += np.random.normal(0,0.5)
+        return max(0.001, min(0.999, green/points))
 
-            # Compute the point distance
-            dist = (self.robotheight/np.tan(np.radians(tilt+point[1])))/np.cos(np.radians(point[0]))
-            # Compute the direction of the point
-            angle = -self.robot.rotate+pan+point[0]
-
-            # Compute the position in the world of the point
-            x = self.robot.x + dist * np.cos(np.radians(angle)) #+ np.random.normal(0,1)
-            y = self.robot.y + dist * np.sin(np.radians(angle)) #+ np.random.normal(0,1)
-
-            # Verify if it is in or out of the field
-            if 0 <= x and x <= 1040 and 0 <= y and y <= 740:
-                ret.append(1)
-            else:
-                ret.append(0)
-                
-        # Return the points values
-        return ret
+    # Generates random points and returns their angles in radians
+    def RndGenerate(self, n):
+        # Generate n random points
+        vrnd = np.random.random([n]) 
+        hrnd = np.random.random([n]) 
+        hp = np.arctan((1.9*hrnd-0.95) * np.tan(np.radians(self.hfov))) # Converts to "screen coordinates"
+        vp = np.arctan(1/((0.9*vrnd+0.05)*(1/np.tan(np.radians(17.4-self.vfov))-1/np.tan(np.radians(17.4+self.vfov)))+1/np.tan(np.radians(17.4+self.vfov))))-np.radians(17.4)
+        # Computes and returns the random generated angles
+        return vp, hp
 
     # Return the distance and direction of a given point
     def GetPoint(self, point):
@@ -212,24 +164,11 @@ class VISION():
         dist = np.hypot(dx, dy)
         ang = np.degrees(np.arctan2(dy, dx))-self.robot.rotate
 
-        if point == (520,370):
-            print
-            print "Ponto:", point
-            print "Robo.x:", self.robot.x, ", Robo.y:", self.robot.y, ", Robo.ang:", self.robot.rotate
-            print "Distancia.x:", dx, ", Distancia.y:", dy
-            print "arctan:", np.degrees(np.arctan2(dy, dx))
-            print "Distancia:", dist, ", Angle:", ang, "=",
-
         # Normalizes angle
         if ang < -180:
             ang += 360
         elif ang > 180:
             ang -= 360
-
-        if point == (520,370):
-            print ang
-            print "Pan:", self.headpan, ", hfov:", self.hfov
-            print "F.O.V.:", -self.hfov-self.headpan, "<=", ang, "<=", self.hfov-self.headpan
 
         # Verifies if the angle is inside the field of view
         if -self.hfov-self.headpan <= ang and ang <= self.hfov-self.headpan:
@@ -241,20 +180,9 @@ class VISION():
             dn = n/np.cos(np.radians(ang+self.headpan))
             df = f/np.cos(np.radians(ang+self.headpan))
 
-            if point == (520,370):
-                print "Tilt:", self.headtilt, ", vfov:", self.vfov
-                print "Dist:", n, "<= d <=", f
-                print "Dist. Angulada:", dn, "<=", dist, "<=", df
-
             # Verifies if the distance is in range
             if (1 + sp.erf((min(df,700)-dist)/(np.sqrt(2)*10))) * (1 - sp.erf((max(10,dn)-dist)/(np.sqrt(2)*1))) / 4 >= np.random.random():
-                if point == (520,370):
-                    print "Retorna angulo.:", ang
-                    print
                 return np.random.normal(ang, 1)
-        if point == (520,370):
-            print "Nao retorna angulo."
-            print
         return -999
 
     # Return the measure of all seen goalposts
@@ -281,24 +209,8 @@ class VISION():
             return -1, -1
 
     # Vision Process!
-    jump = True
-    change = True
     def VisionProcess(self):
-        # if time.time() % 60 < 1:
-        #     if self.jump:
-        #         self.robot.x = np.random.randint(70, 970)
-        #         self.robot.y = np.random.randint(70, 670)
-        #         self.robot.rotate = np.random.randint(-180, 180)
-        #         self.jump = False
-        # else:
-        #     self.jump = True
-
-        # if time.time() % 13 < 1:
-        #     if self.change:
-        #         self.bkb.write_int(self.Mem, 'DECISION_ACTION_A', [11, 1, 0, 8, 11, 17, 0, 18, 11, 6, 0, 7, 11, 2, 0, 3, 11, 9, 0, 14][np.random.randint(12)])
-        #         self.change = False
-        # else:
-        #     self.change = True
+        # self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', -999)
 
         if self.count == 0:
             self.text += str(time.time()) + " " + str(self.robot.x) + " " + str(self.robot.y) + " " + str(self.robot.rotate) + "\n"
@@ -335,11 +247,14 @@ class VISION():
         self.headBehave()
         self.headmotion()
         goals = self.GetGoalPosts()
-        dots = self.GetField()
-        
-        if sum(dots) != 0:
-            self.bkb.write_int(self.Mem, 'VISION_FIELD', write(dots))
 
+        if self.get:
+            self.get = False
+            if self.panpos < 0:
+                self.bkb.write_float(self.Mem, 'VISION_FIELD', self.panpos - self.Field())
+            else:
+                self.bkb.write_float(self.Mem, 'VISION_FIELD', self.panpos + self.Field())
+        
         for x in [('VISION_FIRST_GOALPOST', goals[0]), ('VISION_SECOND_GOALPOST', goals[1]), ('VISION_THIRD_GOALPOST', goals[2]), ('VISION_FOURTH_GOALPOST', goals[3]), ('VISION_PAN_DEG', self.headpan)]:
             self.bkb.write_float(self.Mem, *x)
 
@@ -355,61 +270,3 @@ def CompAng(ang, base, rng):
     c = hypot(xr-1, yr)
 
     return d < c
-
-def write(v):
-    x = 0
-    for i in range(32):
-        x += int(v[i]) << i
-    # print v
-    return x
-
-import numpy as np
-
-def fun(dist, ang):
-    c = dist * np.cos(np.radians(ang))
-
-    v = np.degrees(np.arctan(50./c)) - 17.4
-
-    return ang, v
-
-def points(v):
-    ret = []
-
-    for x in v:
-        ret.append(fun(*x))
-
-    return ret
-
-v = [(1030,20),
-     (880,20),
-     (740,20),
-     (600,20),
-     (450,20),
-     (310,20),
-     (170,20),
-
-     (990,-20),
-     (850,-20),
-     (710,-20),
-     (560,-20),
-     (420,-20),
-     (280,-20),
-     (130,-20),
-
-     (910,10),
-     (780,10),
-     (640,10),
-     (500,10),
-     (370,10),
-     (230,10),
-
-     (880,-10),
-     (750,-10),
-     (610,-10),
-     (470,-10),
-     (330,-10),
-     (190,-10),
-     
-     (1000,0),
-     (160,0),
-     (90,0)]

@@ -66,7 +66,7 @@ class MINDREADER():
                     print "\tExperiment number", index
                     self.first()
                     self.bkb.write_int(self.Mem, 'VISION_WORKING', 11011)
-                    time.sleep(1)
+                    time.sleep(2)
                 
                 for i in xrange(30):
                     index += 1
@@ -75,125 +75,125 @@ class MINDREADER():
                     self.bkb.write_int(self.Mem, 'VISION_WORKING', 11011)
                     time.sleep(1)
 
-                # # MCL with variable quantity of particles
-                # print 'Changing quantity of particles'
-                # for i in xrange(30):
-                #     index += 1
-                #     print "\tExperiment number", index
-                #     self.first()
-                #     self.bkb.write_int(self.Mem, 'VISION_WORKING', 11011)
-                #     time.sleep(1)
+                # MCL with variable quantity of particles
+                print 'Changing quantity of particles'
+                for i in xrange(30):
+                    index += 1
+                    print "\tExperiment number", index
+                    self.first()
+                    self.bkb.write_int(self.Mem, 'VISION_WORKING', 11011)
+                    time.sleep(1)
 
-                # for i in xrange(30):
-                #     index += 1
-                #     print "\tExperiment number", index
-                #     self.second()
-                #     self.bkb.write_int(self.Mem, 'VISION_WORKING', 11011)
-                #     time.sleep(1)
+                for i in xrange(30):
+                    index += 1
+                    print "\tExperiment number", index
+                    self.second()
+                    self.bkb.write_int(self.Mem, 'VISION_WORKING', 11011)
+                    time.sleep(1)
 
-                # # MCL with Value of the Perfect Information
-                # print 'Using the value of the perfect information'
-                # for i in xrange(30):
-                #     index += 1
-                #     print "\tExperiment number", index
-                #     self.first()
-                #     self.bkb.write_int(self.Mem, 'VISION_WORKING', 11011)
-                #     time.sleep(1)
+                # MCL with Value of the Perfect Information
+                print 'Using the value of the perfect information'
+                for i in xrange(30):
+                    index += 1
+                    print "\tExperiment number", index
+                    self.first()
+                    self.bkb.write_int(self.Mem, 'VISION_WORKING', 11011)
+                    time.sleep(1)
 
-                # for i in xrange(30):
-                #     index += 1
-                #     print "\tExperiment number", index
-                #     self.second()
-                #     self.bkb.write_int(self.Mem, 'VISION_WORKING', 11011)
-                #     time.sleep(1)
+                for i in xrange(30):
+                    index += 1
+                    print "\tExperiment number", index
+                    self.second()
+                    self.bkb.write_int(self.Mem, 'VISION_WORKING', 11011)
+                    time.sleep(1)
 
-                # # MCL with changing quantity of particles and VPI
-                # print 'Changing quantity of particles and VPI'
-                # for i in xrange(30):
-                #     index += 1
-                #     print "\tExperiment number", index
-                #     self.first()
-                #     self.bkb.write_int(self.Mem, 'VISION_WORKING', 11011)
-                #     time.sleep(1)
+                # MCL with changing quantity of particles and VPI
+                print 'Changing quantity of particles and VPI'
+                for i in xrange(30):
+                    index += 1
+                    print "\tExperiment number", index
+                    self.first()
+                    self.bkb.write_int(self.Mem, 'VISION_WORKING', 11011)
+                    time.sleep(1)
 
-                # for i in xrange(30):
-                #     index += 1
-                #     print "\tExperiment number", index
-                #     self.second()
-                #     self.bkb.write_int(self.Mem, 'VISION_WORKING', 11011)
-                #     time.sleep(1)
+                for i in xrange(30):
+                    index += 1
+                    print "\tExperiment number", index
+                    self.second()
+                    self.bkb.write_int(self.Mem, 'VISION_WORKING', 11011)
+                    time.sleep(1)
 
-                # # MCL with position resetting
-                # print 'Position Resetting'
-                # for i in xrange(30):
-                #     index += 1
-                #     print "\tExperiment number", index
-                #     self.first()
-                #     self.second()
-                #     self.bkb.write_int(self.Mem, 'VISION_WORKING', 11011)
-                #     time.sleep(1)
+                # MCL with position resetting
+                print 'Position Resetting'
+                for i in xrange(30):
+                    index += 1
+                    print "\tExperiment number", index
+                    self.first()
+                    self.second()
+                    self.bkb.write_int(self.Mem, 'VISION_WORKING', 11011)
+                    time.sleep(1)
 
-                # for i in xrange(30):
-                #     index += 1
-                #     print "\tExperiment number", index
-                #     self.second()
-                #     self.first()
-                #     self.bkb.write_int(self.Mem, 'VISION_WORKING', 11011)
-                #     time.sleep(1)
+                for i in xrange(30):
+                    index += 1
+                    print "\tExperiment number", index
+                    self.second()
+                    self.first()
+                    self.bkb.write_int(self.Mem, 'VISION_WORKING', 11011)
+                    time.sleep(1)
 
-                # # MCL with position resetting and quantity variation of particles
-                # print 'Position resetting and changing quantity of particles'
-                # for i in xrange(30):
-                #     index += 1
-                #     print "\tExperiment number", index
-                #     self.first()
-                #     self.second()
-                #     self.bkb.write_int(self.Mem, 'VISION_WORKING', 11011)
-                #     time.sleep(1)
+                # MCL with position resetting and quantity variation of particles
+                print 'Position resetting and changing quantity of particles'
+                for i in xrange(30):
+                    index += 1
+                    print "\tExperiment number", index
+                    self.first()
+                    self.second()
+                    self.bkb.write_int(self.Mem, 'VISION_WORKING', 11011)
+                    time.sleep(1)
 
-                # for i in xrange(30):
-                #     index += 1
-                #     print "\tExperiment number", index
-                #     self.second()
-                #     self.first()
-                #     self.bkb.write_int(self.Mem, 'VISION_WORKING', 11011)
-                #     time.sleep(1)
+                for i in xrange(30):
+                    index += 1
+                    print "\tExperiment number", index
+                    self.second()
+                    self.first()
+                    self.bkb.write_int(self.Mem, 'VISION_WORKING', 11011)
+                    time.sleep(1)
 
-                # # MCL with position resetting and VPI
-                # print 'Position resetting and value of perfect information'
-                # for i in xrange(30):
-                #     index += 1
-                #     print "\tExperiment number", index
-                #     self.first()
-                #     self.second()
-                #     self.bkb.write_int(self.Mem, 'VISION_WORKING', 11011)
-                #     time.sleep(1)
+                # MCL with position resetting and VPI
+                print 'Position resetting and value of perfect information'
+                for i in xrange(30):
+                    index += 1
+                    print "\tExperiment number", index
+                    self.first()
+                    self.second()
+                    self.bkb.write_int(self.Mem, 'VISION_WORKING', 11011)
+                    time.sleep(1)
 
-                # for i in xrange(30):
-                #     index += 1
-                #     print "\tExperiment number", index
-                #     self.second()
-                #     self.first()
-                #     self.bkb.write_int(self.Mem, 'VISION_WORKING', 11011)
-                #     time.sleep(1)
+                for i in xrange(30):
+                    index += 1
+                    print "\tExperiment number", index
+                    self.second()
+                    self.first()
+                    self.bkb.write_int(self.Mem, 'VISION_WORKING', 11011)
+                    time.sleep(1)
 
-                # # Complete system
-                # print 'Complete implementation'
-                # for i in xrange(30):
-                #     index += 1
-                #     print "\tExperiment number", index
-                #     self.first()
-                #     self.second()
-                #     self.bkb.write_int(self.Mem, 'VISION_WORKING', 11011)
-                #     time.sleep(1)
+                # Complete system
+                print 'Complete implementation'
+                for i in xrange(30):
+                    index += 1
+                    print "\tExperiment number", index
+                    self.first()
+                    self.second()
+                    self.bkb.write_int(self.Mem, 'VISION_WORKING', 11011)
+                    time.sleep(1)
 
-                # for i in xrange(30):
-                #     index += 1
-                #     print "\tExperiment number", index
-                #     self.second()
-                #     self.first()
-                #     self.bkb.write_int(self.Mem, 'VISION_WORKING', 11011)
-                #     time.sleep(1)
+                for i in xrange(30):
+                    index += 1
+                    print "\tExperiment number", index
+                    self.second()
+                    self.first()
+                    self.bkb.write_int(self.Mem, 'VISION_WORKING', 11011)
+                    time.sleep(1)
             except:
                 print "\nOut"
             # print "Second position"

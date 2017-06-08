@@ -78,7 +78,7 @@ class Localization():
         self.bkb.write_float(self.Mem, 'VISION_SECOND_GOALPOST', -999)
         self.bkb.write_float(self.Mem, 'VISION_THIRD_GOALPOST', -999)
         self.bkb.write_float(self.Mem, 'VISION_FOURTH_GOALPOST', -999)
-        self.bkb.write_int(self.Mem, 'VISION_FIELD', 0)
+        self.bkb.write_float(self.Mem, 'VISION_FIELD', -999)
 
     #----------------------------------------------------------------------------------------------
     #   Localization's main method.
@@ -91,27 +91,15 @@ class Localization():
             field = SoccerField(screen) # Draws the field
             simul.field = field # Passes the field to the simulation
 
-        PF = MonteCarlo(1000, 1000, [1, 2, 1, 0, 1,  1, 2, 1, 0, 1.5,  1, 2, 1, 0, 1])
+        PF = MonteCarlo(1000, 1000)
 
         std = 100
         hp = -999
         self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', -999)
         weight = 1
 
-        # z1 = []
-        # z2 = []
-        # z3 = []
-        # z4 = []
-        # timecount = []
-
         # Main loop
         while True:
-            # z0 = 0
-            # z1 = 0
-            # z2 = 0
-            # z3 = 0
-            # z4 = []
-
             landmarks = []
 
             self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 1) # Sets the flag for telemetry
@@ -123,18 +111,6 @@ class Localization():
             # Gets the motion command from the blackboard.
             u = self.GetU(self.bkb.read_int(self.Mem, 'CONTROL_ACTION'))
 
-            # auxtime = time.time()
-            # try:
-            #     if auxtime-timecount[0] > 0:
-            #         timecount.pop(0)
-            #         for zn in [zb, zr, zy, zp]:
-            #             zn.pop(0)
-            # except:
-            #     pass
-
-            # print timecount
-
-            # timecount.append(auxtime)
             # Gets the measured variable from the blackboard,
             # and free them.
             landmarks.append(self.bkb.read_float(self.Mem, 'VISION_FIRST_GOALPOST'))
@@ -149,33 +125,22 @@ class Localization():
             orientation = self.bkb.read_float(self.Mem, 'IMU_EULER_Z')
             # orientation = None
 
-            x = self.bkb.read_int(self.Mem, 'VISION_FIELD')
-            fieldpoints = read(x)
+            fieldpoints = self.bkb.read_float(self.Mem, 'VISION_FIELD')
             
-            if x == 0:
+            if fieldpoints == -999:
                 fieldpoints = None
             else:
-                self.bkb.write_int(self.Mem, 'VISION_FIELD', 0)
+                self.bkb.write_float(self.Mem, 'VISION_FIELD', -999)
 
             if sum(landmarks) == - 4 * 999:
                 landmarks = None
 
-            # z0 = mean(zb)
-            # z1 = mean(zr)
-            # z2 = mean(zy)
-            # z3 = mean(zp)
-            # z4 = degrees(self.bkb.read_float(self.Mem, 'IMU_EULER_Z'))
-
-            fieldpoints = None
+            # fieldpoints = None
             # orientation = None
-            # landmarks = None
-            # print zn[0], z0
-            if fieldpoints != None and landmarks != None:
+            landmarks = None
+
+            if fieldpoints != None or landmarks != None:
                 z = [landmarks, fieldpoints, orientation]
-            elif fieldpoints != None:
-                z = [None, fieldpoints, orientation]
-            elif landmarks != None:
-                z = [landmarks, None, orientation]
             else:
                 z = [None, None, None]
 
@@ -254,29 +219,6 @@ class Localization():
         timer = auxtime - self.timestamp
         self.timestamp = auxtime
         return timer
-
-def mean(vec):
-    s = 0
-    n = 0
-    m = 0
-    for x in vec:
-        if x != -999:
-            n += 1
-            s += x*n
-            m += n
-    if n == 0:
-        return -999
-    else:
-        return s/m
-
-def read(x):
-    v = []
-    for i in xrange(31, -1, -1):
-        aux = x >> i
-        x -= aux << i
-        v.insert(0, abs(aux))
-
-    return v
 
 #Call the main function, start up the simulation
 if __name__ == "__main__":

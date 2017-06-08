@@ -78,7 +78,7 @@ class Localization():
         self.bkb.write_float(self.Mem, 'VISION_SECOND_GOALPOST', -999)
         self.bkb.write_float(self.Mem, 'VISION_THIRD_GOALPOST', -999)
         self.bkb.write_float(self.Mem, 'VISION_FOURTH_GOALPOST', -999)
-        self.bkb.write_int(self.Mem, 'VISION_FIELD', 0)
+        self.bkb.write_float(self.Mem, 'VISION_FIELD', 0)
 
     #----------------------------------------------------------------------------------------------
     #   Localization's main method.
@@ -97,13 +97,13 @@ class Localization():
 
         while True:
             if index < 60 or 120 <= index and index < 180:
-                PF = MonteCarlo(1000, 1000, [1, 2, 1, 0, 1,  1, 2, 1, 0, 1.5,  1, 2, 1, 0, 1]) # Starts the Particle Filter
+                PF = MonteCarlo(1000, 1000, [1, 2, 1, 0, 0,  1, 2, 1, 0, 0,  1, 2, 1, 0, 0]) # Starts the Particle Filter
             elif index < 120 or 180 <= index and index < 240:
-                PF = MonteCarlo(1000, 30, [1, 2, 1, 0, 1,  1, 2, 1, 0, 1.5,  1, 2, 1, 0, 1]) # Starts the Particle Filter
+                PF = MonteCarlo(1000, 30, [1, 2, 1, 0, 0,  1, 2, 1, 0, 0,  1, 2, 1, 0, 0]) # Starts the Particle Filter
             elif index < 300 or 360 <= index and index < 420:
-                PF = MonteCarlo(1000, 1000, [1, 2, 1, 500, 1,  1, 2, 1, 500, 1.5,  1, 2, 1, 100, 1]) # Starts the Particle Filter
+                PF = MonteCarlo(1000, 1000, [1, 2, 1, 500, 0,  1, 2, 1, 500, 0,  1, 2, 1, 100, 0]) # Starts the Particle Filter
             elif index < 360 or 420 <= index and index < 480:
-                PF = MonteCarlo(1000, 30, [1, 2, 1, 500, 1,  1, 2, 1, 500, 1.5,  1, 2, 1, 100, 1]) # Starts the Particle Filter
+                PF = MonteCarlo(1000, 30, [1, 2, 1, 500, 0,  1, 2, 1, 500, 0,  1, 2, 1, 100, 0]) # Starts the Particle Filter
 
             std = 100
             hp = -999
@@ -168,18 +168,27 @@ class Localization():
 
                 orientation = self.bkb.read_float(self.Mem, 'IMU_EULER_Z')
 
-                landmarks = []
-                landmarks.append(self.bkb.read_float(self.Mem, 'VISION_FIRST_GOALPOST'))
-                self.bkb.write_float(self.Mem, 'VISION_FIRST_GOALPOST', -999)
-                landmarks.append(self.bkb.read_float(self.Mem, 'VISION_SECOND_GOALPOST'))
-                self.bkb.write_float(self.Mem, 'VISION_SECOND_GOALPOST', -999)
-                landmarks.append(self.bkb.read_float(self.Mem, 'VISION_THIRD_GOALPOST'))
-                self.bkb.write_float(self.Mem, 'VISION_THIRD_GOALPOST', -999)
-                landmarks.append(self.bkb.read_float(self.Mem, 'VISION_FOURTH_GOALPOST'))
-                self.bkb.write_float(self.Mem, 'VISION_FOURTH_GOALPOST', -999)
+                # landmarks = []
+                # landmarks.append(self.bkb.read_float(self.Mem, 'VISION_FIRST_GOALPOST'))
+                # self.bkb.write_float(self.Mem, 'VISION_FIRST_GOALPOST', -999)
+                # landmarks.append(self.bkb.read_float(self.Mem, 'VISION_SECOND_GOALPOST'))
+                # self.bkb.write_float(self.Mem, 'VISION_SECOND_GOALPOST', -999)
+                # landmarks.append(self.bkb.read_float(self.Mem, 'VISION_THIRD_GOALPOST'))
+                # self.bkb.write_float(self.Mem, 'VISION_THIRD_GOALPOST', -999)
+                # landmarks.append(self.bkb.read_float(self.Mem, 'VISION_FOURTH_GOALPOST'))
+                # self.bkb.write_float(self.Mem, 'VISION_FOURTH_GOALPOST', -999)
 
-                if sum(landmarks) != 4*-999:
-                    z = [landmarks, None, orientation]
+                fieldpoints = self.bkb.read_float(self.Mem, 'VISION_FIELD')
+
+                if fieldpoints == -999:
+                    fieldpoints = None
+                else:
+                    self.bkb.write_float(self.Mem, 'VISION_FIELD', -999)
+
+                landmarks = None
+
+                if fieldpoints != None or landmarks != None:
+                    z = [landmarks, fieldpoints, orientation]
                 else:
                     z = [None, None, None]
 
@@ -187,7 +196,7 @@ class Localization():
 
                 text += str(time.time()) + " " + str(pos[0]) + " " + str(pos[1]) + " " + str(pos[2]) + " " + str(std) + " " + str(PF.qtd) + "\n"
 
-                if sum(landmarks) != 4*-999:
+                if fieldpoints != None:
                     if (120 <= index and index < 240 or index > 360):
                         hp = PF.PerfectInformation(u, self.bkb.read_float(self.Mem, 'VISION_PAN_DEG'), 5)
                     else:

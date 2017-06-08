@@ -14,7 +14,7 @@ class MonteCarlo():
     #----------------------------------------------------------------------------------------------
     #   Constructor of the particle filter
     #----------------------------------------------------------------------------------------------
-    def __init__(self, max_qtd=1000, min_qtd=30, fac=[1, 2, 1, 500, 1,  1, 2, 1, 500, 1.5,  1, 2, 1, 100, 1]):
+    def __init__(self, max_qtd=1000, min_qtd=30, fac=None):
         # Holds the particles objects
         self.particles = []
 
@@ -27,11 +27,10 @@ class MonteCarlo():
 
         for i in range(self.qtd):
             # Randomly generates n particles
-            self.particles.append(Particle(factors = fac))
+            self.particles.append(Particle(factors=fac))
             # self.particles.append(Particle(100,500,90))
         
         self.totalweight = 0. # Holds the total sum of particles' weights.
-        self.maxweight = 1.
         self.meanweight = 0
 
         self.mean = [0, 0, 0] # Holds the mean position of the estimated position.
@@ -55,9 +54,6 @@ class MonteCarlo():
     def Update(self, z=None):
         # Clears the last total weight
         self.totalweight = 0
-
-        # Computes the max weight.
-        self.maxweight = self.particles[0].MaxWeight(*z)
 
         # Applies the observation model to each particle
         for particle in self.particles:
@@ -89,7 +85,7 @@ class MonteCarlo():
             else:
                 i += 1 # Moves one step
                 p = self.particles[j] # Gets the particle
-                parts.append(Particle(*p.copy(), maxweight=self.maxweight, factors=p.factors)) # adds the particle to the list.
+                parts.append(Particle(*p.copy(), factors=p.factors)) # adds the particle to the list.
                 self.meanweight += p.weight
 
                 # Saves the position for computing the standard deviation
@@ -120,7 +116,7 @@ class MonteCarlo():
             
             # Takes the first 30 particles of the set
             for P in self.particles[0:30]:
-                parts.append(Particle(*P.copy()[0:2], weight=1, maxweight=1))
+                parts.append(Particle(*P.copy()))
             
             # Moves the particles for a time!
             uf = [u[0], u[1], u[2], time]
@@ -133,11 +129,11 @@ class MonteCarlo():
             for i in pos:
                 aux = - np.abs(hp - i) * 7./180. + 7.
                 
-                d = [i, parts[0].GetDistances(i)]
+                z = (None, parts[0].Sight(i), parts[0].rotation)
                 tw = 0
                 # Computes the particles weight
                 for p in parts:
-                    tw += p.Sensor(distances=d)
+                    tw += p.Sensor(*z)
 
                 # "Resamples"
                 s = tw/31.
@@ -165,8 +161,12 @@ class MonteCarlo():
                 # Counts the losses
                 aux += 30-k
                 uv.append(aux)
+
+            print 
+            print uv
+
             return pos[np.argmax(uv)]
-        return -999
+        return 999
 
     #----------------------------------------------------------------------------------------------
     #   Main algorithm

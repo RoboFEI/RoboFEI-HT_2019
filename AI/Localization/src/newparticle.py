@@ -9,54 +9,17 @@ import scipy.special as sp
 hrobot = 50
 # Robot's head's tilt's position
 htilt = 17.4
-
-# Distance and angles of the notable points
-vpoints = [(1030,20),
-           (880,20),
-           (740,20),
-           (600,20),
-           (450,20),
-           (310,20),
-           (170,20),
-
-           (990,-20),
-           (850,-20),
-           (710,-20),
-           (560,-20),
-           (420,-20),
-           (280,-20),
-           (130,-20),
-
-           (910,10),
-           (780,10),
-           (640,10),
-           (500,10),
-           (370,10),
-           (230,10),
-
-           (880,-10),
-           (750,-10),
-           (610,-10),
-           (470,-10),
-           (330,-10),
-           (190,-10),
-           
-           (1000,0),
-           (160,0),
-           (90,0)]
-
-# Vars used to compute the particles likelihood
-maxWdelta = None
+hfov = 26.13
+vfov = 14.58
 
 #--------------------------------------------------------------------------------------------------
 #   Class implementing a particle used on Particle Filter Localization
 #--------------------------------------------------------------------------------------------------
-
 class Particle(object):
     #----------------------------------------------------------------------------------------------
     #   Particle constructor
     #----------------------------------------------------------------------------------------------
-    def __init__(self, x=None, y=None, rotation=None, weight=1, maxweight=1, normals=None, regions=None, factors=None, std=None, spread=1):
+    def __init__(self, x=None, y=None, rotation=None, wfactor=0, weight=1, normals=None, regions=None, factors=None, std=None, spread=1):
         # This block sets the initial position values of the particles.
         #    If there was any given value, adopt it;
         #    else if there was a gaussian possible position given, generate a random position;
@@ -105,14 +68,13 @@ class Particle(object):
             self.rotation = np.random.randint(self.regions[2][0], self.regions[2][1])
         
         self.weight = weight # Holds particles weight, can come from previous iterations
-        self.maxweight = maxweight # Holds the previous maximum weight
-
+        
         # Motion error coefficients
         if factors == None:
-            self.factors = [1, 2, 1, 500, 1,  1, 2, 1, 500, 1.5,  1, 2, 1, 100, 1]
+            self.factors = [1, 2, 1, 500, 10,  1, 2, 1, 500, 15,  1, 2, 1, 100, 10]
             # self.factors = 15*[0]
             # self.factors = [1, 2, 1, 0, 10,  1, 2, 1, 0, 20,  1, 2, 1, 0, 10]
-            # self.factors = [0, 0, 0, 0, 10,  0, 0, 0, 0, 20,  0, 0, 0, 0, 10]
+            # self.factors = [0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0, 0, 0, 100, 0]
         else:
             self.factors = factors
 
@@ -139,6 +101,10 @@ class Particle(object):
 
         self.SigmaIMU = 20
 
+        self.SigmaField = 0.1
+
+        self.wfactor = wfactor # Used in order to implement the motion error.
+
     #----------------------------------------------------------------------------------------------
     #   Method that chooses which movement should be used
     #----------------------------------------------------------------------------------------------
@@ -160,14 +126,14 @@ class Particle(object):
         # drift is the robot's sideways speed in cm/s
         # rotational is the robot's angular speed in degrees/s
 
-        wfactor = max(min(np.log(self.weight/self.maxweight)/np.log(1e-20), 1.), 0.)
+        # wfactor = max(min(np.log(self.weight/self.maxweight)/np.log(1e-20), 1.), 0.)
 
         # Computes the forward speed with error
-        Forward = straight + NRnd(self.factors[0]*straight) + NRnd(self.factors[1]*drift) + NRnd(self.factors[2]*rotational) + NRnd(self.factors[3] * wfactor)/dt + NRnd(self.factors[4])/dt
+        Forward = straight + NRnd(self.factors[0]*straight) + NRnd(self.factors[1]*drift) + NRnd(self.factors[2]*rotational) + NRnd(self.factors[3] * self.wfactor) + NRnd(self.factors[4])
         # Computes the side speed with error
-        Side = drift + NRnd(self.factors[5]*straight) + NRnd(self.factors[6]*drift) + NRnd(self.factors[7]*rotational) + NRnd(self.factors[8] * wfactor)/dt + NRnd(self.factors[9])/dt
+        Side = drift + NRnd(self.factors[5]*straight) + NRnd(self.factors[6]*drift) + NRnd(self.factors[7]*rotational) + NRnd(self.factors[8] * self.wfactor) + NRnd(self.factors[9])
         # Computes the angular speed with error
-        Omega = rotational + NRnd(self.factors[10]*straight) + NRnd(self.factors[11]*drift) + NRnd(self.factors[12]*rotational) + NRnd(self.factors[13] * wfactor)/dt + NRnd(self.factors[14])/dt
+        Omega = rotational + NRnd(self.factors[10]*straight) + NRnd(self.factors[11]*drift) + NRnd(self.factors[12]*rotational) + NRnd(self.factors[13] * self.wfactor) + NRnd(self.factors[14])
 
         # Converts angles to radians
         Omega = np.radians(Omega)
@@ -198,10 +164,6 @@ class Particle(object):
         else:
             self.rotation = rot
 
-        # Resets weight variables
-        self.weight = 1
-        self.maxweight = 1
-
     #----------------------------------------------------------------------------------------------
     #   Method to replace particles after rising up
     #----------------------------------------------------------------------------------------------
@@ -222,7 +184,7 @@ class Particle(object):
     #----------------------------------------------------------------------------------------------
     #   Likelihood computation
     #----------------------------------------------------------------------------------------------
-    def Sensor(self, landmarks=None, field=None, orientation=None, distances=None, weight=1):
+    def Sensor(self, landmarks=None, field=None, orientation=None, weight=1):
         # If it was given landmarks
         if landmarks != None:
             # Computes the landmarks positions
@@ -254,107 +216,74 @@ class Particle(object):
 
         # If the given information is the field's points
         if field != None:
-            # Finds out the head's position
-            if field[0:3] == [1,1,1]:
-                pan = 90
-            elif field[0:3] == [1,1,0]:
-                pan = -90
-            elif field[0:3] == [1,0,1]:
-                pan = 60
-            elif field[0:3] == [1,0,0]:
-                pan = -60
-            elif field[0:3] == [0,1,1]:
-                pan = 30
-            elif field[0:3] == [0,1,0]:
-                pan = -30
-            else:
-                pan = 0
+            hpan = int(field) # Extract the pan angle
+            points = 30.
 
-            ret = [] # Holds the probabilities of each point been 1
-            for k in vpoints:
-                p = np.radians(-self.rotation + pan + k[1]) # Computes the direction
-                i = self.x + k[0] * np.cos(p) # Computes the x position of the point
-                j = self.y + k[0] * np.sin(p) # Computes the y position of the point
-
-                ret.append(prob(i, j, self.radius, k[0])) # Computes the probability of the point been inside the field
-
-            # Computes a normalization value
-            n = 1
-            for i in xrange(3, 32):
-                n *= 0.99 * field[i] + 0.9 * (1-field[i])
-
-            # Computes the normalized weight
-            w = 1
-            for i in xrange(3, 32):
-                w *= 0.99 * field[i] * ret[i-3] + 0.9 * (1-field[i]) * (1-ret[i-3]) + 0.2 * field[i] * (1-ret[i-3]) + 0.1 * (1-field[i]) * ret[i-3]
+            vec = np.array(self.RndGenerate(points)).transpose() # Takes the random generated angles
+            green = 0 # Counts how many dots are green
             
-            w /= n
-        
-            weight *= w
+            h = hrobot # Adds error to the robot's height
+            pan = np.radians(hpan) # Adds error to the horizontal angles
+            tilt = np.radians(htilt) # Adds error to the vertical angles
+
+            for i in vec:
+                dist = (h / np.tan(tilt + i[0]))/np.cos(i[1]) # Computes the point distance
+                ang = - np.radians(self.rotation) + i[1] + pan # Computes the point angle
+                px = self.x + dist * np.cos(ang) # Computes point x position
+                py = self.y + dist * np.sin(ang) # Computes point y position
+
+                if 0 <= px and px <= 1040 and 0 <= py and py <= 740:
+                    # If the dot is "green", save it.
+                    green += 1
+
+            s =  max(0.001, min(0.999, green/points))
+
+            weight *= np.exp(-(np.power(s-np.abs(field)+np.abs(hpan), 2))/(2*np.power(self.SigmaField,2)))
 
         # If the IMU's orientation was given
         if orientation != None:
             weight *= ComputeAngLikelihoodDeg(np.degrees(orientation), self.rotation, self.SigmaIMU)
         
-        # If its a test of VIP!
-        if distances != None:
-            d = self.GetDistances(distances[0])
-            for i in xrange(5):
-                # weight *= np.exp(-(np.power(d[i]-distances[1][i], 2))/(2*np.power(25,2)))
-                weight *= np.exp(-(np.power(d[i]-distances[1][i], 2))/(2*np.power(distances[1][i]/7.,2)))
-
-            # weight = np.power(weight, 1./5.)
-
         self.weight = max(weight, 1e-300)
+        self.wfactor = max(min(np.log(self.weight)/np.log(1e-20), 1.), 0.)
         return self.weight
 
-    #----------------------------------------------------------------------------------------------
-    #   Computes the distances for predicting the future.
-    #----------------------------------------------------------------------------------------------
-    def GetDistances(self, pan=0):
-        d = [] # Holds the five distances
+    def RndGenerate(self, n):
+        # Generate n random points
+        vrnd = np.random.random([n]) 
+        hrnd = np.random.random([n]) 
+        hp = np.arctan((1.9*hrnd-0.95) * np.tan(np.radians(hfov))) # Converts to "screen coordinates"
+        vp = np.arctan(1/((0.9*vrnd+0.05)*(1/np.tan(np.radians(htilt-vfov))-1/np.tan(np.radians(htilt+vfov)))+1/np.tan(np.radians(htilt+vfov))))-np.radians(htilt)
+        # Computes and returns the random generated angles
+        return vp, hp
 
-        angs = [np.radians(20.+pan-self.rotation), # Max angle to the left
-                np.radians(10.+pan-self.rotation), # Midway angle to the left
-                np.radians(pan-self.rotation), # Frontal angle
-                np.radians(-10.+pan-self.rotation), # Midway angle to the right
-                np.radians(-20.+pan-self.rotation)] # Max angle to the right
+    def Sight(self, angle):
+        hpan = angle # Extract the pan angle
+        points = 1000.
 
-        comp = [np.arctan2(self.regions[1][1] - self.y, self.regions[0][1] - self.x), # Angle in relation to X,Y
-                np.arctan2(self.regions[1][0] - self.y, self.regions[0][1] - self.x), # Angle in relation to X,0
-                np.arctan2(self.regions[1][1] - self.y, self.regions[0][0] - self.x), # Angle in relation to 0,Y
-                np.arctan2(self.regions[1][0] - self.y, self.regions[0][0] - self.x)] # Angle in relation to 0,0
-              
-        for ang in angs:
-            # Compute the distance of each "ray" in relation to the field borders
-            if comp[1] < ang and ang <= comp[0]:
-                d.append(np.abs(self.regions[0][1] - self.x)/np.cos(ang))
-            elif comp[0] < ang and ang <= comp[2]:
-                d.append(np.abs(self.regions[1][1] - self.y)/np.cos(np.radians(90)-ang))
-            elif comp[3] < ang and  ang <= comp[1]:
-                d.append(np.abs(self.regions[1][0] - self.y)/np.cos(ang+np.radians(90)))
-            elif comp[2] < ang:
-                d.append(np.abs(self.regions[0][0] - self.x)/np.cos(np.radians(180)-ang))
-            elif comp[3] >= ang:
-                d.append(np.abs(self.regions[0][0] - self.x)/np.cos(np.radians(180)+ang))
+        vec = np.array(self.RndGenerate(points)).transpose() # Takes the random generated angles
+        green = 0 # Counts how many dots are green
+        
+        h = hrobot # Adds error to the robot's height
+        pan = np.radians(hpan) # Adds error to the horizontal angles
+        tilt = np.radians(htilt) # Adds error to the vertical angles
 
-        return d
+        for i in vec:
+            dist = (h / np.tan(tilt + i[0]))/np.cos(i[1]) # Computes the point distance
+            ang = - np.radians(self.rotation) + i[1] + pan # Computes the point angle
+            px = self.x + dist * np.cos(ang) # Computes point x position
+            py = self.y + dist * np.sin(ang) # Computes point y position
 
-    #----------------------------------------------------------------------------------------------
-    #   Computes the max weight of the particles, generally 1.
-    #----------------------------------------------------------------------------------------------
-    def MaxWeight(self, landmarks=None, field=None, orientation=None):
-        weight = 1
-        if landmarks != None:
-            for lm in landmarks:
-                if lm != -999:
-                    weight *= Walpha(0)
-                    weight *= maxWdelta
-                else:
-                    weight *= 1 - Walpha(0)
+            if 0 <= px and px <= 1040 and 0 <= py and py <= 740:
+                # If the dot is "green", save it.
+                green += 1
 
-        return max(weight, 1e-300)
-
+        s =  max(0.001, min(0.999, green/points))
+        if pan < 0:
+            return pan - s
+        else:
+            return pan + s
+        
     #----------------------------------------------------------------------------------------------
     #   Returns a string to print the particle's representation.
     #----------------------------------------------------------------------------------------------
@@ -365,7 +294,7 @@ class Particle(object):
     #   Returns the variables used to create a new particle from this one.
     #----------------------------------------------------------------------------------------------
     def copy(self):
-        return self.x, self.y, self.rotation, self.weight
+        return self.x, self.y, self.rotation, self.wfactor, self.weight
 
 #--------------------------------------------------------------------------------------------------
 #   Computes the likelihood between two angles in degrees.
@@ -408,77 +337,7 @@ def NRnd(sigma, mu=0):
         return np.random.normal(mu, np.abs(sigma))
 
 #--------------------------------------------------------------------------------------------------
-#   Returns the probability given the x and y limits, the circle position and its radius.
-#--------------------------------------------------------------------------------------------------
-def prob(cx, cy, rad, d, xa=0, xb=1040, ya=0, yb=740):
-    w = 1 # Default
-
-    # Computes the radius used to compute the weight of this set of points
-    r = (rad[1]-rad[0])*d/900. + 10.*rad[0]/9. - rad[1]/9. 
-
-    # Computes the integral of the field in relation to the field (Too complex to be explained here, just believe it!)
-    if cx+r <= xa or cx-r >= xb:
-        return 0
-    elif cx-r < xa:
-        w *= 0.5 - ((xa-cx)*np.sqrt((r**2)-(xa-cx)**2) + (r**2)*np.arctan((xa-cx)/(np.sqrt((r**2)-(xa-cx)**2))))/((r**2)*np.pi)
-    elif cx+r > xb:
-        w *= 0.5 + ((xb-cx)*np.sqrt((r**2)-(xb-cx)**2) + (r**2)*np.arctan((xb-cx)/(np.sqrt((r**2)-(xb-cx)**2))))/((r**2)*np.pi)
-
-    if cy+r <= ya or cy-r >= yb:
-        return 0
-    elif cy-r < ya:
-        w *= 0.5 - ((ya-cy)*np.sqrt((r**2)-(ya-cy)**2) + (r**2)*np.arctan((ya-cy)/(np.sqrt((r**2)-(ya-cy)**2))))/((r**2)*np.pi)
-    elif cy+r > yb:
-        w *= 0.5 + ((yb-cy)*np.sqrt((r**2)-(yb-cy)**2) + (r**2)*np.arctan((yb-cy)/(np.sqrt((r**2)-(yb-cy)**2))))/((r**2)*np.pi)
-
-    return w
-
-#--------------------------------------------------------------------------------------------------
-#   Computes the Walpha factor for weight computation
-#--------------------------------------------------------------------------------------------------
-def Walpha(ang, gamma=26.13, Delta=90):
-    if -Delta+gamma < ang and ang < Delta-gamma:
-        return gamma/(Delta+gamma)
-    elif ang < -Delta-gamma or ang > Delta+gamma:
-        return 0
-    else:
-        return 0.5 * (Delta+gamma-np.abs(ang))/(Delta+gamma)
-
-#--------------------------------------------------------------------------------------------------
 #   Computes the Wdelta factor for weight computation
 #--------------------------------------------------------------------------------------------------
 def Wdelta(dist, psi=0.7, SigmaO=70, MuF=700, SigmaF=10, MuN=10, SigmaN=1):
     return (psi + (1-psi)*np.exp(-np.power(dist,2)/(2*np.power(SigmaO,2)))) * (1 + sp.erf((MuF-dist)/(np.sqrt(2)*SigmaF))) * (1 - sp.erf((MuN-dist)/(np.sqrt(2)*SigmaN))) / 4
-
-#--------------------------------------------------------------------------------------------------
-#   Computes the maximum value Wdelta can get.
-#--------------------------------------------------------------------------------------------------
-if maxWdelta == None:
-    psi = 0.7 # Occlusion factor in the infinity
-    SigmaO = 70 # Decay rate of the occlusion factor
-    
-    MuF = 700 # Farthest distance in which a robot can see any landmark
-    SigmaF = 10 # Its decay rate
-    
-    MuN = 10 # Nearest distance a robot can see anything
-    SigmaN = 1 # Its decay rate
-
-    # Generates a 1000 points in random positions
-    d = np.array([]) 
-    for i in xrange(1000):
-        d = np.append(d, [np.random.randint(MuN, MuF)])
-
-    w = 0 # Initializes the weight as 0
-    while True:
-        p = w # Saves the prev. weight
-
-        d = np.random.normal(d, 0.3) # Moves points at random
-        e = Wdelta(d) # Computes the new vector of weights
-
-        w = np.max(e) # Get the biggest weight
-
-        if np.abs(w-p) < 1e-3: # If it was just a small change saves it
-            d = d[np.argmax(e)]
-            break
-
-    maxWdelta = Wdelta(d) # Saves the greatest weight
