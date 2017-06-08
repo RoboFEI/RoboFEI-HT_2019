@@ -3,8 +3,8 @@ __authors__ = "Aislan C. Almeida"
 __license__ = "GNU General Public License v3.0"
 
 from Viewer import * # Imports the environment of the viewer
-# from AMCL import * # Imports the Particle Filter Class
-import time 
+from MCL import *
+import time
 
 # To pass arguments to the function
 import argparse
@@ -22,28 +22,8 @@ except ImportError:
 parser = argparse.ArgumentParser(description='Robot Localization', epilog= 'Implements particle filters to self-localize a robot on the field.')
 parser.add_argument('-g', '--graphs', action="store_true", help='Shows graphical interface which visualizes the particles.')
 parser.add_argument('-l', '--log', action="store_true", help='Print variable logs.')
-parser.add_argument('-m', '--mcl', action="store_true", help='Uses Monte-Carlo Localization')
-parser.add_argument('-a', '--amcl', action="store_true", help='Uses Augmented Monte-Carlo Localization')
-parser.add_argument('-s', '--srmcl', action="store_true", help='Uses Sensor Reseting Monte-Carlo Localization')
-parser.add_argument('-t', '--test', action="store_true", help='Test')
 
 args = parser.parse_args()
-
-qtdparts = 1000
-
-if args.mcl:
-    from MCL import *
-elif args.amcl:
-    from AMCL import *
-elif args.srmcl:
-    from SRMCL import *
-elif args.test:
-    from test import *
-    qtdparts = 1000
-else:
-    print 'Please choose a version of MCL to be used!'
-    exit()
-
 
 #--------------------------------------------------------------------------------------------------
 #   Class implementing the Core of the Localization Process
@@ -91,27 +71,15 @@ class Localization():
             field = SoccerField(screen) # Draws the field
             simul.field = field # Passes the field to the simulation
 
-        PF = MonteCarlo(1000, 1000, [1, 2, 1, 0, 1,  1, 2, 1, 0, 1.5,  1, 2, 1, 0, 1])
+        PF = MonteCarlo()
 
         std = 100
         hp = -999
         self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', -999)
         weight = 1
 
-        # z1 = []
-        # z2 = []
-        # z3 = []
-        # z4 = []
-        # timecount = []
-
         # Main loop
         while True:
-            # z0 = 0
-            # z1 = 0
-            # z2 = 0
-            # z3 = 0
-            # z4 = []
-
             landmarks = []
 
             self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 1) # Sets the flag for telemetry
@@ -123,18 +91,6 @@ class Localization():
             # Gets the motion command from the blackboard.
             u = self.GetU(self.bkb.read_int(self.Mem, 'CONTROL_ACTION'))
 
-            # auxtime = time.time()
-            # try:
-            #     if auxtime-timecount[0] > 0:
-            #         timecount.pop(0)
-            #         for zn in [zb, zr, zy, zp]:
-            #             zn.pop(0)
-            # except:
-            #     pass
-
-            # print timecount
-
-            # timecount.append(auxtime)
             # Gets the measured variable from the blackboard,
             # and free them.
             landmarks.append(self.bkb.read_float(self.Mem, 'VISION_FIRST_GOALPOST'))
@@ -147,7 +103,6 @@ class Localization():
             self.bkb.write_float(self.Mem, 'VISION_FOURTH_GOALPOST', -999)
 
             orientation = self.bkb.read_float(self.Mem, 'IMU_EULER_Z')
-            # orientation = None
 
             x = self.bkb.read_int(self.Mem, 'VISION_FIELD')
             fieldpoints = read(x)
@@ -160,29 +115,21 @@ class Localization():
             if sum(landmarks) == - 4 * 999:
                 landmarks = None
 
-            # z0 = mean(zb)
-            # z1 = mean(zr)
-            # z2 = mean(zy)
-            # z3 = mean(zp)
-            # z4 = degrees(self.bkb.read_float(self.Mem, 'IMU_EULER_Z'))
-
-            fieldpoints = None
+            # fieldpoints = None
             # orientation = None
-            # landmarks = None
-            # print zn[0], z0
-            if fieldpoints != None and landmarks != None:
-                z = [landmarks, fieldpoints, orientation]
-            elif fieldpoints != None:
-                z = [None, fieldpoints, orientation]
-            elif landmarks != None:
-                z = [landmarks, None, orientation]
-            else:
-                z = [None, None, None]
+            landmarks = None
 
+            if fieldpoints == None and landmarks == None:
+                z = [None, None, None]
+            else:
+                z = [landmarks, fieldpoints, orientation]
+            
             pos, std = PF.main(u,z)
-            if fieldpoints != None:
-                hp = PF.PerfectInformation(u, self.bkb.read_float(self.Mem, 'VISION_PAN_DEG'), 5)
-                self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', hp)
+            
+            # if fieldpoints != None:
+            #     hp = PF.PerfectInformation(u, self.bkb.read_float(self.Mem, 'VISION_PAN_DEG'), 5)
+            #     self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', hp)
+
             if PF.meanweight < 1:                
                 weight = PF.meanweight
             

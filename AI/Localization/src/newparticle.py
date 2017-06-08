@@ -56,7 +56,7 @@ class Particle(object):
     #----------------------------------------------------------------------------------------------
     #   Particle constructor
     #----------------------------------------------------------------------------------------------
-    def __init__(self, x=None, y=None, rotation=None, weight=1, maxweight=1, normals=None, regions=None, factors=None, std=None, spread=1):
+    def __init__(self, x=None, y=None, rotation=None, wfactor=0, weight=1, normals=None, regions=None, factors=None, std=None, spread=1):
         # This block sets the initial position values of the particles.
         #    If there was any given value, adopt it;
         #    else if there was a gaussian possible position given, generate a random position;
@@ -105,14 +105,14 @@ class Particle(object):
             self.rotation = np.random.randint(self.regions[2][0], self.regions[2][1])
         
         self.weight = weight # Holds particles weight, can come from previous iterations
-        self.maxweight = maxweight # Holds the previous maximum weight
 
         # Motion error coefficients
         if factors == None:
-            self.factors = [1, 2, 1, 500, 1,  1, 2, 1, 500, 1.5,  1, 2, 1, 100, 1]
+            self.factors = [1, 2, 1, 500, 10,  1, 2, 1, 500, 15,  1, 2, 1, 100, 10]
             # self.factors = 15*[0]
             # self.factors = [1, 2, 1, 0, 10,  1, 2, 1, 0, 20,  1, 2, 1, 0, 10]
             # self.factors = [0, 0, 0, 0, 10,  0, 0, 0, 0, 20,  0, 0, 0, 0, 10]
+            # self.factors = [0, 0, 0, 50, 0,  0, 0, 0, 50, 0,  0, 0, 0, 10, 0]
         else:
             self.factors = factors
 
@@ -139,6 +139,8 @@ class Particle(object):
 
         self.SigmaIMU = 20
 
+        self.wfactor = wfactor # Used in order to implement the motion error.
+
     #----------------------------------------------------------------------------------------------
     #   Method that chooses which movement should be used
     #----------------------------------------------------------------------------------------------
@@ -160,14 +162,12 @@ class Particle(object):
         # drift is the robot's sideways speed in cm/s
         # rotational is the robot's angular speed in degrees/s
 
-        wfactor = max(min(np.log(self.weight/self.maxweight)/np.log(1e-20), 1.), 0.)
-
         # Computes the forward speed with error
-        Forward = straight + NRnd(self.factors[0]*straight) + NRnd(self.factors[1]*drift) + NRnd(self.factors[2]*rotational) + NRnd(self.factors[3] * wfactor)/dt + NRnd(self.factors[4])/dt
+        Forward = straight + NRnd(self.factors[0]*straight) + NRnd(self.factors[1]*drift) + NRnd(self.factors[2]*rotational) + NRnd(self.factors[3] * self.wfactor) + NRnd(self.factors[4])
         # Computes the side speed with error
-        Side = drift + NRnd(self.factors[5]*straight) + NRnd(self.factors[6]*drift) + NRnd(self.factors[7]*rotational) + NRnd(self.factors[8] * wfactor)/dt + NRnd(self.factors[9])/dt
+        Side = drift + NRnd(self.factors[5]*straight) + NRnd(self.factors[6]*drift) + NRnd(self.factors[7]*rotational) + NRnd(self.factors[8] * self.wfactor) + NRnd(self.factors[9])
         # Computes the angular speed with error
-        Omega = rotational + NRnd(self.factors[10]*straight) + NRnd(self.factors[11]*drift) + NRnd(self.factors[12]*rotational) + NRnd(self.factors[13] * wfactor)/dt + NRnd(self.factors[14])/dt
+        Omega = rotational + NRnd(self.factors[10]*straight) + NRnd(self.factors[11]*drift) + NRnd(self.factors[12]*rotational) + NRnd(self.factors[13] * self.wfactor) + NRnd(self.factors[14])
 
         # Converts angles to radians
         Omega = np.radians(Omega)
@@ -197,10 +197,6 @@ class Particle(object):
             self.rotation = rot + 360
         else:
             self.rotation = rot
-
-        # Resets weight variables
-        self.weight = 1
-        self.maxweight = 1
 
     #----------------------------------------------------------------------------------------------
     #   Method to replace particles after rising up
@@ -306,6 +302,9 @@ class Particle(object):
             # weight = np.power(weight, 1./5.)
 
         self.weight = max(weight, 1e-300)
+        if landmarks != None or field != None or orientation != None:
+            self.wfactor = max(min(np.log(self.weight)/np.log(1e-10), 2.), 0.)
+        # self.wfactor = 0.5
         return self.weight
 
     #----------------------------------------------------------------------------------------------
@@ -365,7 +364,7 @@ class Particle(object):
     #   Returns the variables used to create a new particle from this one.
     #----------------------------------------------------------------------------------------------
     def copy(self):
-        return self.x, self.y, self.rotation, self.weight
+        return self.x, self.y, self.rotation, self.wfactor, self.weight
 
 #--------------------------------------------------------------------------------------------------
 #   Computes the likelihood between two angles in degrees.
