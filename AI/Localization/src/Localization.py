@@ -91,7 +91,7 @@ class Localization():
             field = SoccerField(screen) # Draws the field
             simul.field = field # Passes the field to the simulation
 
-        PF = MonteCarlo(1000, 1000)
+        PF = MonteCarlo(1000, 30)
 
         std = 100
         hp = -999
@@ -145,9 +145,9 @@ class Localization():
                 z = [None, None, None]
 
             pos, std = PF.main(u,z)
-            if fieldpoints != None:
-                hp = PF.PerfectInformation(u, self.bkb.read_float(self.Mem, 'VISION_PAN_DEG'), 5)
-                self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', hp)
+            # if fieldpoints != None:
+            #     hp = PF.PerfectInformation(u, self.bkb.read_float(self.Mem, 'VISION_PAN_DEG'), 5)
+            #     self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', hp)
             if PF.meanweight < 1:                
                 weight = PF.meanweight
             
