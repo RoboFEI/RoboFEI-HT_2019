@@ -71,9 +71,9 @@ class Particle(object):
         
         # Motion error coefficients
         if factors == None:
-            self.factors = [1, 2, 1, 500, 10,  1, 2, 1, 500, 15,  1, 2, 1, 100, 10]
+            # self.factors = [1, 2, 1, 500, 10,  1, 2, 1, 500, 15,  1, 2, 1, 100, 10]
             # self.factors = 15*[0]
-            # self.factors = [1, 2, 1, 0, 10,  1, 2, 1, 0, 20,  1, 2, 1, 0, 10]
+            self.factors = [1, 2, 1, 0, 10,  1, 2, 1, 0, 20,  1, 2, 1, 0, 10]
             # self.factors = [0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0, 0, 0, 100, 0]
         else:
             self.factors = factors
@@ -101,7 +101,7 @@ class Particle(object):
 
         self.SigmaIMU = 20
 
-        self.SigmaField = 0.1
+        self.SigmaField = 0.01
 
         self.wfactor = wfactor # Used in order to implement the motion error.
 
@@ -245,7 +245,8 @@ class Particle(object):
             weight *= ComputeAngLikelihoodDeg(np.degrees(orientation), self.rotation, self.SigmaIMU)
         
         self.weight = max(weight, 1e-300)
-        self.wfactor = max(min(np.log(self.weight)/np.log(1e-20), 1.), 0.)
+        if landmarks != None and field != None and orientation != None:
+            self.wfactor = max(min(np.log(self.weight)/np.log(1e-20), 1.), 0.)
         return self.weight
 
     def RndGenerate(self, n):
