@@ -81,7 +81,8 @@ class VISION():
                 self.behave = (self.behave + 1) % len(y)
                 self.get = True
         else:
-            self.pan(pos=hp)
+            if hp != 999:
+                self.pan(pos=hp)
 
             if np.abs(self.headpan-hp) < 1:
                 self.get = True

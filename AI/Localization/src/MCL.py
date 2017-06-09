@@ -103,7 +103,7 @@ class MonteCarlo():
         poses = np.matrix(poses-m) # Compute the position error of each particle
 
         # Compute the standard deviation of the particle set
-        self.std = np.power(np.sqrt(np.abs(np.linalg.det(((poses.T * poses) / self.qtd)))), 1/3.)
+        self.std = np.power(np.sqrt(np.abs(np.linalg.det(((poses.T * poses) / (self.qtd+1))))), 1/3.)
 
     #----------------------------------------------------------------------------------------------
     #   Tests which is the best information to be acquired.
@@ -114,8 +114,8 @@ class MonteCarlo():
             parts = [] 
             
             # Takes the first 30 particles of the set
-            for P in self.particles[0:30]:
-                parts.append(Particle(*P.copy()[0:2], weight=1, maxweight=1))
+            for P in self.particles[:30]:
+                parts.append(Particle(*P.copy()))
             
             # Moves the particles for a time!
             uf = [u[0], u[1], u[2], time]
@@ -128,11 +128,11 @@ class MonteCarlo():
             for i in pos:
                 aux = - np.abs(hp - i) * 7./180. + 7.
                 
-                d = [i, parts[0].GetDistances(i)]
+                d = parts[0].GetField(i)
                 tw = 0
                 # Computes the particles weight
                 for p in parts:
-                    tw += p.Sensor(distances=d)
+                    tw += p.Sensor(orientation=parts[0].rotation, field=d)
 
                 # "Resamples"
                 s = tw/31.
