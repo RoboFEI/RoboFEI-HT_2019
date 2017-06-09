@@ -39,7 +39,7 @@ class VISION():
 
         self.get = True
 
-        self.dots = None
+        self.dots = []
 
         self.text = ""
         self.index = 0
@@ -119,10 +119,11 @@ class VISION():
 
     # Return the observed integral of the world
     def Field(self):
-        points = 1000.
+        vec = np.array(self.RndGenerate()).transpose() # Takes the random generated angles
+        left = 0 # Counts how many dots are green
+        right = 0
 
-        vec = np.array(self.RndGenerate(points)).transpose() # Takes the random generated angles
-        green = 0 # Counts how many dots are green
+        total = 0
         
         h = self.robotheight + np.random.normal(0,1) # Adds error to the robot's height
         pan = np.radians(self.headpan + np.random.normal(0, 1)) # Adds error to the horizontal angles
@@ -140,16 +141,23 @@ class VISION():
             
             if 0 <= px and px <= 1040 and 0 <= py and py <= 740 and np.random.random() > 0.05:
                 # If the dot is "green", save it.
-                green += 1
+                if total < 1000:
+                    left += 1
+                else:
+                    right += 1
+            total += 1
 
-        return max(0.001, min(0.999, green/points))
+        return 1000 * max(1, min(999, left)) + max(1, min(999, right))
 
     # Generates random points and returns their angles in radians
-    def RndGenerate(self, n):
-        # Generate n random points
-        vrnd = np.random.random([n]) 
-        hrnd = np.random.random([n]) 
-        hp = np.arctan((1.9*hrnd-0.95) * np.tan(np.radians(self.hfov))) # Converts to "screen coordinates"
+    def RndGenerate(self):
+        # Fixed to 2000 points
+        vrnd = np.random.random([2000])
+        hrnd = np.random.random([2000])
+        a = -np.arctan((0.7+0.2*hrnd[:1000]) * np.tan(np.radians(self.hfov)))
+        b = np.arctan((0.7+0.2*hrnd[1000:]) * np.tan(np.radians(self.hfov)))
+        hp = np.concatenate((a, b))
+
         vp = np.arctan(1/((0.9*vrnd+0.05)*(1/np.tan(np.radians(17.4-self.vfov))-1/np.tan(np.radians(17.4+self.vfov)))+1/np.tan(np.radians(17.4+self.vfov))))-np.radians(17.4)
         # Computes and returns the random generated angles
         return vp, hp
@@ -251,9 +259,9 @@ class VISION():
         if self.get:
             self.get = False
             if self.panpos < 0:
-                self.bkb.write_float(self.Mem, 'VISION_FIELD', self.panpos - self.Field())
+                self.bkb.write_int(self.Mem, 'VISION_FIELD', int(1000000 * self.panpos - self.Field()))
             else:
-                self.bkb.write_float(self.Mem, 'VISION_FIELD', self.panpos + self.Field())
+                self.bkb.write_int(self.Mem, 'VISION_FIELD', int(1000000 * self.panpos + self.Field()))
         
         for x in [('VISION_FIRST_GOALPOST', goals[0]), ('VISION_SECOND_GOALPOST', goals[1]), ('VISION_THIRD_GOALPOST', goals[2]), ('VISION_FOURTH_GOALPOST', goals[3]), ('VISION_PAN_DEG', self.headpan)]:
             self.bkb.write_float(self.Mem, *x)
