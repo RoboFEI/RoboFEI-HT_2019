@@ -291,53 +291,52 @@ class Particle(object):
         # If the IMU's orientation was given
         if orientation != None:
             weight *= ComputeAngLikelihoodDeg(np.degrees(orientation), self.rotation, self.SigmaIMU)
-        
-        # If its a test of VIP!
-        if distances != None:
-            d = self.GetDistances(distances[0])
-            for i in xrange(5):
-                # weight *= np.exp(-(np.power(d[i]-distances[1][i], 2))/(2*np.power(25,2)))
-                weight *= np.exp(-(np.power(d[i]-distances[1][i], 2))/(2*np.power(distances[1][i]/7.,2)))
-
-            # weight = np.power(weight, 1./5.)
 
         self.weight = max(weight, 1e-300)
+
         if landmarks != None or field != None or orientation != None:
             self.wfactor = max(min(np.log(self.weight)/np.log(1e-10), 2.), 0.)
+        
         # self.wfactor = 0.5
         return self.weight
 
     #----------------------------------------------------------------------------------------------
     #   Computes the distances for predicting the future.
     #----------------------------------------------------------------------------------------------
-    def GetDistances(self, pan=0):
-        d = [] # Holds the five distances
+    def GetField(self, pan=0):
+        ret = []
 
-        angs = [np.radians(20.+pan-self.rotation), # Max angle to the left
-                np.radians(10.+pan-self.rotation), # Midway angle to the left
-                np.radians(pan-self.rotation), # Frontal angle
-                np.radians(-10.+pan-self.rotation), # Midway angle to the right
-                np.radians(-20.+pan-self.rotation)] # Max angle to the right
+        # Saves the heads position
+        if pan == 90: # If it is to the left
+            ret.extend([1,1,1])
+        elif pan == -90: # If it is to the left
+            ret.extend([1,1,0])
+        elif pan == 60: # If it is to the left
+            ret.extend([1,0,1])
+        elif pan == -60: # If it is to the left
+            ret.extend([1,0,0])
+        elif pan == 30: # If it is to the left
+            ret.extend([0,1,1])
+        elif pan == -30: # If it is to the left
+            ret.extend([0,1,0])
+        elif pan == 0: # If it is to the left
+            ret.extend([0,0,1])
+        else:
+            return 32*[0]
 
-        comp = [np.arctan2(self.regions[1][1] - self.y, self.regions[0][1] - self.x), # Angle in relation to X,Y
-                np.arctan2(self.regions[1][0] - self.y, self.regions[0][1] - self.x), # Angle in relation to X,0
-                np.arctan2(self.regions[1][1] - self.y, self.regions[0][0] - self.x), # Angle in relation to 0,Y
-                np.arctan2(self.regions[1][0] - self.y, self.regions[0][0] - self.x)] # Angle in relation to 0,0
-              
-        for ang in angs:
-            # Compute the distance of each "ray" in relation to the field borders
-            if comp[1] < ang and ang <= comp[0]:
-                d.append(np.abs(self.regions[0][1] - self.x)/np.cos(ang))
-            elif comp[0] < ang and ang <= comp[2]:
-                d.append(np.abs(self.regions[1][1] - self.y)/np.cos(np.radians(90)-ang))
-            elif comp[3] < ang and  ang <= comp[1]:
-                d.append(np.abs(self.regions[1][0] - self.y)/np.cos(ang+np.radians(90)))
-            elif comp[2] < ang:
-                d.append(np.abs(self.regions[0][0] - self.x)/np.cos(np.radians(180)-ang))
-            elif comp[3] >= ang:
-                d.append(np.abs(self.regions[0][0] - self.x)/np.cos(np.radians(180)+ang))
+        # For each point
+        for k in vpoints:
+            p = np.radians(-self.rotation + pan + k[1]) # Computes the direction
+            i = self.x + k[0] * np.cos(p) # Computes the x position of the point
+            j = self.y + k[0] * np.sin(p) # Computes the y position of the point
 
-        return d
+            if 0 <= i and i <= 1040 and 0 <= j and j <= 740:
+                ret.append(1)
+            else:
+                ret.append(0)
+
+        # Return the points values
+        return ret
 
     #----------------------------------------------------------------------------------------------
     #   Computes the max weight of the particles, generally 1.
