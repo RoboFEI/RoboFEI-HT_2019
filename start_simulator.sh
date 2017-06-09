@@ -13,7 +13,7 @@ cd AI/Communication/src
 gnome-terminal --title "sending" -e "python sending.py"
 gnome-terminal --title "receiving" -e "python receiving.py"
 cd ../../Decision/src
-gnome-terminal --title "decision naive" -e "python decision.py -ni"
+gnome-terminal --title "decision naive" -e "python decision.py -l"
 cd ../../..
 
 if [  $REPLY -gt 1 ]; then

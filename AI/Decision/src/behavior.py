@@ -20,7 +20,7 @@ sys.path.append('../../Blackboard/src/')
 from SharedMemory import SharedMemory 
 
 import time
-from math import degrees
+from math import *
 
 ###############################################################################
 #set the distance to kick according the robot
@@ -176,14 +176,127 @@ class TreatingRawData(object):
         self.bkb.write_int(self.mem,'DECISION_ACTION_VISION', 2)
         #return time.sleep(2)
 
-    def walk_to_start_position(self):
-        print 'walking forward for vision to see anything'
-        self.set_vision_ball()
-        self.set_walk_forward()
-        for i in range(0, 20):
-            time.sleep(1)
-            print "time", i
-        self.kickoff_ctrl = 1
+
+    def hcc(self,x1,y1,x2,y2):
+        return sqrt((x1-x2)**2 + (y1-y2)**2)
+
+
+    def distD(self, x1, y1, x2, y2):
+        return self.hcc(x1, y1, x2, y2)
+
+    def distR(self, x1, y1, x2, y2):
+        return atan2((y2-y1), (x2-x1))*180/pi
+        # atan2 retorna angulo entre -pi e +pi
+
+    def compAng(self, ang, base):
+        limitAngle = 35  # The vision range
+        realLimit = limitAngle + base  # Convert to the base angle
+        ang = -ang  # invert the inverted angle
+
+        # computes the x and y coordinates
+        limit = [cos(radians(realLimit)), sin(radians(realLimit))]
+        angle = [cos(radians(ang)), sin(radians(ang))]
+        zero = [cos(radians(base)), sin(radians(base))]
+
+        # computes the square of the distance between the base angle and the two comparing angles
+        dist2angle = (angle[0] - zero[0]) ** 2 + (angle[1] - zero[1]) ** 2
+        dist2limit = (limit[0] - zero[0]) ** 2 + (limit[1] - zero[1]) ** 2
+
+        # compares if the distance between the angle and the base falls into the vision range
+        return dist2angle < dist2limit
+
+
+    def calc_d_r(self,r_x,r_y,x,y):
+        d = self.distD(r_x,r_y,x,y)
+        r = self.distR(r_x,r_y,x,y)
+        return (-r,d)
+
+
+    def region_field(self,region):
+        if region == 1:
+            return (160,120)
+        if region == 2:
+            return (160,355)
+        if region == 3:
+            return (160,620)
+        if region == 4:
+            return (520,120)
+        if region == 5:
+            return (520,355)
+        if region == 6:
+            return (520,620)
+        if region == 7:
+            return (880,120)
+        if region == 8:
+            return (880,355)
+        if region == 9:
+            return (880,620)
+        if region == 0:
+            return (80,355)
+
+    #Moves the robot to the target position x_target, y_target, theta_target
+    #s_vel defines if walks fast or slow.
+    #d_obst bool - defines if the robot needs to avoid the obstacle or no.
+    def move(self,x_targ,y_targ):
+
+        #self.x_targ = self.bkb.read_float(self.mem, 'LOCALIZATION_BALL_X')
+        #self.y_targ = self.bkb.read_float(self.mem, 'LOCALIZATION_BALL_Y')
+
+        #x_targ = 300
+        #y_targ = 300
+        print 'targetX: ',x_targ
+        print 'targetY: ',y_targ
+
+        r_pos_x = self.bkb.read_int(self.mem, 'LOCALIZATION_X')
+        r_pos_y = self.bkb.read_int(self.mem, 'LOCALIZATION_Y')
+        #r_pos_theta = self.bkb.read_int(self.mem, 'LOCALIZATION_THETA')
+        r_pos_theta = self.get_orientation()
+
+        print 'rposx: ',r_pos_x
+        print 'rposy: ',r_pos_y
+        print 'rtheta:', r_pos_theta
+
+        rot, dist = self.calc_d_r(r_pos_x, r_pos_y, x_targ, y_targ)
+
+        rotate = r_pos_theta
+
+        if rotate > 180 and rotate < 360:
+            rotate = rotate - 360
+        rot = rot - rotate
+
+        if rot > 180:
+            rot = rot - 360
+
+        elif rot < -180:
+            rot = rot + 360
+
+        angle = rot
+
+        #ref = view_rot_aux - rotate
+
+
+        #print 'degree: ',angle
+        #print 'dist: ',dist
+
+        if angle > 20 and angle < 160:
+            self.set_turn_left()
+        elif angle < -20 and angle > -160:
+            self.set_turn_right()
+        else:
+
+            if dist < 30:
+                self.set_stand_still()
+            else:
+                self.set_walk_forward()
+
+
+
+    # Dribles the robot with the ball - to the target position x_target, y_target, theta_target
+    # s_vel defines if walks fast or slow.
+    # d_obst bool - defines if the robot needs to avoid the obstacle or no.
+    def drible(self, x_targ, y_targ, theta_targ, s_vel, d_obst, ):
+
+        return True
 
 ##############################################################################
 
@@ -272,14 +385,39 @@ class LocaLoca(TreatingRawData):
 
         #opponent kickoff: walk forward
         elif referee == 21 and self.kickoff_ctrl == 0:
-            self.walk_to_start_position()
+            print 'walking forward for vision to see anything'
+            self.set_vision_ball()
+            self.set_walk_forward()
+            for i in range(0, 20):
+                time.sleep(1)
+                print "time", i
+            self.kickoff_ctrl = 1
 
 
         elif referee == 2 or (referee == 21 and self.kickoff_ctrl != 0):  # play
             self.bkb.write_int(self.mem,'CONTROL_MESSAGES',0)
+
+            #self.move(0, 0, 0)
+
             if self.get_search_status() == 1: # 1 - vision lost
                 print 'vision lost'
                 self.set_stand_still()
+
+                #discretizing region field:
+                #0 = goalie field
+                #1 = defender-left
+                #2 = defender-center
+                #3 = defender-right
+                #4 = center-left
+                #5 = center-center
+                #6 = center-right
+                #7 = attacker-left
+                #8 = attacker-center
+                #9 = attacker-right
+
+                reg_x,reg_y = self.region_field(0)
+                self.move(reg_x,reg_y)
+
                 #self.set_vision_search()
                 #self.set_turn_right()
             elif self.get_search_status() == 0: # 0 - object found
