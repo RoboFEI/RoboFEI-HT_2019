@@ -27,8 +27,8 @@ from math import *
 #to real robots: 14 centimeters
 #to simulated robots: 28 centimeters
 
-distance_to_kick = 50 #real robot
-#distance_to_kick = 29 #simulated robot
+#distance_to_kick = 50 #real robot
+distance_to_kick = 29 #simulated robot
 
 
 ###############################################################################
@@ -239,22 +239,11 @@ class TreatingRawData(object):
     #d_obst bool - defines if the robot needs to avoid the obstacle or no.
     def move(self,x_targ,y_targ):
 
-        #self.x_targ = self.bkb.read_float(self.mem, 'LOCALIZATION_BALL_X')
-        #self.y_targ = self.bkb.read_float(self.mem, 'LOCALIZATION_BALL_Y')
-
-        #x_targ = 300
-        #y_targ = 300
-        print 'targetX: ',x_targ
-        print 'targetY: ',y_targ
-
         r_pos_x = self.bkb.read_int(self.mem, 'LOCALIZATION_X')
         r_pos_y = self.bkb.read_int(self.mem, 'LOCALIZATION_Y')
         #r_pos_theta = self.bkb.read_int(self.mem, 'LOCALIZATION_THETA')
         r_pos_theta = self.get_orientation()
 
-        print 'rposx: ',r_pos_x
-        print 'rposy: ',r_pos_y
-        print 'rtheta:', r_pos_theta
 
         rot, dist = self.calc_d_r(r_pos_x, r_pos_y, x_targ, y_targ)
 
@@ -275,17 +264,23 @@ class TreatingRawData(object):
         #ref = view_rot_aux - rotate
 
 
-        #print 'degree: ',angle
+        #print 'angle: ',angle
         #print 'dist: ',dist
 
-        if angle > 20 and angle < 160:
+        if angle > 20 and angle < 160 and dist > 80:
             self.set_turn_left()
-        elif angle < -20 and angle > -160:
+        elif angle < -20 and angle > -160 and dist > 80:
             self.set_turn_right()
         else:
-
-            if dist < 30:
-                self.set_stand_still()
+            if dist < 80:
+                #self.set_stand_still()
+                print 'orientation: ', self.get_orientation()
+                if self.get_orientation() > 20 or self.get_orientation() < -20:
+                    # revolve_clockwise:
+                    self.set_turn_right()
+                else:
+                    self.set_stand_still()
+                    return True
             else:
                 self.set_walk_forward()
 
@@ -297,6 +292,8 @@ class TreatingRawData(object):
     def drible(self, x_targ, y_targ, theta_targ, s_vel, d_obst, ):
 
         return True
+
+
 
 ##############################################################################
 
@@ -376,7 +373,26 @@ class LocaLoca(TreatingRawData):
 
         elif referee == 11:  # ready
             print 'ready'
-            self.set_stand_still()
+            #self.set_stand_still()
+            # attacking side: left or right
+            # discretizing region field:
+            # 0 = goalie field
+            # 1 = defender-left
+            # 2 = defender-center
+            # 3 = defender-right
+            # 4 = center-left
+            # 5 = center-center
+            # 6 = center-right
+            # 7 = attacker-left
+            # 8 = attacker-center
+            # 9 = attacker-right
+
+            #******************************************                           self positioning
+            #remember to change the the target region ID:
+            reg_x, reg_y = self.region_field(5)
+            self.move(reg_x, reg_y)
+            #******************************************                           self positioning
+
 
         elif referee == 12:  # set
             print 'set'
@@ -388,9 +404,9 @@ class LocaLoca(TreatingRawData):
             print 'walking forward for vision to see anything'
             self.set_vision_ball()
             self.set_walk_forward()
-            for i in range(0, 20):
-                time.sleep(1)
-                print "time", i
+            #for i in range(0, 20):
+            #    time.sleep(1)
+            #    print "time", i
             self.kickoff_ctrl = 1
 
 
@@ -402,21 +418,6 @@ class LocaLoca(TreatingRawData):
             if self.get_search_status() == 1: # 1 - vision lost
                 print 'vision lost'
                 self.set_stand_still()
-
-                #discretizing region field:
-                #0 = goalie field
-                #1 = defender-left
-                #2 = defender-center
-                #3 = defender-right
-                #4 = center-left
-                #5 = center-center
-                #6 = center-right
-                #7 = attacker-left
-                #8 = attacker-center
-                #9 = attacker-right
-
-                reg_x,reg_y = self.region_field(0)
-                self.move(reg_x,reg_y)
 
                 #self.set_vision_search()
                 #self.set_turn_right()
@@ -999,11 +1000,123 @@ class Quarterback(Ordinary):
         
 ##############################################################################
         
-class Golie(Ordinary):
+class Golie(TreatingRawData):
     " " " Golie class " " "
 
     def __init__(self):
+        super(Golie, self).__init__()
         print
         print  'Golie behavior called' 
         print
-        
+        self.kickoff_ctrl = 0
+
+    def decision(self, referee):
+        if referee == 1:  # stopped
+            print 'stand'
+            self.set_stand_still()
+
+        elif referee == 11:  # ready
+            print 'ready'
+            # ******************************************                           self positioning
+            # remember to change the the target region ID:
+            reg_x, reg_y = self.region_field(0)
+            self.move(reg_x, reg_y)
+            # ******************************************                           self positioning
+
+
+        elif referee == 12:  # set
+            print 'set'
+            self.set_stand_still()
+            self.set_vision_ball()
+
+        # opponent kickoff: walk forward
+        elif referee == 21 and self.kickoff_ctrl == 0:
+            print 'walking forward for vision to see anything'
+            self.set_vision_ball()
+            self.set_walk_forward()
+            # for i in range(0, 20):
+            #    time.sleep(1)
+            #    print "time", i
+            self.kickoff_ctrl = 1
+
+
+        elif referee == 2 or (referee == 21 and self.kickoff_ctrl != 0):  # play
+            self.bkb.write_int(self.mem, 'CONTROL_MESSAGES', 0)
+
+            # self.move(0, 0, 0)
+
+            if self.get_search_status() == 1:  # 1 - vision lost
+                print 'vision lost'
+                #self.set_stand_still()
+                self.set_vision_search()
+                reg_x, reg_y = self.region_field(0)
+                self.move(reg_x, reg_y)
+                # self.set_turn_right()
+            elif self.get_search_status() == 0:  # 0 - object found
+
+                ###### this is the beginning of the strategy: the closest robot goes to the ball: ###################
+                # it reads and shares the distance from all robots
+                # it compares who is the closest to the ball and it sets as coordinator.
+                print 'robot number: ', self.bkb.read_int(self.mem, 'ROBOT_NUMBER')
+
+                self.bkb.write_floatDynamic(self.mem, 'DECISION_RBT01_DIST_BALL',
+                                            self.bkb.read_int(self.mem, 'ROBOT_NUMBER') - 1, self.get_dist_ball())
+
+                # print 'dist_ball', self.get_dist_ball()
+                print 'orientation', self.get_orientation()
+
+                # NOT KICK TWICE
+                if self.bkb.read_int(self.mem, 'DECISION_ACTION_A') == 4 or self.bkb.read_int(self.mem,
+                                                                                              'DECISION_ACTION_A') == 5:
+                    self.set_stand_still()
+
+                if self.get_search_status() == 1:  # 1 - vision lost
+                    print 'vision lost'
+                    self.set_stand_still()
+                    # self.set_vision_search()
+                    # self.set_turn_right()
+                elif self.get_search_status() == 0:  # 0 - object found
+                    # align to the ball
+                    if self.get_motor_pan_degrees() > 20 and self.get_motor_pan_degrees() < 160:
+                        self.set_turn_left()
+                        # self.set_stand_still()
+                    elif self.get_motor_pan_degrees() < -20 and self.get_motor_pan_degrees() > -160:
+                        self.set_turn_right()
+                        # self.set_stand_still()
+                    else:
+
+                        if self.get_dist_ball() < distance_to_kick and self.get_motor_pan_degrees() <= 0:
+                            if self.get_orientation() <= 90 and self.get_orientation() >= -90:
+                                self.set_kick_right()
+                            elif self.get_orientation() > 90:
+                                # revolve_clockwise:
+                                self.set_pass_right()
+                                #########
+                            elif self.get_orientation() < -90:
+                                # revolve_anticlockwise:
+                                self.set_pass_left()
+                                #########
+                        elif self.get_dist_ball() < distance_to_kick and self.get_motor_pan_degrees() > 0:
+                            if self.get_orientation() <= 90 and self.get_orientation() >= -90:
+                                self.set_kick_left()
+                            elif self.get_orientation() > 90:
+                                # revolve_clockwise:
+                                self.set_pass_right()
+                                #########
+                            elif self.get_orientation() < -90:
+                                # revolve_anticlockwise:
+                                self.set_pass_left()
+                                #########
+                        elif self.get_dist_ball() > 60:
+                            # self.set_walk_forward()
+                            self.set_walk_forward_slow((self.get_dist_ball() / 5))
+                        # elif self.get_dist_ball() <= 26:
+                        #    self.set_stand_still()
+                        else:
+                            self.set_walk_forward_slow((self.get_dist_ball() / 6))
+
+                            # time.sleep(0.5)
+                            # self.set_stand_still()
+                else:
+                    print 'Invalid argument received from referee!'
+                    print referee
