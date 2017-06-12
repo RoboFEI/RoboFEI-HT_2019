@@ -100,6 +100,7 @@ Arquivo de cabeçalho contendo as funções e definições do black board
 #define IMU_WORKING 105
 #define VOLTAGE 106
 #define DECISION_LOCALIZATION 107
+#define VISION_FIELD 108
 
 #define IMU_GYRO_X 1
 #define IMU_GYRO_Y 2
@@ -223,7 +224,6 @@ Arquivo de cabeçalho contendo as funções e definições do black board
 #define VISION_SECOND_GOALPOST 120
 #define VISION_THIRD_GOALPOST 121
 #define VISION_FOURTH_GOALPOST 122
-#define VISION_FIELD 123
 
 //----global variables------------------------------------------------
 extern int *mem ; //Variável que manipula memória compartilhada

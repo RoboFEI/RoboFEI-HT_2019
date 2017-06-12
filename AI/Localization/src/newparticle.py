@@ -126,8 +126,6 @@ class Particle(object):
         # drift is the robot's sideways speed in cm/s
         # rotational is the robot's angular speed in degrees/s
 
-        # wfactor = max(min(np.log(self.weight/self.maxweight)/np.log(1e-20), 1.), 0.)
-
         # Computes the forward speed with error
         Forward = straight + NRnd(self.factors[0]*straight) + NRnd(self.factors[1]*drift) + NRnd(self.factors[2]*rotational) + NRnd(self.factors[3] * self.wfactor) + NRnd(self.factors[4])
         # Computes the side speed with error
@@ -217,7 +215,7 @@ class Particle(object):
         # If the given information is the field's points
         if field != None:
             hpan = int(field) # Extract the pan angle
-            points = 30.
+            points = 30
 
             vec = np.array(self.RndGenerate(points)).transpose() # Takes the random generated angles
             green = 0 # Counts how many dots are green
@@ -236,7 +234,7 @@ class Particle(object):
                     # If the dot is "green", save it.
                     green += 1
 
-            s =  max(0.001, min(0.999, green/points))
+            s =  max(0.001, min(0.999, float(green)/points))
 
             weight *= np.exp(-(np.power(s-np.abs(field)+np.abs(hpan), 2))/(2*np.power(self.SigmaField,2)))
 
@@ -245,8 +243,10 @@ class Particle(object):
             weight *= ComputeAngLikelihoodDeg(np.degrees(orientation), self.rotation, self.SigmaIMU)
         
         self.weight = max(weight, 1e-300)
-        if landmarks != None and field != None and orientation != None:
-            self.wfactor = max(min(np.log(self.weight)/np.log(1e-20), 1.), 0.)
+
+        if orientation != None:
+            self.wfactor = max(min(np.log(self.weight)/np.log(1e-10), 2.), 0.)
+
         return self.weight
 
     def RndGenerate(self, n):

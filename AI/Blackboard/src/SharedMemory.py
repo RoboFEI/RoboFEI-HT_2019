@@ -144,6 +144,7 @@ class SharedMemory(object):
     'IMU_WORKING': 105,
     'VOLTAGE': 106,
     'DECISION_LOCALIZATION': 107,
+    'VISION_FIELD': 108,
     }
 
     variable_float = {
@@ -269,6 +270,5 @@ class SharedMemory(object):
     'VISION_SECOND_GOALPOST': 120,
     'VISION_THIRD_GOALPOST': 121,
     'VISION_FOURTH_GOALPOST': 122,
-    'VISION_FIELD': 123,
     }
 #------------------------------------------------------------------------------------------

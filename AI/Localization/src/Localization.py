@@ -91,7 +91,7 @@ class Localization():
             field = SoccerField(screen) # Draws the field
             simul.field = field # Passes the field to the simulation
 
-        PF = MonteCarlo(1000, 1000)
+        PF = MonteCarlo(1000, 30)
 
         std = 100
         hp = -999
