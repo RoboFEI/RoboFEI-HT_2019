@@ -68,10 +68,12 @@ class VISION():
         self.headpan = np.min([self.maxpan, np.max([self.minpan, self.headpan])])
 
     # Reactive head behavior
-    def headBehave(self):
+    def headBehave(self, goto=None):
         hp = self.bkb.read_int(self.Mem, 'DECISION_LOCALIZATION')
 
-        if hp == -999:
+        if goto:
+            self.pan(pos=goto)
+        elif hp == -999:
             y = [90,60,30,0,-30,-60,-90]
             x = y[self.behave]
             self.pan(pos=x)
@@ -119,35 +121,62 @@ class VISION():
 
     # Return the observed integral of the world
     def Field(self):
-        vec = np.array(self.RndGenerate()).transpose() # Takes the random generated angles
-        left = 0 # Counts how many dots are green
-        right = 0
+        p = []
+        for i in [-21, -19, -11, -9, -1, 1, 9, 11, 19, 21, 0]:
+            j = i - self.robot.rotate + self.headpan
 
-        total = 0
+            if j > 180:
+                j -= 360
+            elif j < -180:
+                j += 360
+
+            if j == 0:
+                d = 1040 - self.robot.x
+            elif j == 90:
+                d = self.robot.y
+            elif j == -90:
+                d = 740 - self.robot.y
+            elif j == -180 or j == 180:
+                d = self.robot.x
+            elif 0 < j and j < 90:
+                d = min((740-self.robot.y)/np.sin(np.radians(j)), (1040-self.robot.x)/np.cos(np.radians(j)))
+            elif 90 < j and j < 180:
+                d = min((740-self.robot.y)/np.sin(np.radians(j)), (-self.robot.x)/np.cos(np.radians(j)))
+            elif -90 < j and j < 0:
+                d = min((-self.robot.y)/np.sin(np.radians(j)), (1040-self.robot.x)/np.cos(np.radians(j)))
+            elif -180 < j and j < -90:
+                d = min((-self.robot.y)/np.sin(np.radians(j)), (-self.robot.x)/np.cos(np.radians(j)))
+
+            f = d * np.cos(np.radians(i))
+            a = np.arctan(self.robotheight/f)
+            g = a - np.radians(self.headtilt)
+            p.append(min(1, max(0, 0.5 * np.tan(g) / np.tan(np.radians(self.vfov)) + 0.5)))
+
+        ret = 0
+        for i in xrange(5):
+            d = p[i*2] - p[i*2+1]
+            if d < -0.035:
+                ret += 1 * np.power(10, 4-i)
+            elif d < -0.025:
+                ret += 2 * np.power(10, 4-i)
+            elif d < -0.015:
+                ret += 3 * np.power(10, 4-i)
+            elif d < -0.005:
+                ret += 4 * np.power(10, 4-i)
+            elif d < 0.005:
+                ret += 5 * np.power(10, 4-i)
+            elif d < 0.015:
+                ret += 6 * np.power(10, 4-i)
+            elif d < 0.025:
+                ret += 7 * np.power(10, 4-i)
+            elif d < 0.035:
+                ret += 8 * np.power(10, 4-i)
+            elif d > 0.035:
+                ret += 9 * np.power(10, 4-i)
         
-        h = self.robotheight + np.random.normal(0,1) # Adds error to the robot's height
-        pan = np.radians(self.headpan + np.random.normal(0, 1)) # Adds error to the horizontal angles
-        tilt = np.radians(self.headtilt + np.random.normal(0,1)) # Adds error to the vertical angles
+        ret += int(min(99, max(1, p[10] * 100))) * np.power(10, 5)
 
-        self.dots = []
-
-        for i in vec:
-            dist = (h / np.tan(tilt + i[0]))/np.cos(i[1]) # Computes the point distance
-            ang = - np.radians(self.robot.rotate) + i[1] + pan # Computes the point angle
-            px = self.robot.x + dist * np.cos(ang) # Computes point x position
-            py = self.robot.y + dist * np.sin(ang) # Computes point y position
-
-            self.dots.append((int(px),int(py))) # Saves dots to be seen on simulator's screen
-            
-            if 0 <= px and px <= 1040 and 0 <= py and py <= 740 and np.random.random() > 0.05:
-                # If the dot is "green", save it.
-                if total < 1000:
-                    left += 1
-                else:
-                    right += 1
-            total += 1
-
-        return 1000 * max(1, min(999, left)) + max(1, min(999, right))
+        print ret
 
     # Generates random points and returns their angles in radians
     def RndGenerate(self):
@@ -220,51 +249,54 @@ class VISION():
     def VisionProcess(self):
         # self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', -999)
 
-        if self.count == 0:
-            self.text += str(time.time()) + " " + str(self.robot.x) + " " + str(self.robot.y) + " " + str(self.robot.rotate) + "\n"
-            self.count = 20
-        else:
-            self.count -= 1
+        # if self.count == 0:
+        #     self.text += str(time.time()) + " " + str(self.robot.x) + " " + str(self.robot.y) + " " + str(self.robot.rotate) + "\n"
+        #     self.count = 20
+        # else:
+        #     self.count -= 1
 
-        bhv = self.bkb.read_int(self.Mem, 'VISION_WORKING')
-        if bhv == 10101:
-            self.robot.x = 200
-            self.robot.y = 670
-            self.robot.rotate = 90
-            self.count = 0
-            self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 11100)
-            self.bkb.write_int(self.Mem, 'VISION_WORKING', 0)
-        elif bhv == 10102:
-            self.robot.x = 70
-            self.robot.y = 500
-            self.robot.rotate = 0
-            self.count = 0
-            self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 11100)
-            self.bkb.write_int(self.Mem, 'VISION_WORKING', 0)
-        elif bhv == 11011:
-            self.index += 1
-            with open('/home/fei/Dropbox/Masters/Experiment/robot'+str(self.index), 'w') as file:
-                file.write(self.text)
-            self.text = ""
-            self.count = -1
-            self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 11110)
-            self.bkb.write_int(self.Mem, 'VISION_WORKING', 0)
-        elif bhv == 11111:
-            exit()
+        # bhv = self.bkb.read_int(self.Mem, 'VISION_WORKING')
+        # if bhv == 10101:
+        #     self.robot.x = 200
+        #     self.robot.y = 670
+        #     self.robot.rotate = 90
+        #     self.count = 0
+        #     self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 11100)
+        #     self.bkb.write_int(self.Mem, 'VISION_WORKING', 0)
+        # elif bhv == 10102:
+        #     self.robot.x = 70
+        #     self.robot.y = 500
+        #     self.robot.rotate = 0
+        #     self.count = 0
+        #     self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 11100)
+        #     self.bkb.write_int(self.Mem, 'VISION_WORKING', 0)
+        # elif bhv == 11011:
+        #     self.index += 1
+        #     with open('/home/fei/Dropbox/Masters/Experiment/robot'+str(self.index), 'w') as file:
+        #         file.write(self.text)
+        #     self.text = ""
+        #     self.count = -1
+        #     self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 11110)
+        #     self.bkb.write_int(self.Mem, 'VISION_WORKING', 0)
+        # elif bhv == 11111:
+        #     exit()
 
-        self.headBehave()
+        self.headBehave(0)
         self.headmotion()
         goals = self.GetGoalPosts()
 
-        if self.get:
-            self.get = False
-            if self.panpos < 0:
-                self.bkb.write_int(self.Mem, 'VISION_FIELD', int(1000000 * self.panpos - self.Field()))
-            else:
-                self.bkb.write_int(self.Mem, 'VISION_FIELD', int(1000000 * self.panpos + self.Field()))
+        self.Field()
+        print 
+
+        # if self.get:
+        #     self.get = False
+        #     # if self.panpos < 0:
+        #     #     self.bkb.write_int(self.Mem, 'VISION_FIELD', int(1000000 * self.panpos - self.Field()))
+        #     # else:
+        #     #     self.bkb.write_int(self.Mem, 'VISION_FIELD', int(1000000 * self.panpos + self.Field()))
         
-        for x in [('VISION_FIRST_GOALPOST', goals[0]), ('VISION_SECOND_GOALPOST', goals[1]), ('VISION_THIRD_GOALPOST', goals[2]), ('VISION_FOURTH_GOALPOST', goals[3]), ('VISION_PAN_DEG', self.headpan)]:
-            self.bkb.write_float(self.Mem, *x)
+        # for x in [('VISION_FIRST_GOALPOST', goals[0]), ('VISION_SECOND_GOALPOST', goals[1]), ('VISION_THIRD_GOALPOST', goals[2]), ('VISION_FOURTH_GOALPOST', goals[3]), ('VISION_PAN_DEG', self.headpan)]:
+        #     self.bkb.write_float(self.Mem, *x)
 
 def CompAng(ang, base, rng):
     xa = cos(radians(ang))
