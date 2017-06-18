@@ -8,6 +8,15 @@ import argparse
 import time
 from math import log,exp,tan,radians
 
+import tarfile
+import tempfile
+import zipfile
+
+from defs import *
+
+from scipy.stats import mode
+from servo import Servo
+
 from BallVision import *
 from PanTilt import *
 
@@ -38,10 +47,7 @@ mem_key = int(config.get('Communication', 'no_player_robofei'))*100
 Mem = bkb.shd_constructor(mem_key)
 
 
-parser = argparse.ArgumentParser(description='Robot Vision', epilog= 'Responsavel pela deteccao dos objetos em campo / Responsible for detection of Field objects')
-parser.add_argument('--visionball', '--vb', action="store_true", help = 'Calibra valor para a visao da bola')
-parser.add_argument('--withoutservo', '--ws', action="store_true", help = 'Servos desligado')
-parser.add_argument('--head', '--he', action="store_true", help = 'Configurando parametros do controle da cabeca')
+
 
 #----------------------------------------------------------------------------------------------------------------------------------
 
@@ -160,63 +166,242 @@ def setResolution(status):
 		ret = cap.set(4,resolutions[atualres,1])
 
 #----------------------------------------------------------------------------------------------------------------------------------
+
+def classify(image_files, net, transformer,
+             mean_file=None, labels=None, batch_size=None):
+    """
+    Classify some images against a Caffe model and print the results
+
+    Arguments:
+    caffemodel -- path to a .caffemodel
+    deploy_file -- path to a .prototxt
+    image_files -- list of paths to images
+
+    Keyword arguments:
+    mean_file -- path to a .binaryproto
+    labels_file path to a .txt file
+    use_gpu -- if True, run inference on the GPU
+    """
+#    if channels == 3:
+#        mode = 'RGB'
+#    elif channels == 1:
+#        mode = 'L'
+#    else:
+#        raise ValueError('Invalid number for channels: %s' % channels)
+    images = [image_files]
+
+    # Classify the image
+    scores = forward_pass(images, net, transformer, batch_size=batch_size)
+
+    #
+    # Process the results
+    #
+    results = {}
+
+    indices = (-scores).argsort()[:, :7]  # take top 9 results
+    classifications = []
+    for image_index, index_list in enumerate(indices):
+        result = []
+        for i in index_list:
+            # 'i' is a category in labels and also an index into scores
+            if labels is None:
+                label = 'Class #%s' % i
+            else:
+                label = labels[i]
+            result.append((label, round(100.0 * scores[image_index, i], 4)))
+        classifications.append(result)
+
+    for index, classification in enumerate(classifications):
+        print '{:-^80}'.format(' Prediction for image ')
+        for label, confidence in classification:
+            print '{:9.4%} - "{}"'.format(confidence / 100.0, label)
+            results[label] = confidence / 100.0
+        print
+    return classification[0][0], results
+
+#----------------------------------------------------------------------------------------------------------------------------------
+
+def unzip_archive(archive):
+    """
+    Unzips an archive into a temporary directory
+    Returns a link to that directory
+
+    Arguments:
+    archive -- the path to an archive file
+    """
+    assert os.path.exists(archive), 'File not found - %s' % archive
+
+    tmpdir = os.path.join(tempfile.gettempdir(), os.path.basename(archive))
+    assert tmpdir != archive  # That wouldn't work out
+
+    if os.path.exists(tmpdir):
+        # files are already extracted
+        pass
+    else:
+        if tarfile.is_tarfile(archive):
+            print 'Extracting tarfile ...'
+            with tarfile.open(archive) as tf:
+                tf.extractall(path=tmpdir)
+        elif zipfile.is_zipfile(archive):
+            print 'Extracting zipfile ...'
+            with zipfile.ZipFile(archive) as zf:
+                zf.extractall(path=tmpdir)
+        else:
+            raise ValueError('Unknown file type for %s' % os.path.basename(archive))
+    return tmpdir
+
+#----------------------------------------------------------------------------------------------------------------------------------
+
+def soma_prob(mem_p, gamma = 0.9):
+    #gamma  o valor de desconto
+    memory_temp_size = len(mem_p.values())
+
+    soma = {}
+    for key, value in mem_p.iteritems():
+        somador = 0
+        for mem_index in range(memory_temp_size):
+            somador = (gamma**(memory_temp_size-mem_index-1))*value[mem_index] + somador
+#             print mem_p[index][mem_index],
+#         print somador
+        soma[key] = somador
+#     print soma
+    return soma
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+if __name__ == '__main__':
+
+
+    """ Instantiate bkb as a shared memory """
+#    bkb = SharedMemory()
+
+
+    parser = argparse.ArgumentParser(description='Robot Vision', epilog= 'Responsavel pela deteccao dos objetos em campo / Responsible for detection of Field objects')
+    parser.add_argument('--visionball', '--vb', action="store_true", help = 'Calibra valor para a visao da bola')
+    parser.add_argument('--withoutservo', '--ws', action="store_true", help = 'Servos desligado')
+    parser.add_argument('--head', '--he', action="store_true", help = 'Configurando parametros do controle da cabeca')
+    # Positional arguments
+    parser.add_argument('archive', help='Path to a DIGITS model archive')
+    # Optional arguments
+    parser.add_argument('--batch-size', type=int)
+    parser.add_argument('--nogpu', action='store_true', help="Don't use the GPU")
+
+
+
+#----------------------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------------------
 #Inicio programa
 
-args = parser.parse_args()
 
-ball = VisionBall(args)
+    args = vars(parser.parse_args())
+    args2 = parser.parse_args()
 
-if args.withoutservo == False:
-	head = Pantilt(args, ball.Config)
+    ball = VisionBall(args2)
 
-lista = []
-minRadio = 0.8
-maxRadio = 20.0
+    tmpdir = unzip_archive(args['archive'])
+    caffemodel = None
+    deploy_file = None
+    mean_file = None
+    labels_file = None
+    for filename in os.listdir(tmpdir):
+        full_path = os.path.join(tmpdir, filename)
+        if filename.endswith('.caffemodel'):
+            caffemodel = full_path
+        elif filename == 'deploy.prototxt':
+            deploy_file = full_path
+        elif filename.endswith('.binaryproto'):
+            mean_file = full_path
+        elif filename == 'labels.txt':
+            labels_file = full_path
+        else:
+            print 'Unknown file:', filename
 
-resolutions = readResolutions(ball.Config)
-atualres = len(resolutions)/2 -1
-razao = pow(minRadio/maxRadio, 1.0/len(resolutions))
+    assert caffemodel is not None, 'Caffe model file not found'
+    assert deploy_file is not None, 'Deploy file not found'
 
-cap = cv2.VideoCapture(0) #Abrindo camera
+    # Load the model and images
+    net = get_net(caffemodel, deploy_file, use_gpu=False)
+    transformer = get_transformer(deploy_file, mean_file)
+    _, channels, height, width = transformer.inputs['data']
+    labels = read_labels(labels_file)
 
-ret = cap.set(3,resolutions[atualres,0])
-ret = cap.set(4,resolutions[atualres,1])
+    #create index from label to use in decicion action
+    number_label =  dict(zip(labels, range(len(labels))))
+    print number_label
 
-if args.withoutservo == False:
-	posheadball = np.array([head.cen_posTILT,head.cen_posPAN]) #Iniciando valores iniciais da posicao da bola
-os.system("v4l2-ctl -d /dev/video0 -c focus_auto=0 && v4l2-ctl -d /dev/video0 -c focus_absolute=0")
+    #buffer_t = np.zeros((10) , dtype=np.int)
+    memory_temp_size = 10
+    num_itens = len(labels)
+    bucket = [0 for i in range(memory_temp_size)]
+    mem_p = {}
+    for i in labels:
+        mem_p[i] = bucket
 
-while True:
 
-	bkb.write_int(Mem,'VISION_WORKING', 1) # Variavel da telemetria
+
+    if args2.withoutservo == False:
+    	head = Pantilt(args2, ball.Config)
+
+    lista = []
+    minRadio = 0.8
+    maxRadio = 20.0
+
+    resolutions = readResolutions(ball.Config)
+    atualres = len(resolutions)/2 -1
+    razao = pow(minRadio/maxRadio, 1.0/len(resolutions))
+    
+    cap = cv2.VideoCapture(0) #Abrindo camera
+
+    ret = cap.set(3,resolutions[atualres,0])
+    ret = cap.set(4,resolutions[atualres,1])
+
+    if args2.withoutservo == False:
+    	posheadball = np.array([head.cen_posTILT,head.cen_posPAN]) #Iniciando valores iniciais da posicao da bola
+    os.system("v4l2-ctl -d /dev/video0 -c focus_auto=0 && v4l2-ctl -d /dev/video0 -c focus_absolute=0")
+
+    while True:
+
+    	bkb.write_int(Mem,'VISION_WORKING', 1) # Variavel da telemetria
 	
-	#Salva o frame
+    	#Salva o frame
 	
-	for i in xrange(0,3):
-		ret, frame = cap.read()
+###    	for i in xrange(0,3):
+        ret, frame = cap.read()
 	
-	positionballframe = ball.detect(frame,np.array([resolutions[atualres,0],resolutions[atualres,1]]))
+    	positionballframe = ball.detect(frame,np.array([resolutions[atualres,0],resolutions[atualres,1]]))
 	
 	#status
-	statusBall(positionballframe)
+    	statusBall(positionballframe)
 	
-	if args.withoutservo == False:
-		posheadball = head.mov(positionballframe,posheadball,Mem, bkb)
+    	if args2.withoutservo == False:
+    		posheadball = head.mov(positionballframe,posheadball,Mem, bkb)
 #		if head.checkComm() == False:
 #			print "Out of communication with servos!"
 #			break
 	
-	setResolution(positionballframe)
+    	setResolution(positionballframe)
 	
-#	if args.visionball == True or args.head == True:
+#	if args2.visionball == True or args2.head == True:
 #		print "Resolucao: " + str(resolutions[atualres,0]) + "x" + str(resolutions[atualres,1])
 	
-	if cv2.waitKey(1) & 0xFF == ord('q'):
-		break
+    	if cv2.waitKey(1) & 0xFF == ord('q'):
+    		break
 #	raw_input("Pressione enter pra continuar")
 
-if args.withoutservo == False:
-	head.finalize()
-ball.finalize()
-cv2.destroyAllWindows()
-cap.release()
+    if args2.withoutservo == False:
+    	head.finalize()
+    ball.finalize()
+    cv2.destroyAllWindows()
+    cap.release()
