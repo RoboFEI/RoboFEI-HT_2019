@@ -114,10 +114,14 @@ class VISION():
                 pygame.draw.line(where, (255,255,255), points[a], points[b], 1)
 
         for point in self.vpoints:
+            hrbt = np.random.normal(self.robotheight-2, 1)
+            ang1 = np.random.normal(point[0], 0.5)
+            ang2 = np.random.normal(point[1], 0.5)
+
             # Compute the point distance
-            dist = (self.robotheight/np.tan(np.radians(self.headtilt+point[1])))/np.cos(np.radians(point[0]))
+            dist = (hrbt/np.tan(np.radians(self.headtilt+ang2)))/np.cos(np.radians(ang1))
             # Compute the direction of the point
-            angle = -self.robot.rotate+self.headpan+point[0]
+            angle = -self.robot.rotate+self.headpan+ang1
 
             # Compute the position in the world of the point
             x = self.robot.x + dist * np.cos(np.radians(angle))
@@ -339,7 +343,7 @@ class VISION():
         dots = self.GetField()
         
         if sum(dots) != 0:
-            self.bkb.write_int(self.Mem, 'VISION_FIELD', write(dots))
+            self.bkb.write_int(self.Mem, 'iVISION_FIELD', write(dots))
 
         for x in [('VISION_FIRST_GOALPOST', goals[0]), ('VISION_SECOND_GOALPOST', goals[1]), ('VISION_THIRD_GOALPOST', goals[2]), ('VISION_FOURTH_GOALPOST', goals[3]), ('VISION_PAN_DEG', self.headpan)]:
             self.bkb.write_float(self.Mem, *x)
