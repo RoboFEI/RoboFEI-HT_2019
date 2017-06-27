@@ -155,7 +155,7 @@ class Localization():
                 simul.display_update(PF.particles)
 
             # Updates for the next clock
-            screen.clock.tick(60)
+            screen.clock.tick(20)
 
     #----------------------------------------------------------------------------------------------
     #   This method returns a command instruction to the particles.
