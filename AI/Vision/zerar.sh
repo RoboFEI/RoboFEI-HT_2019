@@ -17,8 +17,14 @@ NC='\e[0m' # No Color
 
 echo -e "${Blue}Apagando pastas e arquivos${NC}"
 sleep 1
-rm -r ./include
-rm -r ./src
+cd ./include
+rm -r ./*.py ./*.pyc
+cd ../
+
+cd ./src
+rm -r ./*.py ./*.pyc
+cd ../
+
 rm ./vision.py
 
 echo -e "${Light_Green}"

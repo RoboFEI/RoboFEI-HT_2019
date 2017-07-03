@@ -27,12 +27,12 @@ if !( mv vision.py ../vision.py ) then
 	exit
 fi
 
-if !( mkdir ../src )
-then
-	echo -e "${Light_Red}"
-	read -p "Erro, precione qualquer tecla para finalizar"
-	exit
-fi
+#if !( mkdir ../src )
+#then
+#	echo -e "${Light_Red}"
+#	read -p "Erro, precione qualquer tecla para finalizar"
+#	exit
+#fi
 
 if !( mv MainFunctions.py ../src/MainFunctions.py )
 then
@@ -41,12 +41,12 @@ then
 	exit
 fi
 
-if !( mkdir ../include )
-then
-	echo -e "${Light_Red}"
-	read -p "Erro, precione qualquer tecla para finalizar"
-	exit
-fi
+#if !( mkdir ../include )
+#then
+#	echo -e "${Light_Red}"
+#	read -p "Erro, precione qualquer tecla para finalizar"
+#	exit
+#fi
 
 if !( mv *.py ../include/ )
 then
