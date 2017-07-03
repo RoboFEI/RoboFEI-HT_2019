@@ -220,7 +220,7 @@ class Calibration():
             # Dilatates mask
             dila = cv2.dilate(erod, kern, iterations=self.dltn)
             # Get contours in the mask
-            cnt,_ = cv2.findContours(dila, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+            _,cnt,_ = cv2.findContours(dila, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
             # Draws the contours
             cv2.drawContours(final, cnt, -1, c[auxcolor], -1)
 
@@ -271,7 +271,7 @@ class Calibration():
                 # Dilatates mask
                 dila = cv2.dilate(erod, kern, iterations=self.dltn)
                 # Get contours in the mask
-                cnt,_ = cv2.findContours(dila, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+                _,cnt,_ = cv2.findContours(dila, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
                 # Draws the contours
                 cv2.drawContours(final, cnt, -1, c[i], -1)
             cv2.imshow('Calibration', final)
