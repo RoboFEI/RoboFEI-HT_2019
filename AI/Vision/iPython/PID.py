@@ -1,3 +1,5 @@
+# coding: utf-8
+
 #The recipe gives simple implementation of a Discrete Proportional-Integral-Derivative (PID) controller. PID controller gives output value for error between desired reference input and measurement feedback to minimize error value.
 #More information: http://en.wikipedia.org/wiki/PID_controller
 #
@@ -8,7 +10,7 @@
 #p=PID(3.0,0.4,1.2)
 #p.setPoint(5.0)
 #while True:
-#     pid = p.update(measurement_value)
+#	 pid = p.update(measurement_value)
 #
 #
 
@@ -112,4 +114,3 @@ class PID:
 	def getDerivator(self):
 		""" Returns Derivator """
 		return self.Derivator
-

@@ -1,3 +1,5 @@
+# coding: utf-8
+
 import ctypes
 
 """Describes Class Servo - Communicate, Write and read from Vision Servo-motors"""

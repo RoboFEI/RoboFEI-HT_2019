@@ -1,20 +1,19 @@
-# coding=utf-8
+# coding: utf-8
+
 import cv2
 import time
 
 from servo import Servo
 from PID import *
-import matplotlib.pyplot as plt
 
 import sys
 sys.path.append('../../Blackboard/src/')
 from SharedMemory import SharedMemory 
 
 #try:
-#    from configparser import ConfigParser
+#	from configparser import ConfigParser
 #except ImportError:
 from ConfigParser import ConfigParser  # ver. < 3.0
-
 
 bkb = SharedMemory()
 config = ConfigParser()
@@ -25,8 +24,6 @@ mem_key = 100#int(config.get('Communication', 'no_player_robofei'))*100
 #Mem = bkb.shd_constructor(200)
 
 class Pantilt (object):
-
-	
 
 	servo = None #Para controle dos servos
 
@@ -53,7 +50,6 @@ class Pantilt (object):
 	PanSearchRight4 = None
 	PanSearchRight5 = None
 	__list_varredura = None
-
 
 	# Ganhos
 	__p_pan = None
@@ -148,7 +144,6 @@ class Pantilt (object):
 		[self.PanSearchRight2,self.TiltSearchDown1], # Olhando para baixo
 		[self.PanSearchRight1,self.TiltSearchDown1], # Olhando para baixo
 
-
 		[self.PanSearchRight2,self.TiltSearchCenter], # Olhando para meio
 		[self.PanSearchRight3,self.TiltSearchCenter], # Olhando para meio
 		[self.PanSearchRight4,self.TiltSearchCenter], # Olhando para meio
@@ -182,7 +177,7 @@ class Pantilt (object):
 
 		]
 	
-#		        	self.TiltSearchUp -50
+#					self.TiltSearchUp -50
 #				self.TiltSearchCenter 0
 #				self.TiltSearchDown 50
 #				self.PanSearchLeft1 -20
@@ -190,7 +185,6 @@ class Pantilt (object):
 #				self.PanSearchCenter3 0
 #				self.PanSearchRight4 10
 #				self.PanSearchRight5 20
-		
 		
 		if args.head == True:
 			self.__setVarredura()
@@ -412,9 +406,6 @@ class Pantilt (object):
 
 				break
 				
-
-
-
 #----------------------------------------------------------------------------------------------------------------------------------
 
 #Cada linha representa um ponto na varredura, todos os valores são em relação a posição central dos servos (isaac ajuda nisso) os pontos são respetivamente:
@@ -423,10 +414,7 @@ class Pantilt (object):
 #São 3 pontos olhando para cima
 #e seguem a ordem de [posição do PAN, posição do TILT], todos os pontos devem ser ajustados'''
 
-	
-
 	def __find(self,status):
-		
 		
 		# Indo para posição
 		self.__cont_varredura += 1
@@ -487,7 +475,6 @@ class Pantilt (object):
 #			if self.__list_find[self.__pos_find%2][1]-(self.__jump_find*(self.__pos_find/2)) <= self.min_posTILT:
 #				self.__pos_find = 0'''
 		
-													
 		return [self.servo.readWord(self.__SERVO_PAN, self.__PRESENT_POS), self.servo.readWord(self.__SERVO_TILT, self.__PRESENT_POS)]
 
 #----------------------------------------------------------------------------------------------------------------------------------
@@ -502,7 +489,6 @@ class Pantilt (object):
 			self.servo.writeWord(self.__SERVO_PAN,
 								self.__GOAL_POS,
 								int(self.servo.readWord(self.__SERVO_PAN,self.__PRESENT_POS) + self.__ControllerPan.update(10*status[1])))
-		
 		
 		# Tilt
 		# Posicao
@@ -598,7 +584,6 @@ class Pantilt (object):
 			return True
 		else:
 			return False
-
 
 #----------------------------------------------------------------------------------------------------------------------------------
 
