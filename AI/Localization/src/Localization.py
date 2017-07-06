@@ -58,7 +58,8 @@ class Localization():
         self.bkb.write_float(self.Mem, 'VISION_SECOND_GOALPOST', -999)
         self.bkb.write_float(self.Mem, 'VISION_THIRD_GOALPOST', -999)
         self.bkb.write_float(self.Mem, 'VISION_FOURTH_GOALPOST', -999)
-        self.bkb.write_int(self.Mem, 'VISION_FIELD', 0)
+        self.bkb.write_int(self.Mem, 'iVISION_FIELD', 0)
+        self.bkb.write_float(self.Mem, 'fVISION_FIELD', 0)
 
     #----------------------------------------------------------------------------------------------
     #   Localization's main method.
@@ -104,13 +105,15 @@ class Localization():
 
             orientation = self.bkb.read_float(self.Mem, 'IMU_EULER_Z')
 
-            x = self.bkb.read_int(self.Mem, 'VISION_FIELD')
-            fieldpoints = read(x)
+            x = self.bkb.read_int(self.Mem, 'iVISION_FIELD')
+            y = self.bkb.read_float(self.Mem, 'fVISION_FIELD')
+            fieldpoints = [read(x), y]
             
             if x == 0:
                 fieldpoints = None
             else:
-                self.bkb.write_int(self.Mem, 'VISION_FIELD', 0)
+                self.bkb.write_int(self.Mem, 'iVISION_FIELD', 0)
+                self.bkb.write_float(self.Mem, 'fVISION_FIELD', 0)
 
             if sum(landmarks) == - 4 * 999:
                 landmarks = None
@@ -126,9 +129,11 @@ class Localization():
             
             pos, std = PF.main(u,z)
             
-            if fieldpoints != None:
-                hp = PF.PerfectInformation(u, self.bkb.read_float(self.Mem, 'VISION_PAN_DEG'), 5)
-                self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', hp)
+            # if fieldpoints != None:
+                # hp = PF.PerfectInformation(u, self.bkb.read_float(self.Mem, 'VISION_PAN_DEG'), 5)
+                # self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', hp)
+
+            print 
 
             if PF.meanweight < 1:                
                 weight = PF.meanweight

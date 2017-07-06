@@ -36,7 +36,7 @@ class VISION():
         self.headspd = 30 # Max head speed, in degrees per second
 
         # Observation points
-        self.vpoints = points(v)
+        self.vpoints = v
 
         self.behave = 0
 
@@ -90,113 +90,56 @@ class VISION():
 
     # Draw the field of view of the robot
     def draw(self, where):
-        # Computes distances
-        f = self.robotheight/np.tan(np.radians(self.headtilt-self.vfov))
-        n = self.robotheight/np.tan(np.radians(self.headtilt+self.vfov))
+        # # Computes distances
+        # f = self.robotheight/np.tan(np.radians(self.headtilt-self.vfov))
+        # n = self.robotheight/np.tan(np.radians(self.headtilt+self.vfov))
 
-        # Computes point distances
-        dn = n/np.cos(np.radians(self.hfov))
-        df = f/np.cos(np.radians(self.hfov))
+        # # Computes point distances
+        # dn = n/np.cos(np.radians(self.hfov))
+        # df = f/np.cos(np.radians(self.hfov))
 
-        # Array of points
-        points = []
+        # # Array of points
+        # points = []
 
-        # Create points
-        for d in [dn, df]:
-            for a in [self.hfov, -self.hfov]:
-                x = self.robot.x + d * np.cos(np.radians(-self.robot.rotate + self.headpan + a))
-                y = self.robot.y + d * np.sin(np.radians(-self.robot.rotate + self.headpan + a))
-                points.append((x,y))
+        # # Create points
+        # for d in [dn, df]:
+        #     for a in [self.hfov, -self.hfov]:
+        #         x = self.robot.x + d * np.cos(np.radians(-self.robot.rotate + self.headpan + a))
+        #         y = self.robot.y + d * np.sin(np.radians(-self.robot.rotate + self.headpan + a))
+        #         points.append((x,y))
 
-        # Draw the points
-        for a in [0, 3]:
-            for b in [1, 2]:
-                pygame.draw.line(where, (255,255,255), points[a], points[b], 1)
+        # # Draw the points
+        # for a in [0, 3]:    
+        #     for b in [1, 2]:
+        #         pygame.draw.line(where, (255,255,255), points[a], points[b], 1)
 
-        for point in self.vpoints:
-            hrbt = np.random.normal(self.robotheight-2, 1)
-            ang1 = np.random.normal(point[0], 0.5)
-            ang2 = np.random.normal(point[1], 0.5)
+        for point in np.array([v,c]).T:
+            # Compute the point 
 
-            # Compute the point distance
-            dist = (hrbt/np.tan(np.radians(self.headtilt+ang2)))/np.cos(np.radians(ang1))
+            dist = point[0][0] #+ np.random.normal(0,point[0][0]/10.)
             # Compute the direction of the point
-            angle = -self.robot.rotate+self.headpan+ang1
+            angle = -self.robot.rotate + self.headpan + point[0][1] #+ np.random.normal(0,2)
 
             # Compute the position in the world of the point
-            x = self.robot.x + dist * np.cos(np.radians(angle))
-            y = self.robot.y + dist * np.sin(np.radians(angle))
+            x = self.robot.x + dist * np.cos(np.radians(angle)) #+ np.random.normal(0,1)
+            y = self.robot.y + dist * np.sin(np.radians(angle)) #+ np.random.normal(0,1)
 
-            pygame.draw.circle(where, (0,255,255), (int(x),int(y)), 5, 0)
+            pygame.draw.circle(where, point[1], (int(x),int(y)), 2, 0)
 
     # Return the notable variables for localization, as a vector
     def GetField(self):
         ret = []
 
-        # Saves the heads position
-        if self.headpan > 89: # If it is to the left
-            if self.get:
-                ret.extend([1,1,1])
-                self.get = False
-            else:
-                return 32*[0]
-        elif self.headpan < -89: # If it is to the left
-            if self.get:
-                ret.extend([1,1,0])
-                self.get = False
-            else:
-                return 32*[0]
-        elif self.headpan > 59 and self.headpan < 61: # If it is to the left
-            if self.get:
-                ret.extend([1,0,1])
-                self.get = False
-            else:
-                return 32*[0]
-        elif self.headpan < -59 and self.headpan > -61: # If it is to the left
-            if self.get:
-                ret.extend([1,0,0])
-                self.get = False
-            else:
-                return 32*[0]
-        elif self.headpan > 29 and self.headpan < 31: # If it is to the left
-            if self.get:
-                ret.extend([0,1,1])
-                self.get = False
-            else:
-                return 32*[0]
-        elif self.headpan < -29 and self.headpan > -31: # If it is to the left
-            if self.get:
-                ret.extend([0,1,0])
-                self.get = False
-            else:
-                return 32*[0]
-        elif self.headpan < 1 and self.headpan > -1: # If it is to the left
-            if self.get:
-                ret.extend([0,0,1])
-                self.get = False
-            else:
-                return 32*[0]
-        else:
-            # self.get = True
-            return 32*[0]
-
         # For each point
         for point in self.vpoints:
-            tilt = self.headtilt #+ np.random.normal(0,3)
-            pan = self.headpan #+ np.random.normal(0,3)
-
-            if self.bkb.read_int(self.Mem, 'CONTROL_ACTION') in [11,1,8,17,18,6,7,2,3,9,14]:
-                tilt += np.random.normal(0,0.5)
-                pan += np.random.normal(0,0.5)
-
             # Compute the point distance
-            dist = (self.robotheight/np.tan(np.radians(tilt+point[1])))/np.cos(np.radians(point[0]))
+            dist = point[0] + np.random.normal(0,point[0]/10.)
             # Compute the direction of the point
-            angle = -self.robot.rotate+pan+point[0]
+            angle = -self.robot.rotate + self.headpan + point[1] + np.random.normal(0,2)
 
             # Compute the position in the world of the point
-            x = self.robot.x + dist * np.cos(np.radians(angle)) #+ np.random.normal(0,1)
-            y = self.robot.y + dist * np.sin(np.radians(angle)) #+ np.random.normal(0,1)
+            x = self.robot.x + dist * np.cos(np.radians(angle)) + np.random.normal(0,1)
+            y = self.robot.y + dist * np.sin(np.radians(angle)) + np.random.normal(0,1)
 
             # Verify if it is in or out of the field
             if 0 <= x and x <= 1040 and 0 <= y and y <= 740:
@@ -305,48 +248,77 @@ class VISION():
         # else:
         #     self.change = True
 
-        if self.count == 0:
-            self.text += str(time.time()) + " " + str(self.robot.x) + " " + str(self.robot.y) + " " + str(self.robot.rotate) + "\n"
-            self.count = 20
-        else:
-            self.count -= 1
+        # if self.count == 0:
+        #     self.text += str(time.time()) + " " + str(self.robot.x) + " " + str(self.robot.y) + " " + str(self.robot.rotate) + "\n"
+        #     self.count = 20
+        # else:
+        #     self.count -= 1
 
-        bhv = self.bkb.read_int(self.Mem, 'VISION_WORKING')
-        if bhv == 10101:
-            self.robot.x = 200
-            self.robot.y = 670
-            self.robot.rotate = 90
-            self.count = 0
-            self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 11100)
-            self.bkb.write_int(self.Mem, 'VISION_WORKING', 0)
-        elif bhv == 10102:
-            self.robot.x = 70
-            self.robot.y = 500
-            self.robot.rotate = 0
-            self.count = 0
-            self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 11100)
-            self.bkb.write_int(self.Mem, 'VISION_WORKING', 0)
-        elif bhv == 11011:
-            self.index += 1
-            with open('/home/fei/Dropbox/Masters/Experiment/robot'+str(self.index), 'w') as file:
-                file.write(self.text)
-            self.text = ""
-            self.count = -1
-            self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 11110)
-            self.bkb.write_int(self.Mem, 'VISION_WORKING', 0)
-        elif bhv == 11111:
-            exit()
+        # bhv = self.bkb.read_int(self.Mem, 'VISION_WORKING')
+        # if bhv == 10101:
+        #     self.robot.x = 200
+        #     self.robot.y = 670
+        #     self.robot.rotate = 90
+        #     self.count = 0
+        #     self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 11100)
+        #     self.bkb.write_int(self.Mem, 'VISION_WORKING', 0)
+        # elif bhv == 10102:
+        #     self.robot.x = 70
+        #     self.robot.y = 500
+        #     self.robot.rotate = 0
+        #     self.count = 0
+        #     self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 11100)
+        #     self.bkb.write_int(self.Mem, 'VISION_WORKING', 0)
+        # elif bhv == 11011:
+        #     self.index += 1
+        #     with open('/home/fei/Dropbox/Masters/Experiment/robot'+str(self.index), 'w') as file:
+        #         file.write(self.text)
+        #     self.text = ""
+        #     self.count = -1
+        #     self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 11110)
+        #     self.bkb.write_int(self.Mem, 'VISION_WORKING', 0)
+        # elif bhv == 11111:
+        #     exit()
 
         self.headBehave()
         self.headmotion()
-        goals = self.GetGoalPosts()
-        dots = self.GetField()
-        
-        if sum(dots) != 0:
-            self.bkb.write_int(self.Mem, 'iVISION_FIELD', write(dots))
+        # goals = self.GetGoalPosts()
+        # dots = self.GetField()
 
-        for x in [('VISION_FIRST_GOALPOST', goals[0]), ('VISION_SECOND_GOALPOST', goals[1]), ('VISION_THIRD_GOALPOST', goals[2]), ('VISION_FOURTH_GOALPOST', goals[3]), ('VISION_PAN_DEG', self.headpan)]:
-            self.bkb.write_float(self.Mem, *x)
+        if self.get:
+            self.get = False
+            size = 5.
+            aux = np.zeros(32)
+            for i in range(int(size)):
+                aux += np.array(self.GetField())
+            aux /= size
+            abs_aux = np.rint(aux)
+            mean_aux = np.mean(np.abs(aux-abs_aux))
+
+            self.bkb.write_int(self.Mem, 'iVISION_FIELD', write(abs_aux))
+            
+            if self.headpan <= -89:
+                hpan = -90 - mean_aux
+            elif -61 <= self.headpan and self.headpan <= -59:
+                hpan = -60 - mean_aux
+            elif -31 <= self.headpan and self.headpan <= -29:
+                hpan = -30 - mean_aux
+            elif -1 <= self.headpan and self.headpan <= 1:
+                hpan = 0 + mean_aux
+            elif 29 <= self.headpan and self.headpan <= 31:
+                hpan = 30 + mean_aux
+            elif 59 <= self.headpan and self.headpan <= 61:
+                hpan = 60 + mean_aux
+            elif 89 <= self.headpan:
+                hpan = 90 + mean_aux
+
+            self.bkb.write_float(self.Mem, 'fVISION_FIELD', hpan)
+
+        # if sum(dots) != 0:
+            # self.bkb.write_int(self.Mem, 'iVISION_FIELD', write(dots))
+
+        # for x in [('VISION_FIRST_GOALPOST', goals[0]), ('VISION_SECOND_GOALPOST', goals[1]), ('VISION_THIRD_GOALPOST', goals[2]), ('VISION_FOURTH_GOALPOST', goals[3]), ('VISION_PAN_DEG', self.headpan)]:
+            # self.bkb.write_float(self.Mem, *x)
 
 def CompAng(ang, base, rng):
     xa = cos(radians(ang))
@@ -385,36 +357,84 @@ def points(v):
 
     return ret
 
-v = [(1030,20),
-     (880,20),
-     (740,20),
-     (600,20),
-     (450,20),
-     (310,20),
-     (170,20),
+v = [(130,45),
+     
+     (160,-45),
 
-     (990,-20),
-     (850,-20),
-     (710,-20),
-     (560,-20),
+     (330,30),
+     (270,30),
+     (180,30),
+     (140,30),
+
+     (360,-30),
+     (280,-30),
+     (200,-30),
+     (150,-30),
+
+     (400,20),
+     (360,20),
+     (290,20),
+     (220,20),
+     (150,20),
+
      (420,-20),
-     (280,-20),
-     (130,-20),
+     (370,-20),
+     (300,-20),
+     (230,-20),
+     (160,-20),
 
-     (910,10),
-     (780,10),
-     (640,10),
-     (500,10),
      (370,10),
-     (230,10),
+     (320,10),
+     (250,10),
+     (180,10),
 
-     (880,-10),
-     (750,-10),
-     (610,-10),
-     (470,-10),
-     (330,-10),
+     (380,-10),
+     (340,-10),
+     (260,-10),
      (190,-10),
      
-     (1000,0),
-     (160,0),
-     (90,0)]
+     (400,0),
+     (300,0),
+     (200,0),
+     (100,0)]
+
+c = [(255,0,0),
+     
+     (255,0,0),
+
+     (0,255,255),
+     (0,0,255),
+     (255,0,255),
+     (255,0,0),
+
+     (0,255,255),
+     (0,0,255),
+     (0,150,228),
+     (255,0,0),
+
+     (255,255,0),
+     (0,255,255),
+     (0,0,255),
+     (255,0,255),
+     (255,0,0),
+
+     (255,255,0),
+     (0,255,255),
+     (0,0,255),
+     (255,0,255),
+     (255,0,0),
+
+     (0,255,255),
+     (0,0,255),
+     (255,0,255),
+     (255,0,0),
+
+     (0,255,255),
+     (0,0,255),
+     (255,0,255),
+     (255,0,0),
+     
+     (0,255,255),
+     (0,0,255),
+     (255,0,255),
+     (255,0,0)]

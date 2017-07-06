@@ -4,6 +4,7 @@ __license__ = "GNU General Public License v3.0"
 
 import numpy as np
 import scipy.special as sp
+import time
 
 # Robot's height!!!
 hrobot = 50
@@ -11,39 +12,46 @@ hrobot = 50
 htilt = 17.4
 
 # Distance and angles of the notable points
-vpoints = [(1030,20),
-           (880,20),
-           (740,20),
-           (600,20),
-           (450,20),
-           (310,20),
-           (170,20),
+vpoints = [(130,45),
+     
+           (160,-45),
 
-           (990,-20),
-           (850,-20),
-           (710,-20),
-           (560,-20),
+           (330,30),
+           (270,30),
+           (180,30),
+           (140,30),
+
+           (360,-30),
+           (280,-30),
+           (200,-30),
+           (150,-30),
+
+           (400,20),
+           (360,20),
+           (290,20),
+           (220,20),
+           (150,20),
+
            (420,-20),
-           (280,-20),
-           (130,-20),
+           (370,-20),
+           (300,-20),
+           (230,-20),
+           (160,-20),
 
-           (910,10),
-           (780,10),
-           (640,10),
-           (500,10),
            (370,10),
-           (230,10),
+           (320,10),
+           (250,10),
+           (180,10),
 
-           (880,-10),
-           (750,-10),
-           (610,-10),
-           (470,-10),
-           (330,-10),
+           (380,-10),
+           (340,-10),
+           (260,-10),
            (190,-10),
-           
-           (1000,0),
-           (160,0),
-           (90,0)]
+             
+           (400,0),
+           (300,0),
+           (200,0),
+           (100,0)]
 
 # Vars used to compute the particles likelihood
 maxWdelta = None
@@ -250,21 +258,11 @@ class Particle(object):
 
         # If the given information is the field's points
         if field != None:
-            # Finds out the head's position
-            if field[0:3] == [1,1,1]:
-                pan = 90
-            elif field[0:3] == [1,1,0]:
-                pan = -90
-            elif field[0:3] == [1,0,1]:
-                pan = 60
-            elif field[0:3] == [1,0,0]:
-                pan = -60
-            elif field[0:3] == [0,1,1]:
-                pan = 30
-            elif field[0:3] == [0,1,0]:
-                pan = -30
-            else:
-                pan = 0
+            size = 5. # Frames used for the observation
+            pan = int(field[1])  # Gets the head's pan position
+            err = np.abs(field[1] - pan) * size # Gets the error of the observation
+
+            ifield = np.abs(field[0] - err) # Gets the field points with errors
 
             ret = [] # Holds the probabilities of each point been 1
             for k in vpoints:
@@ -272,17 +270,17 @@ class Particle(object):
                 i = self.x + k[0] * np.cos(p) # Computes the x position of the point
                 j = self.y + k[0] * np.sin(p) # Computes the y position of the point
 
-                ret.append(prob(i, j, self.radius, k[0])) # Computes the probability of the point been inside the field
+                ret.append(prob(i, j, k[0], 0.1*k[0], k[1])) # Computes the probability of the point been inside the field
 
             # Computes a normalization value
             n = 1
-            for i in xrange(3, 32):
-                n *= 0.99 * field[i] + 0.9 * (1-field[i])
+            for i in xrange(32):
+                n *= 0.99 * ifield[i] + 0.9 * (1-ifield[i])
 
             # Computes the normalized weight
             w = 1
-            for i in xrange(3, 32):
-                w *= 0.99 * field[i] * ret[i-3] + 0.9 * (1-field[i]) * (1-ret[i-3]) + 0.2 * field[i] * (1-ret[i-3]) + 0.1 * (1-field[i]) * ret[i-3]
+            for i in xrange(32):
+                w *= 0.99 * ifield[i] * ret[i-3] + 0.9 * (1-ifield[i]) * (1-ret[i-3]) + 0.2 * ifield[i] * (1-ret[i-3]) + 0.1 * (1-ifield[i]) * ret[i-3]
             
             w /= n
         
@@ -408,28 +406,29 @@ def NRnd(sigma, mu=0):
 #--------------------------------------------------------------------------------------------------
 #   Returns the probability given the x and y limits, the circle position and its radius.
 #--------------------------------------------------------------------------------------------------
-def prob(cx, cy, rad, d, xa=0, xb=1040, ya=0, yb=740):
-    w = 1 # Default
+def prob(cx, cy, dist, std, ang, xa=0, xb=1040, ya=0, yb=740):
+    ax = cx + std * np.cos(ang)
+    ay = cy + std * np.sin(ang)
 
-    # Computes the radius used to compute the weight of this set of points
-    r = (rad[1]-rad[0])*d/900. + 10.*rad[0]/9. - rad[1]/9. 
+    bx = cx - std * np.cos(ang)
+    by = cy - std * np.sin(ang)
 
-    # Computes the integral of the field in relation to the field (Too complex to be explained here, just believe it!)
-    if cx+r <= xa or cx-r >= xb:
-        return 0
-    elif cx-r < xa:
-        w *= 0.5 - ((xa-cx)*np.sqrt((r**2)-(xa-cx)**2) + (r**2)*np.arctan((xa-cx)/(np.sqrt((r**2)-(xa-cx)**2))))/((r**2)*np.pi)
-    elif cx+r > xb:
-        w *= 0.5 + ((xb-cx)*np.sqrt((r**2)-(xb-cx)**2) + (r**2)*np.arctan((xb-cx)/(np.sqrt((r**2)-(xb-cx)**2))))/((r**2)*np.pi)
+    if ax >= xa and bx >= xa and ax <= xb and bx <= xb and ay >= ya and by >= ya and ay <= yb and by <= yb:
+        return 1
 
-    if cy+r <= ya or cy-r >= yb:
-        return 0
-    elif cy-r < ya:
-        w *= 0.5 - ((ya-cy)*np.sqrt((r**2)-(ya-cy)**2) + (r**2)*np.arctan((ya-cy)/(np.sqrt((r**2)-(ya-cy)**2))))/((r**2)*np.pi)
-    elif cy+r > yb:
-        w *= 0.5 + ((yb-cy)*np.sqrt((r**2)-(yb-cy)**2) + (r**2)*np.arctan((yb-cy)/(np.sqrt((r**2)-(yb-cy)**2))))/((r**2)*np.pi)
+    sz = np.hypot(ax-bx, ay-by)
+    sm = sz
 
-    return w
+    if ang != 0. and ang != 180. and ang != -180.:
+        sm = min(sm, np.hypot(np.abs(ya-by), np.abs(ya-by)*np.abs(ax-bx)/np.abs(ay-by)))
+        sm = min(sm, np.hypot(np.abs(yb-by), np.abs(yb-by)*np.abs(ax-bx)/np.abs(ay-by)))
+
+    if ang != 90. and ang != -90.:
+        sm = min(sm, np.hypot(np.abs(xa-bx), np.abs(xa-bx)*np.abs(ay-by)/np.abs(ax-bx)))
+        sm = min(sm, np.hypot(np.abs(xb-bx), np.abs(xb-bx)*np.abs(ay-by)/np.abs(ax-bx)))
+
+    ret = (np.max([0, 1-np.exp(-12*(sm/sz-0.5))]) + np.min([1, np.exp(12*(sm/sz-0.5))]))/2.
+    return ret
 
 #--------------------------------------------------------------------------------------------------
 #   Computes the Walpha factor for weight computation

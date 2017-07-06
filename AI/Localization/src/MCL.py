@@ -3,7 +3,7 @@ __authors__ = "Aislan C. Almeida"
 __license__ = "GNU General Public License v3.0"
 
 import numpy as np
-from newparticle import *
+from particle import *
 
 #--------------------------------------------------------------------------------------------------
 #   This class implements the Monte Carlo's Particle Filter
@@ -51,13 +51,16 @@ class MonteCarlo():
     #   Update step
     #----------------------------------------------------------------------------------------------
     def Update(self, z=None):
-        # Clears the last total weight
-        self.totalweight = 0
+        if z != None:
+            # Clears the last total weight
+            self.totalweight = 0
 
-        # Applies the observation model to each particle
-        for particle in self.particles:
-            w = particle.Sensor(*z)
-            self.totalweight += w # Sum the weight
+            # Applies the observation model to each particle
+            for particle in self.particles:
+                self.totalweight += particle.Sensor(*z)
+        else:
+            self.totalweight = self.qtd
+
 
     #----------------------------------------------------------------------------------------------
     #   Resample step
