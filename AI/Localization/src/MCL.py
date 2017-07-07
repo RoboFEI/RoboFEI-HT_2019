@@ -25,6 +25,7 @@ class MonteCarlo():
         # Initializes with the max quantity of particles
         self.qtd = max_qtd
 
+        # self.particles.append(Particle(350,350,0,factors=15*[0]))
         for i in range(self.qtd):
             # Randomly generates n particles
             self.particles.append(Particle())
@@ -51,15 +52,12 @@ class MonteCarlo():
     #   Update step
     #----------------------------------------------------------------------------------------------
     def Update(self, z=None):
-        if z != None:
-            # Clears the last total weight
-            self.totalweight = 0
+        # Clears the last total weight
+        self.totalweight = 0
 
-            # Applies the observation model to each particle
-            for particle in self.particles:
-                self.totalweight += particle.Sensor(*z)
-        else:
-            self.totalweight = self.qtd
+        # Applies the observation model to each particle
+        for particle in self.particles:
+            self.totalweight += particle.Sensor(*z)        
 
 
     #----------------------------------------------------------------------------------------------
@@ -78,8 +76,9 @@ class MonteCarlo():
         i = 1 # Counts the quantity of selected particles
         j = len(self.particles) # Counts down the quantity of particles
         # Until the quantity of particles is reached or there are no more particles to be selected
+        
         self.meanweight = 0
-        while i <= qtd and j >= 0: 
+        while i <= qtd and j >= 0:
             # If the cumulative sum of steps is bigger than the cumulative sum of weights
             if step * i > s:
                 j -= 1 # Change the particle to be tested
@@ -119,9 +118,12 @@ class MonteCarlo():
             # Takes the first 30 particles of the set
             for P in self.particles[:30]:
                 parts.append(Particle(*P.copy()))
+
+            meanpart = Particle(*self.mean)
             
             # Moves the particles for a time!
             uf = [u[0], u[1], u[2], time]
+            meanpart.Motion(*uf)
             for P in parts:
                 P.Motion(*uf)
 
@@ -137,23 +139,23 @@ class MonteCarlo():
                 for p in parts:
                     tw += p.Sensor(orientation=parts[0].rotation, field=d)
 
-                # "Resamples"
-                s = tw/31.
+                # # "Resamples"
+                # s = tw/31.
 
-                i = 1
-                j = 0
-                w = parts[0].weight
-                sj = None
-                k = 0
-                while i < 31.:
-                    if s * i > w:
-                        j += 1
-                        w += parts[j].weight
-                    else:
-                        i += 1
-                        if sj != j:
-                            sj = j
-                            k += 1
+                # i = 1
+                # j = 0
+                # w = parts[0].weight
+                # sj = None
+                # k = 0
+                # while i < 31.:
+                #     if s * i > w:
+                #         j += 1
+                #         w += parts[j].weight
+                #     else:
+                #         i += 1
+                #         if sj != j:
+                #             sj = j
+                #             k += 1
                 
                 # Weight Standard Deviation
                 w = np.array([i.weight for i in parts])
@@ -161,7 +163,7 @@ class MonteCarlo():
                
                 aux += std
                 # Counts the losses
-                aux += 30-k
+                # aux += 30-k
                 uv.append(aux)
             return pos[np.argmax(uv)]
         return -999

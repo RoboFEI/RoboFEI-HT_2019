@@ -262,7 +262,7 @@ class Particle(object):
             pan = int(field[1])  # Gets the head's pan position
             err = np.abs(field[1] - pan) * size # Gets the error of the observation
 
-            ifield = np.abs(field[0] - err) # Gets the field points with errors
+            ifield = np.abs(field[0]) # Gets the field points with errors
 
             ret = [] # Holds the probabilities of each point been 1
             for k in vpoints:
@@ -280,9 +280,17 @@ class Particle(object):
             # Computes the normalized weight
             w = 1
             for i in xrange(32):
-                w *= 0.99 * ifield[i] * ret[i-3] + 0.9 * (1-ifield[i]) * (1-ret[i-3]) + 0.2 * ifield[i] * (1-ret[i-3]) + 0.1 * (1-ifield[i]) * ret[i-3]
+                if ifield[i] == ret[i]:
+                    w *= 0.99 * ifield[i] + 0.9 * (1-ifield[i]) 
+                elif np.abs(ifield[i]-0.5) != 0.5:
+                    aux = np.abs(ifield[i]-err)
+                    w *= 0.99 * aux * ret[i] + 0.9 * (1-aux) * (1-ret[i]) + 0.2 * aux * (1-ret[i]) + 0.1 * (1-aux) * ret[i]
+                else: 
+                    w *= 0.99 * ifield[i] * ret[i] + 0.9 * (1-ifield[i]) * (1-ret[i]) + 0.2 * ifield[i] * (1-ret[i]) + 0.1 * (1-ifield[i]) * ret[i]
             
             w /= n
+
+            # w = np.power(w, 1./32)
         
             weight *= w
 
@@ -304,24 +312,6 @@ class Particle(object):
     def GetField(self, pan=0):
         ret = []
 
-        # Saves the heads position
-        if pan == 90: # If it is to the left
-            ret.extend([1,1,1])
-        elif pan == -90: # If it is to the left
-            ret.extend([1,1,0])
-        elif pan == 60: # If it is to the left
-            ret.extend([1,0,1])
-        elif pan == -60: # If it is to the left
-            ret.extend([1,0,0])
-        elif pan == 30: # If it is to the left
-            ret.extend([0,1,1])
-        elif pan == -30: # If it is to the left
-            ret.extend([0,1,0])
-        elif pan == 0: # If it is to the left
-            ret.extend([0,0,1])
-        else:
-            return 32*[0]
-
         # For each point
         for k in vpoints:
             p = np.radians(-self.rotation + pan + k[1]) # Computes the direction
@@ -334,7 +324,7 @@ class Particle(object):
                 ret.append(0)
 
         # Return the points values
-        return ret
+        return ret, pan
 
     #----------------------------------------------------------------------------------------------
     #   Computes the max weight of the particles, generally 1.
@@ -414,7 +404,9 @@ def prob(cx, cy, dist, std, ang, xa=0, xb=1040, ya=0, yb=740):
     by = cy - std * np.sin(ang)
 
     if ax >= xa and bx >= xa and ax <= xb and bx <= xb and ay >= ya and by >= ya and ay <= yb and by <= yb:
-        return 1
+        return 1.
+    elif ax < xa and bx < xa or ax > xb and bx > xb or ay < ya and by < ya or ay > yb and by > yb:
+        return 0.
 
     sz = np.hypot(ax-bx, ay-by)
     sm = sz

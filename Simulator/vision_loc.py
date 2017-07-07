@@ -46,6 +46,10 @@ class VISION():
         self.index = 0
         self.count = -1
 
+        self.robot.x = 350
+        self.robot.y = 350
+        self.robot.rotate = 0
+
     # Changes the tilt's position
     def tilt(self, diff=None, pos=None):
         if diff: # Adds a difference
@@ -113,18 +117,18 @@ class VISION():
         #     for b in [1, 2]:
         #         pygame.draw.line(where, (255,255,255), points[a], points[b], 1)
 
-        for point in np.array([v,c]).T:
+        for point in v:
             # Compute the point 
 
-            dist = point[0][0] #+ np.random.normal(0,point[0][0]/10.)
+            dist = point[0] #+ np.random.normal(0,point[0][0]/10.)
             # Compute the direction of the point
-            angle = -self.robot.rotate + self.headpan + point[0][1] #+ np.random.normal(0,2)
+            angle = -self.robot.rotate + self.headpan + point[1] #+ np.random.normal(0,2)
 
             # Compute the position in the world of the point
             x = self.robot.x + dist * np.cos(np.radians(angle)) #+ np.random.normal(0,1)
             y = self.robot.y + dist * np.sin(np.radians(angle)) #+ np.random.normal(0,1)
 
-            pygame.draw.circle(where, point[1], (int(x),int(y)), 2, 0)
+            pygame.draw.circle(where, self.robot.color, (int(x),int(y)), 2, 0)
 
     # Return the notable variables for localization, as a vector
     def GetField(self):
@@ -397,44 +401,3 @@ v = [(130,45),
      (300,0),
      (200,0),
      (100,0)]
-
-c = [(255,0,0),
-     
-     (255,0,0),
-
-     (0,255,255),
-     (0,0,255),
-     (255,0,255),
-     (255,0,0),
-
-     (0,255,255),
-     (0,0,255),
-     (0,150,228),
-     (255,0,0),
-
-     (255,255,0),
-     (0,255,255),
-     (0,0,255),
-     (255,0,255),
-     (255,0,0),
-
-     (255,255,0),
-     (0,255,255),
-     (0,0,255),
-     (255,0,255),
-     (255,0,0),
-
-     (0,255,255),
-     (0,0,255),
-     (255,0,255),
-     (255,0,0),
-
-     (0,255,255),
-     (0,0,255),
-     (255,0,255),
-     (255,0,0),
-     
-     (0,255,255),
-     (0,0,255),
-     (255,0,255),
-     (255,0,0)]
