@@ -85,7 +85,7 @@ int main(int argc, char **argv)
 
       //Acopla ou cria a memoria compartilhada
     int *mem = using_shared_memory(ini->getd("Communication","no_player_robofei",-1024) * 100); //0 for real robot
-
+    int chutao = ini->getd("Decision","mola",-1024);
     char string1[50]; //String
     bool stop_gait = true;
     char *Servoport;
@@ -244,19 +244,25 @@ int main(int argc, char **argv)
                 break;
                 
                 case 112: //p
-                    actionMove.kick_right_strong(&cm730, stop_gait);
+		    if(chutao==1)
+                    	actionMove.kick_right_strong(&cm730, stop_gait);
+		    else
+			actionMove.kick_right_weak(&cm730,stop_gait);
                 break;
 
                 case 108: //l
-                    actionMove.kick_left_strong(&cm730, stop_gait);
+		    if(chutao==1)
+                    	actionMove.kick_left_strong(&cm730, stop_gait);
+		    else
+			actionMove.kick_left_weak(&cm730, stop_gait);                    
                 break;
 
                 case 99: //c
-                    actionMove.kick_right_weak(stop_gait);
+                    actionMove.kick_right_weak(&cm730, stop_gait);
                 break;
 
                 case 103: //g
-                    actionMove.kick_left_weak(stop_gait);
+                    actionMove.kick_left_weak(&cm730, stop_gait);
                 break;
 
                 case 102: //f
@@ -402,10 +408,20 @@ int main(int argc, char **argv)
                 gaitMove.turn_right(stop_gait, true, same_moviment);
 
             if(read_int(mem, DECISION_ACTION_A) == 4)
-                actionMove.kick_right_strong(&cm730, stop_gait);
+	    {
+		if(chutao==1)
+                    actionMove.kick_right_strong(&cm730, stop_gait);
+		else
+	            actionMove.kick_right_weak(&cm730,stop_gait);
+	    }
 
             if(read_int(mem, DECISION_ACTION_A) == 5)
-                actionMove.kick_left_strong(&cm730, stop_gait);
+	    {
+		if(chutao==1)
+                    actionMove.kick_left_strong(&cm730, stop_gait);
+		else
+		    actionMove.kick_left_weak(&cm730, stop_gait);		    
+	    }
 
             if(read_int(mem, DECISION_ACTION_A) == 6)
                 gaitMove.sidle_left(stop_gait, same_moviment);
@@ -464,10 +480,10 @@ int main(int argc, char **argv)
                 actionMove.goodBye(stop_gait);
 
             if(read_int(mem, DECISION_ACTION_A) == 21)
-                actionMove.kick_right_weak(stop_gait); //Chute fraco com pe direito
+                actionMove.kick_right_weak(&cm730, stop_gait); //Chute fraco com pe direito
 
             if(read_int(mem, DECISION_ACTION_A) == 22)
-                actionMove.kick_left_weak(stop_gait); //Chute fraco com pe esquerdo
+                actionMove.kick_left_weak(&cm730, stop_gait); //Chute fraco com pe esquerdo
 
             // Escreve na variável de telemetria.
             write_int(mem, CONTROL_WORKING, 1);
