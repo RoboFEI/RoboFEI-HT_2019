@@ -26,6 +26,7 @@ rm -r ./*.py ./*.pyc
 cd ../
 
 rm ./vision.py
+rm ./pointsCalibration.py
 
 echo -e "${Light_Green}"
 read -t 5 -p "Finalizado, pressione qualquer tecla para fechar"

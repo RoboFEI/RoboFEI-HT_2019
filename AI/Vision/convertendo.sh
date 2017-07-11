@@ -21,6 +21,12 @@ cd iPython/
 
 echo -e "${Blue}Movendo arquivos${NC}"
 sleep 1
+if !( mv pointsCalibration.py ../pointsCalibration.py ) then
+	echo -e "${Light_Red}"
+	read -p "Erro, precione qualquer tecla para finalizar"
+	exit
+fi
+
 if !( mv vision.py ../vision.py ) then
 	echo -e "${Light_Red}"
 	read -p "Erro, precione qualquer tecla para finalizar"

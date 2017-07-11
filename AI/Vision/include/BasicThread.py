@@ -29,7 +29,10 @@ class BasicThread(BasicClass, Thread):
 	
 	## Constructor Class
 	@abstractmethod
-	def __init__(self, name, func, arg):
+	def __init__(self, arg, name = None, func = None):
 		Thread.__init__(self)
-		super(BasicThread, self).__init__(name, func, arg)
+		if name != None and func != None:
+			super(BasicThread, self).__init__(arg, name, func)
+		else:
+			super(BasicThread, self).__init__(arg)
 		self._bkb = Blackboard( )

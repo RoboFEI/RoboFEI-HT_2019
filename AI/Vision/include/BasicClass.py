@@ -8,6 +8,7 @@ sys.path.append('../include')
 sys.path.append('../src')
 
 # The standard libraries used in the vision system
+import numpy as np
 from abc import ABCMeta, abstractmethod # Used to create abstract classes
 import cv2 # Library to process image
 print 'BasicClass - Opencv Version:', cv2.__version__
@@ -35,10 +36,11 @@ class BasicClass( ):
 	
 	## Constructor class
 	@abstractmethod
-	def __init__(self, name, func, arg):
+	def __init__(self, arg, name = None, func = None):
 		print 'Instantiating Basic Class'
 		self._args = arg
-		self._confini = ConfigIni(name, func)
+		if name != None and func != None:
+			self._confini = ConfigIni(name, func)
 		
 	## finalize
 	def finalize(self, dictionary):

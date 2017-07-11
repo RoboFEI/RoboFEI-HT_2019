@@ -72,7 +72,7 @@ class CameraCapture(BasicThread):
 	
 	## Constructor Class
 	def __init__(self, arg):
-		super(CameraCapture, self).__init__("Camera" , "parameters", arg)
+		super(CameraCapture, self).__init__(arg, 'Camera' , 'parameters')
 		
 		self.__observation = self._confini.read()
 		if self.__observation is -1:

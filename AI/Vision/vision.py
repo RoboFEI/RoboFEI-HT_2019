@@ -23,6 +23,7 @@ sys.path.append('./src')
 
 # Used class developed by RoboFEI-HT
 from CameraCapture import * # Class responsible for performing the observation of domain
+from LocalizationVision import * # Class responsible for performing the observation of domain
 from MainFunctions import * # Declaration the main functions
 
 # ---- Main Code ----
@@ -32,18 +33,18 @@ from MainFunctions import * # Declaration the main functions
 killedProcess() # Recognize external kill
 
 camera = CameraCapture(args) # Object responsible for the camera
+localization = LocalizationVision(args)
 
 # Main loop
 
 while True:
 	try:
 		observation = camera.currentObservation()
-		os.system('clear') # Cleaning terminal
-		for key in observation.keys():
-			if key == 'frame':
-				continue
-			print key, ': ', observation[key]
-		time.sleep(2)
+		if 'frame' is not observation.keys():
+			time.sleep(0.1)
+			continue
+		localization.find(observation)
+		localization.join()
 	except KeyboardInterrupt:
 		os.system('clear') # Cleaning terminal
 		print "Keyboard interrupt detected"
@@ -53,5 +54,5 @@ while True:
 			break
 
 # Finishing processes
-
+localization.finalize()
 camera.finalize()
