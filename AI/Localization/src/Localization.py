@@ -129,7 +129,7 @@ class Localization():
             
             pos, std = PF.main(u,z)
 
-            if fieldpoints != None:
+            if fieldpoints != None or self.bkb.read_int(self.Mem, 'DECISION_LOCALIZATION') == 999:
                 hp = PF.PerfectInformation(u, self.bkb.read_float(self.Mem, 'VISION_PAN_DEG'), 5)
                 self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', hp)
 

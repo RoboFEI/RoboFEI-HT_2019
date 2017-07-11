@@ -145,7 +145,7 @@ class Particle(object):
 
         self.radius = (10,50)
 
-        self.SigmaIMU = 20
+        self.SigmaIMU = 10
 
         self.wfactor = wfactor # Used in order to implement the motion error.
 
@@ -301,7 +301,7 @@ class Particle(object):
         self.weight = max(weight, 1e-300)
 
         if landmarks != None or field != None or orientation != None:
-            self.wfactor = max(min(np.log(self.weight)/np.log(1e-10), 2.), 0.)
+            self.wfactor = max(min(np.log(self.weight)/np.log(1e-20), 2.), 0.)
         
         # self.wfactor = 0.5
         return self.weight
