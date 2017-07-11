@@ -3,8 +3,8 @@ __authors__ = "Aislan C. Almeida"
 __license__ = "GNU General Public License v3.0"
 
 from Viewer import * # Imports the environment of the viewer
-# from AMCL import * # Imports the Particle Filter Class
-import time 
+from MCL import *
+import time
 
 # To pass arguments to the function
 import argparse
@@ -22,22 +22,8 @@ except ImportError:
 parser = argparse.ArgumentParser(description='Robot Localization', epilog= 'Implements particle filters to self-localize a robot on the field.')
 parser.add_argument('-g', '--graphs', action="store_true", help='Shows graphical interface which visualizes the particles.')
 parser.add_argument('-l', '--log', action="store_true", help='Print variable logs.')
-parser.add_argument('-m', '--mcl', action="store_true", help='Uses Monte-Carlo Localization')
-parser.add_argument('-a', '--amcl', action="store_true", help='Uses Augmented Monte-Carlo Localization')
-parser.add_argument('-s', '--srmcl', action="store_true", help='Uses Sensor Reseting Monte-Carlo Localization')
 
 args = parser.parse_args()
-
-if args.mcl:
-    from MCL import *
-elif args.amcl:
-    from AMCL import *
-elif args.srmcl:
-    from SRMCL import *
-else:
-    print 'Please choose a version of MCL to be used!'
-    exit()
-
 
 #--------------------------------------------------------------------------------------------------
 #   Class implementing the Core of the Localization Process
@@ -68,10 +54,12 @@ class Localization():
         self.timestamp = time.time()
 
         # Clears the variables in the blackboard
-        self.bkb.write_float(self.Mem, 'VISION_BLUE_LANDMARK_DEG', -999)
-        self.bkb.write_float(self.Mem, 'VISION_RED_LANDMARK_DEG', -999)
-        self.bkb.write_float(self.Mem, 'VISION_YELLOW_LANDMARK_DEG', -999)
-        self.bkb.write_float(self.Mem, 'VISION_PURPLE_LANDMARK_DEG', -999)
+        self.bkb.write_float(self.Mem, 'VISION_FIRST_GOALPOST', -999)
+        self.bkb.write_float(self.Mem, 'VISION_SECOND_GOALPOST', -999)
+        self.bkb.write_float(self.Mem, 'VISION_THIRD_GOALPOST', -999)
+        self.bkb.write_float(self.Mem, 'VISION_FOURTH_GOALPOST', -999)
+        self.bkb.write_int(self.Mem, 'iVISION_FIELD', 0)
+        self.bkb.write_float(self.Mem, 'fVISION_FIELD', 0)
 
     #----------------------------------------------------------------------------------------------
     #   Localization's main method.
@@ -84,22 +72,16 @@ class Localization():
             field = SoccerField(screen) # Draws the field
             simul.field = field # Passes the field to the simulation
 
-        PF = MonteCarlo(5000) # Starts the Particle Filter
+        PF = MonteCarlo(500)
 
-        print
-
-        zb = []
-        zr = []
-        zy = []
-        zp = []
-        timecount = []
+        std = 100
+        hp = -999
+        self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', -999)
+        weight = 1
 
         # Main loop
         while True:
-            z0 = 0
-            z1 = 0
-            z2 = 0
-            z3 = 0
+            landmarks = []
 
             self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 1) # Sets the flag for telemetry
 
@@ -110,49 +92,49 @@ class Localization():
             # Gets the motion command from the blackboard.
             u = self.GetU(self.bkb.read_int(self.Mem, 'CONTROL_ACTION'))
 
-            auxtime = time.time()
-            try:
-                if auxtime-timecount[0] > 0:
-                    timecount.pop(0)
-                    for zn in [zb, zr, zy, zp]:
-                        zn.pop(0)
-            except:
-                pass
-
-            # print timecount
-
-            timecount.append(auxtime)
             # Gets the measured variable from the blackboard,
             # and free them.
-            zb.append(self.bkb.read_float(self.Mem, 'VISION_BLUE_LANDMARK_DEG'))
-            self.bkb.write_float(self.Mem, 'VISION_BLUE_LANDMARK_DEG', -999)
-            zr.append(self.bkb.read_float(self.Mem, 'VISION_RED_LANDMARK_DEG'))
-            self.bkb.write_float(self.Mem, 'VISION_RED_LANDMARK_DEG', -999)
-            zy.append(self.bkb.read_float(self.Mem, 'VISION_YELLOW_LANDMARK_DEG'))
-            self.bkb.write_float(self.Mem, 'VISION_YELLOW_LANDMARK_DEG', -999)
-            zp.append(self.bkb.read_float(self.Mem, 'VISION_PURPLE_LANDMARK_DEG'))
-            self.bkb.write_float(self.Mem, 'VISION_PURPLE_LANDMARK_DEG', -999)
+            landmarks.append(self.bkb.read_float(self.Mem, 'VISION_FIRST_GOALPOST'))
+            self.bkb.write_float(self.Mem, 'VISION_FIRST_GOALPOST', -999)
+            landmarks.append(self.bkb.read_float(self.Mem, 'VISION_SECOND_GOALPOST'))
+            self.bkb.write_float(self.Mem, 'VISION_SECOND_GOALPOST', -999)
+            landmarks.append(self.bkb.read_float(self.Mem, 'VISION_THIRD_GOALPOST'))
+            self.bkb.write_float(self.Mem, 'VISION_THIRD_GOALPOST', -999)
+            landmarks.append(self.bkb.read_float(self.Mem, 'VISION_FOURTH_GOALPOST'))
+            self.bkb.write_float(self.Mem, 'VISION_FOURTH_GOALPOST', -999)
 
+            orientation = self.bkb.read_float(self.Mem, 'IMU_EULER_Z')
 
-            z0 = mean(zb)
-            z1 = mean(zr)
-            z2 = mean(zy)
-            z3 = mean(zp)
-            z4 = degrees(self.bkb.read_float(self.Mem, 'IMU_EULER_Z'))
+            x = self.bkb.read_int(self.Mem, 'iVISION_FIELD')
+            y = self.bkb.read_float(self.Mem, 'fVISION_FIELD')
+            fieldpoints = [read(x), y]
+            
+            if x == 0:
+                fieldpoints = None
+            else:
+                self.bkb.write_int(self.Mem, 'iVISION_FIELD', 0)
+                self.bkb.write_float(self.Mem, 'fVISION_FIELD', 0)
 
-            # print zn[0], z0         
+            if sum(landmarks) == - 4 * 999:
+                landmarks = None
 
-            # Mounts the vector to be sent
-            z = (z0, z1, z2, z3, z4)
-            # print z
-               
-            # Performs Particle Filter's Update
+            # fieldpoints = None
+            # orientation = None
+            landmarks = None
+
+            if fieldpoints == None and landmarks == None:
+                z = [None, None, None]
+            else:
+                z = [landmarks, fieldpoints, orientation]
+            
             pos, std = PF.main(u,z)
 
-            if std > 1: # Se o erro for muito alto ele acha landmarks
-                self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', 1)
-            elif std < 1: # Se for pequeno o bastante ele acha a bola
-                self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', 0)
+            if fieldpoints != None or self.bkb.read_int(self.Mem, 'DECISION_LOCALIZATION') == 999:
+                hp = PF.PerfectInformation(u, self.bkb.read_float(self.Mem, 'VISION_PAN_DEG'), 5)
+                self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', hp)
+
+            if PF.meanweight < 1:                
+                weight = PF.meanweight
             
             if self.args.log:
                 print '\t\x1b[32mRobot at', # Prints header
@@ -161,7 +143,7 @@ class Localization():
                 print u'\x1b[32m| \u03B8:\x1b[34m{}\u00B0'.format(int(pos[2])), # Prints the theta
                 print u'\x1b[32m| \u03C3:\x1b[34m{} cm\x1b[32m]'.format(int(std)) # Prints the standard deviation
 
-            # Wirte the robot's position on Black Board to be read by telemetry
+            # Write the robot's position on Black Board to be read by telemetry
             self.bkb.write_int(self.Mem, 'LOCALIZATION_X', int(pos[0]))
             self.bkb.write_int(self.Mem, 'LOCALIZATION_Y', int(pos[1]))
             self.bkb.write_int(self.Mem, 'LOCALIZATION_THETA', int(pos[2]))
@@ -170,12 +152,13 @@ class Localization():
             if self.args.graphs:
                 # Redraws the screen background
                 field.draw_soccer_field()
+                simul.DrawStd(pos, std, weight, hp)
 
                 # Draws all particles on screen
                 simul.display_update(PF.particles)
 
             # Updates for the next clock
-            screen.clock.tick(60)
+            screen.clock.tick(20)
 
     #----------------------------------------------------------------------------------------------
     #   This method returns a command instruction to the particles.
@@ -198,9 +181,9 @@ class Localization():
         elif Action == 7:
             return (0,10,0,1,self.dt()) # Walk Right
         elif Action == 2:
-            return (0,0,20,1,self.dt()) # Turn Right
+            return (0,0,18.7,1,self.dt()) # Turn Right
         elif Action == 3:
-            return (0,0,-20,1,self.dt()) # Turn Left
+            return (0,0,-18.7,1,self.dt()) # Turn Left
         elif Action == 9:
             return (0,-10,-20,1,self.dt()) # Turn Left Around the Ball
         elif Action == 14:
@@ -236,7 +219,17 @@ def mean(vec):
     else:
         return s/m
 
+def read(x):
+    v = []
+    for i in xrange(31, -1, -1):
+        aux = x >> i
+        x -= aux << i
+        v.insert(0, abs(aux))
+
+    return v
+
 #Call the main function, start up the simulation
 if __name__ == "__main__":
     Loc = Localization()
     Loc.main()
+

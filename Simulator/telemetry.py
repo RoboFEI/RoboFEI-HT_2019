@@ -1,6 +1,6 @@
 import pygame
 import random as rnd
-from math import cos, sin, radians, degrees
+from math import cos, sin, radians, degrees, sqrt
 import socket
 import time
 from collections import defaultdict
@@ -135,7 +135,7 @@ class Telemetry(object):
             self.othervars[0] = float(data[1])
             self.othervars[1] = float(data[2])
             self.othervars[2] = int(float(data[3]))
-            self.othervars[3] = max(float(data[4]), 15)
+            self.othervars[3] = max(float(data[4])*sqrt(2)*10, 15)
 
             if data[4] == "-1" or True:
                 self.othervars[4] = -1000
@@ -218,13 +218,13 @@ class Telemetry(object):
             self.resize()   # Resizes the object
 
         if side:
-            pygame.draw.line(new, self.color,(int((2*self.x+260)/2),int((2*self.y+20+self.size*(not(self.minimize)))/2)),(970-int(self.othervars[0]),670-int(self.othervars[1])), 3) # Draws a line
-            pygame.draw.circle(new, (0,0,0,0), (970 - int(self.othervars[0]), 670 - int(self.othervars[1])), int(self.othervars[3]), 0) # Cuts a circle
-            pygame.draw.circle(new, self.color, (970 - int(self.othervars[0]), 670 - int(self.othervars[1])), int(self.othervars[3]), 3) # Draws a circle
+            pygame.draw.line(new, self.color,(int((2*self.x+260)/2),int((2*self.y+20+self.size*(not(self.minimize)))/2)),(1040-int(self.othervars[0]),740-int(self.othervars[1])), 3) # Draws a line
+            pygame.draw.circle(new, (0,0,0,0), (1040 - int(self.othervars[0]), 740 - int(self.othervars[1])), int(self.othervars[3]), 0) # Cuts a circle
+            pygame.draw.circle(new, self.color, (1040 - int(self.othervars[0]), 740 - int(self.othervars[1])), int(self.othervars[3]), 3) # Draws a circle
         else:
-            pygame.draw.line(new, self.color,(int((2*self.x+260)/2),int((2*self.y+20+self.size*(not(self.minimize)))/2)),(int(self.othervars[0])+70,int(self.othervars[1])+70), 3) # Draws a line
-            pygame.draw.circle(new, (0,0,0,0), (70 + int(self.othervars[0]), 70 + int(self.othervars[1])), int(self.othervars[3]), 0) # Cuts a circle
-            pygame.draw.circle(new, self.color, (70 + int(self.othervars[0]), 70 + int(self.othervars[1])), int(self.othervars[3]), 3) # Draws a circle
+            pygame.draw.line(new, self.color,(int((2*self.x+260)/2),int((2*self.y+20+self.size*(not(self.minimize)))/2)),(int(self.othervars[0]),int(self.othervars[1])), 3) # Draws a line
+            pygame.draw.circle(new, (0,0,0,0), (int(self.othervars[0]), int(self.othervars[1])), int(self.othervars[3]), 0) # Cuts a circle
+            pygame.draw.circle(new, self.color, (int(self.othervars[0]), int(self.othervars[1])), int(self.othervars[3]), 3) # Draws a circle
         pygame.draw.rect(new, (0,0,0,0), (self.x, self.y, 260, 20+self.size*(not(self.minimize))), 0) # Cuts a square
 
         self.Body.fill(pygame.Color(255,255,255,0)) # Clear the window surface
@@ -292,13 +292,13 @@ class Telemetry(object):
         ball = pygame.image.load("ball.png") # Load Bitmap
         ball = pygame.transform.scale(ball,(19,19)) # Resize it
         if side:
-            pygame.draw.circle(where, self.color, (970 - int(self.othervars[4]), 670 - int(self.othervars[5])), 13, 0) # Circle it
-            where.blit(ball,(970 - int(self.othervars[4]) - 10, 670 - int(self.othervars[5]) - 10)) # Draw on screen
-            new.blit(aux, (int(970 - self.othervars[0]-rr[2]/2), int(670 - self.othervars[1]-rr[3]/2))) # Draws the Robot
+            pygame.draw.circle(where, self.color, (1040 - int(self.othervars[4]), 740 - int(self.othervars[5])), 13, 0) # Circle it
+            where.blit(ball,(1040 - int(self.othervars[4]) - 10, 740 - int(self.othervars[5]) - 10)) # Draw on screen
+            new.blit(aux, (int(1040 - self.othervars[0]-rr[2]/2), int(740 - self.othervars[1]-rr[3]/2))) # Draws the Robot
         else:
-            pygame.draw.circle(where, self.color, (70+int(self.othervars[4]),70+int(self.othervars[5])), 13, 0) # Circle it
-            where.blit(ball,(70 + int(self.othervars[4]) - 10, 70 + int(self.othervars[5]) - 10)) # Draw on screen
-            new.blit(aux, (70 + int(self.othervars[0]-rr[2]/2), 70 + int(self.othervars[1]-rr[3]/2))) # Draws the Robot
+            pygame.draw.circle(where, self.color, (int(self.othervars[4]),int(self.othervars[5])), 13, 0) # Circle it
+            where.blit(ball,(int(self.othervars[4]) - 10, int(self.othervars[5]) - 10)) # Draw on screen
+            new.blit(aux, (int(self.othervars[0]-rr[2]/2), int(self.othervars[1]-rr[3]/2))) # Draws the Robot
         
         new.blit(self.Body, (int(self.x), int(self.y))) # Draws the object on screen
 

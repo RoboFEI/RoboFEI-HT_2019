@@ -61,7 +61,7 @@ class Robot(pygame.sprite.Sprite,Vision):
 
         self.fast_walk_speed = 20
         self.slow_walk_speed = 10
-        self.turn_angle = 20
+        self.turn_angle = 10
         self.drift_speed = 20
         self.drift_turn_speed = 15
 
@@ -137,7 +137,7 @@ class Robot(pygame.sprite.Sprite,Vision):
         textpos = (self.x - 5, self.y - 40)
         screen.background.blit(text, textpos)
 
-        self.vision.DrawLM(screen.background)
+        self.vision.draw(screen.background)
 
     '''Control'''
 

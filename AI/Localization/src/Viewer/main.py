@@ -36,7 +36,7 @@ def main():
         simul.display_update()
 
         #Pause for the next frame
-        screen.clock.tick(60)
+        screen.clock.tick(30)
 
 #Call the main function, start up the simulation
 if __name__ == "__main__":

@@ -32,6 +32,8 @@ parser.add_argument('--attacker', '-a', action="store_true", help = 'selects att
 parser.add_argument('--naive', '-n', action="store_true", help = 'selects naive behavior')
 parser.add_argument('--naive_imu', '-ni', action="store_true", help = 'selects naive behavior with orientation')
 parser.add_argument('--naive_imu_dec_turning', '-nidt', action="store_true", help = 'selects naive behavior with orientation')
+parser.add_argument('--localize', '-l', action="store_true", help = 'selects decision with localization')
+
 
 args = parser.parse_args()
 
@@ -58,6 +60,10 @@ elif args.naive_imu == True:
 # Naive decision with orientation:
 elif args.naive_imu_dec_turning == True:
     robot = NaiveIMUDecTurning()
+
+# Decision with Localization:
+elif args.localize == True:
+    robot = LocaLoca()
 
 #Ordinary decision:
 else:

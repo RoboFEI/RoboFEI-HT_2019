@@ -144,6 +144,7 @@ class SharedMemory(object):
     'IMU_WORKING': 105,
     'VOLTAGE': 106,
     'DECISION_LOCALIZATION': 107,
+    'iVISION_FIELD': 108,
     }
 
     variable_float = {
@@ -265,9 +266,10 @@ class SharedMemory(object):
     'DECISION_RBT02_DIST_BALL': 116,
     'DECISION_RBT03_DIST_BALL': 117,
     'DECISION_RBT04_DIST_BALL': 118,
-    'VISION_BLUE_LANDMARK_DEG': 119,
-    'VISION_RED_LANDMARK_DEG': 120,
-    'VISION_YELLOW_LANDMARK_DEG': 121,
-    'VISION_PURPLE_LANDMARK_DEG': 122,
+    'VISION_FIRST_GOALPOST': 119,
+    'VISION_SECOND_GOALPOST': 120,
+    'VISION_THIRD_GOALPOST': 121,
+    'VISION_FOURTH_GOALPOST': 122,
+    'fVISION_FIELD': 123,
     }
 #------------------------------------------------------------------------------------------
