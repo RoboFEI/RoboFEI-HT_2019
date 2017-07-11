@@ -53,7 +53,7 @@ class PointCalibration():
         while self.clicks < 32:
             if self.flag:
                 self.flag = False
-                print 'The point is', v[self.clicks][0], 'mts at', v[self.clicks][1], 'degrees.'
+                print 'The point is', v[self.clicks][0], 'cm, at', v[self.clicks][1], 'degrees.'
 
             try:
                 self.Capture()
