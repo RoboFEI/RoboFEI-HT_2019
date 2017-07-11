@@ -42,9 +42,9 @@ class ActionMove
 
         void goalkeeper(bool &stop_gait);
 
-        void kick_right_weak(bool &stop_gait);
+        void kick_right_weak(CM730 *cm730, bool &stop_gait);
 
-        void kick_left_weak(bool &stop_gait);
+        void kick_left_weak(CM730 *cm730, bool &stop_gait);
 
         void kick_left_strong(CM730 *cm730, bool &stop_gait);
 
