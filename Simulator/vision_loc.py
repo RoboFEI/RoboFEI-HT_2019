@@ -77,7 +77,8 @@ class VISION():
         hp = self.bkb.read_int(self.Mem, 'DECISION_LOCALIZATION')
 
         if hp == -999:
-            y = [90,60,30,0,-30,-60,-90]
+            # y = [90,60,30,0,-30,-60,-90]
+            y = [90, 0, -90, 0]
             x = y[self.behave]
             self.pan(pos=x)
 

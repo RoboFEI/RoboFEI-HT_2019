@@ -111,61 +111,118 @@ class MonteCarlo():
     #   Tests which is the best information to be acquired.
     #----------------------------------------------------------------------------------------------
     def PerfectInformation(self, u, hp, time=0):
-        if u[3] <= 1:
-            np.random.shuffle(self.particles) # Shuffles the particle set.
-            parts = [] 
+        np.random.shuffle(self.particles)
+
+        poses = []
+        for P in self.particles[:30]:
+            poses.append([P.x, P.y])
+
+        poses = np.matrix(np.array(poses)-np.array([self.mean[0], self.mean[1]]))
+
+        cov = (poses.T * poses)/(31.)
+
+        P = [self.particles[0].x, self.particles[0].y, self.particles[0].rotation]
+        R = [2., 2., 2.]
+        X = np.rint(np.log(cov[0,0])/np.log(10))
+        Y = np.rint(np.log(cov[1,1])/np.log(10))
+
+        if P[0] >= 640:
+            if -45 <= P[2] and P[2] <= 45:
+                R[1] += X
+            elif -135 <= P[2] and P[2] <= -45:
+                R[0] += X
+            elif 45 <= P[2] and P[2] <= 135:
+                R[2] += X
+
+        if P[0] <= 400:
+            if P[2] <= -135 or 135 <= P[2]:
+                R[1] += X
+            elif -135 <= P[2] and P[2] <= -45:
+                R[2] += X
+            elif 45 <= P[2] and P[2] <= 135:
+                R[0] += X
+
+    
+        if P[1] <= 400:
+            if 45 <= P[2] and P[2] <= 135:
+                R[1] += Y
+            elif -45 <= P[2] and P[2] <= 45:
+                R[0] += Y
+            elif P[2] <= -135 or 135 <= P[2]:
+                R[2] += Y
+
+        if P[1] >= 340:
+            if -135 <= P[2] and P[2] <= -45:
+                R[1] += Y
+            elif -45 <= P[2] and P[2] <= 45:
+                R[2] += Y
+            elif P[2] <= -135 or 135 <= P[2]:
+                R[0] += Y
+
+        print R
+        rand = np.random.random() * sum(R)
+        if R[0] > rand:
+            return -90
+        if R[0] + R[1] > rand:
+            return 0
+        if R[0] + R[1] + R[2] > rand:
+            return 90
+
+        # if u[3] <= 1:
+        #     np.random.shuffle(self.particles) # Shuffles the particle set.
+        #     parts = [] 
             
-            # Takes the first 30 particles of the set
-            for P in self.particles[:30]:
-                parts.append(Particle(*P.copy()))
+        #     # Takes the first 30 particles of the set
+        #     for P in self.particles[:30]:
+        #         parts.append(Particle(*P.copy()))
 
-            meanpart = Particle(*self.mean)
+        #     meanpart = Particle(*self.mean)
             
-            # Moves the particles for a time!
-            uf = [u[0], u[1], u[2], time]
-            meanpart.Motion(*uf)
-            for P in parts:
-                P.Motion(*uf)
+        #     # Moves the particles for a time!
+        #     uf = [u[0], u[1], u[2], time]
+        #     meanpart.Motion(*uf)
+        #     for P in parts:
+        #         P.Motion(*uf)
 
-            # For each possible observation, compute its utility
-            pos = [90, 60, 30, 0, -30, -60, -90]
-            uv = []
-            for i in pos:
-                aux = - np.abs(hp - i) * 7./180. + 7.
+        #     # For each possible observation, compute its utility
+        #     pos = [90, 60, 30, 0, -30, -60, -90]
+        #     uv = []
+        #     for i in pos:
+        #         aux = - np.abs(hp - i) * 7./180. + 7.
                 
-                d = parts[0].GetField(i)
-                tw = 0
-                # Computes the particles weight
-                for p in parts:
-                    tw += p.Sensor(orientation=parts[0].rotation, field=d)
+        #         d = parts[0].GetField(i)
+        #         tw = 0
+        #         # Computes the particles weight
+        #         for p in parts:
+        #             tw += p.Sensor(orientation=parts[0].rotation, field=d)
 
-                # # "Resamples"
-                # s = tw/31.
+        #         # # "Resamples"
+        #         # s = tw/31.
 
-                # i = 1
-                # j = 0
-                # w = parts[0].weight
-                # sj = None
-                # k = 0
-                # while i < 31.:
-                #     if s * i > w:
-                #         j += 1
-                #         w += parts[j].weight
-                #     else:
-                #         i += 1
-                #         if sj != j:
-                #             sj = j
-                #             k += 1
+        #         # i = 1
+        #         # j = 0
+        #         # w = parts[0].weight
+        #         # sj = None
+        #         # k = 0
+        #         # while i < 31.:
+        #         #     if s * i > w:
+        #         #         j += 1
+        #         #         w += parts[j].weight
+        #         #     else:
+        #         #         i += 1
+        #         #         if sj != j:
+        #         #             sj = j
+        #         #             k += 1
                 
-                # Weight Standard Deviation
-                w = np.array([i.weight for i in parts])
-                std = np.sum(np.max(w) - w)
+        #         # Weight Standard Deviation
+        #         w = np.array([i.weight for i in parts])
+        #         std = np.sum(np.max(w) - w)
                
-                aux += std
-                # Counts the losses
-                # aux += 30-k
-                uv.append(aux)
-            return pos[np.argmax(uv)]
+        #         aux += std
+        #         # Counts the losses
+        #         # aux += 30-k
+        #         uv.append(aux)
+        #     return pos[np.argmax(uv)]
         return -999
 
     #----------------------------------------------------------------------------------------------
