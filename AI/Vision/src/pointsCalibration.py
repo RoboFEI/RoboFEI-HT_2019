@@ -16,6 +16,7 @@ class PointCalibration():
         self.mouseX = None
         self.mouseY = None
         self.clicks = 0
+        self.flag = True
 
     #----------------------------------------------------------------------------------------------
     #   Initializes the capture from camera.
@@ -47,7 +48,13 @@ class PointCalibration():
         
         print "\nPress s to skip.\n"
 
+        self.flag = True
+
         while self.clicks < 32:
+            if self.flag:
+                self.flag = False
+                print 'The point is', v[self.clicks][0], 'mts at', v[self.clicks][1], 'degrees.'
+
             try:
                 self.Capture()
                 for p in self.vector:
@@ -112,7 +119,49 @@ class PointCalibration():
             self.mouseX = x
             self.mouseY = y
             self.clicks += 1
+            self.flag = True
             print self.clicks, self.mouseX, self.mouseY
+
+v = [(130,45),
+     
+     (160,-45),
+
+     (330,30),
+     (270,30),
+     (180,30),
+     (140,30),
+
+     (360,-30),
+     (280,-30),
+     (200,-30),
+     (150,-30),
+
+     (400,20),
+     (360,20),
+     (290,20),
+     (220,20),
+     (150,20),
+
+     (420,-20),
+     (370,-20),
+     (300,-20),
+     (230,-20),
+     (160,-20),
+
+     (370,10),
+     (320,10),
+     (250,10),
+     (180,10),
+
+     (380,-10),
+     (340,-10),
+     (260,-10),
+     (190,-10),
+     
+     (400,0),
+     (300,0),
+     (200,0),
+     (100,0)]
 
 P = PointCalibration()
 P.Main()
