@@ -9,6 +9,7 @@ parser.add_argument('--camera', '-ca', action="store_true", help = 'Calibra valo
 parser.add_argument('--visionball', '-vb', action="store_true", help = 'Calibra valor para a visão da bola')
 parser.add_argument('--withoutservo', '-ws', action="store_true", help = 'Sem servos')
 parser.add_argument('--head', '-he', action="store_true", help = 'Configurando parâmetros do controle da cabeça')
+parser.add_argument('--localization', '-lo', action="store_true", help = 'Configurando parâmetros da localização')
 
 args = parser.parse_args()
 
@@ -54,5 +55,6 @@ while True:
 			break
 
 # Finishing processes
+
 localization.finalize()
 camera.finalize()

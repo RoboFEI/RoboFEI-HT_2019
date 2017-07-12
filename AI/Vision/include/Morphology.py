@@ -74,7 +74,3 @@ class Morphology(BasicClass):
 		)
 		if self.show == False:
 			return mask
-	
-	## finalize
-	def finalize(self):
-		super(Morphology, self).finalize(self.__parameters)
