@@ -89,7 +89,11 @@ class PointCalibration():
 		try:
 			self.vector = np.load('./Data/Vector.npy')
 		except:
-			self.PointGenerator()
+			if os.path.islink("./Data/Vector.npy"):
+				self.PointGenerator()
+			else:
+				print "Not exist link"
+				exit()
 
 		print "\nIf changes are needed press n,\nelse press ESC or q.\n"
 
