@@ -6,6 +6,7 @@
 env/
 build/
 AI/Vision/Data/*
+!AI/Vision/Data/README.md
 AI/Control/Data/*.ini
 AI/Control/Data/*.bin
 AI/Vision/src/.thresholds
