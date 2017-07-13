@@ -72,6 +72,8 @@ class GaitMove
         ReadConfig* turnRobotLeft;
         ReadConfig* turnRobotRight;
         ReadConfig* walkslow;
+        ReadConfig* walkbackwardslow;
+        ReadConfig* walkbackward;
         ReadConfig* turnBallR;
         ReadConfig* turnBallL;
         ReadConfig* sidleR;

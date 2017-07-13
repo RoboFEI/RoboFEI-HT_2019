@@ -191,7 +191,7 @@ void ActionMove::kick_left_strong(CM730 *cm730, bool &stop_gait)
     cm730->WriteWord(16, 32, 1023, &erro);
     cm730->WriteWord(18, 32, 150, &erro);
 
-    cm730->WriteWord(12, 30, MotionManager::GetInstance()->m_Offset[12]+741, &erro);
+    cm730->WriteWord(12, 30, MotionManager::GetInstance()->m_Offset[12]+761, &erro);
     cm730->WriteWord(14, 30, MotionManager::GetInstance()->m_Offset[14]+327, &erro);
     cm730->WriteWord(16, 30, MotionManager::GetInstance()->m_Offset[16]+501, &erro);
     cm730->WriteWord(18, 30, MotionManager::GetInstance()->m_Offset[18]+478, &erro);
@@ -234,12 +234,12 @@ void ActionMove::kick_right_strong(CM730 *cm730, bool &stop_gait)
     //getchar();
 
     // Velocidades
-    cm730->WriteWord(11, 32, 399, &erro);
+    cm730->WriteWord(11, 32, 985, &erro);
     cm730->WriteWord(13, 32, 926, &erro);
     cm730->WriteWord(15, 32, 1023, &erro);
     cm730->WriteWord(17, 32, 97, &erro);
 
-    cm730->WriteWord(11, 30, MotionManager::GetInstance()->m_Offset[11]+294, &erro);
+    cm730->WriteWord(11, 30, MotionManager::GetInstance()->m_Offset[11]+200, &erro);
     cm730->WriteWord(13, 30, MotionManager::GetInstance()->m_Offset[13]+614, &erro);
     cm730->WriteWord(15, 30, MotionManager::GetInstance()->m_Offset[15]+448, &erro);
     cm730->WriteWord(17, 30, MotionManager::GetInstance()->m_Offset[17]+545, &erro);
