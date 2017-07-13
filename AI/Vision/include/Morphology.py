@@ -43,7 +43,6 @@ class Morphology(BasicClass):
 	def __init__(self, color, func, arg):
 		func = 'Closing'
 		color = 'Green'
-		print 'Classe Morphology' #des-iPython
 		self.__func = func
 		self.__color = color
 		super(Morphology, self).__init__(arg, self.__color, self.__func)
@@ -53,16 +52,17 @@ class Morphology(BasicClass):
 			self.__parameters = {
 				'size_kennel': 1,
 				'interaction': 1,
-				'morphological': 3
+				'morphological': 3,
+				'interaction': 1
 			}
 			
-			self.__kennel = cv2.getStructuringElement(
-				cv2.MORPH_ELLIPSE,
-				(
-					self.__parameters['size_kennel'],
-					self.__parameters['size_kennel']
-				)
+		self.__kennel = cv2.getStructuringElement(
+			cv2.MORPH_ELLIPSE,
+			(
+				self.__parameters['size_kennel'],
+				self.__parameters['size_kennel']
 			)
+		)
 		
 	## morphologicalTransformations
 	def morphologicalTransformations(self, mask):
@@ -74,3 +74,9 @@ class Morphology(BasicClass):
 		)
 		if self.show == False:
 			return mask
+		else:
+			return mask
+	
+	## finalize
+	def finalize(self):
+		super(Morphology, self).finalize(self.__parameters)

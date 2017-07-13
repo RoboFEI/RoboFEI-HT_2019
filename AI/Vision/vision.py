@@ -41,11 +41,13 @@ localization = LocalizationVision(args)
 while True:
 	try:
 		observation = camera.currentObservation()
-		if 'frame' is not observation.keys():
+		if 'frame' not in observation.keys():
 			time.sleep(0.1)
 			continue
-		localization.find(observation)
-		localization.join()
+		localization.find(observation, 0)
+		with localization.waitthread:
+			pass
+		print 'Passou'
 	except KeyboardInterrupt:
 		os.system('clear') # Cleaning terminal
 		print "Keyboard interrupt detected"

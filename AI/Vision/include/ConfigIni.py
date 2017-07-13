@@ -72,7 +72,8 @@ class ConfigIni( ):
 	def finalize(self, dictionary):
 		self.__dictionary = dictionary # Saving dictionary in class
 		
-		# Saving section parameters
-		with open('./Data/config.ini', 'w') as configfile:
+		self.__conf.read("./Data/config.ini")
+			
+		with open('./Data/config.ini', 'wb') as configfile:
 			self.__conf[(self.__myobject + " " + self.__function).upper()] = self.__dictionary
 			self.__conf.write(configfile)
