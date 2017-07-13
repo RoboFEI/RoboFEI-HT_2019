@@ -25,10 +25,6 @@ class LocalizationVision(BasicThread):
 	
 	# ---- Variables ----
 	
-	## show
-	# .
-	show = False
-	
 	## observation
 	# .
 	__observation = None
@@ -42,7 +38,7 @@ class LocalizationVision(BasicThread):
 		
 		# Try to load the points, if it doesn't work, kill the process.
 		try:
-			self.vector = np.load('./Data/vector.npy')
+			self.vector = np.load('./Data/Vector.npy')
 			print "\n-= Succeeded loading points. =-\n"
 		except:
 			print "\n-= Error loading points. =-\n"
@@ -54,8 +50,12 @@ class LocalizationVision(BasicThread):
 		self.frames = 5
 		self.count = 0
 		
-		self.green = ColorSegmentation('Green', None)
-		self.closing = Morphology('Green', 'Closing', None)
+		__green = ColorSegmentation('Green', None)
+		__closing = Morphology('Green', 'Closing', None)
+		
+		if self._args.localization == True:
+			__green.show = True
+			__closing.show = True
 		
 	def main(mask, pan):
 		p = []
@@ -87,15 +87,15 @@ class LocalizationVision(BasicThread):
 	def run(self):
 		if self.__step == 0:
 			self.__step += 1
-			self.__observation['frame'] = self.green.segmentation(self.__observation['frame'])
+			self.__observation['frame'] = __green.segmentation(self.__observation['frame'])
 		
 		if self.__step == 1:
 			self.__step += 1
-			self.__observation['frame'] = self.closing.morphologicalTransformations(self.__observation['frame'])
+			self.__observation['frame'] = __closing.morphologicalTransformations(self.__observation['frame'])
 		
 		self.__observation['frame'] = main(self.__observation['frame'], self.__observation['pos_pan'])
 	
 	## finalize
 	def finalize(self):
-		self.green.finalize()
-		self.closing.finalize()
+		__green.finalize()
+		__closing.finalize()

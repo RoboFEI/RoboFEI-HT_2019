@@ -23,7 +23,7 @@ class ColorSegmentation(BasicClass):
 	
 	## show
 	# Range maximum values.
-	show = False
+	show = True
 	
 	## upper
 	# Range maximum values.
