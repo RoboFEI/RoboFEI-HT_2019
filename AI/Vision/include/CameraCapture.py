@@ -104,8 +104,8 @@ class CameraCapture(BasicThread):
 				start = time.time()
 			
 			ret, self.__observation['frame'] = self.__camera.read()
-			self.__observation['pos_tilt'] = self._bkb.read_float('VISION_TILT_DEG')
-			self.__observation['pos_pan'] = self._bkb.read_float('VISION_PAN_DEG')
+			self.__observation['pos_tilt'] = 0
+			self.__observation['pos_pan'] = 0
 			self.__observation['time'] = time.localtime()
 			
 			if self._args.camera == True:

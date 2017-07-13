@@ -195,7 +195,7 @@ void GaitMove::walk_foward_fast_direct(bool &stop_gait, bool same_moviment)
 //O robo vira para a direita----------------------------------------------
 void GaitMove::turn_right(bool &stop_gait, bool max_angle, bool same_moviment)
 {
-    write_int(mem, CONTROL_ACTION, 2);
+    write_int(mem, CONTROL_ACTION, 3);
     if(same_moviment == false)
         std::cout << " | \e[38;5;45mVirar a direita\e[0m" << std::endl;
     if(float(read_int(mem, DECISION_ACTION_B))<turnRobotRight->turn_angle && max_angle==false)
@@ -208,7 +208,7 @@ void GaitMove::turn_right(bool &stop_gait, bool max_angle, bool same_moviment)
 //O robo vira para a esquerda---------------------------------------------
 void GaitMove::turn_left(bool &stop_gait, bool max_angle, bool same_moviment)
 {
-    write_int(mem, CONTROL_ACTION, 3);
+    write_int(mem, CONTROL_ACTION, 2);
     if(same_moviment == false)
         std::cout<<" | \e[38;5;45mVirar a esquerda\e[0m"<<std::endl;
     if(float(read_int(mem, DECISION_ACTION_B))<turnRobotLeft->turn_angle && max_angle==false)

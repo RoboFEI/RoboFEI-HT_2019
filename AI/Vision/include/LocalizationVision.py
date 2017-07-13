@@ -8,6 +8,7 @@ from BasicClass import *
 from BasicThread import * # Base class with primary functions
 from ColorSegmentation import * #
 from Morphology import * #
+import time
 
 def write(v):
 	x = 0
@@ -64,8 +65,8 @@ class LocalizationVision(BasicThread):
 	def main(self, mask, pan):
 		p = []
 		for i in self.vector:
-			p.append(mask[tuple(i)])
-	
+			p.append(mask[int(i[1]*mask.shape[1]), int(i[0]*mask.shape[0])])
+		print self.vector
 		if self.count < self.frames:
 			self.vals += np.array(p)
 			self.count += 1
@@ -102,7 +103,7 @@ class LocalizationVision(BasicThread):
 					self.__step += 1
 					self.__observation['frame'] = self.__closing.morphologicalTransformations(self.__observation['frame'])
 			
-				self.__observation['frame'] = self.main(self.__observation['frame'], self.__observation['pos_pan'])
+				self.main(self.__observation['frame'], self.__observation['pos_pan'])
 			
 				if self._args.localization == True:
 					if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -110,6 +111,7 @@ class LocalizationVision(BasicThread):
 						self.__closing.show = False
 						self._args.localization = False
 						cv2.destroyAllWindows()
+			time.sleep(0.1)
 			self._pause()
 	
 	## finalize

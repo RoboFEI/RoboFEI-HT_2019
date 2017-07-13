@@ -74,7 +74,7 @@ class PointCalibration():
 				self.vector[self.clicks-1] = (float(self.mouseX)/self.img.shape[1], float(self.mouseY)/self.img.shape[0])
 
 		if self.clicks == 32:
-			np.save('vector', self.vector)
+			np.save('./Data/Vector', self.vector)
 			print "Saved archive with points."
 		else:
 			print "Points not saved."
@@ -87,7 +87,7 @@ class PointCalibration():
 		self.InitCap()
 
 		try:
-			self.vector = np.load('vector.npy')
+			self.vector = np.load('./Data/Vector.npy')
 		except:
 			self.PointGenerator()
 
