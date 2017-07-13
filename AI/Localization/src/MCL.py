@@ -126,7 +126,7 @@ class MonteCarlo():
         X = np.rint(np.log(cov[0,0])/np.log(10))
         Y = np.rint(np.log(cov[1,1])/np.log(10))
 
-        if P[0] >= 640:
+        if P[0] >= field[0][1]-400:
             if -45 <= P[2] and P[2] <= 45:
                 R[1] += X
             elif -135 <= P[2] and P[2] <= -45:
@@ -134,7 +134,7 @@ class MonteCarlo():
             elif 45 <= P[2] and P[2] <= 135:
                 R[2] += X
 
-        if P[0] <= 400:
+        if P[0] <= field[0][0]+400:
             if P[2] <= -135 or 135 <= P[2]:
                 R[1] += X
             elif -135 <= P[2] and P[2] <= -45:
@@ -143,7 +143,7 @@ class MonteCarlo():
                 R[0] += X
 
     
-        if P[1] <= 400:
+        if P[1] <= field[1][0]+400:
             if 45 <= P[2] and P[2] <= 135:
                 R[1] += Y
             elif -45 <= P[2] and P[2] <= 45:
@@ -151,7 +151,7 @@ class MonteCarlo():
             elif P[2] <= -135 or 135 <= P[2]:
                 R[2] += Y
 
-        if P[1] >= 340:
+        if P[1] >= field[1][1]-400:
             if -135 <= P[2] and P[2] <= -45:
                 R[1] += Y
             elif -45 <= P[2] and P[2] <= 45:
@@ -159,7 +159,6 @@ class MonteCarlo():
             elif P[2] <= -135 or 135 <= P[2]:
                 R[0] += Y
 
-        print R
         rand = np.random.random() * sum(R)
         if R[0] > rand:
             return -90
