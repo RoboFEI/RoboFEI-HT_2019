@@ -66,7 +66,7 @@ class LocalizationVision(BasicThread):
 		p = []
 		for i in self.vector:
 			p.append(mask[int(i[1]*mask.shape[1]), int(i[0]*mask.shape[0])])
-		print self.vector
+	
 		if self.count < self.frames:
 			self.vals += np.array(p)
 			self.count += 1
@@ -111,7 +111,7 @@ class LocalizationVision(BasicThread):
 						self.__closing.show = False
 						self._args.localization = False
 						cv2.destroyAllWindows()
-			time.sleep(0.1)
+			time.sleep(0.1) 
 			self._pause()
 	
 	## finalize

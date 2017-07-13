@@ -58,6 +58,12 @@ class CameraCapture(BasicThread):
 		self.__observation['focus'] = value
 		os.system("v4l2-ctl -d /dev/video" + str(self.__port) + " -c focus_absolute=" + str(self.__observation['focus']))
 	
+	## trackbarSaturation
+	# Responsible for reading the values of the trackbar.
+	def trackbarSaturation(self, value):
+		self.__observation['saturation'] = value
+		os.system("v4l2-ctl -d /dev/video" + str(self.__port) + " -c saturation=" + str(self.__observation['saturation']))
+	
 	## finalize
 	# Terminates the capture process and saves the generated information
 	def finalize(self):
@@ -78,13 +84,15 @@ class CameraCapture(BasicThread):
 		if self.__observation is -1:
 			self.__observation = {
 				'fps': 30,
-				'focus': 25
+				'focus': 25,
+				'saturation': 128,
 			}
 		
 		self.__camera, self.__port = self.cameraOpen()
 		
 		os.system("v4l2-ctl -d /dev/video" + str(self.__port) + " -c focus_auto=0")
 		os.system("v4l2-ctl -d /dev/video" + str(self.__port) + " -c focus_absolute=" + str(self.__observation['focus']))
+		os.system("v4l2-ctl -d /dev/video" + str(self.__port) + " -c saturation=" + str(self.__observation['saturation']))
 		
 		self.start()
 		
@@ -96,6 +104,7 @@ class CameraCapture(BasicThread):
 		if self._args.camera is True:
 			cv2.namedWindow('Camera parameters')
 			cv2.createTrackbar('focus', 'Camera parameters', self.__observation['focus'], 250, self.trackbarFocus)
+			cv2.createTrackbar('saturation', 'Camera parameters', self.__observation['saturation'], 255, self.trackbarSaturation)
 		
 		while self.__exe:
 			if self._args.camera == True or self._args.camera == 'off':
@@ -104,8 +113,8 @@ class CameraCapture(BasicThread):
 				start = time.time()
 			
 			ret, self.__observation['frame'] = self.__camera.read()
-			self.__observation['pos_tilt'] = 0
-			self.__observation['pos_pan'] = 0
+			self.__observation['pos_tilt'] = self._bkb.read_float('VISION_TILT_DEG')
+			self.__observation['pos_pan'] = self._bkb.read_float('VISION_PAN_DEG')
 			self.__observation['time'] = time.localtime()
 			
 			if self._args.camera == True:
