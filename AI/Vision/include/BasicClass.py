@@ -37,7 +37,6 @@ class BasicClass( ):
 	## Constructor class
 	@abstractmethod
 	def __init__(self, arg, name = None, func = None):
-		print 'Instantiating Basic Class'
 		self._args = arg
 		if name != None and func != None:
 			self._confini = ConfigIni(name, func)

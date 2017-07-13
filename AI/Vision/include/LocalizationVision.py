@@ -34,6 +34,7 @@ class LocalizationVision(BasicThread):
 	__step = None
 	
 	def __init__(self, arg):
+		print 'Initiating class localization'
 		super(LocalizationVision, self).__init__(arg)
 		
 		# Try to load the points, if it doesn't work, kill the process.
@@ -50,14 +51,17 @@ class LocalizationVision(BasicThread):
 		self.frames = 5
 		self.count = 0
 		
-		__green = ColorSegmentation('Green', None)
-		__closing = Morphology('Green', 'Closing', None)
+		self.__green = ColorSegmentation('Green', None)
+		self.__closing = Morphology('Green', 'Closing', None)
+		
+		self._pause()
+		self.start()
 		
 		if self._args.localization == True:
-			__green.show = True
-			__closing.show = True
+			self.__green.show = True
+			self.__closing.show = True
 		
-	def main(mask, pan):
+	def main(self, mask, pan):
 		p = []
 		for i in self.vector:
 			p.append(mask[tuple(i)])
@@ -81,21 +85,38 @@ class LocalizationVision(BasicThread):
 	def find(self, observation, step):
 		self.__observation = observation.copy()
 		self.__step = step
-		self.start()
+		self._resume()
 	
 	## run
 	def run(self):
-		if self.__step == 0:
-			self.__step += 1
-			self.__observation['frame'] = __green.segmentation(self.__observation['frame'])
-		
-		if self.__step == 1:
-			self.__step += 1
-			self.__observation['frame'] = __closing.morphologicalTransformations(self.__observation['frame'])
-		
-		self.__observation['frame'] = main(self.__observation['frame'], self.__observation['pos_pan'])
+		self._running = True
+		while self._running:
+			with self._pausethread:
+				if self._running == False:
+				  break
+				if self.__step == 0:
+					self.__step += 1
+					self.__observation['frame'] = self.__green.segmentation(self.__observation['frame'])
+			
+				if self.__step == 1:
+					self.__step += 1
+					self.__observation['frame'] = self.__closing.morphologicalTransformations(self.__observation['frame'])
+			
+				self.__observation['frame'] = self.main(self.__observation['frame'], self.__observation['pos_pan'])
+			
+				if self._args.localization == True:
+					if cv2.waitKey(1) & 0xFF == ord('q'):
+						self.__green.show = False
+						self.__closing.show = False
+						self._args.localization = False
+						cv2.destroyAllWindows()
+			self._pause()
 	
 	## finalize
 	def finalize(self):
-		__green.finalize()
-		__closing.finalize()
+		self._running = False
+		self._pausethread.notify()
+		self._pausethread.release()
+		self.join()
+		self.__green.finalize()
+		self.__closing.finalize()

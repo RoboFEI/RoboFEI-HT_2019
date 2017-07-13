@@ -23,7 +23,7 @@ class ColorSegmentation(BasicClass):
 	
 	## show
 	# Range maximum values.
-	show = True
+	show = False
 	
 	## upper
 	# Range maximum values.
@@ -56,13 +56,13 @@ class ColorSegmentation(BasicClass):
 				's_max': 255,
 				'v_max': 255,
 			}
-			# define range of color in HSV
-			self.__lower = np.array([0,0,0])
-			self.__upper = np.array([255,255,255])
+		# define range of color in HSV
+		self.__lower = np.array([self.__parameters['h_min'], self.__parameters['s_min'], self.__parameters['v_min']])
+		self.__upper = np.array([self.__parameters['h_max'], self.__parameters['s_max'], self.__parameters['v_max']])
 		
 	## trackbarHMin
 	# Trackbar control function.
-	def trackbarHMin(self, value):
+	def __trackbarHMin(self, value):
 		self.__parameters['h_min'] = min(
 			value, # Read trackbar value
 			self.__parameters['h_max'] - 1 # Minimum possible to be in range.
@@ -83,7 +83,7 @@ class ColorSegmentation(BasicClass):
 	
 	## trackbarHMax
 	# Trackbar control function.
-	def trackbarHMax(self, value):
+	def __trackbarHMax(self, value):
 		self.__parameters['h_max'] = max(
 			value, # Read trackbar value
 			self.__parameters['h_min'] + 1 # Maximum possible to be in range.
@@ -104,7 +104,7 @@ class ColorSegmentation(BasicClass):
 	
 	## trackbarSMin
 	# Trackbar control function.
-	def trackbarSMin(self, value):
+	def __trackbarSMin(self, value):
 		self.__parameters['s_min'] = min(
 			value, # Read trackbar value
 			self.__parameters['s_max'] - 1 # Minimum possible to be in range.
@@ -125,7 +125,7 @@ class ColorSegmentation(BasicClass):
 	
 	## trackbarSMax
 	# Trackbar control function.
-	def trackbarSMax(self, value):
+	def __trackbarSMax(self, value):
 		self.__parameters['s_max'] = max(
 			value, # Read trackbar value
 			self.__parameters['s_min'] + 1 # Maximum possible to be in range.
@@ -146,7 +146,7 @@ class ColorSegmentation(BasicClass):
 	
 	## trackbarVMin
 	# Trackbar control function.
-	def trackbarVMin(self, value):
+	def __trackbarVMin(self, value):
 		self.__parameters['v_min'] = min(
 			value, # Read trackbar value
 			self.__parameters['v_max'] - 1 # Minimum possible to be in range.
@@ -167,7 +167,7 @@ class ColorSegmentation(BasicClass):
 	
 	## trackbarVMax
 	# Trackbar control function.
-	def trackbarVMax(self, value):
+	def __trackbarVMax(self, value):
 		self.__parameters['v_max'] = max(
 			value, # Read trackbar value
 			self.__parameters['v_min'] + 1 # Maximum possible to be in range.
@@ -229,7 +229,7 @@ class ColorSegmentation(BasicClass):
 					self.__color + ' Segmentation',
 					self.__parameters['h_min'],
 					255,
-					self.trackbarHMin,
+					self.__trackbarHMin,
 				)
 	
 				cv2.createTrackbar(
@@ -237,7 +237,7 @@ class ColorSegmentation(BasicClass):
 					self.__color + ' Segmentation',
 					self.__parameters['h_max'],
 					255,
-					self.trackbarHMax,
+					self.__trackbarHMax,
 				)
 	
 				cv2.createTrackbar(
@@ -245,7 +245,7 @@ class ColorSegmentation(BasicClass):
 					self.__color + ' Segmentation',
 					self.__parameters['s_min'],
 					255,
-					self.trackbarSMin,
+					self.__trackbarSMin,
 				)
 	
 				cv2.createTrackbar(
@@ -253,7 +253,7 @@ class ColorSegmentation(BasicClass):
 					self.__color + ' Segmentation',
 					self.__parameters['s_max'],
 					255,
-					self.trackbarSMax,
+					self.__trackbarSMax,
 				)
 	
 				cv2.createTrackbar(
@@ -261,7 +261,7 @@ class ColorSegmentation(BasicClass):
 					self.__color + ' Segmentation',
 					self.__parameters['v_min'],
 					255,
-					self.trackbarVMin,
+					self.__trackbarVMin,
 				)
 	
 				cv2.createTrackbar(
@@ -269,7 +269,7 @@ class ColorSegmentation(BasicClass):
 					self.__color + ' Segmentation',
 					self.__parameters['v_max'],
 					255,
-					self.trackbarVMax,
+					self.__trackbarVMax,
 				)
 			
 			return mask
