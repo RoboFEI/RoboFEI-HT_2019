@@ -5,7 +5,7 @@
 
 env/
 build/
-AI/Vision/Data/*.ini
+AI/Vision/Data/*
 AI/Control/Data/*.ini
 AI/Control/Data/*.bin
 AI/Vision/src/.thresholds
