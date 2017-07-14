@@ -22,3 +22,5 @@ class VisionException(Exception):
 			print 'Unable to connect to port'
 		elif numbererror == 3:
 			print 'Process kill command detected'
+		elif numbererror == 4:
+			print 'Could not connect to servos'

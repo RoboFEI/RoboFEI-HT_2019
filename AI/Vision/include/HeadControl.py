@@ -12,7 +12,7 @@ import time
 
 # Used class developed by RoboFEI-HT
 from BasicThread import * # Base class with primary functions
-from Servo import * # 
+from Servo import * #
 
 ## Class HeadControl
 # .
@@ -40,7 +40,7 @@ class HeadControl(BasicThread):
 	def __init__(self, arg):
 		super(HeadControl, self).__init__(arg, 'Head' , 'parameters')
 		
-		self.__observation = self.self._confini.read()
+		self.__observation = self._confini.read()
 		if self.__observation is -1:
 			self.__observation = {
 				'frequency': 1000,
