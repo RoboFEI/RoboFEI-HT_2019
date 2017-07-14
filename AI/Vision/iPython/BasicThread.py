@@ -56,12 +56,16 @@ class BasicThread(BasicClass, Thread):
 		
 	## pause
 	def _pause(self):
+		print 'ini pause'
 		self._pausethread.acquire()
 		self.waitthread.notify()
 		self.waitthread.release()
+		print 'fim pause'
 	
 	## resume
 	def _resume(self):
+		print 'ini resume'
 		self.waitthread.acquire()
 		self._pausethread.notify()
 		self._pausethread.release()
+		print 'fim resume'
