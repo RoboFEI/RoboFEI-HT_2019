@@ -26,6 +26,7 @@ sys.path.append('./src')
 from CameraCapture import * # Class responsible for performing the observation of domain
 from LocalizationVision import * # Class responsible for performing the observation of domain
 from MainFunctions import * # Declaration the main functions
+from HeadControl import * # 
 
 # ---- Main Code ----
 
@@ -33,9 +34,21 @@ from MainFunctions import * # Declaration the main functions
 
 killedProcess() # Recognize external kill
 
-camera = CameraCapture(args) # Object responsible for the camera
-localization = LocalizationVision(args)
-head = HeadControl(args)
+try:
+	camera = CameraCapture(args) # Object responsible for the camera
+except VisionException as e:
+	exit()
+try:
+	localization = LocalizationVision(args)
+except VisionException as e:
+	camera.finalize()
+	exit()
+try:
+	head = HeadControl(args)
+except VisionException as e:
+	localization.finalize()
+	camera.finalize()
+	exit()
 
 # Main loop
 
@@ -48,16 +61,15 @@ while True:
 		localization.find(observation, 0)
 		with localization.waitthread:
 			pass
-		print 'Passou'
 	except KeyboardInterrupt:
 		os.system('clear') # Cleaning terminal
 		print "Keyboard interrupt detected"
 		break
 	except VisionException as e:
-		if e.numbererror == 3:
-			break
+		break
 
 # Finishing processes
 
+head.finalize()
 localization.finalize()
 camera.finalize()
