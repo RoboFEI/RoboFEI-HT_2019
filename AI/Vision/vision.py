@@ -61,16 +61,15 @@ while True:
 		localization.find(observation, 0)
 		with localization.waitthread:
 			pass
-		print 'Passou'
 	except KeyboardInterrupt:
 		os.system('clear') # Cleaning terminal
 		print "Keyboard interrupt detected"
 		break
 	except VisionException as e:
-		if e.numbererror == 3:
-			break
+		break
 
 # Finishing processes
 
+head.finalize()
 localization.finalize()
 camera.finalize()

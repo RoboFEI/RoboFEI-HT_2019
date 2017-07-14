@@ -13,6 +13,9 @@ class VisionException(Exception):
 	## Constructor Class
 	def __init__(self, numbererror, message):
 		self.numbererror = numbererror
+		if numbererror == 5:
+			print 'Solicitação encerramento de processo pela thread', message
+			return
 		print 'Vision System Error:', 
 		if numbererror == 0:
 			print 'Could not read XML file for', message, 'detection'
