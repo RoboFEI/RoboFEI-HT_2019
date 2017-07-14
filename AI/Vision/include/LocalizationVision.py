@@ -63,24 +63,25 @@ class LocalizationVision(BasicThread):
 			self.__closing.show = True
 		
 	def main(self, mask, pan):
-		p = []
-		for i in self.vector:
-			p.append(mask[int(i[1]*mask.shape[1]), int(i[0]*mask.shape[0])])
-	
-		if self.count < self.frames:
-			self.vals += np.array(p)
-			self.count += 1
-		else:
-			self.vals /= self.frames * 255.
-			x = np.rint(self.vals)
-			s = np.mean(np.abs(self.vals-x))
-	
-			self._bkb.write_int('iVISION_FIELD', write(x))
-			self._bkb.write_float('fVISION_FIELD', int(pan)+s)
-	
-			self.vals = np.zeros(32)
-			self.frames = 5
-			self.count = 0
+		if np.abs(pan - self._bkb.read_int('DECISION_LOCALIZATION')) < 1:
+			p = []
+			for i in self.vector:
+				p.append(mask[int(i[1]*mask.shape[1]), int(i[0]*mask.shape[0])])
+		
+			if self.count < self.frames:
+				self.vals += np.array(p)
+				self.count += 1
+			else:
+				self.vals /= self.frames * 255.
+				x = np.rint(self.vals)
+				s = np.mean(np.abs(self.vals-x))
+		
+				self._bkb.write_int('iVISION_FIELD', write(x))
+				self._bkb.write_float('fVISION_FIELD', int(pan)+s)
+		
+				self.vals = np.zeros(32)
+				self.frames = 5
+				self.count = 0
 	
 	## find
 	def find(self, observation, step):
