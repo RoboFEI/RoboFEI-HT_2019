@@ -35,6 +35,7 @@ killedProcess() # Recognize external kill
 
 camera = CameraCapture(args) # Object responsible for the camera
 localization = LocalizationVision(args)
+head = HeadControl(args)
 
 # Main loop
 
