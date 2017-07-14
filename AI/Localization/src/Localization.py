@@ -54,10 +54,10 @@ class Localization():
         self.timestamp = time.time()
 
         # Clears the variables in the blackboard
-        self.bkb.write_float(self.Mem, 'VISION_FIRST_GOALPOST', -999)
-        self.bkb.write_float(self.Mem, 'VISION_SECOND_GOALPOST', -999)
-        self.bkb.write_float(self.Mem, 'VISION_THIRD_GOALPOST', -999)
-        self.bkb.write_float(self.Mem, 'VISION_FOURTH_GOALPOST', -999)
+        # self.bkb.write_float(self.Mem, 'VISION_FIRST_GOALPOST', -999)
+        # self.bkb.write_float(self.Mem, 'VISION_SECOND_GOALPOST', -999)
+        # self.bkb.write_float(self.Mem, 'VISION_THIRD_GOALPOST', -999)
+        # self.bkb.write_float(self.Mem, 'VISION_FOURTH_GOALPOST', -999)
         self.bkb.write_int(self.Mem, 'iVISION_FIELD', 0)
         self.bkb.write_float(self.Mem, 'fVISION_FIELD', 0)
 
@@ -78,6 +78,7 @@ class Localization():
         hp = -999
         self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', -999)
         weight = 1
+        upflag = False
 
         # Main loop
         while True:
@@ -94,14 +95,14 @@ class Localization():
 
             # Gets the measured variable from the blackboard,
             # and free them.
-            landmarks.append(self.bkb.read_float(self.Mem, 'VISION_FIRST_GOALPOST'))
-            self.bkb.write_float(self.Mem, 'VISION_FIRST_GOALPOST', -999)
-            landmarks.append(self.bkb.read_float(self.Mem, 'VISION_SECOND_GOALPOST'))
-            self.bkb.write_float(self.Mem, 'VISION_SECOND_GOALPOST', -999)
-            landmarks.append(self.bkb.read_float(self.Mem, 'VISION_THIRD_GOALPOST'))
-            self.bkb.write_float(self.Mem, 'VISION_THIRD_GOALPOST', -999)
-            landmarks.append(self.bkb.read_float(self.Mem, 'VISION_FOURTH_GOALPOST'))
-            self.bkb.write_float(self.Mem, 'VISION_FOURTH_GOALPOST', -999)
+            # landmarks.append(self.bkb.read_float(self.Mem, 'VISION_FIRST_GOALPOST'))
+            # self.bkb.write_float(self.Mem, 'VISION_FIRST_GOALPOST', -999)
+            # landmarks.append(self.bkb.read_float(self.Mem, 'VISION_SECOND_GOALPOST'))
+            # self.bkb.write_float(self.Mem, 'VISION_SECOND_GOALPOST', -999)
+            # landmarks.append(self.bkb.read_float(self.Mem, 'VISION_THIRD_GOALPOST'))
+            # self.bkb.write_float(self.Mem, 'VISION_THIRD_GOALPOST', -999)
+            # landmarks.append(self.bkb.read_float(self.Mem, 'VISION_FOURTH_GOALPOST'))
+            # self.bkb.write_float(self.Mem, 'VISION_FOURTH_GOALPOST', -999)
 
             orientation = self.bkb.read_float(self.Mem, 'IMU_EULER_Z')
 
@@ -115,8 +116,8 @@ class Localization():
                 self.bkb.write_int(self.Mem, 'iVISION_FIELD', 0)
                 self.bkb.write_float(self.Mem, 'fVISION_FIELD', 0)
 
-            if sum(landmarks) == - 4 * 999:
-                landmarks = None
+            # if sum(landmarks) == - 4 * 999:
+            #     landmarks = None
 
             # fieldpoints = None
             # orientation = None
@@ -129,9 +130,26 @@ class Localization():
             
             pos, std = PF.main(u,z)
 
-            if fieldpoints != None or self.bkb.read_int(self.Mem, 'DECISION_LOCALIZATION') == 999:
+            if std > 7 and upflag:
+                upflag = False
+            elif std < 3 and not upflag:
+                upflag = True
+
+            if upflag:
+                hp = -999
+                self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', -999)
+            elif fieldpoints != None or self.bkb.read_int(self.Mem, 'DECISION_LOCALIZATION') == 999:
                 hp = PF.PerfectInformation(u, self.bkb.read_float(self.Mem, 'VISION_PAN_DEG'), 5)
                 self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', hp)
+
+            print '\n', std, upflag, self.bkb.read_int(self.Mem, 'DECISION_LOCALIZATION')
+
+            # hp = self.bkb.read_int(self.Mem, 'DECISION_LOCALIZATION')
+            # if fieldpoints != None and hp == -999 and std > 7 or hp == 999:
+            #     hp = PF.PerfectInformation(u, self.bkb.read_float(self.Mem, 'VISION_PAN_DEG'), 5)
+            #     self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', hp)
+            # elif fieldpoints != None and hp == -999 and std < 3:
+            #     self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', -999)
 
             if PF.meanweight < 1:                
                 weight = PF.meanweight

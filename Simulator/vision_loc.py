@@ -46,6 +46,8 @@ class VISION():
         self.index = 0
         self.count = -1
 
+        self.timestamp = 0
+
         # self.robot.x = 350
         # self.robot.y = 350
         # self.robot.rotate = 0
@@ -78,13 +80,16 @@ class VISION():
 
         if hp == -999:
             # y = [90,60,30,0,-30,-60,-90]
-            y = [90, 0, -90, 0]
+            # y = [90, 0, -90, 0]
+            y = [0]
             x = y[self.behave]
             self.pan(pos=x)
 
             if np.abs(self.headpan-x) < 1:
                 self.behave = (self.behave + 1) % len(y)
-                self.get = True
+                if time.time() - self.timestamp >= 1:
+                    self.get = True
+                    self.timestamp = time.time()
         else:
             if hp != 999:
                 self.pan(pos=hp)
@@ -237,21 +242,21 @@ class VISION():
     jump = True
     change = True
     def VisionProcess(self):
-        if time.time() % 60 < 1:
-            if self.jump:
-                self.robot.x = np.random.randint(70, 970)
-                self.robot.y = np.random.randint(70, 670)
-                self.robot.rotate = np.random.randint(-180, 180)
-                self.jump = False
-        else:
-            self.jump = True
+        # if time.time() % 60 < 1:
+        #     if self.jump:
+        #         self.robot.x = np.random.randint(70, 970)
+        #         self.robot.y = np.random.randint(70, 670)
+        #         self.robot.rotate = np.random.randint(-180, 180)
+        #         self.jump = False
+        # else:
+        #     self.jump = True
 
-        if time.time() % 13 < 1:
-            if self.change:
-                self.bkb.write_int(self.Mem, 'DECISION_ACTION_A', [11, 1, 0, 8, 11, 17, 0, 18, 11, 6, 0, 7, 11, 2, 0, 3, 11, 9, 0, 14][np.random.randint(12)])
-                self.change = False
-        else:
-            self.change = True
+        # if time.time() % 13 < 1:
+        #     if self.change:
+        #         self.bkb.write_int(self.Mem, 'DECISION_ACTION_A', [11, 1, 0, 8, 11, 17, 0, 18, 11, 6, 0, 7, 11, 2, 0, 3, 11, 9, 0, 14][np.random.randint(12)])
+        #         self.change = False
+        # else:
+        #     self.change = True
 
         # if self.count == 0:
         #     self.text += str(time.time()) + " " + str(self.robot.x) + " " + str(self.robot.y) + " " + str(self.robot.rotate) + "\n"
