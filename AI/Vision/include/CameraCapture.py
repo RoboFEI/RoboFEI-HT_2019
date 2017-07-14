@@ -54,13 +54,13 @@ class CameraCapture(BasicThread):
 	
 	## trackbarFocus
 	# Responsible for reading the values of the trackbar.
-	def trackbarFocus(self, value):
+	def __trackbarFocus(self, value):
 		self.__observation['focus'] = value
 		os.system("v4l2-ctl -d /dev/video" + str(self.__port) + " -c focus_absolute=" + str(self.__observation['focus']))
 	
 	## trackbarSaturation
 	# Responsible for reading the values of the trackbar.
-	def trackbarSaturation(self, value):
+	def __trackbarSaturation(self, value):
 		self.__observation['saturation'] = value
 		os.system("v4l2-ctl -d /dev/video" + str(self.__port) + " -c saturation=" + str(self.__observation['saturation']))
 	
@@ -103,8 +103,8 @@ class CameraCapture(BasicThread):
 		
 		if self._args.camera is True:
 			cv2.namedWindow('Camera parameters')
-			cv2.createTrackbar('focus', 'Camera parameters', self.__observation['focus'], 250, self.trackbarFocus)
-			cv2.createTrackbar('saturation', 'Camera parameters', self.__observation['saturation'], 255, self.trackbarSaturation)
+			cv2.createTrackbar('focus', 'Camera parameters', self.__observation['focus'], 250, self.__trackbarFocus)
+			cv2.createTrackbar('saturation', 'Camera parameters', self.__observation['saturation'], 255, self.__trackbarSaturation)
 		
 		while self.__exe:
 			if self._args.camera == True or self._args.camera == 'off':
