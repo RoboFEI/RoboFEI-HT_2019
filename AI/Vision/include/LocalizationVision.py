@@ -63,7 +63,7 @@ class LocalizationVision(BasicThread):
 			self.__closing.show = True
 		
 	def main(self, mask, pan):
-		if np.abs(pan - self._bkb.read_int('DECISION_LOCALIZATION')) < 1:
+		if np.abs(pan - self._bkb.read_int('DECISION_LOCALIZATION')) < 1 or np.abs(pan) < 1 and self._bkb.read_int('DECISION_LOCALIZATION') == -999:
 			p = []
 			for i in self.vector:
 				p.append(mask[int(i[1]*mask.shape[1]), int(i[0]*mask.shape[0])])
