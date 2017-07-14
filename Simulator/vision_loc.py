@@ -33,7 +33,7 @@ class VISION():
         self.maxpan = 90 # Max pan
         self.minpan = -90 # Min pan
 
-        self.headspd = 30 # Max head speed, in degrees per second
+        self.headspd = 90 # Max head speed, in degrees per second
 
         # Observation points
         self.vpoints = v
