@@ -50,6 +50,7 @@ class LocalizationVision(BasicThread):
 		
 		self.vals = np.zeros(32)
 		self.frames = 5
+		self.ignore = 5
 		self.count = 0
 		
 		self.__green = ColorSegmentation('Green', None)
@@ -68,7 +69,9 @@ class LocalizationVision(BasicThread):
 			for i in self.vector:
 				p.append(mask[int(i[1]*mask.shape[1]), int(i[0]*mask.shape[0])])
 		
-			if self.count < self.frames:
+			if self.count < self.ignore:
+				self.count += 1
+			elif self.count < self.frames + self.ignore:
 				self.vals += np.array(p)
 				self.count += 1
 			else:

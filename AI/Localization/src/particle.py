@@ -290,7 +290,7 @@ class Particle(object):
                     aux = np.abs(ifield[i]-err)
                     w *= 0.99 * aux * ret[i] + 0.9 * (1-aux) * (1-ret[i]) + 0.2 * aux * (1-ret[i]) + 0.1 * (1-aux) * ret[i]
                 else: 
-                    w *= 0.99 * ifield[i] * ret[i] + 0.9 * (1-ifield[i]) * (1-ret[i]) + 0.2 * ifield[i] * (1-ret[i]) + 0.1 * (1-ifield[i]) * ret[i]
+                    w *= 0.99 * ifield[i] * ret[i] + 0.9 * (1-ifield[i]) * (1-ret[i]) + 0.5 * ifield[i] * (1-ret[i]) + 0.5 * (1-ifield[i]) * ret[i]
             
             w /= n
 

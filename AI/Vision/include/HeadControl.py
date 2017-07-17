@@ -27,6 +27,7 @@ class HeadControl(BasicThread):
 		'ID Tilt': 20,
 		'Maximum Torque': 34,
 		'Goal Position': 30,
+		'Present Position': 36,
 	}
 	
 	## head
@@ -82,10 +83,14 @@ class HeadControl(BasicThread):
 					self.__motor['Goal Position'],
 					self.__observation['center_tilt']
 				)
+			self._bkb.write_float('VISION_PAN_DEG',
+			(self.__observation['center_pan'] - self.__head.readWord(
+					self.__motor['ID Pan'],
+					self.__motor['Present Position']
+			))*300.0/1023)
 			time.sleep(1.0/self.__observation['frequency'])
 	
 	## finalize
-	# .
 	def finalize(self):
 		self._running = False
 		self.join()
