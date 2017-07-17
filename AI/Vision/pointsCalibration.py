@@ -2,6 +2,7 @@
 
 import cv2
 import numpy as np
+import os
 
 #--------------------------------------------------------------------------------------------------
 #   Class used for the vision system.
@@ -14,14 +15,19 @@ class PointCalibration():
 		self.cap = None
 		self.img = None
 		self.vector = None
-		self.mouse = None
+		self.mouseX = None
+		self.mouseY = None
 		self.clicks = 0
+		self.flag = True
 
 	#----------------------------------------------------------------------------------------------
 	#   Initializes the capture from camera.
 	#----------------------------------------------------------------------------------------------
 	def InitCap(self):
 		self.cap = cv2.VideoCapture(0)
+		self.cap.set(3, 1280)
+		self.cap.set(4, 720)
+		os.system("v4l2-ctl -d /dev/video0 -c focus_auto=0 && v4l2-ctl -d /dev/video0 -c focus_absolute=0")
 
 	#----------------------------------------------------------------------------------------------
 	#   Captures a image with the camera.
@@ -44,12 +50,18 @@ class PointCalibration():
 		
 		print "\nPress s to skip.\n"
 
+		self.flag = True
+
 		while self.clicks < 32:
+			if self.flag:
+				self.flag = False
+				print 'The point is', v[self.clicks][0], 'cm, at', v[self.clicks][1], 'degrees.'
+
 			try:
 				self.Capture()
 				for p in self.vector:
 					if np.sum(p) != 0:
-						cv2.circle(self.img, (int(p[1]), int(p[0])), 2, (255,255,0), -1)
+						cv2.circle(self.img, (int(p[0]*self.img.shape[1]), int(p[1]*self.img.shape[0])), 2, (255,255,0), -1)
 				cv2.imshow('ROBOT VISION', self.img)
 			except:
 				print "-= ERROR ON METHOD PointGenerator =-"
@@ -59,13 +71,13 @@ class PointCalibration():
 				break
 
 			if self.clicks > 0:
-				self.vector[self.clicks-1] = self.mouse
+				self.vector[self.clicks-1] = (float(self.mouseX)/self.img.shape[1], float(self.mouseY)/self.img.shape[0])
 
 		if self.clicks == 32:
 			np.save('./Data/Vector', self.vector)
 			print "Saved archive with points."
 		else:
-			print "Points where not saved."
+			print "Points not saved."
 			exit()
 
 	#----------------------------------------------------------------------------------------------
@@ -77,7 +89,11 @@ class PointCalibration():
 		try:
 			self.vector = np.load('./Data/Vector.npy')
 		except:
-			self.PointGenerator()
+			if os.path.islink("./Data/Vector.npy"):
+				self.PointGenerator()
+			else:
+				print "Not exist link"
+				exit()
 
 		print "\nIf changes are needed press n,\nelse press ESC or q.\n"
 
@@ -85,7 +101,7 @@ class PointCalibration():
 			try:
 				self.Capture()
 				for p in self.vector:
-					cv2.circle(self.img, (int(p[1]), int(p[0])), 2, (255,255,0), -1)
+					cv2.circle(self.img, (int(p[0]*self.img.shape[1]), int(p[1]*self.img.shape[0])), 2, (255,255,0), -1)
 				cv2.imshow('ROBOT VISION', self.img)
 			except:
 				print "-= ERROR ON METHOD Main =-"
@@ -106,9 +122,52 @@ class PointCalibration():
 	#--------------------------------------------------------------------------------------------------
 	def getpoint(self, event, x, y, flags, param):
 		if event == cv2.EVENT_LBUTTONDOWN and self.clicks < 32:
-			self.mouse = (y,x)
+			self.mouseX = x
+			self.mouseY = y
 			self.clicks += 1
-			print self.clicks, self.mouse
+			self.flag = True
+			print self.clicks, self.mouseX, self.mouseY
+
+v = [(130,45),
+	 
+	 (160,-45),
+
+	 (330,30),
+	 (270,30),
+	 (180,30),
+	 (140,30),
+
+	 (360,-30),
+	 (280,-30),
+	 (200,-30),
+	 (150,-30),
+
+	 (400,20),
+	 (360,20),
+	 (290,20),
+	 (220,20),
+	 (150,20),
+
+	 (420,-20),
+	 (370,-20),
+	 (300,-20),
+	 (230,-20),
+	 (160,-20),
+
+	 (370,10),
+	 (320,10),
+	 (250,10),
+	 (180,10),
+
+	 (380,-10),
+	 (340,-10),
+	 (260,-10),
+	 (190,-10),
+	 
+	 (400,0),
+	 (300,0),
+	 (200,0),
+	 (100,0)]
 
 P = PointCalibration()
 P.Main()

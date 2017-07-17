@@ -50,7 +50,7 @@ class MINDREADER():
             print "fVISION_FIELD", self.bkb.read_float(self.Mem, 'fVISION_FIELD')
             # print "iVISION_FIELD", self.bkb.read_int(self.Mem, 'iVISION_FIELD')
             # print "fVISION_FIELD", self.bkb.read_float(self.Mem, 'fVISION_FIELD')
-            # print "IMU_EULER_Z", self.bkb.read_float(self.Mem, 'IMU_EULER_Z')
+            print "IMU_EULER_Z", self.bkb.read_float(self.Mem, 'IMU_EULER_Z')
             # print 'VISION_PAN_DEG', self.bkb.read_float(self.Mem, 'VISION_PAN_DEG')
             # x = self.bkb.read_int(self.Mem, 'VISION_FIELD')
             # v = read(x)

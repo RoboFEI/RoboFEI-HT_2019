@@ -56,6 +56,8 @@ vpoints = [(130,45),
 # Vars used to compute the particles likelihood
 maxWdelta = None
 
+field = ((0, 1040), (0, 740), (-180, 180))
+
 #--------------------------------------------------------------------------------------------------
 #   Class implementing a particle used on Particle Filter Localization
 #--------------------------------------------------------------------------------------------------
@@ -89,7 +91,9 @@ class Particle(object):
         # Note5: spread determines how much the particles will spread
 
         if regions == None:
-            self.regions = ((0, 1040), (0, 740), (-180, 180))
+            self.regions = field
+        else:
+            self.regions = regions
 
         if x != None:
             self.x = x

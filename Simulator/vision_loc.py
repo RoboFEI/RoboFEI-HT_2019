@@ -33,7 +33,7 @@ class VISION():
         self.maxpan = 90 # Max pan
         self.minpan = -90 # Min pan
 
-        self.headspd = 30 # Max head speed, in degrees per second
+        self.headspd = 90 # Max head speed, in degrees per second
 
         # Observation points
         self.vpoints = v
@@ -46,9 +46,11 @@ class VISION():
         self.index = 0
         self.count = -1
 
-        self.robot.x = 350
-        self.robot.y = 350
-        self.robot.rotate = 0
+        self.timestamp = 0
+
+        # self.robot.x = 350
+        # self.robot.y = 350
+        # self.robot.rotate = 0
 
     # Changes the tilt's position
     def tilt(self, diff=None, pos=None):
@@ -78,13 +80,16 @@ class VISION():
 
         if hp == -999:
             # y = [90,60,30,0,-30,-60,-90]
-            y = [90, 0, -90, 0]
+            # y = [90, 0, -90, 0]
+            y = [0]
             x = y[self.behave]
             self.pan(pos=x)
 
             if np.abs(self.headpan-x) < 1:
                 self.behave = (self.behave + 1) % len(y)
-                self.get = True
+                if time.time() - self.timestamp >= 1:
+                    self.get = True
+                    self.timestamp = time.time()
         else:
             if hp != 999:
                 self.pan(pos=hp)
