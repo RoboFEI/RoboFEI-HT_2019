@@ -12,46 +12,46 @@ hrobot = 50
 htilt = 17.4
 
 # Distance and angles of the notable points
-vpoints = [(130,45),
-     
-           (160,-45),
+vpoints = [(390,45),
+           (110,45),
+         
+           (420,-45),
+           (140,-45),
 
-           (330,30),
-           (270,30),
-           (180,30),
-           (140,30),
+           (900,30),
+           (720,30),
+           (520,30),
+           (260,30),
 
-           (360,-30),
-           (280,-30),
-           (200,-30),
-           (150,-30),
+           (920,-30),
+           (750,-30),
+           (550,-30),
+           (290,-30),
 
-           (400,20),
-           (360,20),
-           (290,20),
-           (220,20),
-           (150,20),
+           (770,20),
+           (610,20),
+           (430,20),
+           (190,20),
 
-           (420,-20),
-           (370,-20),
-           (300,-20),
-           (230,-20),
-           (160,-20),
+           (800,-20),
+           (640,-20),
+           (450,-20),
+           (210,-20),
 
-           (370,10),
-           (320,10),
-           (250,10),
-           (180,10),
+           (690,10),
+           (530,10),
+           (360,10),
+           (130,10),
 
+           (710,-10),
+           (560,-10),
            (380,-10),
-           (340,-10),
-           (260,-10),
-           (190,-10),
-             
-           (400,0),
-           (300,0),
-           (200,0),
-           (100,0)]
+           (150,-10),
+         
+           (850,0),
+           (500,0),
+           (320,0),
+           (50,0)]
 
 # Vars used to compute the particles likelihood
 maxWdelta = None
@@ -149,7 +149,7 @@ class Particle(object):
 
         self.radius = (10,50)
 
-        self.SigmaIMU = 10
+        self.SigmaIMU = 20
 
         self.wfactor = wfactor # Used in order to implement the motion error.
 
@@ -290,7 +290,7 @@ class Particle(object):
                     aux = np.abs(ifield[i]-err)
                     w *= 0.99 * aux * ret[i] + 0.9 * (1-aux) * (1-ret[i]) + 0.2 * aux * (1-ret[i]) + 0.1 * (1-aux) * ret[i]
                 else: 
-                    w *= 0.99 * ifield[i] * ret[i] + 0.9 * (1-ifield[i]) * (1-ret[i]) + 0.5 * ifield[i] * (1-ret[i]) + 0.5 * (1-ifield[i]) * ret[i]
+                    w *= 0.99 * ifield[i] * ret[i] + 0.9 * (1-ifield[i]) * (1-ret[i]) + (0.3+err) * ifield[i] * (1-ret[i]) + (0.3+err) * (1-ifield[i]) * ret[i]
             
             w /= n
 
@@ -305,7 +305,7 @@ class Particle(object):
         self.weight = max(weight, 1e-300)
 
         if landmarks != None or field != None or orientation != None:
-            self.wfactor = max(min(np.log(self.weight)/np.log(1e-20), 2.), 0.)
+            self.wfactor = max(min(np.log(self.weight)/np.log(1e-10), 2.), 0.)
         
         # self.wfactor = 0.5
         return self.weight

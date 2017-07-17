@@ -127,7 +127,7 @@ class Localization():
                 z = [None, None, None]
             else:
                 z = [landmarks, fieldpoints, orientation]
-            
+
             pos, std = PF.main(u,z)
 
             if std > 7 and upflag:
