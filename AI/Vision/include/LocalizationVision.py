@@ -78,9 +78,15 @@ class LocalizationVision(BasicThread):
 				self.vals /= self.frames * 255.
 				x = np.rint(self.vals)
 				s = np.mean(np.abs(self.vals-x))
+				if pan < -45:
+				    aux = -90 - s
+				elif pan > 45:
+				    aux = 90 + s
+				else:
+				    aux = s
 		
 				self._bkb.write_int('iVISION_FIELD', write(x))
-				self._bkb.write_float('fVISION_FIELD', int(pan)+s)
+				self._bkb.write_float('fVISION_FIELD', aux)
 		
 				self.vals = np.zeros(32)
 				self.frames = 5

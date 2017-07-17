@@ -129,6 +129,8 @@ class Localization():
                 z = [landmarks, fieldpoints, orientation]
 
             pos, std = PF.main(u,z)
+            if fieldpoints != None:
+                print fieldpoints
 
             if std > 7 and upflag:
                 upflag = False
@@ -196,9 +198,9 @@ class Localization():
             return (0,-10,0,1,self.dt()) # Walk Left
         elif Action == 7:
             return (0,10,0,1,self.dt()) # Walk Right
-        elif Action == 2:
-            return (0,0,18.7,1,self.dt()) # Turn Right
         elif Action == 3:
+            return (0,0,18.7,1,self.dt()) # Turn Right
+        elif Action == 2:
             return (0,0,-18.7,1,self.dt()) # Turn Left
         elif Action == 9:
             return (0,-10,-20,1,self.dt()) # Turn Left Around the Ball

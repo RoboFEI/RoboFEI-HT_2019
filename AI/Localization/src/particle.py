@@ -57,7 +57,7 @@ vpoints = [
 # Vars used to compute the particles likelihood
 maxWdelta = None
 
-field = ((0, 1040), (0, 740), (-180, 180))
+field = ((8, 1032), (60, 680), (-180, 180))
 
 #--------------------------------------------------------------------------------------------------
 #   Class implementing a particle used on Particle Filter Localization
@@ -121,9 +121,9 @@ class Particle(object):
 
         # Motion error coefficients
         if factors == None:
-            self.factors = [1, 2, 1, 500, 10,  1, 2, 1, 500, 15,  1, 2, 1, 100, 10]
+            # self.factors = [1, 2, 1, 300, 10,  1, 2, 1, 300, 15,  1, 2, 1, 70, 10]
             # self.factors = 15*[0]
-            # self.factors = [1, 2, 1, 0, 10,  1, 2, 1, 0, 20,  1, 2, 1, 0, 10]
+            self.factors = [1, 2, 1, 0, 10,  1, 2, 1, 0, 20,  1, 2, 1, 0, 10]
             # self.factors = [0, 0, 0, 0, 10,  0, 0, 0, 0, 20,  0, 0, 0, 0, 10]
             # self.factors = [0, 0, 0, 50, 0,  0, 0, 0, 50, 0,  0, 0, 0, 10, 0]
         else:
@@ -275,23 +275,22 @@ class Particle(object):
                 i = self.x + k[0] * np.cos(p) # Computes the x position of the point
                 j = self.y + k[0] * np.sin(p) # Computes the y position of the point
 
-                ret.append(prob(i, j, k[0], 0.1*k[0], k[1])) # Computes the probability of the point been inside the field
+                r = self.regions
+
+                ret.append(prob(i, j, k[0], 0.1*k[0], k[1], r[0][0], r[0][1], r[1][0], r[1][1])) # Computes the probability of the point been inside the field
 
             # Computes a normalization value
             n = 1
             for i in xrange(32):
-                n *= 0.99 * ifield[i] + 0.9 * (1-ifield[i])
+                n *= 0.9 * ifield[i] + 0.9 * (1-ifield[i])
 
             # Computes the normalized weight
             w = 1
             for i in xrange(32):
                 if ifield[i] == ret[i]:
-                    w *= 0.99 * ifield[i] + 0.9 * (1-ifield[i]) 
-                elif np.abs(ifield[i]-0.5) != 0.5:
-                    aux = np.abs(ifield[i]-err)
-                    w *= 0.99 * aux * ret[i] + 0.9 * (1-aux) * (1-ret[i]) + 0.2 * aux * (1-ret[i]) + 0.1 * (1-aux) * ret[i]
+                    w *= 0.9
                 else: 
-                    w *= 0.99 * ifield[i] * ret[i] + 0.9 * (1-ifield[i]) * (1-ret[i]) + (0.3+err) * ifield[i] * (1-ret[i]) + (0.3+err) * (1-ifield[i]) * ret[i]
+                    w *= 0.9 * ifield[i] * ret[i] + 0.9 * (1-ifield[i]) * (1-ret[i]) + (0.3+err) * ifield[i] * (1-ret[i]) + (0.3+err) * (1-ifield[i]) * ret[i]
             
             w /= n
 
@@ -301,7 +300,7 @@ class Particle(object):
 
         # If the IMU's orientation was given
         if orientation != None:
-            weight *= ComputeAngLikelihoodDeg(np.degrees(orientation), self.rotation, self.SigmaIMU)
+            weight *= ComputeAngLikelihoodDeg(np.degrees(orientation), self.rotation, self.SigmaIMU)/(np.sqrt(2*np.pi)*self.SigmaIMU)
 
         self.weight = max(weight, 1e-300)
 
@@ -323,7 +322,9 @@ class Particle(object):
             i = self.x + k[0] * np.cos(p) # Computes the x position of the point
             j = self.y + k[0] * np.sin(p) # Computes the y position of the point
 
-            if 0 <= i and i <= 1040 and 0 <= j and j <= 740:
+            r = self.regions
+
+            if r[0][0] <= i and i <= r[0][1] and r[1][0] <= j and j <= r[1][1]:
                 ret.append(1)
             else:
                 ret.append(0)
