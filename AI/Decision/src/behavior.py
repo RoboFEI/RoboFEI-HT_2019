@@ -215,6 +215,18 @@ class TreatingRawData(object):
         return (-r,d)
 
 
+
+# posição dos robôs no campo.
+#    não é necessário alterar o lado para 1o e 2o tempo.
+#    a localização já faz isso automáticamente
+
+#   defense     middle-field    attack
+#   --------------------------------
+#   |       1       4       7      |    left
+#   | 0     2       5       8      |    center
+#   |       3       6       9      |    right
+#   --------------------------------
+
     def region_field(self,region):
         if region == 1:
             return (160,120)
@@ -288,6 +300,55 @@ class TreatingRawData(object):
                 self.set_walk_forward()
 
 
+    # Aligns the robot with the ball - to the target position x_target, y_target, theta_target
+    # s_vel defines if walks fast or slow.
+    def align(self):
+        print '                         aligning'
+
+        goal_x = 1000
+        goal_y = 355
+
+        r_pos_x = self.bkb.read_int(self.mem, 'LOCALIZATION_X')
+        r_pos_y = self.bkb.read_int(self.mem, 'LOCALIZATION_Y')
+        # r_pos_theta = self.bkb.read_int(self.mem, 'LOCALIZATION_THETA')
+        r_pos_theta = self.get_orientation()
+
+        rot, dist = self.calc_d_r(r_pos_x, r_pos_y, goal_x, goal_y)
+
+        rotate = r_pos_theta
+
+        if rotate > 180 and rotate < 360:
+            rotate = rotate - 360
+        rot = rot - rotate
+
+        if rot > 180:
+            rot = rot - 360
+
+        elif rot < -180:
+            rot = rot + 360
+
+        angle = rot
+
+        # ref = view_rot_aux - rotate
+
+
+        # print 'angle: ',angle
+        # print 'dist: ',dist
+
+        #print '             angle ',angle
+
+        if angle > 15 and angle < 165:
+            self.set_revolve_around_ball_anticlockwise()
+        elif angle < -15 and angle > -165:
+            self.set_revolve_around_ball_clockwise()
+        else:
+            return
+        turn = abs(angle)/20
+        #verificar no robo real se o tempo é suficiente para rotacionar
+        if turn >= 2:
+            time.sleep(2)
+        else:
+            time.sleep(turn)
 
     # Dribles the robot with the ball - to the target position x_target, y_target, theta_target
     # s_vel defines if walks fast or slow.
@@ -430,8 +491,7 @@ class LocaLoca(TreatingRawData):
             if self.get_search_status() == 1: # 1 - vision lost
                 print 'vision lost'
                 self.set_stand_still()
-
-                #self.set_vision_search()
+                self.set_vision_search()
                 #self.set_turn_right()
             elif self.get_search_status() == 0: # 0 - object found
 
@@ -488,6 +548,7 @@ class LocaLoca(TreatingRawData):
 
                             if self.get_dist_ball() < distance_to_kick and self.get_motor_pan_degrees() <= 0:
                                 if self.get_orientation() <= 90 and self.get_orientation() >= -90:
+                                    self.align()
                                     self.set_kick_right()
                                 elif self.get_orientation() > 90:
                                     #revolve_clockwise:
@@ -499,6 +560,7 @@ class LocaLoca(TreatingRawData):
                                     #########
                             elif self.get_dist_ball() < distance_to_kick and self.get_motor_pan_degrees() > 0:
                                 if self.get_orientation() <= 90 and self.get_orientation() >= -90:
+                                    self.align()
                                     self.set_kick_left()
                                 elif self.get_orientation() > 90:
                                     #revolve_clockwise:

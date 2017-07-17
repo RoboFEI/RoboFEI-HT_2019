@@ -15,7 +15,7 @@ gnome-terminal --title "receiving" -e "python receiving.py"
 cd ../../Localization/src
 gnome-terminal --title "localization" -e "python Localization.py -g"
 cd ../../Decision/src
-gnome-terminal --title "decision naive" -e "python decision.py -g"
+gnome-terminal --title "decision naive" -e "python decision.py -l"
 cd ../../build/Communication/
 gnome-terminal --title="referee" -x sh -c './communication' &
 cd ../../..
