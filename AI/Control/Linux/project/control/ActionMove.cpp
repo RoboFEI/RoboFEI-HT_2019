@@ -149,23 +149,98 @@ void ActionMove::goalkeeper(bool &stop_gait)
 
 //========================================================================
 //Chute fraco direito-----------------------------------------------------
-void ActionMove::kick_right_weak(bool &stop_gait)
+void ActionMove::kick_right_weak(CM730 *cm730, bool &stop_gait)
 {
-    write_int(mem, CONTROL_ACTION, 21);
+    write_int(mem, CONTROL_ACTION, 4);
     write_int(mem, CONTROL_MOVING, 1);
-    std::cout<<" | \e[38;5;45mChute fraco direito\e[0m"<<std::endl;
-    move_action(12, 0, stop_gait);
+    std::cout << " | \e[38;5;45mChute forte direito\e[0m" << std::endl;
+    move_action(1, 0, stop_gait);
+    while(Action::GetInstance()->IsRunning()) usleep(8*1000);
+    Action::GetInstance()->Start(60);
+    while(Action::GetInstance()->IsRunning()) usleep(8*1000);
+    Action::GetInstance()->Stop();
+    Action::GetInstance()->m_Joint.SetEnableBody(false);
+    MotionManager::GetInstance()->SetEnable(false);
+
+    //getchar();
+
+    // Velocidades
+    cm730->WriteWord(11, 32, 985, &erro);
+    cm730->WriteWord(13, 32, 926, &erro);
+    cm730->WriteWord(15, 32, 1023, &erro);
+    cm730->WriteWord(17, 32, 97, &erro);
+
+    cm730->WriteWord(11, 30, MotionManager::GetInstance()->m_Offset[11]+200, &erro);
+    cm730->WriteWord(13, 30, MotionManager::GetInstance()->m_Offset[13]+614, &erro);
+    cm730->WriteWord(15, 30, MotionManager::GetInstance()->m_Offset[15]+448, &erro);
+    cm730->WriteWord(17, 30, MotionManager::GetInstance()->m_Offset[17]+545, &erro);
+                    
+        //Esperando  completar o movimento
+    unsigned int count_s = 0;
+    cm730->ReadWord(15, 46, &value, 0);
+    while(value!=0)
+    {
+        count_s++;
+        cm730->ReadWord(15, 46, &value, 0);
+        usleep(8*1000);
+        if(count_s>100)
+            break; //Evita de ficar parado neste laco
+    }
+    //std::cout<<count_s<<std::endl;
+
+    Action::GetInstance()->m_Joint.SetEnableBody(true);
+    MotionManager::GetInstance()->SetEnable(true);
+    Action::GetInstance()->Start(61);
+    while(Action::GetInstance()->IsRunning()) usleep(8*1000);
+    stop_gait = 1;
     write_int(mem, CONTROL_MOVING, 0);
 }
 
 //========================================================================
 //Chute fraco esquerdo----------------------------------------------------
-void ActionMove::kick_left_weak(bool &stop_gait)
+void ActionMove::kick_left_weak(CM730 *cm730, bool &stop_gait)
 {
-    write_int(mem, CONTROL_ACTION, 22);
+    write_int(mem, CONTROL_ACTION, 5);
     write_int(mem, CONTROL_MOVING, 1);
-    std::cout<<" | \e[38;5;45mChute fraco esquerdo\e[0m"<<std::endl;
-    move_action(13, 0, stop_gait);
+    std::cout << " | \e[38;5;45mChute forte esquerdo\e[0m" << std::endl;
+    move_action(1, 0, stop_gait);
+    Action::GetInstance()->Start(62);
+    while(Action::GetInstance()->IsRunning()) usleep(8*1000);
+    Action::GetInstance()->Stop();
+    Action::GetInstance()->m_Joint.SetEnableBody(false);
+    MotionManager::GetInstance()->SetEnable(false);
+
+    //getchar();
+
+    // Velocidades
+    cm730->WriteWord(12, 32, 985, &erro);
+    cm730->WriteWord(14, 32, 812, &erro);
+    cm730->WriteWord(16, 32, 1023, &erro);
+    cm730->WriteWord(18, 32, 150, &erro);
+
+    cm730->WriteWord(12, 30, MotionManager::GetInstance()->m_Offset[12]+761, &erro);
+    cm730->WriteWord(14, 30, MotionManager::GetInstance()->m_Offset[14]+327, &erro);
+    cm730->WriteWord(16, 30, MotionManager::GetInstance()->m_Offset[16]+501, &erro);
+    cm730->WriteWord(18, 30, MotionManager::GetInstance()->m_Offset[18]+478, &erro);
+
+        //Esperando  completar o movimento
+    unsigned int count_s = 0;
+    cm730->ReadWord(16, 46, &value, 0);
+    while(value!=0)
+    {
+        count_s++;
+        cm730->ReadWord(16, 46, &value, 0);
+        usleep(8*1000);
+        if(count_s>100)
+            break; //Evita de ficar parado neste laco
+    }
+    //std::cout<<count_s<<std::endl;
+
+    Action::GetInstance()->m_Joint.SetEnableBody(true);
+    MotionManager::GetInstance()->SetEnable(true);
+    Action::GetInstance()->Start(63);
+    while(Action::GetInstance()->IsRunning()) usleep(8*1000);
+    stop_gait = 1;
     write_int(mem, CONTROL_MOVING, 0);
 }
 
@@ -235,12 +310,12 @@ void ActionMove::kick_right_strong(CM730 *cm730, bool &stop_gait)
 
     // Velocidades
     cm730->WriteWord(11, 32, 985, &erro);
-    cm730->WriteWord(13, 32, 926, &erro);
+    cm730->WriteWord(13, 24, 0, &erro);
     cm730->WriteWord(15, 32, 1023, &erro);
     cm730->WriteWord(17, 32, 97, &erro);
 
-    cm730->WriteWord(11, 30, MotionManager::GetInstance()->m_Offset[11]+200, &erro);
-    cm730->WriteWord(13, 30, MotionManager::GetInstance()->m_Offset[13]+614, &erro);
+    //cm730->WriteWord(11, 30, MotionManager::GetInstance()->m_Offset[11]+200, &erro);
+    //cm730->WriteWord(13, 30, MotionManager::GetInstance()->m_Offset[13]+614, &erro);
     cm730->WriteWord(15, 30, MotionManager::GetInstance()->m_Offset[15]+448, &erro);
     cm730->WriteWord(17, 30, MotionManager::GetInstance()->m_Offset[17]+545, &erro);
                     
