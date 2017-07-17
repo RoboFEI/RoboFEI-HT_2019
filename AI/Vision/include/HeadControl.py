@@ -46,7 +46,7 @@ class HeadControl(BasicThread):
 			self.__observation = {
 				'frequency': 1000,
 				'center_pan': 512,
-				'center_tilt': 512,
+				'center_tilt': 310,
 			}
 		
 		self.__head = Servo(self.__observation['center_tilt'], self.__observation['center_pan'])
