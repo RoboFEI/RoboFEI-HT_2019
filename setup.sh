@@ -171,12 +171,14 @@ EOF
 		    ln -sf ../../conf_robos/01/grama/* .
 		    ln -sf ../../conf_robos/01/vision/config.ini ../../Vision/Data/config.ini
 		    ln -sf ../../conf_robos/01/vision/Vector.npy ../../Vision/Data/Vector.npy
+		    cp ../../conf_robos/01/vision/ball.tar.gz ../../Vision/Data/ball.tar.gz
 		    echo "grass files copied!"
 		 elif [ "$CONF" = "n" ]
 		 then
 		    ln -sf ../../conf_robos/01/chao/* .
 		    ln -sf ../../conf_robos/01/vision/config.ini ../../Vision/Data/config.ini
 		    ln -sf ../../conf_robos/01/vision/Vector.npy ../../Vision/Data/Vector.npy
+		    cp ../../conf_robos/01/vision/ball.tar.gz ../../Vision/Data/ball.tar.gz
 		    echo "flat floor files copied!"
 		 else
 		     echo "invalid choice"
@@ -198,12 +200,14 @@ EOF
 		    ln -sf ../../conf_robos/02/grama/* .
 		    ln -sf ../../conf_robos/02/vision/config.ini ../../Vision/Data/config.ini
 		    ln -sf ../../conf_robos/02/vision/Vector.npy ../../Vision/Data/Vector.npy
+		    cp ../../conf_robos/02/vision/ball.tar.gz ../../Vision/Data/ball.tar.gz
 		    echo "grass files copied!"
 		 elif [ "$CONF" = "n" ]
 		 then
 		    ln -sf ../../conf_robos/02/chao/* .
 		    ln -sf ../../conf_robos/02/vision/config.ini ../../Vision/Data/config.ini
 		    ln -sf ../../conf_robos/02/vision/Vector.npy ../../Vision/Data/Vector.npy
+		    cp ../../conf_robos/02/vision/ball.tar.gz ../../Vision/Data/ball.tar.gz
 		    echo "flat floor files copied!"
 		 else
 		     echo "invalid choice"
@@ -225,12 +229,14 @@ EOF
 		    ln -sf ../../conf_robos/03/grama/* .
 		    ln -sf ../../conf_robos/03/vision/config.ini ../../Vision/Data/config.ini
 		    ln -sf ../../conf_robos/03/vision/Vector.npy ../../Vision/Data/Vector.npy
+		    cp ../../conf_robos/03/vision/ball.tar.gz ../../Vision/Data/ball.tar.gz
 		    echo "grass files copied!"
 		 elif [ "$CONF" = "n" ]
 		 then
 		    ln -sf ../../conf_robos/03/chao/* .
 		    ln -sf ../../conf_robos/03/vision/config.ini ../../Vision/Data/config.ini
 		    ln -sf ../../conf_robos/03/vision/Vector.npy ../../Vision/Data/Vector.npy
+		    cp ../../conf_robos/03/vision/ball.tar.gz ../../Vision/Data/ball.tar.gz
 		    echo "flat floor files copied!"
 		 else
 		     echo "invalid choice"
@@ -252,12 +258,14 @@ EOF
 		    ln -sf ../../conf_robos/04/grama/* .
 		    ln -sf ../../conf_robos/04/vision/config.ini ../../Vision/Data/config.ini
 		    ln -sf ../../conf_robos/04/vision/Vector.npy ../../Vision/Data/Vector.npy
+		    cp ../../conf_robos/04/vision/ball.tar.gz ../../Vision/Data/ball.tar.gz
 		    echo "grass files copied!"
 		 elif [ "$CONF" = "n" ]
 		 then
 		    ln -sf ../../conf_robos/04/chao/* .
 		    ln -sf ../../conf_robos/04/vision/config.ini ../../Vision/Data/config.ini
 		    ln -sf ../../conf_robos/04/vision/Vector.npy ../../Vision/Data/Vector.npy
+		    cp ../../conf_robos/04/vision/ball.tar.gz ../../Vision/Data/ball.tar.gz
 		    echo "flat floor files copied!"
 		 else
 		     echo "invalid choice"
