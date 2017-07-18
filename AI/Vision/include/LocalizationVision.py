@@ -50,8 +50,8 @@ class LocalizationVision(BasicThread):
 		
 		self.vals = np.zeros(32)
 		self.frames = 5
-		self.ignore = 5
 		self.count = 0
+		self.ignore = 5 
 		
 		self.__green = ColorSegmentation('Green', None)
 		self.__closing = Morphology('Green', 'Closing', None)
@@ -64,33 +64,32 @@ class LocalizationVision(BasicThread):
 			self.__closing.show = True
 		
 	def main(self, mask, pan):
-		if np.abs(pan - self._bkb.read_int('DECISION_LOCALIZATION')) < 1 or np.abs(pan) < 1 and self._bkb.read_int('DECISION_LOCALIZATION') == -999:
-			p = []
-			for i in self.vector:
-				p.append(mask[int(i[1]*mask.shape[1]), int(i[0]*mask.shape[0])])
-		
-			if self.count < self.ignore:
-				self.count += 1
-			elif self.count < self.frames + self.ignore:
-				self.vals += np.array(p)
-				self.count += 1
-			else:
-				self.vals /= self.frames * 255.
-				x = np.rint(self.vals)
-				s = np.mean(np.abs(self.vals-x))
-				if pan < -45:
-				    aux = -90 - s
-				elif pan > 45:
-				    aux = 90 + s
-				else:
-				    aux = s
-		
-				self._bkb.write_int('iVISION_FIELD', write(x))
-				self._bkb.write_float('fVISION_FIELD', aux)
-		
-				self.vals = np.zeros(32)
-				self.frames = 5
-				self.count = 0
+		if np.abs(pan - self._bkb.read_int('DECISION_LOCALIZATION')) < 1 or np.abs(pan) < 1 and self._bkb.read_int('DECISION_LOCALIZATION') == -999: 
+			p = [] 
+			for i in self.vector: 
+				p.append(mask[int(i[1]*mask.shape[1]), int(i[0]*mask.shape[0])]) 
+			if self.count < self.ignore: 
+				self.count += 1 
+			elif self.count < self.frames + self.ignore: 
+				self.vals += np.array(p) 
+				self.count += 1 
+			else: 
+				self.vals /= self.frames * 255. 
+				x = np.rint(self.vals) 
+				s = np.mean(np.abs(self.vals-x)) 
+			if pan < -45: 
+				aux = -90 - s
+			elif pan > 45: 
+				aux = 90 + s
+			else: 
+				aux = s
+		 
+			self._bkb.write_int('iVISION_FIELD', write(x)) 
+			self._bkb.write_float('fVISION_FIELD', aux) 
+		 
+			self.vals = np.zeros(32) 
+			self.frames = 5
+			self.count = 0
 	
 	## find
 	def find(self, observation, step):
