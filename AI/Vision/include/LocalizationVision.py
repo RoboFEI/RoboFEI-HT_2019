@@ -53,21 +53,23 @@ class LocalizationVision(BasicThread):
 		self.count = 0
 		self.ignore = 5 
 		
-		self.__green = ColorSegmentation('Green', None)
-		self.__closing = Morphology('Green', 'Closing', None)
+		self.__green = ColorSegmentation('Localization-Green', None)
+		self.__opening = Morphology('Localization-Green', 'Opening', None)
+		self.__closing = Morphology('Localization-Green', 'Closing', None)
 		
 		self._pause()
 		self.start()
 		
 		if self._args.localization == True:
 			self.__green.show = True
+			self.__opening.show = True
 			self.__closing.show = True
 		
 	def main(self, mask, pan):
 		if np.abs(pan - self._bkb.read_int('DECISION_LOCALIZATION')) < 1 or np.abs(pan) < 1 and self._bkb.read_int('DECISION_LOCALIZATION') == -999: 
 			p = [] 
 			for i in self.vector: 
-				p.append(mask[int(i[1]*mask.shape[1]), int(i[0]*mask.shape[0])]) 
+				p.append(mask[int(i[1]*mask.shape[0]), int(i[0]*mask.shape[1])])
 			if self.count < self.ignore: 
 				self.count += 1 
 			elif self.count < self.frames + self.ignore: 
@@ -77,19 +79,19 @@ class LocalizationVision(BasicThread):
 				self.vals /= self.frames * 255. 
 				x = np.rint(self.vals) 
 				s = np.mean(np.abs(self.vals-x)) 
-			if pan < -45: 
-				aux = -90 - s
-			elif pan > 45: 
-				aux = 90 + s
-			else: 
-				aux = s
+				if pan < -45: 
+					aux = -90 - s
+				elif pan > 45: 
+					aux = 90 + s
+				else: 
+					aux = s
 		 
-			self._bkb.write_int('iVISION_FIELD', write(x)) 
-			self._bkb.write_float('fVISION_FIELD', aux) 
+				self._bkb.write_int('iVISION_FIELD', write(x)) 
+				self._bkb.write_float('fVISION_FIELD', aux) 
 		 
-			self.vals = np.zeros(32) 
-			self.frames = 5
-			self.count = 0
+				self.vals = np.zeros(32) 
+				self.frames = 5
+				self.count = 0
 	
 	## find
 	def find(self, observation, step):
@@ -106,21 +108,32 @@ class LocalizationVision(BasicThread):
 				  break
 				if self.__step == 0:
 					self.__step += 1
-					self.__observation['frame'] = self.__green.segmentation(self.__observation['frame'])
+					frame = self.__green.segmentation(self.__observation['frame'].copy())
 			
 				if self.__step == 1:
 					self.__step += 1
-					self.__observation['frame'] = self.__closing.morphologicalTransformations(self.__observation['frame'])
+					if self._args.localization == True:
+						frame = self.__opening.morphologicalTransformations(frame, self.__observation['frame'].copy())
+					else:
+						frame = self.__opening.morphologicalTransformations(frame)
+				
+				if self.__step == 2:
+					self.__step += 1
+					if self._args.localization == True:
+						frame = self.__closing.morphologicalTransformations(frame, self.__observation['frame'].copy())
+					else:
+						frame = self.__closing.morphologicalTransformations(frame)
 			
-				self.main(self.__observation['frame'], self.__observation['pos_pan'])
+				self.main(frame, self.__observation['pos_pan'])
 			
 				if self._args.localization == True:
 					if cv2.waitKey(1) & 0xFF == ord('q'):
 						self.__green.show = False
+						self.__opening.show = False
 						self.__closing.show = False
 						self._args.localization = False
 						cv2.destroyAllWindows()
-			time.sleep(0.1) 
+			# des-iPython time.sleep(0.1) 
 			self._pause()
 	
 	## finalize
@@ -130,4 +143,5 @@ class LocalizationVision(BasicThread):
 		self._pausethread.release()
 		self.join()
 		self.__green.finalize()
+		self.__opening.finalize()
 		self.__closing.finalize()

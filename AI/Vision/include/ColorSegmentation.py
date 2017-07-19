@@ -55,6 +55,9 @@ class ColorSegmentation(BasicClass):
 				'h_max': 255,
 				's_max': 255,
 				'v_max': 255,
+				'color_b': 0,
+				'color_g': 0,
+				'color_r': 0,
 			}
 		# define range of color in HSV
 		self.__lower = np.array([self.__parameters['h_min'], self.__parameters['s_min'], self.__parameters['v_min']])
@@ -199,7 +202,9 @@ class ColorSegmentation(BasicClass):
 				np.uint8
 			)
 			
-			blank_image[:,:,1] = 255
+			blank_image[:,:,0] = self.__parameters['color_b']
+			blank_image[:,:,1] = self.__parameters['color_g']
+			blank_image[:,:,2] = self.__parameters['color_r']
 			
 			img = cv2.bitwise_and(
 				img,

@@ -5,11 +5,13 @@
 import argparse
 
 parser = argparse.ArgumentParser(description='Robot Vision', epilog= 'Responsável pela detecção dos objetos em campo / Responsible for detection of Field objects')
-parser.add_argument('--camera', '-ca', action="store_true", help = 'Calibra valor para a câmera')
-parser.add_argument('--visionball', '-vb', action="store_true", help = 'Calibra valor para a visão da bola')
-parser.add_argument('--withoutservo', '-ws', action="store_true", help = 'Sem servos')
-parser.add_argument('--head', '-he', action="store_true", help = 'Configurando parâmetros do controle da cabeça')
-parser.add_argument('--localization', '-lo', action="store_true", help = 'Configurando parâmetros da localização')
+parser.add_argument('--camera', '--ca', action="store_true", help = 'Calibra valor para a câmera')
+parser.add_argument('--visionball', '--vb', action="store_true", help = 'Calibra valor para a visão da bola')
+parser.add_argument('--whiteball', '--bw', action="store_true", help = 'Calibra valor o branco da bola')
+parser.add_argument('--morphologyball', '--bm', action="store_true", help = 'Calibra morfologia usadas na bola')
+parser.add_argument('--withoutservo', '--ws', action="store_true", help = 'Sem servos')
+parser.add_argument('--head', '--he', action="store_true", help = 'Configurando parâmetros do controle da cabeça')
+parser.add_argument('--localization', '--lo', action="store_true", help = 'Configurando parâmetros da localização')
 
 args = parser.parse_args()
 
@@ -38,17 +40,20 @@ try:
 	camera = CameraCapture(args) # Object responsible for the camera
 except VisionException as e:
 	exit()
+
 try:
 	localization = LocalizationVision(args)
 except VisionException as e:
 	camera.finalize()
 	exit()
-try:
-	head = HeadControl(args)
-except VisionException as e:
-	localization.finalize()
-	camera.finalize()
-	exit()
+
+if args.withoutservo == False:
+	try:
+		head = HeadControl(args)
+	except VisionException as e:
+		localization.finalize()
+		camera.finalize()
+		exit()
 
 # Main loop
 
@@ -70,6 +75,7 @@ while True:
 
 # Finishing processes
 
-head.finalize()
+if args.withoutservo == False:
+	head.finalize()
 localization.finalize()
 camera.finalize()

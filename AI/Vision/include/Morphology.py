@@ -41,8 +41,6 @@ class Morphology(BasicClass):
 	
 	## Constructor Class
 	def __init__(self, color, func, arg):
-		func = 'Closing'
-		color = 'Green'
 		self.__func = func
 		self.__color = color
 		super(Morphology, self).__init__(arg, self.__color, self.__func)
@@ -53,7 +51,6 @@ class Morphology(BasicClass):
 				'size_kennel': 1,
 				'interaction': 1,
 				'morphological': 3,
-				'interaction': 1
 			}
 			
 		self.__kennel = cv2.getStructuringElement(
@@ -65,7 +62,7 @@ class Morphology(BasicClass):
 		)
 		
 	## morphologicalTransformations
-	def morphologicalTransformations(self, mask):
+	def morphologicalTransformations(self, mask, frame = None):
 		mask = cv2.morphologyEx(
 			mask,
 			self.__parameters['morphological'],
@@ -75,6 +72,8 @@ class Morphology(BasicClass):
 		if self.show == False:
 			return mask
 		else:
+			
+			cv2.imshow(self.__color + ' ' + self.__func, mask)
 			return mask
 	
 	## finalize

@@ -90,6 +90,9 @@ class CameraCapture(BasicThread):
 		
 		self.__camera, self.__port = self.cameraOpen()
 		
+		self.__camera.set(3,1280)
+		self.__camera.set(4,720)
+		
 		os.system("v4l2-ctl -d /dev/video" + str(self.__port) + " -c focus_auto=0")
 		os.system("v4l2-ctl -d /dev/video" + str(self.__port) + " -c focus_absolute=" + str(self.__observation['focus']))
 		os.system("v4l2-ctl -d /dev/video" + str(self.__port) + " -c saturation=" + str(self.__observation['saturation']))
