@@ -18,6 +18,7 @@ import caffe
 from caffe.proto import caffe_pb2  # noqa
 
 # Used class developed by RoboFEI-HT
+sys.path.append('../../Blackboard/src') # debug-iPython
 from BasicThread import * # 
 from ColorSegmentation import * # 
 from Morphology import * #
@@ -30,7 +31,18 @@ class BallDNN(BasicThread):
 	# .
 	__observation = None
 	
-	## read_labels
+	## net
+	__net = None
+	
+	## transformer
+	__transformer = None
+	
+	## mean_file
+	__mean_file = None
+	
+	## labels
+	__labels = None
+	
 	def __read_labels(self, labels_file):
 		"""
 		Returns a list of strings
@@ -110,7 +122,7 @@ class BallDNN(BasicThread):
 		return caffe.Net(deploy_file, caffemodel, caffe.TEST)
 	
 	## unzip_archive
-	def self.__unzip_archive(self, archive):
+	def __unzip_archive(self, archive):
 		"""
 		Unzips an archive into a temporary directory
 		Returns a link to that directory
@@ -142,7 +154,7 @@ class BallDNN(BasicThread):
 		print 'Initiating class Ball DNN'
 		super(BallDNN, self).__init__(arg, 'Ball', 'DNN')
 		
-		self.__observation = _confini.read()
+		self.__observation = self._confini.read()
 		if self.__observation is -1:
 			self.__observation = {
 				'x_esquerdo': 280,
@@ -161,10 +173,9 @@ class BallDNN(BasicThread):
 				'file DNN': 'ball.tar.gz'
 			}
 		
-		tmpdir = unzip_archive('./Data/' + self.__observation['file DNN'])
+		tmpdir = self.__unzip_archive('./Data/' + self.__observation['file DNN'])
 		caffemodel = None
 		deploy_file = None
-		mean_file = None
 		labels_file = None
 		for filename in os.listdir(tmpdir):
 			full_path = os.path.join(tmpdir, filename)
@@ -173,7 +184,7 @@ class BallDNN(BasicThread):
 			elif filename == 'deploy.prototxt':
 				deploy_file = full_path
 			elif filename.endswith('.binaryproto'):
-				mean_file = full_path
+				self.__mean_file = full_path
 			elif filename == 'labels.txt':
 				labels_file = full_path
 			else:
@@ -182,10 +193,10 @@ class BallDNN(BasicThread):
 		assert caffemodel is not None, 'Caffe model file not found'
 		assert deploy_file is not None, 'Deploy file not found'
 		
-		net = self.__get_net(caffemodel, deploy_file, use_gpu=False)
-		transformer = self.__get_transformer(deploy_file, mean_file)
-		__, channels, height, width = transformer.inputs['data']
-		labels = self.__read_labels(labels_file)
+		self.__net = self.__get_net(caffemodel, deploy_file, use_gpu=False)
+		# __transformer = __get_transformer(deploy_file, __mean_file)
+		# __, channels, height, width = __transformer.inputs['data']
+		# __labels = __read_labels(labels_file)
 		
-		###	#create index from label to use in decicion action
-		number_label =  dict(zip(labels, range(len(labels))))
+		####	#create index from label to use in decicion action
+		# number_label =  dict(zip(__labels, range(len(__labels))))
