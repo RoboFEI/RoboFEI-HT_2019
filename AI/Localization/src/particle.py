@@ -9,7 +9,7 @@ import time
 # Distance and angles of the notable points
 vpoints = [
      (260,45),
-     
+
      (230,-45),
 
      (550,30),
@@ -43,7 +43,7 @@ vpoints = [
      (370,-10),
      (230,-10),
      (70,-10),
-     
+
      (800,0),
      (500,0),
      (200,0),
@@ -52,8 +52,8 @@ vpoints = [
 # Vars used to compute the particles likelihood
 maxWdelta = None
 
-# field = ((8, 1032), (60, 680), (-180, 180))
-field = ((0, 1040), (0, 740), (-180, 180))
+field = ((8, 1032), (60, 680), (-180, 180))
+# field = ((0, 1040), (0, 740), (-180, 180))
 
 #--------------------------------------------------------------------------------------------------
 #   Class implementing a particle used on Particle Filter Localization
@@ -112,7 +112,7 @@ class Particle(object):
             self.rotation = np.random.normal(normals[2][0], normals[2][1])
         else:
             self.rotation = np.random.randint(self.regions[2][0], self.regions[2][1])
-        
+
         self.weight = weight # Holds particles weight, can come from previous iterations
 
         # Motion error coefficients
@@ -197,7 +197,7 @@ class Particle(object):
             y = self.y - Forward/Omega * (np.cos(Theta)-np.cos(Direction)) - Side/Omega * (np.sin(-Theta)-np.sin(Dir2))
 
         if x < self.regions[0][0] or x > self.regions[0][1] or y < self.regions[1][0] or y > self.regions[1][1]:
-            return 
+            return
 
         # Saves the new positions
         self.x = x
@@ -287,20 +287,20 @@ class Particle(object):
             w = 1
             for i in xrange(32):
                 n *= self.probfactors[0] / np.power(vpoints[i][0] * np.cos(np.radians(vpoints[i][1])), -self.probfactors[1]) * (
-                    self.probfactors[3] * ifield[i] + 
+                    self.probfactors[3] * ifield[i] +
                     self.probfactors[2] * (1-ifield[i]))
 
             # Computes the normalized weight
                 w *= self.probfactors[0] / np.power(vpoints[i][0] * np.cos(np.radians(vpoints[i][1])), -self.probfactors[1]) * (
                     self.probfactors[2] * (1-ifield[i]) * (1-ret[i]) +
-                    self.probfactors[3] * ifield[i] * ret[i] + 
+                    self.probfactors[3] * ifield[i] * ret[i] +
                     self.probfactors[4] * ifield[i] * (1-ret[i]) +
                     self.probfactors[5] * (1-ifield[i]) * ret[i])
-            
+
             w /= n
 
             # w = np.power(w, 1./32)
-        
+
             weight *= w
 
         # If the IMU's orientation was given
@@ -311,7 +311,7 @@ class Particle(object):
 
         # if landmarks != None or field != None or orientation != None:
         #     self.wfactor = max(min(np.log(self.weight)/np.log(1e-10), 2.), 0.)
-        
+
         # self.wfactor = 0.5
         return self.weight
 
@@ -371,7 +371,7 @@ def ComputeAngLikelihoodDeg(ang, base, std_deviation=0):
     # Note: the standard deviation also is in degrees
 
     # If the standard deviation is null
-    if std_deviation == 0: 
+    if std_deviation == 0:
         # return a binary answer.
         if ang == base:
             return 1
@@ -456,15 +456,15 @@ def Wdelta(dist, psi=0.7, SigmaO=70, MuF=700, SigmaF=10, MuN=10, SigmaN=1):
 if maxWdelta == None:
     psi = 0.7 # Occlusion factor in the infinity
     SigmaO = 70 # Decay rate of the occlusion factor
-    
+
     MuF = 700 # Farthest distance in which a robot can see any landmark
     SigmaF = 10 # Its decay rate
-    
+
     MuN = 10 # Nearest distance a robot can see anything
     SigmaN = 1 # Its decay rate
 
     # Generates a 1000 points in random positions
-    d = np.array([]) 
+    d = np.array([])
     for i in xrange(1000):
         d = np.append(d, [np.random.randint(MuN, MuF)])
 

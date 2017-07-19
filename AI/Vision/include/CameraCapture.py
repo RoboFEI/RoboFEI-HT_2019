@@ -43,7 +43,7 @@ class CameraCapture(BasicThread):
 		if line == '':
 			raise VisionException(1, '')
 		
-		for port in xrange(1,10):
+		for port in xrange(10):
 			camera = cv2.VideoCapture(port)
 			if camera.isOpened():
 				break
