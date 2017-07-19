@@ -314,7 +314,7 @@ void ActionMove::kick_right_strong(CM730 *cm730, bool &stop_gait)
     cm730->WriteWord(15, 32, 1023, &erro);
     cm730->WriteWord(17, 32, 97, &erro);
 
-    //cm730->WriteWord(11, 30, MotionManager::GetInstance()->m_Offset[11]+200, &erro);
+    cm730->WriteWord(11, 30, MotionManager::GetInstance()->m_Offset[11]+250, &erro);
     //cm730->WriteWord(13, 30, MotionManager::GetInstance()->m_Offset[13]+614, &erro);
     cm730->WriteWord(15, 30, MotionManager::GetInstance()->m_Offset[15]+448, &erro);
     cm730->WriteWord(17, 30, MotionManager::GetInstance()->m_Offset[17]+545, &erro);
