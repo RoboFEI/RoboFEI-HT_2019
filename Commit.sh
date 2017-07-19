@@ -1,4 +1,5 @@
 blue='\33[0;34m'
+LightRed='\33[1;31m'
 NC='\33[0m' # No Color
 #font colors:
 #Black				0;30		Dark Gray			1;30
@@ -26,6 +27,17 @@ git config --global user.name "${name}"
 git config --global user.email "${email}"
 
 git cola
+
+echo "${LightRed}Certifique se está conectado a internet e logado, precione enter para continuar${NC}"
+read a
+
+git pull -f --all
+echo "${LightRed}Certifique se foi realizado corretamente o pull, precione enter para continuar${NC}"
+read a
+
+git push -f --all
+echo "${LightRed}Certifique se foi realizado corretamente o push, precione enter para continuar${NC}"
+read a
 
 git config --global --unset-all user.name
 git config --global --unset-all user.email
