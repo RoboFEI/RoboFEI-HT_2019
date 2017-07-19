@@ -60,9 +60,9 @@ class MonteCarlo():
             self.totalweight += particle.Sensor(*z)
 
         if z != None and z != [None, None, None]:
-            print self.totalweight, self.particles[0].weight
+            # print np.log(particle.weight), np.log(self.totalweight)
             for particle in self.particles:
-                particle.wfactor = min(max(np.log(particle.weight)/np.log(self.totalweight), 2), 0)
+                particle.wfactor = max(min(np.log(particle.weight)/np.log(self.totalweight * np.exp(-100)), 2), 0)
 
     #----------------------------------------------------------------------------------------------
     #   Resample step

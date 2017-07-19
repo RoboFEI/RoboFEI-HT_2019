@@ -135,6 +135,9 @@ class VISION():
             y = self.robot.y + dist * np.sin(np.radians(angle)) #+ np.random.normal(0,1)
 
             pygame.draw.circle(where, self.robot.color, (int(x),int(y)), 2, 0)
+            # pygame.draw.circle(where, (0,0,0), (int(x),int(y)), 2, 0)
+
+        pass
 
     # Return the notable variables for localization, as a vector
     def GetField(self):
@@ -151,8 +154,14 @@ class VISION():
             x = self.robot.x + dist * np.cos(np.radians(angle)) + np.random.normal(0,1)
             y = self.robot.y + dist * np.sin(np.radians(angle)) + np.random.normal(0,1)
 
+            if 0.5 > np.random.random():
+                if 0.5 < np.random.random():
+                    ret.append(1) 
+                else:
+                    ret.append(0)
+
             # Verify if it is in or out of the field
-            if 0 <= x and x <= 1040 and 0 <= y and y <= 740:
+            elif 0 <= x and x <= 1040 and 0 <= y and y <= 740:
                 ret.append(1)
             else:
                 ret.append(0)
@@ -242,21 +251,21 @@ class VISION():
     jump = True
     change = True
     def VisionProcess(self):
-        # if time.time() % 60 < 1:
-        #     if self.jump:
-        #         self.robot.x = np.random.randint(70, 970)
-        #         self.robot.y = np.random.randint(70, 670)
-        #         self.robot.rotate = np.random.randint(-180, 180)
-        #         self.jump = False
-        # else:
-        #     self.jump = True
+        if time.time() % 60 < 1:
+            if self.jump:
+                self.robot.x = np.random.randint(70, 970)
+                self.robot.y = np.random.randint(70, 670)
+                self.robot.rotate = np.random.randint(-180, 180)
+                self.jump = False
+        else:
+            self.jump = True
 
-        # if time.time() % 13 < 1:
-        #     if self.change:
-        #         self.bkb.write_int(self.Mem, 'DECISION_ACTION_A', [11, 1, 0, 8, 11, 17, 0, 18, 11, 6, 0, 7, 11, 2, 0, 3, 11, 9, 0, 14][np.random.randint(12)])
-        #         self.change = False
-        # else:
-        #     self.change = True
+        if time.time() % 13 < 1:
+            if self.change:
+                self.bkb.write_int(self.Mem, 'DECISION_ACTION_A', [11, 1, 0, 8, 11, 17, 0, 18, 11, 6, 0, 7, 11, 2, 0, 3, 11, 9, 0, 14][np.random.randint(12)])
+                self.change = False
+        else:
+            self.change = True
 
         # if self.count == 0:
         #     self.text += str(time.time()) + " " + str(self.robot.x) + " " + str(self.robot.y) + " " + str(self.robot.rotate) + "\n"
