@@ -33,7 +33,7 @@ parser.add_argument('--naive', '-n', action="store_true", help = 'selects naive 
 parser.add_argument('--naive_imu', '-ni', action="store_true", help = 'selects naive behavior with orientation')
 parser.add_argument('--naive_imu_dec_turning', '-nidt', action="store_true", help = 'selects naive behavior with orientation')
 parser.add_argument('--localize', '-l', action="store_true", help = 'selects decision with localization')
-
+parser.add_argument('--realRobotLocalization', '-rrl', action="store_true", help = 'selects decision with localization')
 
 args = parser.parse_args()
 
@@ -64,6 +64,10 @@ elif args.naive_imu_dec_turning == True:
 # Decision with Localization:
 elif args.localize == True:
     robot = LocaLoca()
+
+# Decision with Localization to Real Robot:
+elif args.realRobotLocalization == True:
+    robot = RealRobotLocalizationFishEye()
 
 #Ordinary decision:
 else:

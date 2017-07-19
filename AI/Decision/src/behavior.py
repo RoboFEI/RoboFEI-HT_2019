@@ -75,11 +75,11 @@ class TreatingRawData(object):
         return self.bkb.read_float(self.mem,'VISION_PAN_DEG')
 
 
-    def get_angle_ball(self):
-        return self.bkb.read_float(self.mem,'VISION_BALL_ANGLE')
-        
-    def get_dist_ball(self):
-        return self.bkb.read_float(self.mem,'VISION_BALL_DIST')
+    def get_motor_tilt_degrees(self):
+        return int(self.bkb.read_float(self.mem,'VISION_TILT_DEG'))
+
+    def get_motor_pan_degrees(self):
+        return int(self.bkb.read_float(self.mem,'VISION_PAN_DEG'))
         
     ''''def get_head_pan_initial(self):
         return self.config.getint('Offset', 'ID_19')
@@ -583,6 +583,125 @@ class LocaLoca(TreatingRawData):
                 else:
                     print 'Invalid argument received from referee!'
                     print referee
+
+
+class RealRobotLocalizationFishEye(TreatingRawData):
+    " " " Decision based on RealRobotLocalizationFishEye class " " "
+
+    def __init__(self):
+        super(RealRobotLocalizationFishEye, self).__init__()
+        print
+        print 'Decision based on Real Robot Localization with Fisheye '
+        print
+        self.kickoff_ctrl = 0
+
+    def decision(self, referee):
+        if referee == 1:  # stopped
+            print 'stand'
+            self.set_stand_still()
+
+        elif referee == 11:  # ready
+            print 'ready'
+            #self.set_stand_still()
+            # attacking side: left or right
+            # discretizing region field:
+            # 0 = goalie field
+            # 1 = defender-left
+            # 2 = defender-center
+            # 3 = defender-right
+            # 4 = center-left
+            # 5 = center-center
+            # 6 = center-right
+            # 7 = attacker-left
+            # 8 = attacker-center
+            # 9 = attacker-right
+
+            #******************************************                           self positioning
+            #remember to change the the target region ID:
+            reg_x, reg_y = self.region_field(5)
+            self.move(reg_x, reg_y)
+            #******************************************                           self positioning
+
+
+        elif referee == 12:  # set
+            print 'set'
+            self.set_stand_still()
+            self.set_vision_ball()
+
+        #opponent kickoff: walk forward
+        elif referee == 21 and self.kickoff_ctrl == 0:
+            print 'walking forward for vision to see anything'
+            self.set_vision_ball()
+            self.set_walk_forward()
+            #for i in range(0, 20):
+            #    time.sleep(1)
+            #    print "time", i
+            self.kickoff_ctrl = 1
+
+
+        elif referee == 2 or (referee == 21 and self.kickoff_ctrl != 0):  # play
+
+            self.kickoff_ctrl = 1
+            #print 'dist_ball', self.get_dist_ball()
+            print 'orientation', self.get_orientation()
+
+            #Do not kick 2x
+            if self.bkb.read_int(self.mem, 'CONTROL_MOVING') == 1 and self.flag_move_ac==True:
+                self.bkb.write_int(self.mem, 'DECISION_ACTION_A', 0) # Writing in the memory
+                self.flag_move_ac=False
+
+            if self.get_search_status() == 1: # 1 - vision lost
+                print 'vision lost'
+                self.set_stand_still()
+                #thiago decision
+                #self.set_vision_search()
+                #self.set_turn_right()
+            elif self.get_search_status() == 0: # 0 - object found
+                # align to the ball
+                if self.get_motor_pan_degrees() == 60:
+                    self.set_turn_left()
+                elif self.get_motor_pan_degrees() == -60:
+                    self.set_turn_right()
+                else:
+                    if self.get_motor_tilt_degrees() == 0 and self.get_motor_pan_degrees() == -30:
+                        #verificar se o valor da orientação é suficiente. em alguns casos, 40o e -40o é suficiente
+                        if self.get_orientation() <= 90 and self.get_orientation() >= -90:
+                            self.align()
+                            self.set_kick_right()
+                        elif self.get_orientation() > 90:
+                            #revolve_clockwise:
+                            self.set_pass_right()
+                            #########
+                        elif self.get_orientation() < -90:
+                            #revolve_anticlockwise:
+                            self.set_pass_left()
+                            #########
+                    elif self.get_motor_tilt_degrees() == 0  and self.get_motor_pan_degrees() == 30:
+                        if self.get_orientation() <= 90 and self.get_orientation() >= -90:
+                            self.align()
+                            self.set_kick_left()
+                        elif self.get_orientation() > 90:
+                            #revolve_clockwise:
+                            self.set_pass_right()
+                            #########
+                        elif self.get_orientation() < -90:
+                            #revolve_anticlockwise:
+                            self.set_pass_left()
+                            #########
+                    elif self.get_motor_tilt_degrees() == 70: #longe
+                        self.set_walk_forward()
+                    #elif self.get_dist_ball() <= 26:
+                    #    self.set_stand_still()
+                    else:
+                        self.set_walk_forward_slow((self.get_dist_ball() / 6))
+
+                        # time.sleep(0.5)
+                        # self.set_stand_still()
+            else:
+                print 'Invalid argument received from referee!'
+                print referee
+
+
 
 
 class NaiveIMU(TreatingRawData):

@@ -8,7 +8,8 @@ cd Decision/src/
 #-a: attacker
 #-q: quarterback
 #-g: golie:
-#no arguments: hybrid 
+#no arguments: hybrid
+#-rrl: real Robot Localization
 
 #--naive: naive behavior
 #--naive_imu: naive behavior with orientation and pass, but the robot closest to ball goes to it.
@@ -16,4 +17,4 @@ cd Decision/src/
 #python decision.py --naive_imu_dec_turning
 #python decision.py -nidt
 #python decision.py -ni
-python decision.py
+python decision.py -rrl
