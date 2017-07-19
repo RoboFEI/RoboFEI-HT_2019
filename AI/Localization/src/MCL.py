@@ -57,8 +57,12 @@ class MonteCarlo():
 
         # Applies the observation model to each particle
         for particle in self.particles:
-            self.totalweight += particle.Sensor(*z)        
+            self.totalweight += particle.Sensor(*z)
 
+        if z != None and z != [None, None, None]:
+            print self.totalweight, self.particles[0].weight
+            for particle in self.particles:
+                particle.wfactor = min(max(np.log(particle.weight)/np.log(self.totalweight), 2), 0)
 
     #----------------------------------------------------------------------------------------------
     #   Resample step

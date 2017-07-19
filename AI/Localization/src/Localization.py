@@ -129,8 +129,6 @@ class Localization():
                 z = [landmarks, fieldpoints, orientation]
 
             pos, std = PF.main(u,z)
-            if fieldpoints != None:
-                print fieldpoints
 
             if std > 7 and upflag:
                 upflag = False
@@ -156,7 +154,7 @@ class Localization():
             
             if self.args.log:
                 print '\t\x1b[32mRobot at', # Prints header
-                print '\x1b[32m[x:\x1b[34m{} cm'.format(int(pos[0])), #  Prints the x position
+                print 'ent\x1b[32m[x:\x1b[34m{} cm'.format(int(pos[0])), #  Prints the x position
                 print '\x1b[32m| y:\x1b[34m{} cm'.format(int(pos[1])), # Prints the y position
                 print u'\x1b[32m| \u03B8:\x1b[34m{}\u00B0'.format(int(pos[2])), # Prints the theta
                 print u'\x1b[32m| \u03C3:\x1b[34m{} cm\x1b[32m]'.format(int(std)) # Prints the standard deviation

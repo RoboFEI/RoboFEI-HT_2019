@@ -6,11 +6,6 @@ import numpy as np
 import scipy.special as sp
 import time
 
-# Robot's height!!!
-hrobot = 50
-# Robot's head's tilt's position
-htilt = 17.4
-
 # Distance and angles of the notable points
 vpoints = [
      (260,45),
@@ -57,7 +52,8 @@ vpoints = [
 # Vars used to compute the particles likelihood
 maxWdelta = None
 
-field = ((8, 1032), (60, 680), (-180, 180))
+# field = ((8, 1032), (60, 680), (-180, 180))
+field = ((0, 1040), (0, 740), (-180, 180))
 
 #--------------------------------------------------------------------------------------------------
 #   Class implementing a particle used on Particle Filter Localization
@@ -121,9 +117,9 @@ class Particle(object):
 
         # Motion error coefficients
         if factors == None:
-            # self.factors = [1, 2, 1, 300, 10,  1, 2, 1, 300, 15,  1, 2, 1, 70, 10]
+            self.factors = [1, 2, 1, 500, 10,  1, 2, 1, 500, 15,  1, 2, 1, 100, 10]
             # self.factors = 15*[0]
-            self.factors = [1, 2, 1, 0, 10,  1, 2, 1, 0, 20,  1, 2, 1, 0, 10]
+            # self.factors = [1, 2, 1, 0, 10,  1, 2, 1, 0, 20,  1, 2, 1, 0, 10]
             # self.factors = [0, 0, 0, 0, 10,  0, 0, 0, 0, 20,  0, 0, 0, 0, 10]
             # self.factors = [0, 0, 0, 50, 0,  0, 0, 0, 50, 0,  0, 0, 0, 10, 0]
         else:
@@ -153,6 +149,9 @@ class Particle(object):
         self.SigmaIMU = 20
 
         self.wfactor = wfactor # Used in order to implement the motion error.
+
+        # Probability factors used to compute particles weights.
+        self.probfactors = (1, 1, 1, 1, 0.3, 0.7)
 
     #----------------------------------------------------------------------------------------------
     #   Method that chooses which movement should be used
@@ -277,20 +276,26 @@ class Particle(object):
 
                 r = self.regions
 
-                ret.append(prob(i, j, k[0], 0.1*k[0], k[1], r[0][0], r[0][1], r[1][0], r[1][1])) # Computes the probability of the point been inside the field
+                # ret.append(prob(i, j, k[0], 0.1*k[0], k[1], r[0][0], r[0][1], r[1][0], r[1][1])) # Computes the probability of the point been inside the field
+                if r[0][0] <= i and i <= r[0][1] and r[1][0] <= j and  j <= r[1][1]:
+                    ret.append(1)
+                else:
+                    ret.append(0)
 
             # Computes a normalization value
             n = 1
-            for i in xrange(32):
-                n *= 0.9 * ifield[i] + 0.9 * (1-ifield[i])
-
-            # Computes the normalized weight
             w = 1
             for i in xrange(32):
-                if ifield[i] == ret[i]:
-                    w *= 0.9
-                else: 
-                    w *= 0.9 * ifield[i] * ret[i] + 0.9 * (1-ifield[i]) * (1-ret[i]) + (0.3+err) * ifield[i] * (1-ret[i]) + (0.3+err) * (1-ifield[i]) * ret[i]
+                n *= self.probfactors[0] / np.power(vpoints[i][0] * np.cos(np.radians(vpoints[i][1])), -self.probfactors[1]) * (
+                    self.probfactors[3] * ifield[i] + 
+                    self.probfactors[2] * (1-ifield[i]))
+
+            # Computes the normalized weight
+                w *= self.probfactors[0] / np.power(vpoints[i][0] * np.cos(np.radians(vpoints[i][1])), -self.probfactors[1]) * (
+                    self.probfactors[2] * (1-ifield[i]) * (1-ret[i]) +
+                    self.probfactors[3] * ifield[i] * ret[i] + 
+                    self.probfactors[4] * ifield[i] * (1-ret[i]) +
+                    self.probfactors[5] * (1-ifield[i]) * ret[i])
             
             w /= n
 
@@ -304,8 +309,8 @@ class Particle(object):
 
         self.weight = max(weight, 1e-300)
 
-        if landmarks != None or field != None or orientation != None:
-            self.wfactor = max(min(np.log(self.weight)/np.log(1e-10), 2.), 0.)
+        # if landmarks != None or field != None or orientation != None:
+        #     self.wfactor = max(min(np.log(self.weight)/np.log(1e-10), 2.), 0.)
         
         # self.wfactor = 0.5
         return self.weight
