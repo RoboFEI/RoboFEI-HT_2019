@@ -302,6 +302,7 @@ class TreatingRawData(object):
 
     # Aligns the robot with the ball - to the target position x_target, y_target, theta_target
     # s_vel defines if walks fast or slow.
+    #adicionei esse comentário para comitar e subir. apagar depois
     def align(self):
         print '                         aligning'
 
