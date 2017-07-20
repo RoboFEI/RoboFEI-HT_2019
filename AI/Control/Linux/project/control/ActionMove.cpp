@@ -266,7 +266,7 @@ void ActionMove::kick_left_strong(CM730 *cm730, bool &stop_gait)
     cm730->WriteWord(16, 32, 1023, &erro);
     cm730->WriteWord(18, 32, 150, &erro);
 
-    cm730->WriteWord(12, 30, MotionManager::GetInstance()->m_Offset[12]+900, &erro);
+    cm730->WriteWord(12, 30, MotionManager::GetInstance()->m_Offset[12]+850, &erro);
     //cm730->WriteWord(14, 30, MotionManager::GetInstance()->m_Offset[14]+327, &erro);
     cm730->WriteWord(16, 30, MotionManager::GetInstance()->m_Offset[16]+501, &erro);
     cm730->WriteWord(18, 30, MotionManager::GetInstance()->m_Offset[18]+478, &erro);
@@ -331,7 +331,8 @@ void ActionMove::kick_right_strong(CM730 *cm730, bool &stop_gait)
             break; //Evita de ficar parado neste laco
     }
     //std::cout<<count_s<<std::endl;
-
+    
+    
     Action::GetInstance()->m_Joint.SetEnableBody(true);
     MotionManager::GetInstance()->SetEnable(true);
     Action::GetInstance()->Start(61);
