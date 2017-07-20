@@ -154,7 +154,7 @@ class VISION():
             x = self.robot.x + dist * np.cos(np.radians(angle)) + np.random.normal(0,1)
             y = self.robot.y + dist * np.sin(np.radians(angle)) + np.random.normal(0,1)
 
-            if 0.5 > np.random.random():
+            if .3 > np.random.random():
                 if 0.5 < np.random.random():
                     ret.append(1) 
                 else:
@@ -179,24 +179,11 @@ class VISION():
         dist = np.hypot(dx, dy)
         ang = np.degrees(np.arctan2(dy, dx))-self.robot.rotate
 
-        if point == (520,370):
-            print
-            print "Ponto:", point
-            print "Robo.x:", self.robot.x, ", Robo.y:", self.robot.y, ", Robo.ang:", self.robot.rotate
-            print "Distancia.x:", dx, ", Distancia.y:", dy
-            print "arctan:", np.degrees(np.arctan2(dy, dx))
-            print "Distancia:", dist, ", Angle:", ang, "=",
-
         # Normalizes angle
         if ang < -180:
             ang += 360
         elif ang > 180:
             ang -= 360
-
-        if point == (520,370):
-            print ang
-            print "Pan:", self.headpan, ", hfov:", self.hfov
-            print "F.O.V.:", -self.hfov-self.headpan, "<=", ang, "<=", self.hfov-self.headpan
 
         # Verifies if the angle is inside the field of view
         if -self.hfov-self.headpan <= ang and ang <= self.hfov-self.headpan:
@@ -208,20 +195,9 @@ class VISION():
             dn = n/np.cos(np.radians(ang+self.headpan))
             df = f/np.cos(np.radians(ang+self.headpan))
 
-            if point == (520,370):
-                print "Tilt:", self.headtilt, ", vfov:", self.vfov
-                print "Dist:", n, "<= d <=", f
-                print "Dist. Angulada:", dn, "<=", dist, "<=", df
-
             # Verifies if the distance is in range
             if (1 + sp.erf((min(df,700)-dist)/(np.sqrt(2)*10))) * (1 - sp.erf((max(10,dn)-dist)/(np.sqrt(2)*1))) / 4 >= np.random.random():
-                if point == (520,370):
-                    print "Retorna angulo.:", ang
-                    print
                 return np.random.normal(ang, 1)
-        if point == (520,370):
-            print "Nao retorna angulo."
-            print
         return -999
 
     # Return the measure of all seen goalposts
@@ -251,21 +227,21 @@ class VISION():
     jump = True
     change = True
     def VisionProcess(self):
-        if time.time() % 60 < 1:
-            if self.jump:
-                self.robot.x = np.random.randint(70, 970)
-                self.robot.y = np.random.randint(70, 670)
-                self.robot.rotate = np.random.randint(-180, 180)
-                self.jump = False
-        else:
-            self.jump = True
+        # if time.time() % 60 < 1:
+        #     if self.jump:
+        #         self.robot.x = np.random.randint(70, 970)
+        #         self.robot.y = np.random.randint(70, 670)
+        #         self.robot.rotate = np.random.randint(-180, 180)
+        #         self.jump = False
+        # else:
+        #     self.jump = True
 
-        if time.time() % 13 < 1:
-            if self.change:
-                self.bkb.write_int(self.Mem, 'DECISION_ACTION_A', [11, 1, 0, 8, 11, 17, 0, 18, 11, 6, 0, 7, 11, 2, 0, 3, 11, 9, 0, 14][np.random.randint(12)])
-                self.change = False
-        else:
-            self.change = True
+        # if time.time() % 13 < 1:
+        #     if self.change:
+        #         self.bkb.write_int(self.Mem, 'DECISION_ACTION_A', [11, 1, 0, 8, 11, 17, 0, 18, 11, 6, 0, 7, 11, 2, 0, 3, 11, 9, 0, 14][np.random.randint(12)])
+        #         self.change = False
+        # else:
+        #     self.change = True
 
         # if self.count == 0:
         #     self.text += str(time.time()) + " " + str(self.robot.x) + " " + str(self.robot.y) + " " + str(self.robot.rotate) + "\n"
@@ -376,43 +352,44 @@ def points(v):
 
     return ret
 
-v = [(260,45),
-     
-     (230,-45),
+v = [(1,0),
+     (9999999,0),
 
-     (550,30),
-     (390,30),
-     (170,30),
+     (100,-45),
+     (200,-45),
+     (300,-45),
 
-     (520,-30),
-     (360,-30),
-     (150,-30),
+     (70,-30),
+     (140,-30),
+     (300,-30),
+     (530,-30),
 
-     (820,20),
-     (670,20),
-     (460,20),
-     (310,20),
-     (120,20),
+     (80,-20),
+     (180,-20),
+     (420,-20),
 
-     (780,-20),
-     (640,-20),
-     (430,-20),
-     (290,-20),
-     (110,-20),
+     (90,-10),
+     (150,-10),
+     (300,-10),
 
-     (710,10),
-     (570,10),
-     (390,10),
-     (250,10),
-     (80,10),
-
-     (680,-10),
-     (540,-10),
-     (370,-10),
-     (230,-10),
-     (70,-10),
-     
-     (800,0),
-     (500,0),
+     (50,0),
+     (100,0),
      (200,0),
-     (50,0)]
+     (500,0),
+
+     (90,10),
+     (150,10),
+     (300,10),
+
+     (80,20),
+     (190,20),
+     (430,20),
+
+     (70,30),
+     (140,30),
+     (300,30),
+     (530,30),
+
+     (100,45),
+     (200,45),
+     (300,45)]

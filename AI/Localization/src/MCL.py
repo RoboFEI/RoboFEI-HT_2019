@@ -28,7 +28,7 @@ class MonteCarlo():
         # self.particles.append(Particle(350,350,0,factors=15*[0]))
         for i in range(self.qtd):
             # Randomly generates n particles
-            self.particles.append(Particle())
+            self.particles.append(Particle(normals=[[[300,50],[70,5],[-90,5]],[[300,50],[670,5],[90,5]],[[80,5],[370,30],[0,5]], [[440,10],[370,10],[0,5]]]))
         
         self.totalweight = 0. # Holds the total sum of particles' weights.
         self.meanweight = 0
@@ -46,7 +46,7 @@ class MonteCarlo():
         # If there was movement, run the prediction step
         if u != None:
             for particle in self.particles:
-                particle.Movement(*u)
+                particle.Movement(*u, meanw=self.meanweight)
 
     #----------------------------------------------------------------------------------------------
     #   Update step
@@ -58,11 +58,6 @@ class MonteCarlo():
         # Applies the observation model to each particle
         for particle in self.particles:
             self.totalweight += particle.Sensor(*z)
-
-        if z != None and z != [None, None, None]:
-            # print np.log(particle.weight), np.log(self.totalweight)
-            for particle in self.particles:
-                particle.wfactor = max(min(np.log(particle.weight)/np.log(self.totalweight * np.exp(-100)), 2), 0)
 
     #----------------------------------------------------------------------------------------------
     #   Resample step
@@ -98,6 +93,8 @@ class MonteCarlo():
 
         self.particles = parts # Overwrites the previous particles.
         self.qtd = len(self.particles) # Saves the new quantity of particles.
+
+        self.totalweight = self.meanweight
         self.meanweight /= self.qtd
 
         m = np.mean(poses, 0) # Computes the mean of the particles.

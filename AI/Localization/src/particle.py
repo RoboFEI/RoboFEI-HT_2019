@@ -8,52 +8,53 @@ import time
 
 # Distance and angles of the notable points
 vpoints = [
-     (260,45),
+     (1,0),
+     (9999999,0),
+     
+     (100,-45),
+     (200,-45),
+     (300,-45),
 
-     (230,-45),
+     (70,-30),
+     (140,-30),
+     (300,-30),
+     (530,-30),
 
-     (550,30),
-     (390,30),
-     (170,30),
+     (80,-20),
+     (180,-20),
+     (420,-20),
 
-     (520,-30),
-     (360,-30),
-     (150,-30),
+     (90,-10),
+     (150,-10),
+     (300,-10),
 
-     (820,20),
-     (670,20),
-     (460,20),
-     (310,20),
-     (120,20),
-
-     (780,-20),
-     (640,-20),
-     (430,-20),
-     (290,-20),
-     (110,-20),
-
-     (710,10),
-     (570,10),
-     (390,10),
-     (250,10),
-     (80,10),
-
-     (680,-10),
-     (540,-10),
-     (370,-10),
-     (230,-10),
-     (70,-10),
-
-     (800,0),
-     (500,0),
+     (50,0),
+     (100,0),
      (200,0),
-     (50,0)]
+     (500,0),
+
+     (90,10),
+     (150,10),
+     (300,10),
+
+     (80,20),
+     (190,20),
+     (430,20),
+
+     (70,30),
+     (140,30),
+     (300,30),
+     (530,30),
+
+     (100,45),
+     (200,45),
+     (300,45)]
 
 # Vars used to compute the particles likelihood
 maxWdelta = None
 
-field = ((8, 1032), (60, 680), (-180, 180))
-# field = ((0, 1040), (0, 740), (-180, 180))
+# field = ((8, 1032), (60, 680), (-180, 180))
+field = ((0, 1040), (0, 740), (-180, 180))
 
 #--------------------------------------------------------------------------------------------------
 #   Class implementing a particle used on Particle Filter Localization
@@ -69,7 +70,7 @@ class Particle(object):
         #    else if there was a gaussian possible position given, generate a random position;
         #    else create a totally random one.
 
-        # Note: normals is a 3x2 matrix, where
+        # Note: normals is a Nx3x2 matrix, where
         #    the first line presents the mean and standard deviation of the x position
         #    the second line presents the mean and standard deviation of the y position
         #    the third line presents the mean and standard deviation of the rotation
@@ -92,24 +93,27 @@ class Particle(object):
         else:
             self.regions = regions
 
+        if normals != None:
+            i = np.random.randint(len(normals))
+
         if x != None:
             self.x = x
-        elif normals:
-            self.x = np.random.normal(normals[0][0], normals[0][1])
+        elif normals != None:
+            self.x = np.random.normal(normals[i][0][0], normals[i][0][1])
         else:
             self.x = np.random.randint(self.regions[0][0], self.regions[0][1])
 
         if y != None:
             self.y = y
-        elif normals:
-            self.y = np.random.normal(normals[1][0], normals[1][1])
+        elif normals != None:
+            self.y = np.random.normal(normals[i][1][0], normals[i][1][1])
         else:
             self.y = np.random.randint(self.regions[1][0], self.regions[1][1])
 
         if rotation != None:
             self.rotation = rotation
-        elif normals:
-            self.rotation = np.random.normal(normals[2][0], normals[2][1])
+        elif normals != None:
+            self.rotation = np.random.normal(normals[i][2][0], normals[i][2][1])
         else:
             self.rotation = np.random.randint(self.regions[2][0], self.regions[2][1])
 
@@ -117,7 +121,7 @@ class Particle(object):
 
         # Motion error coefficients
         if factors == None:
-            self.factors = [1, 2, 1, 500, 10,  1, 2, 1, 500, 15,  1, 2, 1, 100, 10]
+            self.factors = [1, 2, 1, 500, 5,  1, 2, 1, 500, 7,  1, 2, 1, 100, 5]
             # self.factors = 15*[0]
             # self.factors = [1, 2, 1, 0, 10,  1, 2, 1, 0, 20,  1, 2, 1, 0, 10]
             # self.factors = [0, 0, 0, 0, 10,  0, 0, 0, 0, 20,  0, 0, 0, 0, 10]
@@ -156,30 +160,33 @@ class Particle(object):
     #----------------------------------------------------------------------------------------------
     #   Method that chooses which movement should be used
     #----------------------------------------------------------------------------------------------
-    def Movement(self, straight=0, drift=0, rotational=0, moving=1, dt=0):
+    def Movement(self, straight=0, drift=0, rotational=0, moving=1, dt=0, meanw=1):
         if moving == 1:
-            self.Motion(straight, drift, rotational, dt)
+            self.Motion(straight, drift, rotational, moving, dt, meanw)
         elif moving == 2:
             self.GetUpBackUp()
         elif moving == 3:
             self.GetUpFrontUp()
         else:
-            self.Motion(0,0,0,dt)
+            self.Motion(0,0,0,0,dt,meanw)
 
     #----------------------------------------------------------------------------------------------
     #   Method which moves particles around, reimplement.
     #----------------------------------------------------------------------------------------------
-    def Motion(self, straight=0, drift=0, rotational=0, dt=0):
+    def Motion(self, straight=0, drift=0, rotational=0, moving=0, dt=0, meanw=1):
         # straight is the robot's forward speed in cm/s
         # drift is the robot's sideways speed in cm/s
         # rotational is the robot's angular speed in degrees/s
 
+        if type(self.weight) != int:
+            self.wfactor = max(min(np.log(meanw/self.weight)/np.log(1000), 2), 0)
+
         # Computes the forward speed with error
-        Forward = straight + NRnd(self.factors[0]*straight) + NRnd(self.factors[1]*drift) + NRnd(self.factors[2]*rotational) + NRnd(self.factors[3] * self.wfactor) + NRnd(self.factors[4])
+        Forward = straight + NRnd(self.factors[0]*straight) + NRnd(self.factors[1]*drift) + NRnd(self.factors[2]*rotational) + NRnd(self.factors[3] * self.wfactor * moving) + NRnd(self.factors[4])
         # Computes the side speed with error
-        Side = drift + NRnd(self.factors[5]*straight) + NRnd(self.factors[6]*drift) + NRnd(self.factors[7]*rotational) + NRnd(self.factors[8] * self.wfactor) + NRnd(self.factors[9])
+        Side = drift + NRnd(self.factors[5]*straight) + NRnd(self.factors[6]*drift) + NRnd(self.factors[7]*rotational) + NRnd(self.factors[8] * self.wfactor * moving) + NRnd(self.factors[9])
         # Computes the angular speed with error
-        Omega = rotational + NRnd(self.factors[10]*straight) + NRnd(self.factors[11]*drift) + NRnd(self.factors[12]*rotational) + NRnd(self.factors[13] * self.wfactor) + NRnd(self.factors[14])
+        Omega = rotational + NRnd(self.factors[10]*straight) + NRnd(self.factors[11]*drift) + NRnd(self.factors[12]*rotational) + NRnd(self.factors[13] * self.wfactor * moving) + NRnd(self.factors[14])
 
         # Converts angles to radians
         Omega = np.radians(Omega)

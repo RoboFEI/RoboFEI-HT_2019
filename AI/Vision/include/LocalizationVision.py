@@ -51,6 +51,7 @@ class LocalizationVision(BasicThread):
 		self.vals = np.zeros(32)
 		self.frames = 5
 		self.count = 0
+		self.ignorecount = 0
 		self.ignore = 5 
 		
 		self.__green = ColorSegmentation('Localization-Green', None)
@@ -70,12 +71,11 @@ class LocalizationVision(BasicThread):
 			p = [] 
 			for i in self.vector: 
 				p.append(mask[int(i[1]*mask.shape[0]), int(i[0]*mask.shape[1])])
-			if self.count < self.ignore: 
-				self.count += 1 
-			elif self.count < self.frames + self.ignore: 
+			if self.count < (self.frames + 1) * self.ignore and self.ignorecount == self.count:
 				self.vals += np.array(p) 
-				self.count += 1 
-			else: 
+				self.count += 1
+				self.ignorecount = 0
+			elif self.count == (self.frames + 1) * self.ignore: 
 				self.vals /= self.frames * 255. 
 				x = np.rint(self.vals) 
 				s = np.mean(np.abs(self.vals-x)) 
@@ -89,9 +89,12 @@ class LocalizationVision(BasicThread):
 				self._bkb.write_int('iVISION_FIELD', write(x)) 
 				self._bkb.write_float('fVISION_FIELD', aux) 
 		 
-				self.vals = np.zeros(32) 
-				self.frames = 5
+				self.vals = np.zeros(32)
 				self.count = 0
+				self.ignorecount = 0
+			else:
+				self.count += 1
+				self.ignorecount += 1
 	
 	## find
 	def find(self, observation, step):

@@ -103,7 +103,7 @@ class Localization():
             # self.bkb.write_float(self.Mem, 'VISION_THIRD_GOALPOST', -999)
             # landmarks.append(self.bkb.read_float(self.Mem, 'VISION_FOURTH_GOALPOST'))
             # self.bkb.write_float(self.Mem, 'VISION_FOURTH_GOALPOST', -999)
-
+            
             orientation = self.bkb.read_float(self.Mem, 'IMU_EULER_Z')
 
             x = self.bkb.read_int(self.Mem, 'iVISION_FIELD')
@@ -130,9 +130,9 @@ class Localization():
 
             pos, std = PF.main(u,z)
 
-            if std > 7 and upflag:
+            if std > 8 and upflag:
                 upflag = False
-            elif std < 3 and not upflag:
+            elif std < 4 and not upflag:
                 upflag = True
 
             if upflag:
@@ -150,7 +150,7 @@ class Localization():
             #     self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', -999)
 
             if PF.meanweight < 1:                
-                weight = PF.meanweight
+                weight = np.log(0.05)/np.log(PF.meanweight)
             
             if self.args.log:
                 print '\t\x1b[32mRobot at', # Prints header
@@ -174,7 +174,7 @@ class Localization():
                 simul.display_update(PF.particles)
 
             # Updates for the next clock
-            screen.clock.tick(20)
+            screen.clock.tick(5)
 
     #----------------------------------------------------------------------------------------------
     #   This method returns a command instruction to the particles.
