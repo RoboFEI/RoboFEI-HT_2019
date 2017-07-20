@@ -28,7 +28,8 @@ class MonteCarlo():
         # self.particles.append(Particle(350,350,0,factors=15*[0]))
         for i in range(self.qtd):
             # Randomly generates n particles
-            self.particles.append(Particle(normals=[[[300,50],[70,5],[-90,5]],[[300,50],[670,5],[90,5]],[[80,5],[370,30],[0,5]], [[440,10],[370,10],[0,5]]]))
+            # self.particles.append(Particle(normals=[[[300,50],[70,5],[-90,5]],[[300,50],[670,5],[90,5]],[[80,5],[370,30],[0,5]], [[440,10],[370,10],[0,5]]]))
+            self.particles.append(Particle())
         
         self.totalweight = 0. # Holds the total sum of particles' weights.
         self.meanweight = 0

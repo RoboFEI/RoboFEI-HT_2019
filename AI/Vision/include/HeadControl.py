@@ -60,7 +60,7 @@ class HeadControl(BasicThread):
 		self._running = True
 		while self._running:
 			value = self._bkb.read_int('DECISION_LOCALIZATION')
-			print 'value:', value 
+			#print 'value:', value 
 			if value == -999:
 				self.__head.writeWord(
 					self.__motor['ID Pan'],
