@@ -178,8 +178,8 @@ sudo -H pip install protobuf
 cd
 
 #Caffe
-git clone https://github.com/NVIDIA/caffe.git
-#git clone http://github.com/BVLC/caffe.git
+#git clone https://github.com/NVIDIA/caffe.git
+git clone http://github.com/BVLC/caffe.git
 cd caffe
 cp Makefile.config.example Makefile.config
 sed -i 's/.*CPU_ONLY := 1/CPU_ONLY := 1/g' Makefile.config # CPU only
@@ -191,7 +191,6 @@ make test
 make runtest
 make pycaffe
 echo 'export PYTHONPATH=~/caffe/python' >> ~/.bashrc
-echo 'export CAFFE_ROOT=~/caffe' >> ~/.bashrc
 #=========================================================================================================================
 
 
