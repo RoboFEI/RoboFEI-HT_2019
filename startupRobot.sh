@@ -66,9 +66,15 @@ sudo apt -y install build-essential libncurses5-dev libjpeg-dev mplayer mplayer-
 #Ajuste do auto foco na camera
 sudo apt -y install v4l-utils
 
+#Screen
+sudo apt -y install screen
+
 #PS3/Bluetooth dependencies:
 echo -e "${blue} PS3/Bluetooth dependencies (Robô Jimmy) ${NC}"
 sudo apt -y install bluez-utils bluez-compat bluez-hcidump libusb-dev libbluetooth-dev joystick
+
+#ConfigParser
+sudo apt-get install python-configparser
 
 #opencv
 echo -e "${blue} Opencv dependências ${NC}"
@@ -103,6 +109,22 @@ sudo apt -y install python-pip
 
 sudo -H pip install imutils
 
+sudo -H pip install --upgrade pip #Nao ha necessidade, a nao ser q a versao do pip seja muito antiga
+
+#Construct 2.5.3
+sudo pip install construct==2.5.3
+
+#Upgrade numpy
+sudo -H pip install --upgrade numpy
+
+#Cython
+sudo -H pip install Cython
+
+#scikit-image
+sudo -H pip install scikit-image
+
+#Protobuth
+sudo -H pip install protobuf
 
 #============================Install Opencv 3===================================================================
 light_Green='\e[1;32m'
@@ -159,11 +181,6 @@ sudo apt -y install libprotobuf-dev libleveldb-dev libsnappy-dev libhdf5-serial-
 # Remaining dependencies
 sudo apt -y install libgflags-dev libgoogle-glog-dev liblmdb-dev protobuf-compiler
 
-sudo -H pip install --upgrade pip #Nao ha necessidade, a nao ser q a versao do pip seja muito antiga
-
-#Upgrade numpy
-sudo -H pip install --upgrade numpy
-
 #sudo apt install libopenblas-dev
 
 # BLAS -- for better CPU performance
@@ -178,8 +195,8 @@ sudo -H pip install protobuf
 cd
 
 #Caffe
-git clone https://github.com/NVIDIA/caffe.git
-#git clone http://github.com/BVLC/caffe.git
+#git clone https://github.com/NVIDIA/caffe.git
+git clone http://github.com/BVLC/caffe.git
 cd caffe
 cp Makefile.config.example Makefile.config
 sed -i 's/.*CPU_ONLY := 1/CPU_ONLY := 1/g' Makefile.config # CPU only
@@ -191,7 +208,6 @@ make test
 make runtest
 make pycaffe
 echo 'export PYTHONPATH=~/caffe/python' >> ~/.bashrc
-echo 'export CAFFE_ROOT=~/caffe' >> ~/.bashrc
 #=========================================================================================================================
 
 
