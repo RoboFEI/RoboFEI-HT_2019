@@ -103,6 +103,14 @@ sudo apt -y install python-pip
 
 sudo -H pip install imutils
 
+#Cython
+sudo -H pip install Cython
+
+#scikit-image
+sudo -H pip install scikit-image
+
+#Protobuth
+sudo -H pip install protobuf
 
 #============================Install Opencv 3===================================================================
 light_Green='\e[1;32m'
