@@ -66,6 +66,9 @@ sudo apt -y install build-essential libncurses5-dev libjpeg-dev mplayer mplayer-
 #Ajuste do auto foco na camera
 sudo apt -y install v4l-utils
 
+#Screen
+sudo apt -y install screen
+
 #PS3/Bluetooth dependencies:
 echo -e "${blue} PS3/Bluetooth dependencies (Robô Jimmy) ${NC}"
 sudo apt -y install bluez-utils bluez-compat bluez-hcidump libusb-dev libbluetooth-dev joystick
@@ -107,6 +110,9 @@ sudo apt -y install python-pip
 sudo -H pip install imutils
 
 sudo -H pip install --upgrade pip #Nao ha necessidade, a nao ser q a versao do pip seja muito antiga
+
+#Construct 2.5.3
+sudo pip install construct==2.5.3
 
 #Upgrade numpy
 sudo -H pip install --upgrade numpy
