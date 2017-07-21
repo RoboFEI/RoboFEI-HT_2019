@@ -70,6 +70,9 @@ sudo apt -y install v4l-utils
 echo -e "${blue} PS3/Bluetooth dependencies (Robô Jimmy) ${NC}"
 sudo apt -y install bluez-utils bluez-compat bluez-hcidump libusb-dev libbluetooth-dev joystick
 
+#ConfigParser
+sudo apt-get install python-configparser
+
 #opencv
 echo -e "${blue} Opencv dependências ${NC}"
 sleep 1
@@ -102,6 +105,11 @@ sudo apt -y install libqt4-dev
 sudo apt -y install python-pip
 
 sudo -H pip install imutils
+
+sudo -H pip install --upgrade pip #Nao ha necessidade, a nao ser q a versao do pip seja muito antiga
+
+#Upgrade numpy
+sudo -H pip install --upgrade numpy
 
 #Cython
 sudo -H pip install Cython
@@ -166,11 +174,6 @@ sudo apt -y install libprotobuf-dev libleveldb-dev libsnappy-dev libhdf5-serial-
 
 # Remaining dependencies
 sudo apt -y install libgflags-dev libgoogle-glog-dev liblmdb-dev protobuf-compiler
-
-sudo -H pip install --upgrade pip #Nao ha necessidade, a nao ser q a versao do pip seja muito antiga
-
-#Upgrade numpy
-sudo -H pip install --upgrade numpy
 
 #sudo apt install libopenblas-dev
 
