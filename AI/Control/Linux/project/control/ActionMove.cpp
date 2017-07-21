@@ -250,7 +250,7 @@ void ActionMove::kick_left_strong(CM730 *cm730, bool &stop_gait)
 {
     write_int(mem, CONTROL_ACTION, 5);
     write_int(mem, CONTROL_MOVING, 1);
-    std::cout << " | \e[38;5;45mChute forte esquerdo\e[0m" << std::endl;
+    std::cout << " | \e[38;5;45mChute forte esquerdo com mola\e[0m" << std::endl;
     move_action(1, 0, stop_gait);
     Action::GetInstance()->Start(62);
     while(Action::GetInstance()->IsRunning()) usleep(8*1000);
@@ -297,7 +297,7 @@ void ActionMove::kick_right_strong(CM730 *cm730, bool &stop_gait)
 {
     write_int(mem, CONTROL_ACTION, 4);
     write_int(mem, CONTROL_MOVING, 1);
-    std::cout << " | \e[38;5;45mChute forte direito\e[0m" << std::endl;
+    std::cout << " | \e[38;5;45mChute forte direito com mola\e[0m" << std::endl;
     move_action(1, 0, stop_gait);
     while(Action::GetInstance()->IsRunning()) usleep(8*1000);
     Action::GetInstance()->Start(60);
