@@ -4,19 +4,62 @@
 
 import argparse
 
-parser = argparse.ArgumentParser(description='Robot Vision', epilog= 'Responsável pela detecção dos objetos em campo / Responsible for detection of Field objects')
-parser.add_argument('--camera', '--ca', action="store_true", help = 'Calibra valor para a câmera')
-parser.add_argument('--visionball', '--vb', action="store_true", help = 'Calibra valor para a visão da bola')
-parser.add_argument('--whiteball', '--bw', action="store_true", help = 'Calibra valor o branco da bola')
-parser.add_argument('--morphologyball', '--bm', action="store_true", help = 'Calibra morfologia usadas na bola')
-parser.add_argument('--withoutservo', '--ws', action="store_true", help = 'Sem servos')
-parser.add_argument('--head', '--he', action="store_true", help = 'Configurando parâmetros do controle da cabeça')
-parser.add_argument('--localization', '--lo', action="store_true", help = 'Configurando parâmetros da localização')
+parser = argparse.ArgumentParser(description='Robot Vision', epilog= 'Responsável pela detecção dos objetos em campo./Responsible for detection of field objects.')
 
-parser.add_argument('--camerageometric', # Full name
+parser.add_argument('--camera', # Full name
 				 '--ca', # Abbreviation for the name
 				 action = "store_true", # Type variable
-				 help = 'Inicia o treinamento da modelagem geometrica de câmera / Begins geometric camera modeling training' # Description of the variable
+				 help = 'Calibra valor para a câmera.\\' \
+						'Calibrates value for the camera.' # Description of the variable
+				)
+
+parser.add_argument('--visionball', # Full name
+				 '--vb', # Abbreviation for the name
+				 action = "store_true", # Type variable
+				 help = 'Calibra valor para a visão da bola.\\' \
+						'Calibrates value for ball view.' # Description of the variable
+				)
+
+parser.add_argument('--whiteball', # Full name
+				 '--wb', # Abbreviation for the name
+				 action = "store_true", # Type variable
+				 help = 'Calibra valor o branco da bola.\\' \
+						'Calibrate morphology used on the ball.' # Description of the variable
+				)
+
+parser.add_argument('--morphologyball', # Full name
+				 '--mb', # Abbreviation for the name
+				 action = "store_true", # Type variable
+				 help = 'Calibra morfologia usadas na bola.\\' \
+						'Calibrate morphology used on the ball.' # Description of the variable
+				)
+
+parser.add_argument('--withoutservo', # Full name
+				 '--ws', # Abbreviation for the name
+				 action = "store_true", # Type variable
+				 help = 'Sem servos.\\' \
+						'Without servomotors.' # Description of the variable
+				)
+
+parser.add_argument('--head', # Full name
+				 '--he', # Abbreviation for the name
+				 action = "store_true", # Type variable
+				 help = 'Configurando parâmetros do controle da cabeça.\\' \
+						'Configuring head control parameters.' # Description of the variable
+				)
+
+parser.add_argument('--localization', # Full name
+				 '--lo', # Abbreviation for the name
+				 action = "store_true", # Type variable
+				 help = 'Configurando parâmetros da localização.\\' \
+						'Configuring location parameters.' # Description of the variable
+				)
+
+parser.add_argument('--camerageometric', # Full name
+				 '--cg', # Abbreviation for the name
+				 action = "store_true", # Type variable
+				 help = 'Inicia o treinamento da modelagem geometrica de câmera.\\' \
+						'Begins geometric camera modeling training.' # Description of the variable
 				)
 
 args = parser.parse_args()
@@ -40,6 +83,10 @@ from HeadControl import * #
 
 # Starting processes
 
+args.withoutservo = False
+if args.camerageometric == True and args.withoutservo == True:
+	raise VisionException(6, 'It is not possible to do training without a servo, to remove the withoutservo function')
+
 killedProcess() # Recognize external kill
 
 try:
@@ -47,17 +94,10 @@ try:
 except VisionException as e:
 	exit()
 
-try:
-	localization = LocalizationVision(args)
-except VisionException as e:
-	camera.finalize()
-	exit()
-
 if args.withoutservo == False:
 	try:
 		head = HeadControl(args)
 	except VisionException as e:
-		localization.finalize()
 		camera.finalize()
 		exit()
 
@@ -69,9 +109,6 @@ while True:
 		if 'frame' not in observation.keys():
 			time.sleep(0.1)
 			continue
-		localization.find(observation, 0)
-		with localization.waitthread:
-			pass
 	except KeyboardInterrupt:
 		os.system('clear') # Cleaning terminal
 		print "Keyboard interrupt detected"
@@ -83,5 +120,4 @@ while True:
 
 if args.withoutservo == False:
 	head.finalize()
-localization.finalize()
 camera.finalize()

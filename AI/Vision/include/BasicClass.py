@@ -44,3 +44,8 @@ class BasicClass( ):
 	## finalize
 	def finalize(self, dictionary):
 		self._confini.finalize(dictionary)
+	
+	## printLine
+	def printLine(self, text):
+		print '\r', text,
+		sys.stdout.flush()

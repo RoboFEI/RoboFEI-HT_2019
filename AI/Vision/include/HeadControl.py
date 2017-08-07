@@ -40,6 +40,7 @@ class HeadControl(BasicThread):
 	
 	## Constructor Class
 	def __init__(self, arg):
+		print '---- Initializing class HeadControl ----'
 		super(HeadControl, self).__init__(arg, 'Head' , 'parameters')
 		
 		self.__observation = self._confini.read()
@@ -51,7 +52,6 @@ class HeadControl(BasicThread):
 			}
 		
 		self.__head = Servo(self.__observation['center_tilt'], self.__observation['center_pan'])
-		self._bkb.write_int('DECISION_LOCALIZATION', -999)
 		self.start()
 		
 	## run

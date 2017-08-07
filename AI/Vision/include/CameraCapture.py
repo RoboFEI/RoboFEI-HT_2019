@@ -5,10 +5,10 @@ import sys
 sys.path.append('../include')
 sys.path.append('../src')
 
+# The standard libraries used in the vision system
 import os # Library for interaction with the system
-from copy import copy
-import time
-# from datetime import *
+from copy import copy # To create copies of the variables
+import time # Using for time control and measurement
 
 # Used class developed by RoboFEI-HT
 from BasicThread import * # Base class with primary functions
@@ -36,8 +36,9 @@ class CameraCapture(BasicThread):
 	__exe = None
 	
 	## cameraOpen
-	# Used to locate the port where the camera is connected and connect to it
-	def cameraOpen(self):
+	# Used to locate the port where the camera is connected and connect to it.
+	# @return Returns the object of the camera and the port on which it is connected.
+	def __cameraOpen(self):
 		p = os.popen('ls /dev/video*')
 		line = p.readline()
 		if line == '':
@@ -54,12 +55,14 @@ class CameraCapture(BasicThread):
 	
 	## trackbarFocus
 	# Responsible for reading the values of the trackbar.
+	# @param value Amount to be processed.
 	def __trackbarFocus(self, value):
 		self.__observation['focus'] = value
 		os.system("v4l2-ctl -d /dev/video" + str(self.__port) + " -c focus_absolute=" + str(self.__observation['focus']))
 	
 	## trackbarSaturation
 	# Responsible for reading the values of the trackbar.
+	# @param value Amount to be processed.
 	def __trackbarSaturation(self, value):
 		self.__observation['saturation'] = value
 		os.system("v4l2-ctl -d /dev/video" + str(self.__port) + " -c saturation=" + str(self.__observation['saturation']))
@@ -78,6 +81,7 @@ class CameraCapture(BasicThread):
 	
 	## Constructor Class
 	def __init__(self, arg):
+		print '\33[1;33m' + '---- Initializing class camera ----' + '\33[0m'
 		super(CameraCapture, self).__init__(arg, 'Camera' , 'parameters')
 		
 		self.__observation = self._confini.read()
@@ -86,12 +90,13 @@ class CameraCapture(BasicThread):
 				'fps': 30,
 				'focus': 25,
 				'saturation': 128,
+				'resolution': '1280x720'
 			}
 		
-		self.__camera, self.__port = self.cameraOpen()
+		self.__camera, self.__port = self.__cameraOpen()
 		
-		self.__camera.set(3,1280)
-		self.__camera.set(4,720)
+		self.__camera.set(3,int(self.__observation['resolution'].split('x')[0]))
+		self.__camera.set(4,int(self.__observation['resolution'].split('x')[1]))
 		
 		os.system("v4l2-ctl -d /dev/video" + str(self.__port) + " -c focus_auto=0")
 		os.system("v4l2-ctl -d /dev/video" + str(self.__port) + " -c focus_absolute=" + str(self.__observation['focus']))
@@ -110,10 +115,7 @@ class CameraCapture(BasicThread):
 			cv2.createTrackbar('saturation', 'Camera parameters', self.__observation['saturation'], 255, self.__trackbarSaturation)
 		
 		while self.__exe:
-			if self._args.camera == True or self._args.camera == 'off':
-				os.system('clear') # Cleaning terminal
-	#			 clear_output()
-				start = time.time()
+			start = time.time()
 			
 			ret, self.__observation['frame'] = self.__camera.read()
 			self.__observation['pos_tilt'] = self._bkb.read_float('VISION_TILT_DEG')
@@ -126,12 +128,16 @@ class CameraCapture(BasicThread):
 					self._args.camera = 'off'
 					cv2.destroyAllWindows()
 			else:
-				time.sleep(1.0/self.__observation['fps']) # Camera fps
+				if start + 1.0/self.__observation['fps'] - time.time() > 0:
+					time.sleep( # Camera fps
+						start + 1.0/self.__observation['fps'] - time.time()
+					)
 			
 			if self._args.camera == True or self._args.camera == 'off':
 				diff = time.time() - start
-				print 'Diff:', diff, 'FPS medido:', 1.0/(diff)
-	
+				s = '\33[0;36m' + 'FPS' + '\33[0m' + ': ' + str(1.0/(diff))
+				self.printLine(s)
+					
 	## currentObservation
 	def currentObservation(self):
 		return self.__observation.copy()
