@@ -74,7 +74,8 @@ class Telemetry(object):
                           ['IMU_WORKING', True, 'NO'],
                           ['DECISION_ACTION_A', True, '---'],
                           ['IMU_EULER_Z', True, '---'],
-                          ['VOLTAGE', True, '---']]
+                          ['VOLTAGE', True, '---'],
+                          ['VISION_LOST', True, '---']]
 
         # Variables for probable process' situation
         self.probs = [0.5, 0.5, 0.5, 0.5, 0.5]
@@ -134,7 +135,7 @@ class Telemetry(object):
         try:
             self.othervars[0] = float(data[1])
             self.othervars[1] = float(data[2])
-            self.othervars[2] = int(float(data[3]))
+            self.othervars[2] = int(degrees(float(data[3])))
             self.othervars[3] = max(float(data[4])*sqrt(2)*10, 15)
 
             if data[4] == "-1" or True:
@@ -184,9 +185,20 @@ class Telemetry(object):
         except:
             print 'ERROR of telemetry.change() for VOLTAGE!'
 
+        # Variable of seen ball.
+        try:
+            if data[15] == '1':
+                self.variables[8][2] = "Lost Ball"
+            elif data[15] == '0':
+                self.variables[8][2] = "Found Ball"
+            else:
+                self.variables[8][2] = "Wrong Value"
+        except:
+            print 'ERROR of telemetry.change() for VISION_LOST!'            
+
         # Test if the Telemetry is updated.
         try:
-            if data[15] != 'OUT':
+            if data[16] != 'OUT':
                 print 'TELEMETRY IS OUTDATED!'
         except:
             print 'ERROR on telemetry.change()!'
@@ -463,6 +475,7 @@ def TelemetryControl(tele, sock): # Function to Control the Telemetry Screens
             if test: # If the robot was not found
                 tele.append(Telemetry(int(data[0]))) # Creates a new screen to it
         except:
+            # print 'Communication Lost at', time.time()
             pass
 
     for t in tele: # For all robots
