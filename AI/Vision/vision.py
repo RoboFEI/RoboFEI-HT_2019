@@ -83,7 +83,6 @@ from HeadControl import * #
 
 # Starting processes
 
-args.withoutservo = False
 if args.camerageometric == True and args.withoutservo == True:
 	raise VisionException(6, 'It is not possible to do training without a servo, to remove the withoutservo function')
 
