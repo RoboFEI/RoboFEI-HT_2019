@@ -130,10 +130,10 @@ class Localization():
 
             pos, std = PF.main(u,z)
 
-            if std > 8 and upflag:
-                upflag = False
-            elif std < 4 and not upflag:
-                upflag = True
+            # if std > 8 and upflag:
+            #     upflag = False
+            # elif std < 4 and not upflag:
+            #     upflag = True
 
             if upflag:
                 hp = -999
