@@ -17,12 +17,12 @@ NC='\e[0m' # No Color
 
 echo -e "${Blue}Apagando arquivos pre-copilados${NC}"
 sleep 1
-rm *.pyc
+find -iname "*.pyc" -exec rm {} \;
 
 echo -e "${Blue}Apagando arquivos python${NC}"
 sleep 1
-rm *.py
+find -iname "*.py" -exec rm {} \;
 
 echo -e "${Light_Green}"
-read -t 5 -p "Finalizado, pressione qualquer tecla para fechar"
-echo ""
+read -t 1 -p "Finalizado, pressione qualquer tecla para fechar"
+echo "${NC}"

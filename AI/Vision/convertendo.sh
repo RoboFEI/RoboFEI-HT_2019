@@ -62,5 +62,5 @@ then
 fi
 
 echo -e "${Light_Green}"
-read -t 5 -p "Finalizado, pressione qualquer tecla para fechar"
-echo ""
+read -t 1 -p "Finalizado, pressione qualquer tecla para fechar"
+echo "${NC}"

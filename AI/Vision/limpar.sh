@@ -15,18 +15,13 @@ NC='\e[0m' # No Color
 #Brown/Orange	0;33		Yellow				1;33
 #Light Gray		0;37		White					1;37
 
-echo -e "${Blue}Apagando pastas e arquivos${NC}"
+echo -e "${Blue}Apagando arquivos temporarios${NC}"
 sleep 1
-cd ./include
-rm -r ./*.py ./*.pyc
-cd ../
+find -iname "*~" -exec rm {} \;
 
-cd ./src
-rm -r ./*.py ./*.pyc
-cd ../
-
-rm ./vision.py
-rm ./pointsCalibration.py
+echo -e "${Blue}Apagando arquivos pre-copilados${NC}"
+sleep 1
+find -iname "*.pyc" -exec rm {} \;
 
 echo -e "${Light_Green}"
 read -t 1 -p "Finalizado, pressione qualquer tecla para fechar"
