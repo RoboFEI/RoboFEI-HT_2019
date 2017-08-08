@@ -80,8 +80,8 @@ class VISION():
 
         if hp == -999:
             # y = [90,60,30,0,-30,-60,-90]
-            # y = [90, 0, -90, 0]
-            y = [0]
+            y = [90, 0, -90, 0]
+            # y = [0]
             x = y[self.behave]
             self.pan(pos=x)
 
@@ -227,21 +227,21 @@ class VISION():
     jump = True
     change = True
     def VisionProcess(self):
-        # if time.time() % 60 < 1:
-        #     if self.jump:
-        #         self.robot.x = np.random.randint(70, 970)
-        #         self.robot.y = np.random.randint(70, 670)
-        #         self.robot.rotate = np.random.randint(-180, 180)
-        #         self.jump = False
-        # else:
-        #     self.jump = True
+        if time.time() % 60 < 1:
+            if self.jump:
+                self.robot.x = np.random.randint(70, 970)
+                self.robot.y = np.random.randint(70, 670)
+                self.robot.rotate = np.random.randint(-180, 180)
+                self.jump = False
+        else:
+            self.jump = True
 
-        # if time.time() % 13 < 1:
-        #     if self.change:
-        #         self.bkb.write_int(self.Mem, 'DECISION_ACTION_A', [11, 1, 0, 8, 11, 17, 0, 18, 11, 6, 0, 7, 11, 2, 0, 3, 11, 9, 0, 14][np.random.randint(12)])
-        #         self.change = False
-        # else:
-        #     self.change = True
+        if time.time() % 13 < 1:
+            if self.change:
+                self.bkb.write_int(self.Mem, 'DECISION_ACTION_A', [11, 1, 0, 8, 11, 17, 0, 18, 11, 6, 0, 7, 11, 2, 0, 3, 11, 9, 0, 14][np.random.randint(12)])
+                self.change = False
+        else:
+            self.change = True
 
         # if self.count == 0:
         #     self.text += str(time.time()) + " " + str(self.robot.x) + " " + str(self.robot.y) + " " + str(self.robot.rotate) + "\n"
@@ -282,15 +282,44 @@ class VISION():
 
         if self.get:
             self.get = False
-            size = 5.
-            aux = np.zeros(32)
-            for i in xrange(int(size)):
-                aux += np.array(self.GetField())
-            aux /= size
-            abs_aux = np.rint(aux)
-            mean_aux = np.mean(np.abs(aux-abs_aux))
+            # size = 5.
+            # aux = np.zeros(32)
+            # for i in xrange(int(size)):
+            #     aux += np.array(self.GetField())
+            # aux /= size
+            # abs_aux = np.rint(aux)
+            # mean_aux = np.mean(np.abs(aux-abs_aux))
 
-            self.bkb.write_int(self.Mem, 'iVISION_FIELD', write(abs_aux))
+            # self.bkb.write_int(self.Mem, 'iVISION_FIELD', write(abs_aux))
+
+            if self.robot.rotate > 180:
+                orient = self.robot.rotate - 360
+            else:
+                orient = self.robot.rotate
+
+            alpha = np.abs(-orient + self.headpan) # x -> 1040
+            beta = np.abs(90 - orient + self.headpan) # y -> 0
+            gamma = np.abs(-90 - orient + self.headpan) # y -> 740
+            delta = min(np.abs(180 - orient + self.headpan), np.abs(-180 - orient + self.headpan))  # x -> 0
+            
+            dist = 9999
+
+            if alpha < 90:
+                dist = min(dist, (1040-self.robot.x)/np.cos(np.radians(alpha)))
+                # print 'alpha', alpha, (1040-self.robot.x)/np.cos(np.radians(alpha))
+            if beta < 90:
+                dist = min(dist, self.robot.y/np.cos(np.radians(beta)))
+                # print 'beta', beta, self.robot.y/np.cos(np.radians(beta))
+            if gamma < 90:
+                dist = min(dist, (740-self.robot.y)/np.cos(np.radians(gamma)))
+                # print 'gamma', gamma, (740-self.robot.y)/np.cos(np.radians(gamma))
+            if delta < 90:
+                dist = min(dist, self.robot.x/np.cos(np.radians(delta)))
+                # print 'delta', delta, self.robot.x/np.cos(np.radians(delta))
+            
+            # print 'final', dist, '\n'
+            # mean_aux = 1./max(self.robot.radius, np.random.normal(dist, 0.1 * dist))
+            mean_aux = 1./max(self.robot.radius, dist)
             
             if self.headpan <= -89:
                 hpan = -90 - mean_aux

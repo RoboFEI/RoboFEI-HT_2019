@@ -72,7 +72,7 @@ class Localization():
             field = SoccerField(screen) # Draws the field
             simul.field = field # Passes the field to the simulation
 
-        PF = MonteCarlo(500)
+        PF = MonteCarlo(1000)
 
         std = 100
         hp = -999
@@ -106,27 +106,37 @@ class Localization():
             
             orientation = self.bkb.read_float(self.Mem, 'IMU_EULER_Z')
 
-            x = self.bkb.read_int(self.Mem, 'iVISION_FIELD')
-            y = self.bkb.read_float(self.Mem, 'fVISION_FIELD')
-            fieldpoints = [read(x), y]
+            # x = self.bkb.read_int(self.Mem, 'iVISION_FIELD')
+            # y = self.bkb.read_float(self.Mem, 'fVISION_FIELD')
+            # fieldpoints = [read(x), y]
             
+            # if x == 0:
+            #     fieldpoints = None
+            # else:
+            #     self.bkb.write_int(self.Mem, 'iVISION_FIELD', 0)
+            #     self.bkb.write_float(self.Mem, 'fVISION_FIELD', 0)
+
+            x = self.bkb.read_float(self.Mem, 'fVISION_FIELD')
+            self.bkb.write_float(self.Mem, 'fVISION_FIELD', 0)
             if x == 0:
-                fieldpoints = None
+                distances = None
             else:
-                self.bkb.write_int(self.Mem, 'iVISION_FIELD', 0)
-                self.bkb.write_float(self.Mem, 'fVISION_FIELD', 0)
+                distances = x
+
+            # print 1./np.abs(x-int(x))
 
             # if sum(landmarks) == - 4 * 999:
             #     landmarks = None
 
-            # fieldpoints = None
+            fieldpoints = None
             # orientation = None
             landmarks = None
+            # distances = None
 
-            if fieldpoints == None and landmarks == None:
-                z = [None, None, None]
+            if fieldpoints == None and landmarks == None and distances == None:
+                z = [None, None, None, None]
             else:
-                z = [landmarks, fieldpoints, orientation]
+                z = [landmarks, fieldpoints, orientation, distances]
 
             pos, std = PF.main(u,z)
 
@@ -138,7 +148,7 @@ class Localization():
             if upflag:
                 hp = -999
                 self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', -999)
-            elif fieldpoints != None or self.bkb.read_int(self.Mem, 'DECISION_LOCALIZATION') == 999:
+            elif fieldpoints != None or distances != None or self.bkb.read_int(self.Mem, 'DECISION_LOCALIZATION') == 999:
                 hp = PF.PerfectInformation(u, self.bkb.read_float(self.Mem, 'VISION_PAN_DEG'), 5)
                 self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', hp)
 

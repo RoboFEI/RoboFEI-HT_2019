@@ -178,15 +178,12 @@ class Particle(object):
         # drift is the robot's sideways speed in cm/s
         # rotational is the robot's angular speed in degrees/s
 
-        if type(self.weight) != int:
-            self.wfactor = max(min(np.log(meanw/self.weight)/np.log(1000), 2), 0)
-
         # Computes the forward speed with error
-        Forward = straight + NRnd(self.factors[0]*straight) + NRnd(self.factors[1]*drift) + NRnd(self.factors[2]*rotational) + NRnd(self.factors[3] * self.wfactor * moving) + NRnd(self.factors[4])
+        Forward = straight + NRnd(self.factors[0]*straight) + NRnd(self.factors[1]*drift) + NRnd(self.factors[2]*rotational) + NRnd(self.factors[3] * self.wfactor) + NRnd(self.factors[4])
         # Computes the side speed with error
-        Side = drift + NRnd(self.factors[5]*straight) + NRnd(self.factors[6]*drift) + NRnd(self.factors[7]*rotational) + NRnd(self.factors[8] * self.wfactor * moving) + NRnd(self.factors[9])
+        Side = drift + NRnd(self.factors[5]*straight) + NRnd(self.factors[6]*drift) + NRnd(self.factors[7]*rotational) + NRnd(self.factors[8] * self.wfactor) + NRnd(self.factors[9])
         # Computes the angular speed with error
-        Omega = rotational + NRnd(self.factors[10]*straight) + NRnd(self.factors[11]*drift) + NRnd(self.factors[12]*rotational) + NRnd(self.factors[13] * self.wfactor * moving) + NRnd(self.factors[14])
+        Omega = rotational + NRnd(self.factors[10]*straight) + NRnd(self.factors[11]*drift) + NRnd(self.factors[12]*rotational) + NRnd(self.factors[13] * self.wfactor) + NRnd(self.factors[14])
 
         # Converts angles to radians
         Omega = np.radians(Omega)
@@ -238,6 +235,9 @@ class Particle(object):
     #   Likelihood computation
     #----------------------------------------------------------------------------------------------
     def Sensor(self, landmarks=None, field=None, orientation=None, distances=None, weight=1):
+        factorweight = 1
+        fwl = -1
+
         # If it was given landmarks
         if landmarks != None:
             # Computes the landmarks positions
@@ -310,14 +310,41 @@ class Particle(object):
 
             weight *= w
 
+        if distances != None:
+            pan = int(distances)
+            aux = np.abs(pan - distances)
+            dist = 1.0/aux
+
+            alpha = np.abs(-self.rotation + pan) # x -> 1040
+            beta = np.abs(90 - self.rotation + pan) # y -> 0
+            gamma = np.abs(-90 - self.rotation + pan) # y -> 740
+            delta = min(np.abs(180 - self.rotation + pan), np.abs(-180 - self.rotation + pan))  # x -> 0
+
+            maxd = 9999
+
+            if alpha < 90:
+                maxd = min(maxd, (1040-self.x)/np.cos(np.radians(alpha)))
+            if beta < 90:
+                maxd = min(maxd, self.y/np.cos(np.radians(beta)))
+            if gamma < 90:
+                maxd = min(maxd, (740-self.y)/np.cos(np.radians(gamma)))
+            if delta < 90:
+                maxd = min(maxd, self.x/np.cos(np.radians(delta)))
+
+            weight *= np.exp(-np.power(dist-maxd, 2)/(2 * np.power(50, 2)))
+
+
+            factorweight *= np.exp(fwl)
+
         # If the IMU's orientation was given
         if orientation != None:
             weight *= ComputeAngLikelihoodDeg(np.degrees(orientation), self.rotation, self.SigmaIMU)/(np.sqrt(2*np.pi)*self.SigmaIMU)
+            factorweight *= np.exp(fwl)/(np.sqrt(2*np.pi)*self.SigmaIMU)
 
         self.weight = max(weight, 1e-300)
 
-        # if landmarks != None or field != None or orientation != None:
-        #     self.wfactor = max(min(np.log(self.weight)/np.log(1e-10), 2.), 0.)
+        if landmarks != None or field != None or orientation != None or distances != None:
+            self.wfactor = max(min(np.log(factorweight/self.weight), 2.), 0.)
 
         # self.wfactor = 0.5
         return self.weight
