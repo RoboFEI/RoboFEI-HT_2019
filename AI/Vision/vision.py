@@ -67,9 +67,6 @@ args = parser.parse_args()
 # ---- Imports ----
 
 # Libraries to be used
-import sys
-sys.path.append('./include')
-sys.path.append('./src')
 
 # The standard libraries used in the vision system
 

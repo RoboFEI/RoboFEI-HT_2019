@@ -45,14 +45,14 @@ class Morphology(BasicClass):
 		self.__color = color
 		super(Morphology, self).__init__(arg, self.__color, self.__func)
 		
-		self.__parameters = self._confini.read()
-		if self.__parameters == -1:
-			self.__parameters = {
-				'size_kennel': 1,
-				'interaction': 1,
-				'morphological': 3,
-			}
-			
+		# Creating default values and reading config
+		self.__parameters = {
+			'size_kennel': 1,
+			'interaction': 1,
+			'morphological': 3,
+		}
+		self.__parameters = self._confini.read(self.__parameters)
+		
 		self.__kennel = cv2.getStructuringElement(
 			cv2.MORPH_ELLIPSE,
 			(

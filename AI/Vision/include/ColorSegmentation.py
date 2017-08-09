@@ -22,7 +22,7 @@ class ColorSegmentation(BasicClass):
 	# ---- Variables ----
 	
 	## show
-	# Range maximum values.
+	# .
 	show = False
 	
 	## upper
@@ -38,27 +38,29 @@ class ColorSegmentation(BasicClass):
 	__color = None
 	
 	## Parameters
-	# Parameters used to perform color segmentation
+	# Parameters used to perform color segmentation.
 	__parameters = None
 	
 	## Constructor Class
-	def __init__(self, color, arg):
+	def __init__(self, color, func, arg):
 		self.__color = color
-		super(ColorSegmentation, self).__init__(arg, color, "Segmentation")
+		__func = func
+		super(ColorSegmentation, self).__init__(arg, color, "Segmentation-" + __func)
 		
-		self.__parameters = self._confini.read()
-		if self.__parameters == -1:
-			self.__parameters = {
-				'h_min': 0,
-				's_min': 0,
-				'v_min': 0,
-				'h_max': 255,
-				's_max': 255,
-				'v_max': 255,
-				'color_b': 0,
-				'color_g': 0,
-				'color_r': 0,
-			}
+		# Creating default values and reading config
+		self.__parameters = {
+			'h_min': 0,
+			's_min': 0,
+			'v_min': 0,
+			'h_max': 255,
+			's_max': 255,
+			'v_max': 255,
+			'color_b': 0,
+			'color_g': 0,
+			'color_r': 0,
+		}
+		self.__parameters = self._confini.read(self.__parameters)
+		
 		# define range of color in HSV
 		self.__lower = np.array([self.__parameters['h_min'], self.__parameters['s_min'], self.__parameters['v_min']])
 		self.__upper = np.array([self.__parameters['h_max'], self.__parameters['s_max'], self.__parameters['v_max']])
@@ -192,8 +194,10 @@ class ColorSegmentation(BasicClass):
 	## segmentation
 	# Function that performs the segmentation of a given color and returns a mask
 	def segmentation(self, img):
+		# Color segmentation
 		hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 		mask = cv2.inRange(hsv, self.__lower, self.__upper)
+		
 		if self.show == False:
 			return mask
 		else:

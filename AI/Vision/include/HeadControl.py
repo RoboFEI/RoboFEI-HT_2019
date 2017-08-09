@@ -40,10 +40,11 @@ class HeadControl(BasicThread):
 		print '\33[1;33m' + '---- Initializing class HeadControl ----' + '\33[0m'
 		super(HeadControl, self).__init__(arg, 'Head' , 'parameters')
 		
+		# Creating default values and reading config
 		self.__observation = {
-			'ID Pan': 19,
-			'ID Tilt': 20,
-			'frequency': 1000,
+			'id_pan': 19,
+			'id_tilt': 20,
+			'frequency': 1e3,
 			'center_pan': 512,
 			'center_tilt': 310,
 		}
@@ -59,26 +60,25 @@ class HeadControl(BasicThread):
 		while self._running:
 			start = time.time()
 			value = self._bkb.read_int('DECISION_LOCALIZATION')
-			print 'value:', value 
 			if value == -999:
 				self.__head.writeWord(
-					self.__observation['ID Pan'],
+					self.__observation['id_pan'],
 					self.__motor['Goal Position'],
 					self.__observation['center_pan']
 				)
 				self.__head.writeWord(
-					self.__observation['ID Tilt'],
+					self.__observation['id_tilt'],
 					self.__motor['Goal Position'],
 					self.__observation['center_tilt']
 				)
 			else:
 				self.__head.writeWord(
-					self.__observation['ID Pan'],
+					self.__observation['id_pan'],
 					self.__motor['Goal Position'],
 					self.__observation['center_pan']-(value*1023)/300
 				)
 				self.__head.writeWord(
-					self.__observation['ID Tilt'],
+					self.__observation['id_tilt'],
 					self.__motor['Goal Position'],
 					self.__observation['center_tilt']
 				)
@@ -86,7 +86,7 @@ class HeadControl(BasicThread):
 			self._bkb.write_float(
 				'VISION_PAN_DEG',
 				(self.__observation['center_pan'] - self.__head.readWord(
-						self.__observation['ID Pan'],
+						self.__observation['id_pan'],
 						self.__motor['Present Position']
 					)
 				)*300.0/1023

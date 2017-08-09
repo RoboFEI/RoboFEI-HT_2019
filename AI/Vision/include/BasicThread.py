@@ -33,9 +33,6 @@ class BasicThread(BasicClass, Thread):
 	## pausethread
 	_pausethread = None
 	
-	## waitthread
-	waitthread = None
-	
 	## Constructor Class
 	@abstractmethod
 	def __init__(self, arg, name = None, func = None):
@@ -50,18 +47,12 @@ class BasicThread(BasicClass, Thread):
 		self._bkb = Blackboard( )
 		
 		self._pausethread = Condition(Lock())
-		self.waitthread = Condition(Lock())
-		
-		self.waitthread.acquire()
 		
 	## pause
 	def _pause(self):
 		self._pausethread.acquire()
-		self.waitthread.notify()
-		self.waitthread.release()
 	
 	## resume
 	def _resume(self):
-		self.waitthread.acquire()
 		self._pausethread.notify()
 		self._pausethread.release()

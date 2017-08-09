@@ -65,7 +65,18 @@ class ConfigIni( ):
 			self.__dictionary = -1
 		
 	## read
-	def read(self):
+	def read(self, base):
+		# Data not found
+		if self.__dictionary == -1:
+			self.__dictionary = base
+			return base
+		
+		# Updating data
+		for k in self.__dictionary.keys():
+			base[k] = self.__dictionary[k]
+		
+		# Updating and returning
+		self.__dictionary = base
 		return self.__dictionary
 	
 	## finalize

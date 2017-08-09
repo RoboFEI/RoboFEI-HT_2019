@@ -73,10 +73,15 @@ class CameraCapture(BasicThread):
 		self._running = False
 		self.join()
 		self.__camera.release()
-		del self.__observation['frame']
-		del self.__observation['pos_tilt']
-		del self.__observation['pos_pan']
-		del self.__observation['time']
+		
+		if 'frame' in self.__observation.keys():
+			del self.__observation['frame']
+		if 'pos_tilt' in self.__observation.keys():
+			del self.__observation['pos_tilt']
+		if 'pos_pan' in self.__observation.keys():
+			del self.__observation['pos_pan']
+		if 'time' in self.__observation.keys():
+			del self.__observation['time']
 		super(CameraCapture,self).finalize(self.__observation)
 	
 	## Constructor Class
@@ -84,14 +89,13 @@ class CameraCapture(BasicThread):
 		print '\33[1;33m' + '---- Initializing class camera ----' + '\33[0m'
 		super(CameraCapture, self).__init__(arg, 'Camera' , 'parameters')
 		
-		self.__observation = self._confini.read()
-		if self.__observation is -1:
-			self.__observation = {
-				'fps': 30,
-				'focus': 25,
-				'saturation': 128,
-				'resolution': '1280x720'
-			}
+		self.__observation = {
+			'fps': 30,
+			'focus': 25,
+			'saturation': 128,
+			'resolution': '1280x720'
+		}
+		self.__observation = self._confini.read(self.__observation)
 		
 		self.__camera, self.__port = self.__cameraOpen()
 		
