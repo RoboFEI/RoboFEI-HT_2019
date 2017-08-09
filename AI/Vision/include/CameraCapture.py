@@ -31,9 +31,9 @@ class CameraCapture(BasicThread):
 	# Saves the observation of the most recent state.
 	__observation = None
 	
-	## exe variable
+	## running variable
 	# Flag responsible for executing camera capture
-	__exe = None
+	_running = None
 	
 	## cameraOpen
 	# Used to locate the port where the camera is connected and connect to it.
@@ -70,7 +70,7 @@ class CameraCapture(BasicThread):
 	## finalize
 	# Terminates the capture process and saves the generated information
 	def finalize(self):
-		self.__exe = False
+		self._running = False
 		self.join()
 		self.__camera.release()
 		del self.__observation['frame']
@@ -107,14 +107,14 @@ class CameraCapture(BasicThread):
 	## run
 	# Function that will be executed as a thread
 	def run(self):
-		self.__exe = True
+		self._running = True
 		
 		if self._args.camera is True:
 			cv2.namedWindow('Camera parameters')
 			cv2.createTrackbar('focus', 'Camera parameters', self.__observation['focus'], 250, self.__trackbarFocus)
 			cv2.createTrackbar('saturation', 'Camera parameters', self.__observation['saturation'], 255, self.__trackbarSaturation)
 		
-		while self.__exe:
+		while self._running:
 			start = time.time()
 			
 			ret, self.__observation['frame'] = self.__camera.read()

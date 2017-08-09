@@ -100,6 +100,9 @@ if args.withoutservo == False:
 		camera.finalize()
 		exit()
 
+if args.camerageometric == True:
+	head.finalize()
+
 # Main loop
 
 while True:

@@ -17,11 +17,23 @@ NC='\e[0m' # No Color
 
 echo -e "${Blue}Apagando arquivos pre-copilados${NC}"
 sleep 1
-find -iname "*.pyc" -exec rm {} \;
+if !( find -iname "*.pyc" -exec rm {} \; )
+then
+	echo -e "${Light_Red}"
+	read -p "Erro, precione qualquer tecla para finalizar"
+	exit
+fi
+
 
 echo -e "${Blue}Apagando arquivos python${NC}"
 sleep 1
-find -iname "*.py" -exec rm {} \;
+if !( find -iname "*.py" -exec rm {} \; )
+then
+	echo -e "${Light_Red}"
+	read -p "Erro, precione qualquer tecla para finalizar"
+	exit
+fi
+
 
 echo -e "${Light_Green}"
 read -t 1 -p "Finalizado, pressione qualquer tecla para fechar"

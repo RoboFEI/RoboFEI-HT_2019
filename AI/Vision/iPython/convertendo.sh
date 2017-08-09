@@ -17,9 +17,9 @@ NC='\e[0m' # No Color
 
 ./limpar.sh
 
+
 echo -e "${Blue}Convertendo ipynb${NC}"
 sleep 1
-
 if !( jupyter nbconvert --to python *.ipynb )
 then
 	echo -e "${Light_Red}"
@@ -30,7 +30,6 @@ fi
 
 echo -e "${Blue}Arrumando arquivo Python${NC}"
 sleep 1
-
 if !( python converter.py )
 then
 	echo -e "${Light_Red}"
@@ -44,6 +43,7 @@ then
 	read -p "Erro, precione qualquer tecla para finalizar"
 	exit
 fi
+
 
 echo -e "${Light_Green}"
 read -t 1 -p "Finalizado, pressione qualquer tecla para fechar"
