@@ -106,32 +106,32 @@ class Localization():
             
             orientation = self.bkb.read_float(self.Mem, 'IMU_EULER_Z')
 
-            # x = self.bkb.read_int(self.Mem, 'iVISION_FIELD')
-            # y = self.bkb.read_float(self.Mem, 'fVISION_FIELD')
-            # fieldpoints = [read(x), y]
+            x = self.bkb.read_int(self.Mem, 'iVISION_FIELD')
+            y = self.bkb.read_float(self.Mem, 'fVISION_FIELD')
+            fieldpoints = [read(x), y]
             
-            # if x == 0:
-            #     fieldpoints = None
-            # else:
-            #     self.bkb.write_int(self.Mem, 'iVISION_FIELD', 0)
-            #     self.bkb.write_float(self.Mem, 'fVISION_FIELD', 0)
-
-            x = self.bkb.read_float(self.Mem, 'fVISION_FIELD')
-            self.bkb.write_float(self.Mem, 'fVISION_FIELD', 0)
             if x == 0:
-                distances = None
+                fieldpoints = None
             else:
-                distances = x
+                self.bkb.write_int(self.Mem, 'iVISION_FIELD', 0)
+                self.bkb.write_float(self.Mem, 'fVISION_FIELD', 0)
+
+            # x = self.bkb.read_float(self.Mem, 'fVISION_FIELD')
+            # self.bkb.write_float(self.Mem, 'fVISION_FIELD', 0)
+            # if x == 0:
+            #     distances = None
+            # else:
+            #     distances = x
 
             # print 1./np.abs(x-int(x))
 
             # if sum(landmarks) == - 4 * 999:
             #     landmarks = None
 
-            fieldpoints = None
+            # fieldpoints = None
             # orientation = None
             landmarks = None
-            # distances = None
+            distances = None
 
             if fieldpoints == None and landmarks == None and distances == None:
                 z = [None, None, None, None]
@@ -247,7 +247,7 @@ def mean(vec):
 
 def read(x):
     v = []
-    for i in xrange(31, -1, -1):
+    for i in xrange(9, -1, -1):
         aux = x >> i
         x -= aux << i
         v.insert(0, abs(aux))

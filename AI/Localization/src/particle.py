@@ -7,48 +7,18 @@ import scipy.special as sp
 import time
 
 # Distance and angles of the notable points
-vpoints = [
-     (1,0),
-     (9999999,0),
-     
-     (100,-45),
-     (200,-45),
-     (300,-45),
+vpoints = [(100,-45),
+           (200,-45),
+           (300,-45),
 
-     (70,-30),
-     (140,-30),
-     (300,-30),
-     (530,-30),
+           (50,0),
+           (100,0),
+           (200,0),
+           (400,0),
 
-     (80,-20),
-     (180,-20),
-     (420,-20),
-
-     (90,-10),
-     (150,-10),
-     (300,-10),
-
-     (50,0),
-     (100,0),
-     (200,0),
-     (500,0),
-
-     (90,10),
-     (150,10),
-     (300,10),
-
-     (80,20),
-     (190,20),
-     (430,20),
-
-     (70,30),
-     (140,30),
-     (300,30),
-     (530,30),
-
-     (100,45),
-     (200,45),
-     (300,45)]
+           (100,45),
+           (200,45),
+           (300,45)]
 
 # Vars used to compute the particles likelihood
 maxWdelta = None
@@ -155,7 +125,13 @@ class Particle(object):
         self.wfactor = wfactor # Used in order to implement the motion error.
 
         # Probability factors used to compute particles weights.
-        self.probfactors = (1, 1, 1, 1, 0.3, 0.7)
+        self.probfactors = (1, 0, 1, 1, 0.1, 0.3)
+        # 0 - Factor
+        # 1 - Factor
+        # 2 - 0 0
+        # 3 - 1 1
+        # 4 - 1 0
+        # 5 - 0 1
 
     #----------------------------------------------------------------------------------------------
     #   Method that chooses which movement should be used
@@ -292,22 +268,30 @@ class Particle(object):
             # Computes a normalization value
             n = 1
             w = 1
-            for i in xrange(32):
-                n *= self.probfactors[0] / np.power(vpoints[i][0] * np.cos(np.radians(vpoints[i][1])), -self.probfactors[1]) * (
+            f = 1
+            for i in xrange(10):
+                n *= self.probfactors[0] * np.power(vpoints[i][0] * np.cos(np.radians(vpoints[i][1])), -self.probfactors[1]) * (
                     self.probfactors[3] * ifield[i] +
                     self.probfactors[2] * (1-ifield[i]))
 
             # Computes the normalized weight
-                w *= self.probfactors[0] / np.power(vpoints[i][0] * np.cos(np.radians(vpoints[i][1])), -self.probfactors[1]) * (
+                w *= self.probfactors[0] * np.power(vpoints[i][0] * np.cos(np.radians(vpoints[i][1])), -self.probfactors[1]) * (
                     self.probfactors[2] * (1-ifield[i]) * (1-ret[i]) +
                     self.probfactors[3] * ifield[i] * ret[i] +
                     self.probfactors[4] * ifield[i] * (1-ret[i]) +
                     self.probfactors[5] * (1-ifield[i]) * ret[i])
 
+                f *= self.probfactors[0] * np.power(vpoints[i][0] * np.cos(np.radians(vpoints[i][1])), -self.probfactors[1]) * (
+                    self.probfactors[2] +
+                    self.probfactors[3] +
+                    self.probfactors[4] +
+                    self.probfactors[5]) * np.power(4., fwl)
+
             w /= n
+            f /= n
 
             # w = np.power(w, 1./32)
-
+            factorweight *= f
             weight *= w
 
         if distances != None:
@@ -345,6 +329,7 @@ class Particle(object):
 
         if landmarks != None or field != None or orientation != None or distances != None:
             self.wfactor = max(min(np.log(factorweight/self.weight), 2.), 0.)
+            # print self.wfactor
 
         # self.wfactor = 0.5
         return self.weight
