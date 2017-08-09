@@ -1,16 +1,16 @@
 # coding: utf-8
 
-# Libraries to be used
+# Libraries to be used.
 import sys
 sys.path.append('../include')
 sys.path.append('../src')
 
-# The standard libraries used in the vision system
+# The standard libraries used in the vision system.
 import os # Library for interaction with the system
 from copy import copy # To create copies of the variables
 import time # Using for time control and measurement
 
-# Used class developed by RoboFEI-HT
+# Used class developed by RoboFEI-HT.
 from BasicThread import * # Base class with primary functions
 
 ## Class CameraCapture

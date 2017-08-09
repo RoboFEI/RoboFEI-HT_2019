@@ -2,18 +2,18 @@
 
 # ---- Imports ----
 
-# Libraries to be used
+# Libraries to be used.
 import sys
 sys.path.append('../include')
 sys.path.append('../src')
 
-# The standard libraries used in the vision system
+# The standard libraries used in the vision system.
 import configparser # Used to read ini files
 
-# Used class developed by RoboFEI-HT
+# Used class developed by RoboFEI-HT.
 from VisionException import * # Used to handle exceptions
 
-# Import a shared memory
+# Import a shared memory.
 sys.path.append('../Blackboard/src/')
 from SharedMemory import SharedMemory
 

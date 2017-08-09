@@ -66,17 +66,17 @@ args = parser.parse_args()
 
 # ---- Imports ----
 
-# Libraries to be used
+# Libraries to be used.
 import sys
 sys.path.append('./include')
 sys.path.append('./src')
 
-# The standard libraries used in the vision system
+# The standard libraries used in the vision system.
 
 # Used class developed by RoboFEI-HT
-from MainFunctions import * # Declaration the main functions
-from CameraCapture import * # Class responsible for performing the observation of domain
-from HeadControl import * # 
+from MainFunctions import * # Declaration the main functions.
+from CameraCapture import * # Class responsible for performing the observation of domain.
+from HeadControl import * # Class responsible for performing head control.
 
 # ---- Main Code ----
 

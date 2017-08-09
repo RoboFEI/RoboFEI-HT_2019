@@ -8,8 +8,8 @@ sys.path.append('../include')
 sys.path.append('../src')
 
 # The standard libraries used in the vision system
-import numpy as np
-from abc import ABCMeta, abstractmethod # Used to create abstract classes
+import numpy as np # Library used for manipulation of matrices and vectors.
+from abc import ABCMeta, abstractmethod # Used to create abstract classes.
 import cv2 # Library to process image
 print 'BasicClass - Opencv Version:', cv2.__version__
 if int((cv2.__version__).split('.')[0]) < 3:
@@ -21,7 +21,7 @@ from VisionException import * # Used to handle exceptions
 from ConfigIni import * # Used to read config vision
 
 ## Basic Class
-# Class that implements similar functions between classes
+# Class that implements similar functions between classes.
 class BasicClass( ):
 	__metaclass__ = ABCMeta
 	

@@ -2,18 +2,18 @@
 
 # ---- Imports ----
 
-# Libraries to be used
+# Libraries to be used.
 import sys
 sys.path.append('../include')
 sys.path.append('../src')
 
-# The standard libraries used in the vision system
+# The standard libraries used in the vision system.
 from abc import ABCMeta, abstractmethod # Used to create abstract classes
-from threading import Thread, Condition, Lock# Used to create classes with thread functions
+from threading import Thread, Condition, Lock # Used to create classes with thread functions
 
-# Used class developed by RoboFEI-HT
-from BasicClass import * # 
-from Blackboard import * # 
+# Used class developed by RoboFEI-HT.
+from BasicClass import * # Class that implements similar functions between classes.
+from Blackboard import * # Class responsible for accessing shared memory.
 from VisionException import * # Used to handle exceptions
 
 ## Basic Class - Thread

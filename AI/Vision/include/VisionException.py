@@ -1,11 +1,5 @@
 # coding: utf-8
 
-# ---- Imports ----
-
-import sys
-sys.path.append('../include')
-sys.path.append('../src')
-
 ## Class to VisionException
 # Class used to handle system errors
 class VisionException(Exception):

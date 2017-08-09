@@ -1,9 +1,10 @@
 # coding: utf-8
 
-# Libraries to be used
-import ctypes
+# Libraries to be used.
+import ctypes # Used for reading library in C++.
 
-from VisionException import * #
+# Used class developed by RoboFEI-HT
+from VisionException import *  # Used to handle exceptions
 
 ## Describes Class Servo - Communicate, Write and read from Vision Servo-motors
 
