@@ -1,10 +1,9 @@
-
-
 from collisions import *
 from telemetry import *
 import sys
 sys.path.append('../AI/Localization/src/')
 from particle import *
+from GameState import *
 
 class Simulation():
     def __init__(self, screen):
@@ -23,8 +22,9 @@ class Simulation():
             self.sock[c].bind(('255.255.255.255', 1241+c))
             self.sock[c].settimeout(0.001)
 
-        self.gamecontroller = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.gamecontroller.bind(('255.255.255.255', 3838))
+        self.gamecontroller = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        self.gamecontroller.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.gamecontroller.bind(('0.0.0.0', 3838))
         self.gamecontroller.settimeout(0.001)
 
     def update_mouse_pos(self):
@@ -71,29 +71,30 @@ class Simulation():
             self.timestamp = time.time()
 
         try:
-            data = self.gamecontroller.recv(1024, socket.MSG_DONTWAIT) # Reads GameController
-            v = memoryview(data) # Gets the memory address
-            x = v.tolist() # Converts the memory into useful data
-            if len(x) == 158:
-                State = x[7] # Gets game state
-                Time = x[15]*256 + x[14] # Gets remaining time, in seconds.
-                if x[18] == 18: # Find the first team
-                    FGoal = x[20] # Saves the team's score
-                    EGoal = x[90] # Saves the opponent's score
-                else:
-                    FGoal = x[90] # Saves the team's score
-                    EGoal = x[20] # Saves the opponent's score
+        # if True:
+            data, _ = self.gamecontroller.recvfrom(GameState.sizeof()) # Reads GameController
+            data = GameState.parse(data)
 
-                if State == 3:
-                    self.field.GameStop = False
-                else:
-                    self.field.GameStop = True
+            State = data.game_state # Gets game state
+            Time = data.secondary_seconds_remaining*256 + data.seconds_remaining # Gets remaining time, in seconds.
+            if data.teams[0].team_number == 18: # Find the first team
+                FGoal = data.teams[0].score # Saves the team's score
+                EGoal = data.teams[1].score # Saves the opponent's score
+            else:
+                FGoal = data.teams[1].score # Saves the team's score
+                EGoal = data.teams[0].score # Saves the opponent's score
+            
+            if State == 'STATE_PLAYING':
+                self.field.GameStop = False
+            else:
+                self.field.GameStop = True
 
-                self.field.Counter = Time * 1000
+            self.field.Counter = Time * 1000
 
-                self.field.FriendGoals = FGoal
-                self.field.EnemyGoals = EGoal
+            self.field.FriendGoals = FGoal
+            self.field.EnemyGoals = EGoal
         except:
+            # print 'Not listenning the Gamecontroller at', time.time()
             pass
 
         pygame.display.flip()

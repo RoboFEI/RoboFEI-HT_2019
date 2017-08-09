@@ -7,48 +7,18 @@ import scipy.special as sp
 import time
 
 # Distance and angles of the notable points
-vpoints = [
-     (1,0),
-     (9999999,0),
-     
-     (100,-45),
-     (200,-45),
-     (300,-45),
+vpoints = [(100,-45),
+           (200,-45),
+           (300,-45),
 
-     (70,-30),
-     (140,-30),
-     (300,-30),
-     (530,-30),
+           (50,0),
+           (100,0),
+           (200,0),
+           (400,0),
 
-     (80,-20),
-     (180,-20),
-     (420,-20),
-
-     (90,-10),
-     (150,-10),
-     (300,-10),
-
-     (50,0),
-     (100,0),
-     (200,0),
-     (500,0),
-
-     (90,10),
-     (150,10),
-     (300,10),
-
-     (80,20),
-     (190,20),
-     (430,20),
-
-     (70,30),
-     (140,30),
-     (300,30),
-     (530,30),
-
-     (100,45),
-     (200,45),
-     (300,45)]
+           (100,45),
+           (200,45),
+           (300,45)]
 
 # Vars used to compute the particles likelihood
 maxWdelta = None
@@ -155,7 +125,13 @@ class Particle(object):
         self.wfactor = wfactor # Used in order to implement the motion error.
 
         # Probability factors used to compute particles weights.
-        self.probfactors = (1, 1, 1, 1, 0.3, 0.7)
+        self.probfactors = (1, 0, 1, 1, 0.1, 0.3)
+        # 0 - Factor
+        # 1 - Factor
+        # 2 - 0 0
+        # 3 - 1 1
+        # 4 - 1 0
+        # 5 - 0 1
 
     #----------------------------------------------------------------------------------------------
     #   Method that chooses which movement should be used
@@ -178,15 +154,12 @@ class Particle(object):
         # drift is the robot's sideways speed in cm/s
         # rotational is the robot's angular speed in degrees/s
 
-        if type(self.weight) != int:
-            self.wfactor = max(min(np.log(meanw/self.weight)/np.log(1000), 2), 0)
-
         # Computes the forward speed with error
-        Forward = straight + NRnd(self.factors[0]*straight) + NRnd(self.factors[1]*drift) + NRnd(self.factors[2]*rotational) + NRnd(self.factors[3] * self.wfactor * moving) + NRnd(self.factors[4])
+        Forward = straight + NRnd(self.factors[0]*straight) + NRnd(self.factors[1]*drift) + NRnd(self.factors[2]*rotational) + NRnd(self.factors[3] * self.wfactor) + NRnd(self.factors[4])
         # Computes the side speed with error
-        Side = drift + NRnd(self.factors[5]*straight) + NRnd(self.factors[6]*drift) + NRnd(self.factors[7]*rotational) + NRnd(self.factors[8] * self.wfactor * moving) + NRnd(self.factors[9])
+        Side = drift + NRnd(self.factors[5]*straight) + NRnd(self.factors[6]*drift) + NRnd(self.factors[7]*rotational) + NRnd(self.factors[8] * self.wfactor) + NRnd(self.factors[9])
         # Computes the angular speed with error
-        Omega = rotational + NRnd(self.factors[10]*straight) + NRnd(self.factors[11]*drift) + NRnd(self.factors[12]*rotational) + NRnd(self.factors[13] * self.wfactor * moving) + NRnd(self.factors[14])
+        Omega = rotational + NRnd(self.factors[10]*straight) + NRnd(self.factors[11]*drift) + NRnd(self.factors[12]*rotational) + NRnd(self.factors[13] * self.wfactor) + NRnd(self.factors[14])
 
         # Converts angles to radians
         Omega = np.radians(Omega)
@@ -238,6 +211,9 @@ class Particle(object):
     #   Likelihood computation
     #----------------------------------------------------------------------------------------------
     def Sensor(self, landmarks=None, field=None, orientation=None, distances=None, weight=1):
+        factorweight = 1
+        fwl = -1
+
         # If it was given landmarks
         if landmarks != None:
             # Computes the landmarks positions
@@ -292,32 +268,68 @@ class Particle(object):
             # Computes a normalization value
             n = 1
             w = 1
-            for i in xrange(32):
-                n *= self.probfactors[0] / np.power(vpoints[i][0] * np.cos(np.radians(vpoints[i][1])), -self.probfactors[1]) * (
+            f = 1
+            for i in xrange(10):
+                n *= self.probfactors[0] * np.power(vpoints[i][0] * np.cos(np.radians(vpoints[i][1])), -self.probfactors[1]) * (
                     self.probfactors[3] * ifield[i] +
                     self.probfactors[2] * (1-ifield[i]))
 
             # Computes the normalized weight
-                w *= self.probfactors[0] / np.power(vpoints[i][0] * np.cos(np.radians(vpoints[i][1])), -self.probfactors[1]) * (
+                w *= self.probfactors[0] * np.power(vpoints[i][0] * np.cos(np.radians(vpoints[i][1])), -self.probfactors[1]) * (
                     self.probfactors[2] * (1-ifield[i]) * (1-ret[i]) +
                     self.probfactors[3] * ifield[i] * ret[i] +
                     self.probfactors[4] * ifield[i] * (1-ret[i]) +
                     self.probfactors[5] * (1-ifield[i]) * ret[i])
 
+                f *= self.probfactors[0] * np.power(vpoints[i][0] * np.cos(np.radians(vpoints[i][1])), -self.probfactors[1]) * (
+                    self.probfactors[2] +
+                    self.probfactors[3] +
+                    self.probfactors[4] +
+                    self.probfactors[5]) * np.power(4., fwl)
+
             w /= n
+            f /= n
 
             # w = np.power(w, 1./32)
-
+            factorweight *= f
             weight *= w
+
+        if distances != None:
+            pan = int(distances)
+            aux = np.abs(pan - distances)
+            dist = 1.0/aux
+
+            alpha = np.abs(-self.rotation + pan) # x -> 1040
+            beta = np.abs(90 - self.rotation + pan) # y -> 0
+            gamma = np.abs(-90 - self.rotation + pan) # y -> 740
+            delta = min(np.abs(180 - self.rotation + pan), np.abs(-180 - self.rotation + pan))  # x -> 0
+
+            maxd = 9999
+
+            if alpha < 90:
+                maxd = min(maxd, (1040-self.x)/np.cos(np.radians(alpha)))
+            if beta < 90:
+                maxd = min(maxd, self.y/np.cos(np.radians(beta)))
+            if gamma < 90:
+                maxd = min(maxd, (740-self.y)/np.cos(np.radians(gamma)))
+            if delta < 90:
+                maxd = min(maxd, self.x/np.cos(np.radians(delta)))
+
+            weight *= np.exp(-np.power(dist-maxd, 2)/(2 * np.power(50, 2)))
+
+
+            factorweight *= np.exp(fwl)
 
         # If the IMU's orientation was given
         if orientation != None:
             weight *= ComputeAngLikelihoodDeg(np.degrees(orientation), self.rotation, self.SigmaIMU)/(np.sqrt(2*np.pi)*self.SigmaIMU)
+            factorweight *= np.exp(fwl)/(np.sqrt(2*np.pi)*self.SigmaIMU)
 
         self.weight = max(weight, 1e-300)
 
-        # if landmarks != None or field != None or orientation != None:
-        #     self.wfactor = max(min(np.log(self.weight)/np.log(1e-10), 2.), 0.)
+        if landmarks != None or field != None or orientation != None or distances != None:
+            self.wfactor = max(min(np.log(factorweight/self.weight), 2.), 0.)
+            # print self.wfactor
 
         # self.wfactor = 0.5
         return self.weight

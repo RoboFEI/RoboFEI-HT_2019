@@ -10,15 +10,15 @@ def main():
     screen = Screen()
     screen.start_simulation()
 
-
     simul = Simulation(screen)
-
 
     field = SoccerField(screen)
 
     simul.field = field
 
     pygame.display.set_icon(field.robofei_logo_scaled)
+
+    pygame.display.set_caption('RoboFEI-HT- Soccer Telemetry')
 
     #Main loop
     while True:

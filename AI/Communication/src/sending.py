@@ -96,8 +96,9 @@ while(True):
     bkb.write_int(mem, 'IMU_WORKING', 0) # Equal previous
     # Other Variables
     message += str(bkb.read_int(mem, 'DECISION_ACTION_A')) + ' ' # Sends the movement the decision is executing.
-    message += str(bkb.read_float(mem, 'IMU_EULER_Z')) + ' ' # Sends the orientation of the IMU
+    message += str(bkb.read_float(mem, 'IMU_EULER_Z')) + ' ' # Sends the orientation of the IMU.
     message += str(bkb.read_int(mem, 'VOLTAGE')) + ' ' # Sends the Voltage on motors.
+    message += str(bkb.read_int(mem, 'VISION_LOST')) + ' ' # Lost ball.
 
     # End of Message
     message += 'OUT'

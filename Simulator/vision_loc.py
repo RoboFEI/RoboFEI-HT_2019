@@ -80,8 +80,8 @@ class VISION():
 
         if hp == -999:
             # y = [90,60,30,0,-30,-60,-90]
-            # y = [90, 0, -90, 0]
-            y = [0]
+            y = [90, 0, -90, 0]
+            # y = [0]
             x = y[self.behave]
             self.pan(pos=x)
 
@@ -283,7 +283,7 @@ class VISION():
         if self.get:
             self.get = False
             size = 5.
-            aux = np.zeros(32)
+            aux = np.zeros(10)
             for i in xrange(int(size)):
                 aux += np.array(self.GetField())
             aux /= size
@@ -291,6 +291,29 @@ class VISION():
             mean_aux = np.mean(np.abs(aux-abs_aux))
 
             self.bkb.write_int(self.Mem, 'iVISION_FIELD', write(abs_aux))
+
+            # if self.robot.rotate > 180:
+            #     orient = self.robot.rotate - 360
+            # else:
+            #     orient = self.robot.rotate
+
+            # alpha = np.abs(-orient + self.headpan) # x -> 1040
+            # beta = np.abs(90 - orient + self.headpan) # y -> 0
+            # gamma = np.abs(-90 - orient + self.headpan) # y -> 740
+            # delta = min(np.abs(180 - orient + self.headpan), np.abs(-180 - orient + self.headpan))  # x -> 0
+            
+            # dist = 9999
+
+            # if alpha < 90:
+            #     dist = min(dist, (1040-self.robot.x)/np.cos(np.radians(alpha)))
+            # if beta < 90:
+            #     dist = min(dist, self.robot.y/np.cos(np.radians(beta)))
+            # if gamma < 90:
+            #     dist = min(dist, (740-self.robot.y)/np.cos(np.radians(gamma)))
+            # if delta < 90:
+            #     dist = min(dist, self.robot.x/np.cos(np.radians(delta)))
+            
+            # mean_aux = 1./max(self.robot.radius, dist)
             
             if self.headpan <= -89:
                 hpan = -90 - mean_aux
@@ -330,7 +353,7 @@ def CompAng(ang, base, rng):
 
 def write(v):
     x = 0
-    for i in range(32):
+    for i in range(10):
         x += int(v[i]) << i
     # print v
     return x
@@ -352,43 +375,14 @@ def points(v):
 
     return ret
 
-v = [(1,0),
-     (9999999,0),
-
-     (100,-45),
+v = [(100,-45),
      (200,-45),
      (300,-45),
-
-     (70,-30),
-     (140,-30),
-     (300,-30),
-     (530,-30),
-
-     (80,-20),
-     (180,-20),
-     (420,-20),
-
-     (90,-10),
-     (150,-10),
-     (300,-10),
 
      (50,0),
      (100,0),
      (200,0),
-     (500,0),
-
-     (90,10),
-     (150,10),
-     (300,10),
-
-     (80,20),
-     (190,20),
-     (430,20),
-
-     (70,30),
-     (140,30),
-     (300,30),
-     (530,30),
+     (400,0),
 
      (100,45),
      (200,45),
