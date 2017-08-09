@@ -72,12 +72,10 @@ class LocalizationVision(BasicThread):
 			for i in self.vector: 
 				p.append(mask[int(i[1]*mask.shape[0]), int(i[0]*mask.shape[1])])
 			if self.count < (self.frames + 1) * self.ignore and self.ignorecount == self.ignore:
-				print 'HERE1'
 				self.vals += np.array(p) 
 				self.count += 1
 				self.ignorecount = 0
 			elif self.count == (self.frames + 1) * self.ignore: 
-				print 'HERE'
 				self.vals /= self.frames * 255. 
 				x = np.rint(self.vals) 
 				s = np.mean(np.abs(self.vals-x)) 

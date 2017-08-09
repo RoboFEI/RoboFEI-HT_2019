@@ -52,7 +52,7 @@ class PointCalibration():
 
 		self.flag = True
 
-		while self.clicks < 32:
+		while self.clicks < len(v):
 			if self.flag:
 				self.flag = False
 				print 'The point is', v[self.clicks][0], 'cm, at', v[self.clicks][1], 'degrees.'
@@ -73,7 +73,7 @@ class PointCalibration():
 			if self.clicks > 0:
 				self.vector[self.clicks-1] = (float(self.mouseX)/self.img.shape[1], float(self.mouseY)/self.img.shape[0])
 
-		if self.clicks == 32:
+		if self.clicks == len(v):
 			np.save('./Data/Vector', self.vector)
 			print "Saved archive with points."
 		else:
@@ -128,43 +128,14 @@ class PointCalibration():
 			self.flag = True
 			print self.clicks, self.mouseX, self.mouseY
 
-v = [(1,0),
-     (9999999,0),
-     
-     (100,-45),
+v = [(100,-45),
      (200,-45),
      (300,-45),
-
-     (70,-30),
-     (140,-30),
-     (300,-30),
-     (530,-30),
-
-     (80,-20),
-     (180,-20),
-     (420,-20),
-
-     (90,-10),
-     (150,-10),
-     (300,-10),
 
      (50,0),
      (100,0),
      (200,0),
-     (500,0),
-
-     (90,10),
-     (150,10),
-     (300,10),
-
-     (80,20),
-     (190,20),
-     (430,20),
-
-     (70,30),
-     (140,30),
-     (300,30),
-     (530,30),
+     (400,0),
 
      (100,45),
      (200,45),
