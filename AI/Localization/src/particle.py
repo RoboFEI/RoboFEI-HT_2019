@@ -23,8 +23,8 @@ vpoints = [(100,-45),
 # Vars used to compute the particles likelihood
 maxWdelta = None
 
-# field = ((8, 1032), (60, 680), (-180, 180))
-field = ((0, 1040), (0, 740), (-180, 180))
+field = ((8, 1032), (60, 680), (-180, 180))
+# field = ((0, 1040), (0, 740), (-180, 180))
 
 #--------------------------------------------------------------------------------------------------
 #   Class implementing a particle used on Particle Filter Localization
@@ -91,9 +91,10 @@ class Particle(object):
 
         # Motion error coefficients
         if factors == None:
-            self.factors = [1, 2, 1, 500, 5,  1, 2, 1, 500, 7,  1, 2, 1, 100, 5]
+            # self.factors = [1, 2, 1, 500, 5,  1, 2, 1, 500, 7,  1, 2, 1, 100, 5]
+            self.factors = [1, 2, 1, 50, 5,  1, 2, 1, 50, 7,  1, 2, 1, 10, 5]
             # self.factors = 15*[0]
-            # self.factors = [1, 2, 1, 0, 10,  1, 2, 1, 0, 20,  1, 2, 1, 0, 10]
+            # self.factors = [1, 2, 1, 0, 5,  1, 2, 1, 0, 7,  1, 2, 1, 0, 5]
             # self.factors = [0, 0, 0, 0, 10,  0, 0, 0, 0, 20,  0, 0, 0, 0, 10]
             # self.factors = [0, 0, 0, 50, 0,  0, 0, 0, 50, 0,  0, 0, 0, 10, 0]
         else:

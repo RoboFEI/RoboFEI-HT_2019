@@ -95,7 +95,6 @@ class LocalizationVision(BasicThread):
 			else:
 				self.count += 1
 				self.ignorecount += 1
-			print self.count, self.ignorecount
 	## find
 	def find(self, observation, step):
 		self.__observation = observation.copy()

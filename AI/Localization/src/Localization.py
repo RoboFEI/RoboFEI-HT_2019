@@ -59,7 +59,7 @@ class Localization():
         # self.bkb.write_float(self.Mem, 'VISION_THIRD_GOALPOST', -999)
         # self.bkb.write_float(self.Mem, 'VISION_FOURTH_GOALPOST', -999)
         self.bkb.write_int(self.Mem, 'iVISION_FIELD', 0)
-        self.bkb.write_float(self.Mem, 'fVISION_FIELD', 0)
+        self.bkb.write_float(self.Mem, 'fVISION_FIELD', 999)
 
     #----------------------------------------------------------------------------------------------
     #   Localization's main method.
@@ -110,11 +110,11 @@ class Localization():
             y = self.bkb.read_float(self.Mem, 'fVISION_FIELD')
             fieldpoints = [read(x), y]
             
-            if x == 0:
+            if y == 999:
                 fieldpoints = None
             else:
                 self.bkb.write_int(self.Mem, 'iVISION_FIELD', 0)
-                self.bkb.write_float(self.Mem, 'fVISION_FIELD', 0)
+                self.bkb.write_float(self.Mem, 'fVISION_FIELD', 999)
 
             # x = self.bkb.read_float(self.Mem, 'fVISION_FIELD')
             # self.bkb.write_float(self.Mem, 'fVISION_FIELD', 0)
@@ -195,7 +195,7 @@ class Localization():
         elif Action == 11:
             return (0,0,0,1,self.dt()) # Gait
         elif Action == 1:
-            return (20,0,0,1,self.dt()) # Fast Walk Forward
+            return (13,0,0,1,self.dt()) # Fast Walk Forward
         elif Action == 8:
             return (10,0,0,1,self.dt()) # Slow Walk Forward
         elif Action == 17:
@@ -206,10 +206,10 @@ class Localization():
             return (0,-10,0,1,self.dt()) # Walk Left
         elif Action == 7:
             return (0,10,0,1,self.dt()) # Walk Right
-        elif Action == 3:
-            return (0,0,18.7,1,self.dt()) # Turn Right
         elif Action == 2:
-            return (0,0,-18.7,1,self.dt()) # Turn Left
+            return (0,0,18,1,self.dt()) # Turn Right
+        elif Action == 3:
+            return (0,0,-22.5,1,self.dt()) # Turn Left
         elif Action == 9:
             return (0,-10,-20,1,self.dt()) # Turn Left Around the Ball
         elif Action == 14:
