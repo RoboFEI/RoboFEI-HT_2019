@@ -63,6 +63,7 @@ class Simulation():
                         robot.imu_initial_value = 0
                         robot.fast_walk_speed = -1000
                         robot.turn_angle = 300
+                        robot.set_errors(0,0.01, 0,0.01, 0,0.01, 0,0, 0,0, 0,0.01)
 
                     robot.bkb.write_int(robot.Mem, 'DECISION_ACTION_A', 0)
                     robot.ball = self.ball

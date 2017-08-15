@@ -35,7 +35,7 @@ class VISION():
         self.maxpan = 90 # Max pan
         self.minpan = -90 # Min pan
 
-        self.headspd = 90 # Max head speed, in degrees per second
+        self.headspd = 180 # Max head speed, in degrees per second
 
         # Observation points
         self.vpoints = v
@@ -70,8 +70,8 @@ class VISION():
 
     # Updates the head position
     def headmotion(self):
-        self.headtilt += np.sign(self.tiltpos-self.headtilt) * np.min([abs(self.tiltpos-self.headtilt), self.headspd]) / self.clk
-        self.headpan += np.sign(self.panpos-self.headpan) * np.min([abs(self.panpos-self.headpan), self.headspd]) / self.clk
+        self.headtilt += np.sign(self.tiltpos-self.headtilt) * np.min([abs(self.tiltpos-self.headtilt) * self.clk, self.headspd]) / self.clk
+        self.headpan += np.sign(self.panpos-self.headpan) * np.min([abs(self.panpos-self.headpan) * self.clk, self.headspd]) / self.clk
 
         self.headtilt = np.min([self.maxtilt, np.max([self.mintilt, self.headtilt])])
         self.headpan = np.min([self.maxpan, np.max([self.minpan, self.headpan])])
@@ -81,8 +81,12 @@ class VISION():
         hp = self.bkb.read_int(self.Mem, 'DECISION_LOCALIZATION')
 
         if hp == -999:
+            self.robot.x, self.robot.y, self.robot.rotate = 130, 540, -135
+            self.jump = False
+
+        if hp == -999:
             # y = [90,60,30,0,-30,-60,-90]
-            y = [90, 0, -90, 0]
+            y = [0, 90, 0, -90]
             # y = [0]
             x = y[self.behave]
             self.pan(pos=x)
@@ -156,6 +160,9 @@ class VISION():
             x = self.robot.x + dist * np.cos(np.radians(angle)) + np.random.normal(0,1)
             y = self.robot.y + dist * np.sin(np.radians(angle)) + np.random.normal(0,1)
 
+            f = ((8, 1032), (60, 680))
+            # f = ((0, 1040), (0, 740))
+
             if .3 > np.random.random():
                 if 0.5 < np.random.random():
                     ret.append(1) 
@@ -163,7 +170,7 @@ class VISION():
                     ret.append(0)
 
             # Verify if it is in or out of the field
-            elif 0 <= x and x <= 1040 and 0 <= y and y <= 740:
+            elif f[0][0] <= x and x <= f[0][1] and f[1][0] <= y and y <= f[1][1]:
                 ret.append(1)
             else:
                 ret.append(0)
@@ -307,48 +314,50 @@ class VISION():
         # else:
         #     self.change = True
 
-        bhv = self.bkb.read_int(self.Mem, 'LOCALIZATION_WORKING')
-        if bhv >= 100 and bhv < 110: # Setup the robot
-            print 'vision_loc: Setting up experiment!'
-            self.robot.x = 250
-            self.robot.y = 670
-            self.robot.rotate = 90
-            self.exp = bhv - 100
-            self.save = []
-            self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', bhv+10)
+        # bhv = self.bkb.read_int(self.Mem, 'LOCALIZATION_WORKING')
+        # if bhv >= 100 and bhv < 110: # Setup the robot
+        #     print 'vision_loc: Setting up experiment!'
+        #     self.robot.x = 250
+        #     self.robot.y = 670
+        #     self.robot.rotate = 90
+        #     self.exp = bhv - 100
+        #     self.save = []
+        #     self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', bhv+10)
 
-        if bhv == 200 or bhv == 600:
-            self.save.append([time.time(), self.robot.x, self.robot.y, self.robot.rotate])
+        # if bhv == 200 or bhv == 600:
+        #     self.save.append([time.time(), self.robot.x, self.robot.y, self.robot.rotate])
 
-        if bhv == 600:
-            print 'vision_loc: Jump!'
-            self.robot.x = 650
-            self.robot.y = 670
-            self.robot.rotate = 90
-            self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 200)
+        # if bhv == 600:
+        #     print 'vision_loc: Jump!'
+        #     self.robot.x = 650
+        #     self.robot.y = 670
+        #     self.robot.rotate = 90
+        #     self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 200)
 
-        if bhv >= 300 and bhv < 400:
-            print 'vision_loc: Saving.'
-            i = bhv - 300
-            np.save('/home/aislan/Dropbox/Masters/Dissertação/Experiments/simulated/robot'+str(self.exp * 100 + i), np.array(self.save))
-            self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', bhv+100)
+        # if bhv >= 300 and bhv < 400:
+        #     print 'vision_loc: Saving.'
+        #     i = bhv - 300
+        #     np.save('/home/aislan/Dropbox/Masters/Dissertação/Experiments/simulated/robot'+str(self.exp * 100 + i), np.array(self.save))
+        #     self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', bhv+100)
 
-        if bhv == 900:
-            print 'vision_loc: Finished by the mindcontroller!'
-            self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 910)
-            exit()
+        # if bhv == 900:
+        #     print 'vision_loc: Finished by the mindcontroller!'
+        #     self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 910)
+        #     exit()
 
         self.headBehave()
         self.headmotion()
 
-        if self.exp == 1:
-            goals = self.GetGoalPosts()
-            for x in [('VISION_FIRST_GOALPOST', goals[0]), ('VISION_SECOND_GOALPOST', goals[1]), ('VISION_THIRD_GOALPOST', goals[2]), ('VISION_FOURTH_GOALPOST', goals[3]), ('VISION_PAN_DEG', self.headpan)]:
-                self.bkb.write_float(self.Mem, *x)
-        elif self.exp == 2:
-            self.GetFieldRet()
-        else:
-            self.GetDist()
+        self.GetFieldRet()
+
+        # if self.exp == 1:
+        #     goals = self.GetGoalPosts()
+        #     for x in [('VISION_FIRST_GOALPOST', goals[0]), ('VISION_SECOND_GOALPOST', goals[1]), ('VISION_THIRD_GOALPOST', goals[2]), ('VISION_FOURTH_GOALPOST', goals[3]), ('VISION_PAN_DEG', self.headpan)]:
+        #         self.bkb.write_float(self.Mem, *x)
+        # elif self.exp == 2:
+        #     self.GetFieldRet()
+        # else:
+        #     self.GetDist()
 
 def CompAng(ang, base, rng):
     xa = cos(radians(ang))
