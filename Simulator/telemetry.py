@@ -135,7 +135,8 @@ class Telemetry(object):
         try:
             self.othervars[0] = float(data[1])
             self.othervars[1] = float(data[2])
-            self.othervars[2] = int(degrees(float(data[3])))
+            # self.othervars[2] = int(degrees(float(data[3])))
+            self.othervars[2] = int(float(data[3]))
             self.othervars[3] = max(float(data[4])*sqrt(2)*10, 15)
 
             if data[4] == "-1" or True:

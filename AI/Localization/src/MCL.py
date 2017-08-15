@@ -14,7 +14,7 @@ class MonteCarlo():
     #----------------------------------------------------------------------------------------------
     #   Constructor of the particle filter
     #----------------------------------------------------------------------------------------------
-    def __init__(self, max_qtd=1000, min_qtd=30):
+    def __init__(self, max_qtd=1000, min_qtd=30, kidnap=True):
         # Holds the particles objects
         self.particles = []
 
@@ -28,8 +28,12 @@ class MonteCarlo():
         # self.particles.append(Particle(350,350,0,factors=15*[0]))
         for i in range(self.qtd):
             # Randomly generates n particles
+            if kidnap:
+                self.particles.append(Particle())
+            else:
+                self.particles.append(Particle(factors=[1, 2, 1, 0, 5,  1, 2, 1, 0, 7,  1, 2, 1, 0, 5]))
             # self.particles.append(Particle(normals=[[[300,50],[70,5],[-90,5]],[[300,50],[670,5],[90,5]],[[80,5],[370,30],[0,5]], [[440,10],[370,10],[0,5]]]))
-            self.particles.append(Particle())
+            # self.particles.append(Particle())
         
         self.totalweight = 0. # Holds the total sum of particles' weights.
         self.meanweight = 0
@@ -112,7 +116,7 @@ class MonteCarlo():
     #----------------------------------------------------------------------------------------------
     #   Tests which is the best information to be acquired.
     #----------------------------------------------------------------------------------------------
-    def PerfectInformation(self, u, hp, time=0):
+    def PerfectInformation(self, u, time=0):
         np.random.shuffle(self.particles)
 
         poses = []

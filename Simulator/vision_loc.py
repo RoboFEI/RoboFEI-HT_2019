@@ -1,3 +1,5 @@
+# coding: utf-8
+
 import numpy as np
 import scipy.special as sp
 import os
@@ -223,9 +225,71 @@ class VISION():
         else:
             return -1, -1
 
+    def GetFieldRet(self):
+        if self.get:
+            self.get = False
+            size = 5.
+            aux = np.zeros(10)
+            for i in xrange(int(size)):
+                aux += np.array(self.GetField())
+            aux /= size
+            abs_aux = np.rint(aux)
+            mean_aux = np.mean(np.abs(aux-abs_aux))
+
+            self.bkb.write_int(self.Mem, 'iVISION_FIELD', write(abs_aux))
+            
+            if self.headpan <= -89:
+                hpan = -90 - mean_aux
+            elif -1 <= self.headpan and self.headpan <= 1:
+                hpan = 0 + mean_aux
+            elif 89 <= self.headpan:
+                hpan = 90 + mean_aux
+            else:
+                hpan = 0
+
+            self.bkb.write_float(self.Mem, 'fVISION_FIELD', hpan)
+
+    def GetDist(self):
+        if self.get:
+            self.get = False
+            if self.robot.rotate > 180:
+                orient = self.robot.rotate - 360
+            else:
+                orient = self.robot.rotate
+
+            alpha = np.abs(-orient + self.headpan) # x -> 1040
+            beta = np.abs(90 - orient + self.headpan) # y -> 0
+            gamma = np.abs(-90 - orient + self.headpan) # y -> 740
+            delta = min(np.abs(180 - orient + self.headpan), np.abs(-180 - orient + self.headpan))  # x -> 0
+            
+            dist = 9999
+
+            if alpha < 90:
+                dist = min(dist, (1040-self.robot.x)/np.cos(np.radians(alpha)))
+            if beta < 90:
+                dist = min(dist, self.robot.y/np.cos(np.radians(beta)))
+            if gamma < 90:
+                dist = min(dist, (740-self.robot.y)/np.cos(np.radians(gamma)))
+            if delta < 90:
+                dist = min(dist, self.robot.x/np.cos(np.radians(delta)))
+            
+            mean_aux = 1./max(self.robot.radius, dist)
+            
+            if self.headpan <= -89:
+                hpan = -90 - mean_aux
+            elif -1 <= self.headpan and self.headpan <= 1:
+                hpan = 0 + mean_aux
+            elif 89 <= self.headpan:
+                hpan = 90 + mean_aux
+            else:
+                hpan = 0
+            self.bkb.write_float(self.Mem, 'fVISION_FIELD', hpan)
+
     # Vision Process!
     jump = True
     change = True
+    exp = 0
+    save = []
     def VisionProcess(self):
         # if time.time() % 60 < 1:
         #     if self.jump:
@@ -243,100 +307,48 @@ class VISION():
         # else:
         #     self.change = True
 
-        # if self.count == 0:
-        #     self.text += str(time.time()) + " " + str(self.robot.x) + " " + str(self.robot.y) + " " + str(self.robot.rotate) + "\n"
-        #     self.count = 20
-        # else:
-        #     self.count -= 1
+        bhv = self.bkb.read_int(self.Mem, 'LOCALIZATION_WORKING')
+        if bhv >= 100 and bhv < 110: # Setup the robot
+            print 'vision_loc: Setting up experiment!'
+            self.robot.x = 250
+            self.robot.y = 670
+            self.robot.rotate = 90
+            self.exp = bhv - 100
+            self.save = []
+            self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', bhv+10)
 
-        # bhv = self.bkb.read_int(self.Mem, 'VISION_WORKING')
-        # if bhv == 10101:
-        #     self.robot.x = 200
-        #     self.robot.y = 670
-        #     self.robot.rotate = 90
-        #     self.count = 0
-        #     self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 11100)
-        #     self.bkb.write_int(self.Mem, 'VISION_WORKING', 0)
-        # elif bhv == 10102:
-        #     self.robot.x = 70
-        #     self.robot.y = 500
-        #     self.robot.rotate = 0
-        #     self.count = 0
-        #     self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 11100)
-        #     self.bkb.write_int(self.Mem, 'VISION_WORKING', 0)
-        # elif bhv == 11011:
-        #     self.index += 1
-        #     with open('/home/fei/Dropbox/Masters/Experiment/robot'+str(self.index), 'w') as file:
-        #         file.write(self.text)
-        #     self.text = ""
-        #     self.count = -1
-        #     self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 11110)
-        #     self.bkb.write_int(self.Mem, 'VISION_WORKING', 0)
-        # elif bhv == 11111:
-        #     exit()
+        if bhv == 200 or bhv == 600:
+            self.save.append([time.time(), self.robot.x, self.robot.y, self.robot.rotate])
+
+        if bhv == 600:
+            print 'vision_loc: Jump!'
+            self.robot.x = 650
+            self.robot.y = 670
+            self.robot.rotate = 90
+            self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 200)
+
+        if bhv >= 300 and bhv < 400:
+            print 'vision_loc: Saving.'
+            i = bhv - 300
+            np.save('/home/aislan/Dropbox/Masters/Dissertação/Experiments/simulated/robot'+str(self.exp * 100 + i), np.array(self.save))
+            self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', bhv+100)
+
+        if bhv == 900:
+            print 'vision_loc: Finished by the mindcontroller!'
+            self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 910)
+            exit()
 
         self.headBehave()
         self.headmotion()
-        # goals = self.GetGoalPosts()
-        # dots = self.GetField()
 
-        if self.get:
-            self.get = False
-            size = 5.
-            aux = np.zeros(10)
-            for i in xrange(int(size)):
-                aux += np.array(self.GetField())
-            aux /= size
-            abs_aux = np.rint(aux)
-            mean_aux = np.mean(np.abs(aux-abs_aux))
-
-            self.bkb.write_int(self.Mem, 'iVISION_FIELD', write(abs_aux))
-
-            # if self.robot.rotate > 180:
-            #     orient = self.robot.rotate - 360
-            # else:
-            #     orient = self.robot.rotate
-
-            # alpha = np.abs(-orient + self.headpan) # x -> 1040
-            # beta = np.abs(90 - orient + self.headpan) # y -> 0
-            # gamma = np.abs(-90 - orient + self.headpan) # y -> 740
-            # delta = min(np.abs(180 - orient + self.headpan), np.abs(-180 - orient + self.headpan))  # x -> 0
-            
-            # dist = 9999
-
-            # if alpha < 90:
-            #     dist = min(dist, (1040-self.robot.x)/np.cos(np.radians(alpha)))
-            # if beta < 90:
-            #     dist = min(dist, self.robot.y/np.cos(np.radians(beta)))
-            # if gamma < 90:
-            #     dist = min(dist, (740-self.robot.y)/np.cos(np.radians(gamma)))
-            # if delta < 90:
-            #     dist = min(dist, self.robot.x/np.cos(np.radians(delta)))
-            
-            # mean_aux = 1./max(self.robot.radius, dist)
-            
-            if self.headpan <= -89:
-                hpan = -90 - mean_aux
-            elif -61 <= self.headpan and self.headpan <= -59:
-                hpan = -60 - mean_aux
-            elif -31 <= self.headpan and self.headpan <= -29:
-                hpan = -30 - mean_aux
-            elif -1 <= self.headpan and self.headpan <= 1:
-                hpan = 0 + mean_aux
-            elif 29 <= self.headpan and self.headpan <= 31:
-                hpan = 30 + mean_aux
-            elif 59 <= self.headpan and self.headpan <= 61:
-                hpan = 60 + mean_aux
-            elif 89 <= self.headpan:
-                hpan = 90 + mean_aux
-
-            self.bkb.write_float(self.Mem, 'fVISION_FIELD', hpan)
-
-        # if sum(dots) != 0:
-            # self.bkb.write_int(self.Mem, 'iVISION_FIELD', write(dots))
-
-        # for x in [('VISION_FIRST_GOALPOST', goals[0]), ('VISION_SECOND_GOALPOST', goals[1]), ('VISION_THIRD_GOALPOST', goals[2]), ('VISION_FOURTH_GOALPOST', goals[3]), ('VISION_PAN_DEG', self.headpan)]:
-            # self.bkb.write_float(self.Mem, *x)
+        if self.exp == 1:
+            goals = self.GetGoalPosts()
+            for x in [('VISION_FIRST_GOALPOST', goals[0]), ('VISION_SECOND_GOALPOST', goals[1]), ('VISION_THIRD_GOALPOST', goals[2]), ('VISION_FOURTH_GOALPOST', goals[3]), ('VISION_PAN_DEG', self.headpan)]:
+                self.bkb.write_float(self.Mem, *x)
+        elif self.exp == 2:
+            self.GetFieldRet()
+        else:
+            self.GetDist()
 
 def CompAng(ang, base, rng):
     xa = cos(radians(ang))
