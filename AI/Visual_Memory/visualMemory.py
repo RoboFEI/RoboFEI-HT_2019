@@ -5,20 +5,20 @@
 import argparse
 
 parser = argparse.ArgumentParser(
- description='Robot Vision',
- epilog= 'Responsável pela detecção dos objetos em campo./Responsible for detection of field objects.'
+ description='Visual Memory',
+ epilog= 'Responsável por rastrear todos os objetos detectáveis pela visão.\\' \
+		 'Responsible for tracking all objects detectable by vision.'
 )
 
-parser.add_argument('--robot_numbers', # Full name
-				 '--rn', # Abbreviation for the name
-				 type = int, # Type variable
-				 help = 'Calibra valor para a câmera.\\' \
-						'Calibrates value for the camera.' # Description of the variable
-				)
+parser.add_argument(
+ '--robot_numbers', # Full name
+ '--rn', # Abbreviation for the name
+ type = int, # Type variable
+ help = 'Número de robôs que serão rastreados.\\' \
+		'Number of robots to be tracked.' # Description of the variable
+)
 
 args = parser.parse_args()
-
-print args.robot_numbers
 
 # ---- Imports ----
 
@@ -37,6 +37,7 @@ from Blackboard import * # Class used to access shared memory.
 from Robots import * # Class used to track robot.
 from Landmark import * # Class used to track landmark.
 from Ball import * # Class used to track ball.
+from Speeds import * # Classes used to manage robot speed values.
 from ConfigIni import * # Used to read file 'config.ini'.
 
 # ---- Main Code ----
@@ -53,6 +54,8 @@ parameters = {
 # Reading 'config.ini' values
 conf = ConfigIni("Basic", "Settings")
 parameters = conf.read(parameters)
+if args.robot_numbers != None:
+	parameters['robot_numbers'] = args.robot_numbers
 
 mem = Blackboard( ) # Creating shared memory
 
@@ -62,22 +65,36 @@ ball = Ball( ) # Creating landmark object
 
 # Creating robot objects
 robots = []
+newrobots = []
 for __ in xrange(parameters['robot_numbers']):
-	robots.append(Robots( ))
+	newrobots.append(Robots( ))
+
+# List with velocities for each movement of the robot.
+speeds = Speeds( )
 
 # Main loop
 
 while True:
 	try:
-		1+2*5+4+78/5*78+7-7+87
+		# Reading data about the landmark.
+		taglandmark = mem.read_float('VISION_LAND_TAG')
+		
+		if taglandmark != 0:
+			# Read the values sent
+			datalandmarks = readDataLandmarks( )		
+			speeds.update(land.update(datalandmarks))
+			
+		else:
+			land.prediction( )
+		
 	except KeyboardInterrupt:
 		os.system('clear') # Cleaning terminal
 		print "Keyboard interrupt detected"
 		break
-	except VisionException as e:
+	except VisualMemoryException as e:
 		break
 
-# Finishing processes
+###### Finishing processes
 
 # Saving config values
 conf.finalize(parameters)

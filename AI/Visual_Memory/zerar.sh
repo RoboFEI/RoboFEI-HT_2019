@@ -15,7 +15,7 @@ NC='\e[0m' # No Color
 #Brown/Orange	0;33		Yellow				1;33
 #Light Gray		0;37		White					1;37
 
-./limpar.sh
+./limpar_all.sh
 
 echo -e "${Blue}Apagando pastas e arquivos${NC}"
 sleep 1
