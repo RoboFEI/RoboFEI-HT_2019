@@ -15,5 +15,9 @@ def killedProcess( ):
 	signal.signal(signal.SIGTERM, signal_term_handler)
 
 ## readDataLandmarks
-def readDataLandmarks( ):
-	return None
+def readDataLandmarks(taglandmark, mem):
+	x = mem.read_float('VISION_LAND_X')
+	y = mem.read_float('VISION_LAND_Y')
+	time = mem.read_float('VISION_LAND_TIME')
+	mem.write_float('VISION_LAND_TAG', 0)
+	return [taglandmark, x, y, time ]

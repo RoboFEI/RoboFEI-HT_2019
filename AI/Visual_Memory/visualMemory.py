@@ -81,11 +81,13 @@ while True:
 		
 		if taglandmark != 0:
 			# Read the values sent
-			datalandmarks = readDataLandmarks( )		
+			datalandmarks = readDataLandmarks(taglandmark, mem)
 			speeds.update(land.update(datalandmarks))
 			
 		else:
 			land.prediction( )
+		
+		datarobots = readDataRobots(mem)
 		
 	except KeyboardInterrupt:
 		os.system('clear') # Cleaning terminal
@@ -94,7 +96,7 @@ while True:
 	except VisualMemoryException as e:
 		break
 
-###### Finishing processes
+# Finishing processes
 
 # Saving config values
 conf.finalize(parameters)
