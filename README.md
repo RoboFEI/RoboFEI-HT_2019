@@ -47,6 +47,11 @@ This program was tested in Ubuntu 14.04 LTS 64 bits
     * python-numpy
     * python-opencv
     * screen
+
+## Communication dependency
+Install Construct:
+
+sudo pip install construct==2.5.3
     
 ## License
 

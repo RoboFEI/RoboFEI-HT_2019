@@ -1,15 +1,19 @@
+# -*- coding: UTF8 -*-
+
 import sys
 sys.path.append("./src")
 import numpy as np
-import os
+#import os
 import cv2
 import ctypes
 import argparse
 import time
 from math import log,exp,tan,radians
+import thread
+import imutils
 
-from BallVision import *
-from PanTilt import *
+#from BallVision import *
+from DNN import *
 
 import sys
 
@@ -29,194 +33,319 @@ except ImportError:
 """ Instantiate bkb as a shared memory """
 bkb = SharedMemory()
 """ Config is a new configparser """
-config = ConfigParser()
+config1 = ConfigParser()
 """ Path for the file config.ini:"""
-config.read('../../Control/Data/config.ini')
+config1.read('../../Control/Data/config.ini')
 """ Mem_key is for all processes to know where the blackboard is. It is robot number times 100"""
-mem_key = int(config.get('Communication', 'no_player_robofei'))*100 
+mem_key = int(config1.get('Communication', 'no_player_robofei'))*100 
 """Memory constructor in mem_key"""
 Mem = bkb.shd_constructor(mem_key)
 
 
 parser = argparse.ArgumentParser(description='Robot Vision', epilog= 'Responsavel pela deteccao dos objetos em campo / Responsible for detection of Field objects')
 parser.add_argument('--visionball', '--vb', action="store_true", help = 'Calibra valor para a visao da bola')
+parser.add_argument('--visionMask', '--vm', action="store_true", help = 'Calibra valor para a visao da bola')
+parser.add_argument('--visionMorph1', '--vm1', action="store_true", help = 'Mostra a imagem da morfologia perto')
+parser.add_argument('--visionMorph2', '--vm2', action="store_true", help = 'Mostra a imagem da morfologia medio')
+parser.add_argument('--visionMorph3', '--vm3', action="store_true", help = 'Mostra a imagem da morfologia longe') 
+parser.add_argument('--visionMorph4', '--vm4', action="store_true", help = 'Mostra a imagem da morfologia muito longe') 
 parser.add_argument('--withoutservo', '--ws', action="store_true", help = 'Servos desligado')
 parser.add_argument('--head', '--he', action="store_true", help = 'Configurando parametros do controle da cabeca')
 
+
 #----------------------------------------------------------------------------------------------------------------------------------
 
-def statusBall(positionballframe):
-	global lista
-	if positionballframe[0] == 0:
-		lista = []
-		print "Campo nao encontrado"
-		
-	if positionballframe[0] == 1:
-		lista = []
-		mens = "Bola nao encontrada, campo "
-		
-		if positionballframe[1] == -1:
-			mens += "a esquerda"
-		elif positionballframe[1] == 1:
-			mens += "a direita"
-		else:
-			mens += "esta no meio"
-		
-		if positionballframe[2] == -1:
-			mens += " cima"
-		elif positionballframe[2] == 1:
-			mens += " baixo"
-		else:
-			mens += " centro"
-		print mens
-	if positionballframe[0] == 2:
-		if bkb.read_float(Mem, 'VISION_TILT_DEG') < 50:
-			lista.append(21.62629757*exp(0.042451235*bkb.read_float(Mem, 'VISION_TILT_DEG')))#8.48048735
-			##bkb.write_float(Mem, 'VISION_BALL_DIST', 430*tan(radians(bkb.read_float(Mem, 'VISION_TILT_DEG'))))
-			print 'Dist using tilt angle: ', bkb.read_float(Mem, 'VISION_BALL_DIST')
-			#0.0848048735*exp(0.042451235*bkb.read_int('VISION_TILT_DEG')
-			#print "Distancia da Bola func 1 em metros: " + str(0.0848048735*exp(0.042451235*bkb.read_int('VISION_MOTOR1_ANGLE')))
-			#print "Bola encontrada na posicao x: " + str(round(positionballframe[1],2)) + " y: " + str(round(positionballframe[2],2)) + " e diametro de: " + str(round(positionballframe[3],2))
-		else:
-			#print "Bola encontrada na posicao x: " + str(round(positionballframe[1],2)) + " y: " + str(round(positionballframe[2],2)) + " e diametro de: " + str(round(positionballframe[3],2))
-			#print "Distancia da Bola func 2 em metros: " + str(4.1813911146*pow(positionballframe[3],-1.0724682465))
-			lista.append(418.13911146*pow(positionballframe[3],-1.0724682465))
-			print 'Dist using pixel size: ', bkb.read_float(Mem, 'VISION_BALL_DIST')
-		if len(lista) == 1:
-			dist_media = lista[0]
-		else:
-			if len(lista) >= 1:
-				lista.pop(0)
-			dist_media = float(sum(lista)/len(lista))
-		bkb.write_float(Mem, 'VISION_BALL_DIST', dist_media)
-		bkb.write_int(Mem,'VISION_LOST', 0)
-		
-		
-#		print "Bola encontrada = " + str(bkb.read_int('VISION_LOST_BALL'))
-#		print "Posicao servo 1 tilt = " + str(bkb.read_int('VISION_MOTOR1_ANGLE'))
-	else:
-	    bkb.write_int(Mem,'VISION_LOST', 1)
-#	    print "Bola Perdida = " + str(bkb.read_int('VISION_LOST_BALL'))
 
-	    
-#----------------------------------------------------------------------------------------------------------------------------------
+class classConfig():
 
-def readResolutions(Config):
-	if 'Resolutions' not in Config.sections():
-		print "Resolutions inexistente, criando valores padrao"
-		Config.add_section('Resolutions')
-	if len(Config.options('Resolutions')) == 0:
-		Config.set('Resolutions','1','320x180')
-		Config.set('Resolutions','2','640x480\n\t;Resolucoes nao pode ter valores iguais')
-		with open('../Data/config.ini', 'wb') as configfile:
-			Config.write(configfile)
-		
-	a = 0
-	Resolutions = np.chararray((len(Config.options('Resolutions')), 2), itemsize=11)
-	Resolutions[:]='0'
-	for i in Config.options('Resolutions'):
-			if '\n' in Config.get('Resolutions',i).rpartition('\n'):
-				Resolutions[a,0] = Config.get('Resolutions',i).rpartition('\n')[0]
-			else:
-				Resolutions[a,0] = Config.get('Resolutions',i).rpartition('\n')[2]
-			a += 1
+	def __init__(self):
+		# Read config.ini
+		self.Config = ConfigParser()
+		x = 0
+		y = 0
+		raio = 0
+
+		self.SERVO_PAN = None
+		self.SERVO_TILT  = None
+
+		self.SERVO_PAN_LEFT = None
+		self.SERVO_PAN_RIGHT  = None
+
+		self.SERVO_TILT_VALUE = None
+		self.SERVO_PAN_VALUE = None
+
+		self.kernel_perto = None
+		self.kernel_perto2 = None
+	
+		self.kernel_medio = None
+		self.kernel_medio2 = None
+
+		self.kernel_longe = None
+		self.kernel_longe2 = None
+
+		self.kernel_muito_longe = None
+		self.kernel_muito_longe2 = None
+
+		self.x_left = None
+		self.x_center_left = None
+		self.x_center = None
+		self.x_center_right = None
+		self.x_right = None
+
+		self.y_chute = None
+		self.y_longe = None
+		self.CheckConfig()
 
 
-	for a in range(0, len(Config.options('Resolutions'))):
-			Resolutions[a,1] = Resolutions[a,0].rpartition('x')[2]
-			Resolutions[a,0] = Resolutions[a,0].rpartition('x')[0]
 
-	value = np.array( np.zeros( ( len( Config.options('Resolutions') ), 2 ), dtype=np.int ) )
+	def CheckConfig(self):
+		# Read file config.ini
+		while True:
+			if self.Config.read('../Data/config.ini') != []:
+				print 'Leitura do config.ini'
+				self.CENTER_SERVO_PAN = 	self.Config.getint('Basic Settings', 'center_servo_pan')
+				self.POSITION_SERVO_TILT  = 	self.Config.getint('Basic Settings', 'position_servo_tilt')
 
-	for i in range(0, len( Config.options('Resolutions') )):
-			for j in range(0, 2):
-				value[i,j] = int(Resolutions[i,j])
+				self.SERVO_PAN_LEFT = 		self.Config.getint('Basic Settings', 'servo_pan_left')
+				self.SERVO_PAN_RIGHT  = 	self.Config.getint('Basic Settings', 'servo_pan_right')
+
+				self.SERVO_PAN_ID    = 		self.Config.getint('Basic Settings', 'PAN_ID')
+				self.SERVO_TILT_ID   = 		self.Config.getint('Basic Settings', 'TILT_ID')
+
+				self.DNN_type = 		self.Config.get('Basic Settings', 'dnn_type')
+
+				self.white_threshould = 	self.Config.getint('Basic Settings', 'white_threshould')
+
+				self.max_count_lost_frame =   self.Config.getint('Basic Settings', 'max_count_lost_frame') 
+
+				self.kernel_perto =		self.Config.getint('Kernel Selection', 'kernel_perto')
+				self.kernel_perto2 = 		self.Config.getint('Kernel Selection', 'kernel_perto2')
 			
-	return np.sort(value, axis=0)
+				self.kernel_medio = 		self.Config.getint('Kernel Selection','kernel_medio')
+				self.kernel_medio2 = 		self.Config.getint('Kernel Selection','kernel_medio2')
 
-#----------------------------------------------------------------------------------------------------------------------------------
+				self.kernel_longe = 		self.Config.getint('Kernel Selection', 'kernel_longe')
+				self.kernel_longe2 = 		self.Config.getint('Kernel Selection', 'kernel_longe2')
 
-def setResolution(status):
-	global resolutions
-	global atualres
-	global dis
-	global maxRadio
-	
-	if status[0] == 2:
-#		print "Max: " + str(		maxRadio*pow(razao,atualres)		)
-#		print "Min: " + str(		maxRadio*pow(razao,atualres+1)-2		)
-		if status[3]>maxRadio*pow(razao,atualres):
-			atualres -=1
-			ret = cap.set(3,resolutions[atualres,0])
-			ret = cap.set(4,resolutions[atualres,1])
-		elif status[3]<maxRadio*pow(razao,atualres+1)-2:
-			atualres +=1
-			ret = cap.set(3,resolutions[atualres,0])
-			ret = cap.set(4,resolutions[atualres,1])
-	
-	elif atualres != len(resolutions)/2 - 1:
-		atualres = len(resolutions)/2 - 1
-		ret = cap.set(3,resolutions[atualres,0])
-		ret = cap.set(4,resolutions[atualres,1])
+				self.kernel_muito_longe = 	self.Config.getint('Kernel Selection', 'kernel_muito_longe')
+				self.kernel_muito_longe2 = 	self.Config.getint('Kernel Selection', 'kernel_muito_longe2')
+
+				self.x_left = 			self.Config.getint('Distance Limits (Pixels)', 'Left_Region_Division')
+				self.x_center = 		self.Config.getint('Distance Limits (Pixels)', 'Center_Region_Division')
+				self.x_right = 			self.Config.getint('Distance Limits (Pixels)', 'Right_Region_Division')
+				self.y_chute = 			self.Config.getint('Distance Limits (Pixels)', 'Down_Region_Division')
+				self.y_longe = 			self.Config.getint('Distance Limits (Pixels)', 'Up_Region_Division')
+				break
+
+			else:
+				print 'Falha na leitura do config.ini, criando arquivo\nVision Ball inexistente, criando valores padrao'
+				self.Config = ConfigParser()
+				self.Config.write('../Data/config.ini')
+
+				self.Config.add_section('Basic Settings')
+				self.Config.set('Basic Settings', 'center_servo_pan'       , str(512)+'\t\t\t;Center Servo PAN Position')
+				self.Config.set('Basic Settings', 'position_servo_tilt'      , str(705)+'\t;Center Servo TILT Position')
+
+				self.Config.set('Basic Settings', 'servo_pan_left'   , str(162)+'\t\t\t;Center Servo PAN Position')
+				self.Config.set('Basic Settings', 'servo_pan_right'  , str(862)+'\t;Center Servo TILT Position')
+
+				self.Config.set('Basic Settings', 'PAN_ID'                 , str(19)+'\t\t\t;Servo Identification number for PAN')
+				self.Config.set('Basic Settings', 'TILT_ID'                , str(20)+'\t;Servo Identification number for TILT')
+
+				self.Config.set('Basic Settings', 'dnn_type'                , "r_80_cv4_32_256.tar.gz"+'\t;Dnn type')
+				self.Config.set('Basic Settings', 'white_threshould'        , str(200)+'\t;Threshould')
+
+				self.Config.set('Basic Settings', 'max_count_lost_frame'        , str(10)+'\t;Threshould') 
+
+				self.Config.add_section('Kernel Selection')
+				self.Config.set('Kernel Selection', 'kernel_perto'    , str(39)+'\t\t\t;Kernel Erosion ball is closest the robot')
+				self.Config.set('Kernel Selection', 'kernel_perto2'   , str(100)+'\t;Kernel Dilation ball is closest the robot')
+				self.Config.set('Kernel Selection', 'kernel_medio' , str(22)+'\t\t\t;Kernel Erosion ball is very close to the robot')
+				self.Config.set('Kernel Selection', 'kernel_medio2', str(80)+'\t;Kernel Dilation ball is very close to the robot')
+				self.Config.set('Kernel Selection', 'kernel_longe'      , str(12)+'\t\t\t;Kernel Erosion ball is close to the robot')
+				self.Config.set('Kernel Selection', 'kernel_longe2'     , str(40)+'\t;Kernel Dilation ball is close to the robot')
+				self.Config.set('Kernel Selection', 'kernel_muito_longe'        , str(7)+'\t\t\t;Kernel Erosion ball is far from the robot')
+				self.Config.set('Kernel Selection', 'kernel_muito_longe2'       , str(30)+'\t;Kernel Dilation ball is far from the robot')
+
+				self.Config.add_section('Distance Limits (Pixels)')
+				self.Config.set('Distance Limits (Pixels)', 'Left_Region_Division'         , str(280)+'\t\t\t;X Screen Left division')
+				self.Config.set('Distance Limits (Pixels)', 'Center_Region_Division'       , str(465)+'\t\t\t;X Screen Center division')
+				self.Config.set('Distance Limits (Pixels)', 'Right_Region_Division'        , str(703)+'\t\t\t;X Screen Right division')
+				self.Config.set('Distance Limits (Pixels)', 'Down_Region_Division'         , str(549)+'\t\t\t;Y Screen Down division')
+				self.Config.set('Distance Limits (Pixels)', 'Up_Region_Division'           , str(220)+'\t\t\t;Y Screen Up division')
+
+				with open('../Data/config.ini', 'wb') as configfile:
+					self.Config.write(configfile)
+
+
+class ballStatus():
+
+	def __init__(self, config):
+		self.config = config
+
+	def BallStatus(self, x,y,status):
+
+		if status  == 1:
+			#Bola a esquerda
+			if (x <= self.config.x_left):
+				bkb.write_float(Mem,'VISION_PAN_DEG', 60) # Posição da bola
+				print ("Bola a Esquerda")
+
+			#Bola ao centro esquerda
+			if (x > self.config.x_left and x < self.config.x_center):
+				bkb.write_float(Mem,'VISION_PAN_DEG', 30) # Variavel da telemetria
+				print ("Bola ao Centro Esquerda")
+
+			#Bola centro direita
+			if (x < self.config.x_right and x > self.config.x_center):
+				bkb.write_float(Mem,'VISION_PAN_DEG', -30) # Variavel da telemetria
+				print ("Bola ao Centro Direita")
+
+			#Bola a direita
+			if (x >= self.config.x_right):
+				bkb.write_float(Mem,'VISION_PAN_DEG', -60) # Variavel da telemetria
+				print ("Bola a Direita")
+
+		else: 
+			if (status ==2):
+				bkb.write_float(Mem,'VISION_PAN_DEG', 60) # Posição da bola
+				print ("Bola a Esquerda")
+			else:
+				bkb.write_float(Mem,'VISION_PAN_DEG', -60) # Variavel da telemetria
+				print ("Bola a Direita")
+
+
+	#	#CUIDADO AO ALTERAR OS VALORES ABAIXO!! O código abaixo possui inversão de eixos!
+	#	# O eixo em pixels é de cima para baixo ja as distancias são ao contrario.
+	#	# Quanto mais alto a bola na tela menor o valor em pixels 
+	#	# e mais longe estará a bola do robô
+		#Bola abaixo
+		if (y < self.config.y_longe):
+			bkb.write_float(Mem,'VISION_TILT_DEG', 70) # Variavel da telemetria
+			print ("Bola acima")
+		#Bola ao centro
+		if (y < self.config.y_chute and y > self.config.y_longe):
+			bkb.write_float(Mem,'VISION_TILT_DEG', 45) # Variavel da telemetria
+			print ("Bola Centralizada")
+		#Bola acima
+		if (y >= self.config.y_chute):
+			bkb.write_float(Mem,'VISION_TILT_DEG', 0) # Variavel da telemetria
+			print ("Bola abaixo")
+
+
+def thread_DNN():
+	time.sleep(1)
+
+	while True:
+#		script_start_time = time.time()
+
+#		print "FRAME = ", time.time() - script_start_time
+		start1 = time.time()
+
+#===============================================================================
+		ball = False
+		frame_b, x, y, raio, ball, status= detectBall.searchball(frame, args2.visionMask, args2.visionMorph1, args2.visionMorph2, args2.visionMorph3, args2.visionMorph4)
+		print "tempo de varredura = ", time.time() - start1
+		if ball ==False:
+			bkb.write_int(Mem,'VISION_LOST', 1)
+		else:
+			bkb.write_int(Mem,'VISION_LOST', 0)
+			ballS.BallStatus(x,y,status)
+		if args2.visionball:
+			cv2.circle(frame_b, (x, y), raio, (0, 255, 0), 4)
+			cv2.imshow('frame',frame_b)
+#===============================================================================
+#		print "tempo de varredura = ", time.time() - start
+		if cv2.waitKey(1) & 0xFF == ord('q'):
+			break
+	cap.release()
+	cv2.destroyAllWindows()
+
 
 #----------------------------------------------------------------------------------------------------------------------------------
 #Inicio programa
 
-args = parser.parse_args()
+if __name__ == '__main__':
 
-ball = VisionBall(args)
 
-if args.withoutservo == False:
-	head = Pantilt(args, ball.Config)
+#	args = vars(parser.parse_args())
+	args2 = parser.parse_args()
 
-lista = []
-minRadio = 0.8
-maxRadio = 20.0
+	config = classConfig()
 
-resolutions = readResolutions(ball.Config)
-atualres = len(resolutions)/2 -1
-razao = pow(minRadio/maxRadio, 1.0/len(resolutions))
+	tmpdir = unzip_archive("./nets/"+config.DNN_type)
+	caffemodel = None
+	deploy_file = None
+	mean_file = None
+	labels_file = None
+	for filename in os.listdir(tmpdir):
+		full_path = os.path.join(tmpdir, filename)
+		if filename.endswith('.caffemodel'):
+			caffemodel = full_path
+		elif filename == 'deploy.prototxt':
+			deploy_file = full_path
+		elif filename.endswith('.binaryproto'):
+			mean_file = full_path
+		elif filename == 'labels.txt':
+			labels_file = full_path
+		else:
+			print 'Unknown file:', filename
 
-cap = cv2.VideoCapture(0) #Abrindo camera
+	assert caffemodel is not None, 'Caffe model file not found'
+	assert deploy_file is not None, 'Deploy file not found'
 
-ret = cap.set(3,resolutions[atualres,0])
-ret = cap.set(4,resolutions[atualres,1])
+###    # Load the model and images
+	net = get_net(caffemodel, deploy_file, use_gpu=False)
+	transformer = get_transformer(deploy_file, mean_file)
+	_, channels, height, width = transformer.inputs['data']
+	labels = read_labels(labels_file)
 
-if args.withoutservo == False:
-	posheadball = np.array([head.cen_posTILT,head.cen_posPAN]) #Iniciando valores iniciais da posicao da bola
-os.system("v4l2-ctl -d /dev/video0 -c focus_auto=0 && v4l2-ctl -d /dev/video0 -c focus_absolute=0")
+###    #create index from label to use in decicion action
+	number_label =  dict(zip(labels, range(len(labels))))
+	print number_label
+###    #
 
-while True:
+	ballS = ballStatus(config)
+	detectBall = objectDetect(net, transformer, mean_file, labels, args2.withoutservo, config, bkb, Mem)
+#	detectBall.servo.writeWord(config.SERVO_TILT_ID,34, 70)#olha para o centro
 
-	bkb.write_int(Mem,'VISION_WORKING', 1) # Variavel da telemetria
-	
-	#Salva o frame
-	
-	for i in xrange(0,3):
+	cap = cv2.VideoCapture(0) #Abrindo camera
+        cap.set(3,1280) #720 1280 1920
+        cap.set(4,720) #480 720 1080
+	os.system("v4l2-ctl -d /dev/video0 -c focus_auto=0 && v4l2-ctl -d /dev/video0 -c focus_absolute=0")
+	os.system("v4l2-ctl -d /dev/video0 -c saturation=200")
+
+	try:
+            thread.start_new_thread(thread_DNN, ())
+	except:
+            print "Error Thread"
+
+	while True:
+
+#		if bkb.read_int(Mem,'IMU_STATE')==1:
+#			detectBall.servo.writeWord(config.SERVO_TILT_ID,34, 512)#olha para o centro
+#			detectBall.servo.writeWord(config.SERVO_TILT_ID,32, 1023)#velocidade
+#			detectBall.servo.writeWord(config.SERVO_PAN_ID,32, 1023)#velocidade
+#			detectBall.servo.writeWord(config.SERVO_TILT_ID,30, config.POSITION_SERVO_TILT+350)#olha para o centro
+#			time.sleep(0.5)
+#			detectBall.servo.writeWord(config.SERVO_TILT_ID,34, 100)#olha para o centro
+#			detectBall.servo.writeWord(config.SERVO_PAN_ID,30, config.CENTER_SERVO_PAN)#olha para o centro
+#		else:
+#			detectBall.servo.writeWord(config.SERVO_TILT_ID,30, config.POSITION_SERVO_TILT)#olha para o centro
+
+		bkb.write_int(Mem,'VISION_WORKING', 1) # Variavel da telemetria
+
 		ret, frame = cap.read()
-	
-	positionballframe = ball.detect(frame,np.array([resolutions[atualres,0],resolutions[atualres,1]]))
-	
-	#status
-	statusBall(positionballframe)
-	
-	if args.withoutservo == False:
-		posheadball = head.mov(positionballframe,posheadball,Mem, bkb)
-#		if head.checkComm() == False:
-#			print "Out of communication with servos!"
-#			break
-	
-	setResolution(positionballframe)
-	
-#	if args.visionball == True or args.head == True:
-#		print "Resolucao: " + str(resolutions[atualres,0]) + "x" + str(resolutions[atualres,1])
-	
-	if cv2.waitKey(1) & 0xFF == ord('q'):
-		break
-#	raw_input("Pressione enter pra continuar")
+		frame = frame[:,200:1100]
 
-if args.withoutservo == False:
-	head.finalize()
-ball.finalize()
-cv2.destroyAllWindows()
-cap.release()
+
+		time.sleep(0.01)
+
+#===============================================================================
+#===============================================================================
+#===============================================================================
+#===============================================================================
+#===============================================================================
+#===============================================================================
+#===============================================================================
+#===============================================================================

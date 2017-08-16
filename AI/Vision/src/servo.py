@@ -22,7 +22,7 @@ class Servo(object):
 		""" Define return type of the method dxlReadWord (int)"""
 		self.visionlib.dxlReadWord.restype = ctypes.c_int 
 		""" Define initial torque with 50% to servo ID=20, parameter 34 seted with 512"""
-		self.visionlib.dxlWriteWord(ctypes.c_int(20), ctypes.c_int(34), ctypes.c_int(512)); 
+		self.visionlib.dxlWriteWord(ctypes.c_int(30), ctypes.c_int(34), ctypes.c_int(512)); 
 		""" Define initial torque with 50% to servo ID=19, parameter 34 seted with 512"""
 		self.visionlib.dxlWriteWord(ctypes.c_int(19), ctypes.c_int(34), ctypes.c_int(512)); 
 		#--------------------------------------------------------------------------------------------------------------------

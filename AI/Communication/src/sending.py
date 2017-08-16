@@ -44,7 +44,7 @@ else:
     Y_ROBOT = 220
 # This will be removed after Localization is finished.
 
-UDP_IP = "255.255.255.255"
+UDP_IP = "192.168.255.255"
 UDP_PORT1 = 1231
 UDP_PORT2 = 1232
 UDP_PORT3 = 1233
@@ -77,10 +77,14 @@ while(True):
     # Used for Telemetry
     message = str(rbt_number) + ' ' # Robot number
     # Localization Variables
-    message += str(bkb.read_int(mem,'LOCALIZATION_X')) + ' ' # X Position
-    message += str(bkb.read_int(mem,'LOCALIZATION_Y')) + ' ' # Y Position
-    message += str(bkb.read_int(mem,'LOCALIZATION_THETA')) + ' ' # THETA Position
-    message += str(bkb.read_float(mem,'LOCALIZATION_RBT01_X')) + ' ' # Belief
+    # message += str(bkb.read_int(mem,'LOCALIZATION_X')) + ' ' # X Position
+    # message += str(bkb.read_int(mem,'LOCALIZATION_Y')) + ' ' # Y Position
+    # message += str(bkb.read_int(mem,'LOCALIZATION_THETA')) + ' ' # THETA Position
+    # message += str(bkb.read_float(mem,'LOCALIZATION_RBT01_X')) + ' ' # Belief
+    message += str(X_ROBOT) + ' '
+    message += str(Y_ROBOT) + ' '
+    message += str(bkb.read_float(mem, 'IMU_EULER_Z')) + ' '
+    message += str(2) + ' '
     message += str(bkb.read_float(mem, 'VISION_BALL_DIST')) + ' ' # Distance Ball's Position
     message += str(bkb.read_float(mem, 'VISION_PAN_DEG')) + ' ' # Angle Ball's Position
     # Flags of Execution
@@ -98,6 +102,7 @@ while(True):
     message += str(bkb.read_int(mem, 'DECISION_ACTION_A')) + ' ' # Sends the movement the decision is executing.
     message += str(bkb.read_float(mem, 'IMU_EULER_Z')) + ' ' # Sends the orientation of the IMU
     message += str(bkb.read_int(mem, 'VOLTAGE')) + ' ' # Sends the Voltage on motors.
+    message += str(bkb.read_int(mem, 'VISION_LOST')) + ' '
 
     # End of Message
     message += 'OUT'
