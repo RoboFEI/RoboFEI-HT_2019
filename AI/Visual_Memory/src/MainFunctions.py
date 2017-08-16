@@ -16,8 +16,10 @@ def killedProcess( ):
 
 ## readDataLandmarks
 def readDataLandmarks(taglandmark, mem):
+	# Reading landmarks value
 	x = mem.read_float('VISION_LAND_X')
 	y = mem.read_float('VISION_LAND_Y')
 	time = mem.read_float('VISION_LAND_TIME')
 	mem.write_float('VISION_LAND_TAG', 0)
+	
 	return [taglandmark, x, y, time ]
