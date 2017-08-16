@@ -23,6 +23,6 @@ echo -e "${Blue}Apagando arquivos pre-copilados${NC}"
 sleep 1
 find -iname "*.pyc" -exec rm {} \;
 
-find -iname "limpar.sh" -exec {} \;
+find -iname "limpar.sh" -execdir {} \;
 
 notify-send "Limpeza realizada" "Arquivos de pré-compilação e temporarios apagado."
