@@ -21,5 +21,6 @@ echo -e "${Blue}Apagando pastas e arquivos${NC}"
 sleep 1
 rm -r ./include
 rm -r ./src
+rm visualMemory.py
 
 notify-send "Limpeza realizada" "Arquivos da memória visual apagado."
