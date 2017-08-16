@@ -87,7 +87,7 @@ while True:
 		else:
 			land.prediction( )
 		
-		datarobots = readDataRobots(mem)
+		datarobots = readDataRobots(mem, parameters['robot_numbers'])
 		
 	except KeyboardInterrupt:
 		os.system('clear') # Cleaning terminal
