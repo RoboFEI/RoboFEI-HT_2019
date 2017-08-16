@@ -52,7 +52,7 @@ class PointCalibration():
 
 		self.flag = True
 
-		while self.clicks < 32:
+		while self.clicks < len(v):
 			if self.flag:
 				self.flag = False
 				print 'The point is', v[self.clicks][0], 'cm, at', v[self.clicks][1], 'degrees.'
@@ -73,7 +73,7 @@ class PointCalibration():
 			if self.clicks > 0:
 				self.vector[self.clicks-1] = (float(self.mouseX)/self.img.shape[1], float(self.mouseY)/self.img.shape[0])
 
-		if self.clicks == 32:
+		if self.clicks == len(v):
 			np.save('./Data/Vector', self.vector)
 			print "Saved archive with points."
 		else:
@@ -128,6 +128,7 @@ class PointCalibration():
 			self.flag = True
 			print self.clicks, self.mouseX, self.mouseY
 
+<<<<<<< HEAD
 v = [(260,45),
 	 
 	 (230,-45),
@@ -168,6 +169,20 @@ v = [(260,45),
 	 (500,0),
 	 (200,0),
 	 (50,0)
+=======
+v = [(100,-45),
+     (200,-45),
+     (300,-45),
+
+     (50,0),
+     (100,0),
+     (200,0),
+     (400,0),
+
+     (100,45),
+     (200,45),
+     (300,45)
+>>>>>>> Vision-RoboCup2017
 ]
 
 P = PointCalibration()
