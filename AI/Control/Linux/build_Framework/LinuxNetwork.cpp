@@ -18,6 +18,7 @@ using namespace std;
 LinuxSocket::LinuxSocket() : m_sock ( -1 )
 {
     memset ( &m_addr, 0, sizeof ( m_addr ) );
+    m_non_blocking = false;
 }
 
 LinuxSocket::~LinuxSocket()
@@ -43,7 +44,8 @@ bool LinuxSocket::create()
     return true;
 }
 
-bool LinuxSocket::bind ( const int port )  {
+bool LinuxSocket::bind ( const int port )
+{
     if ( ! is_valid() )
     {
         return false;
@@ -82,9 +84,15 @@ bool LinuxSocket::listen() const
 bool LinuxSocket::accept ( LinuxSocket& new_socket ) const
 {
     int addr_length = sizeof ( m_addr );
+
+    errno = 0;
     new_socket.m_sock = ::accept ( m_sock, ( sockaddr * ) &m_addr, ( socklen_t * ) &addr_length );
 
-    if ( new_socket.m_sock <= 0 )
+    if ( m_non_blocking && ( ( errno == EAGAIN ) || ( errno == EWOULDBLOCK ) ) )
+    {
+        return false; // don't block
+    }
+    else if ( new_socket.m_sock <= 0 )
         return false;
     else
         return true;
@@ -92,27 +100,30 @@ bool LinuxSocket::accept ( LinuxSocket& new_socket ) const
 
 bool LinuxSocket::send ( const std::string s ) const
 {
-    int status = ::send ( m_sock, s.c_str(), s.size(), MSG_NOSIGNAL );
-    if ( status == -1 )
+    errno = 0;
+    int status = ::send ( m_sock, s.c_str(), s.size(), MSG_NOSIGNAL | ( m_non_blocking ? MSG_DONTWAIT : 0 ) );
+
+    if ( ( status >= 0 ) || ( m_non_blocking  && ( ( errno == EAGAIN ) || ( errno == EWOULDBLOCK ) ) ) )
     {
-        return false;
+        return true;
     }
     else
     {
-        return true;
+        return false;
     }
 }
 
 bool LinuxSocket::send ( void* data, int length ) const
 {
+    errno = 0;
     int status = ::send ( m_sock, data, length, MSG_NOSIGNAL );
-    if ( status == -1 )
+    if ( ( status >= 0 ) || ( m_non_blocking  && ( ( errno == EAGAIN ) || ( errno == EWOULDBLOCK ) ) ) )
     {
-        return false;
+        return true;
     }
     else
     {
-        return true;
+        return false;
     }
 }
 
@@ -124,36 +135,52 @@ int LinuxSocket::recv ( std::string& s ) const
 
     memset ( buf, 0, MAXRECV + 1 );
 
-    int status = ::recv ( m_sock, buf, MAXRECV, 0 );
+    errno = 0;
+    int status = ::recv ( m_sock, buf, MAXRECV, m_non_blocking ? MSG_DONTWAIT : 0 );
 
-    if ( status == -1 )
+    if ( status == 0 )
     {
-        cout << "status == -1   errno == " << errno << "  in Socket::recv\n";
-        return 0;
+        return 0; // connection was gracefully closed
     }
-    else if ( status == 0 )
+    else if ( status == -1 )
     {
-        return 0;
+        if ( m_non_blocking  && ( ( errno == EAGAIN ) || ( errno == EWOULDBLOCK ) ) )
+        {
+            return 1; // true result
+        }
+        else
+        {
+            cout << "status == -1   errno == " << errno << "  in Socket::recv\n";
+            return 0;
+        }
     }
     else
     {
-        s = buf;
+        s = string(buf,status);
         return status;
     }
 }
 
 int LinuxSocket::recv ( void* data, int length ) const
 {
-	int status = ::recv ( m_sock, data, length, 0 );
+    errno = 0;
+    int status = ::recv ( m_sock, data, length, m_non_blocking ? MSG_DONTWAIT : 0 );
 
-    if ( status == -1 )
+    if ( status == 0 )
     {
-        cout << "status == -1   errno == " << errno << "  in Socket::recv\n";
-        return 0;
+        return 0; // connection was gracefully closed
     }
-    else if ( status == 0 )
+    else if ( status == -1 )
     {
-        return 0;
+        if ( m_non_blocking  && ( ( errno == EAGAIN ) || ( errno == EWOULDBLOCK ) ) )
+        {
+            return 0; // no data to return
+        }
+        else
+        {
+            cout << "status == -1   errno == " << errno << "  in Socket::recv\n";
+            return 0;
+        }
     }
     
     return status;
@@ -196,11 +223,53 @@ void LinuxSocket::set_non_blocking ( const bool b )
 
     fcntl ( m_sock,
             F_SETFL,opts );
+
+    m_non_blocking = b;
 }
 
+const LinuxSocket& LinuxSocket::operator << ( const std::string& s ) const
+{	
+    if ( ! send ( s ) )
+    {
+        throw LinuxSocketException ( "Could not write to socket." );
+    }
 
+    return *this;
+}
+
+const LinuxSocket& LinuxSocket::operator << ( const int& i ) const
+{
+    std::stringstream ss;
+    ss << i;
+
+    if ( ! send ( ss.str() ) )
+    {
+        throw LinuxSocketException ( "Could not write to socket." );
+    }
+
+    return *this;
+}
+
+const LinuxSocket& LinuxSocket::operator >> ( std::string& s ) const
+{
+    if ( ! recv ( s ) )
+    {
+        throw LinuxSocketException ( "Could not read from socket." );
+    }
+
+    return *this;
+}
 
 LinuxServer::LinuxServer ( int port )
+{
+    listen(port);
+}
+
+LinuxServer::~LinuxServer()
+{
+}
+
+void LinuxServer::listen ( int port )
 {
     if ( ! LinuxSocket::create() )
     {
@@ -218,57 +287,4 @@ LinuxServer::LinuxServer ( int port )
     }
 }
 
-LinuxServer::~LinuxServer()
-{
-}
 
-const LinuxServer& LinuxServer::operator << ( const std::string& s ) const
-{	
-    if ( ! LinuxSocket::send ( s ) )
-    {
-        throw LinuxSocketException ( "Could not write to socket." );
-    }
-
-    return *this;
-}
-
-const LinuxServer& LinuxServer::operator << ( const int& i ) const
-{
-    std::stringstream ss;
-    ss << i;
-
-    if ( ! LinuxSocket::send ( ss.str() ) )
-    {
-        throw LinuxSocketException ( "Could not write to socket." );
-    }
-
-    return *this;
-}
-
-const LinuxServer& LinuxServer::operator >> ( std::string& s ) const
-{
-    if ( ! LinuxSocket::recv ( s ) )
-    {
-        throw LinuxSocketException ( "Could not read from socket." );
-    }
-
-    return *this;
-}
-
-void LinuxServer::accept ( LinuxServer& sock )
-{
-    if ( ! LinuxSocket::accept ( sock ) )
-    {
-        throw LinuxSocketException ( "Could not accept socket." );
-    }
-}
-
-bool LinuxServer::send ( unsigned char* data, int length )
-{
-	return LinuxSocket::send(data, length);
-}
-
-int LinuxServer::recv ( unsigned char* data, int length )
-{
-	return LinuxSocket::recv(data, length);
-}
