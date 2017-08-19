@@ -172,8 +172,7 @@ int main(int argc, char **argv)
 //    Walking::GetInstance()->LoadINISettings(ini); 
 //    MotionManager::GetInstance()->AddModule((MotionModule*)Action::GetInstance());
 //    MotionManager::GetInstance()->AddModule((MotionModule*)Walking::GetInstance());
-    LinuxMotionTimer linuxMotionTimer;
-    linuxMotionTimer.Initialize(MotionManager::GetInstance());
+    LinuxMotionTimer linuxMotionTimer(MotionManager::GetInstance());
     linuxMotionTimer.Start();
     /////////////////////////////////////////////////////////////////////
 
@@ -527,7 +526,7 @@ int Initialize_servo(char *string1)
     printf("\e[0;31mConectou-se a placa USB/RS-485 mas não conseguiu se comunicar com nenhum servo.\e[0m\n");
     std::cout<<"Endereço: "<<"/dev/robot/body"<<std::endl;
     std::cout<<"\e[0;36mVerifique se a chave que liga os servos motores está na posição ligada.\n\n\e[0m"<<std::endl;
-    return 1;
+    return 0;
 }
 
 int check_servo(CM730 *cm730, int idServo, bool &stop_gait)
