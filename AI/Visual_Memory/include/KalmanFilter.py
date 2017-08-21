@@ -19,10 +19,14 @@ class KalmanFilter(Basic):
 	
 	# ---- Variables ----
 	
+	## _speeds
+	# .
+	_speeds = None
+	
 	## Constructor Class
 	@abstractmethod
-	def __init__(self):
-		pass
+	def __init__(self, s):
+		self._speeds = s
 		
 	## update
 	def update(self, measurements):

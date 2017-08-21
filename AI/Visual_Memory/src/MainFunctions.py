@@ -25,7 +25,7 @@ def readDataLandmarks(taglandmark, mem):
 	time = mem.read_float('VISION_LAND_TIME')
 	mem.write_float('VISION_LAND_TAG', 0)
 	
-	return [taglandmark, x, y, time ]
+	return [taglandmark, x, y, time]
 
 ## readDataRobots
 def readDataRobots(mem, nrobots):

@@ -57,20 +57,20 @@ parameters = conf.read(parameters)
 if args.robot_numbers != None:
 	parameters['robot_numbers'] = args.robot_numbers
 
+# List with velocities for each movement of the robot.
+speeds = Speeds( )
+
 mem = Blackboard( ) # Creating shared memory
 
-land = Landmark( ) # Creating landmark object
+land = Landmark(speeds) # Creating landmark object
 
-ball = Ball( ) # Creating landmark object
+ball = Ball(speeds) # Creating landmark object
 
 # Creating robot objects
 robots = []
 newrobots = []
 for __ in xrange(parameters['robot_numbers']):
-	newrobots.append(Robots( ))
-
-# List with velocities for each movement of the robot.
-speeds = Speeds( )
+	newrobots.append(Robots(speeds))
 
 # Main loop
 
