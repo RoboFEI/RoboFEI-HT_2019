@@ -18,6 +18,14 @@ parser.add_argument(
 		"Number of robots to be tracked." # Description of the variable
 )
 
+parser.add_argument(
+ "--frequency_of_execution", # Full name
+ "--f", # Abbreviation for the name
+ type = float, # Type variable
+ help = "Frequência de execução do programa, caso seja zero ira rodar sem interrupções.\\" \
+		"Frequency of program execution, if zero will run without interruptions." # Description of the variable
+)
+
 args = parser.parse_args()
 
 # ---- Imports ----
@@ -58,6 +66,9 @@ conf = ConfigIni("Basic", "Settings")
 parameters = conf.read(parameters)
 if args.robot_numbers != None:
 	parameters["robot_numbers"] = args.robot_numbers
+
+if args.frequency_of_execution != None:
+	parameters["frequency_of_execution"] = args.frequency_of_execution
 
 if parameters['frequency_of_execution'] != 0:
 	parameters['frequency_of_execution'] = 1.0/parameters['frequency_of_execution']
