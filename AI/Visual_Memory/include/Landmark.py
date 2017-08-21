@@ -10,14 +10,14 @@ sys.path.append('../src')
 # The standard libraries used in the visual memory system.
 
 # Used class developed by RoboFEI-HT.
-from KalmanFilter import * # Class responsible for implementing kalman filter
+from BasicThread import * # Class responsible for implementing thread
 
 ## Class to Landmark
 # .
-class Landmark(KalmanFilter):
+class Landmark(BasicThread):
 	
 	# ---- Variables ----
 	
 	## Constructor Class
-	def __init__(self):
-		pass
+	def __init__(self, s):
+		super(Landmark, self).__init__(s)
