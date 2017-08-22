@@ -64,12 +64,6 @@ do
         echo Iniciando decision
     fi
 
-    if [ ! "$(pidof -x start_control.sh)" ] 
-    then
-        sudo screen -d -m -S control ./start_control.sh
-        echo Iniciando control
-    fi
-
     if [ ! "$(pidof -x start_vision.sh)" ] 
     then
         sudo screen -d -m -S vision ./start_vision.sh
@@ -94,6 +88,13 @@ do
         echo Iniciando Client communication
     fi
 
+    if [ ! "$(pidof -x start_control.sh)" ] 
+    then
+        sleep 1
+        sudo screen -d -m -S control ./start_control.sh
+        echo Iniciando control
+    fi
+
     echo ''
-    sleep 5
+    sleep 2
 done
