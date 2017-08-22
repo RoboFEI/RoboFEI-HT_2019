@@ -1,3 +1,5 @@
+#!/bin/bash
+
 blue='\33[0;34m'
 LightRed='\33[1;31m'
 NC='\33[0m' # No Color
@@ -11,6 +13,7 @@ NC='\33[0m' # No Color
 #Brown/Orange	0;33		Yellow				1;33
 #Light Gray		0;37		White					1;37
 
+clear
 git config --global --unset-all user.name
 git config --global --unset-all user.email
 
