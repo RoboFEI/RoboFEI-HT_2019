@@ -62,6 +62,7 @@ echo -e "${blue} cheese ${NC}"
 sudo apt -y install cheese
 echo -e "${blue} Core library dependencies (Robô Jimmy) ${NC}"
 sudo apt -y install build-essential libncurses5-dev libjpeg-dev mplayer mplayer-skins
+sudo apt -y install git-cola
 
 #Ajuste do auto foco na camera
 sudo apt -y install v4l-utils
@@ -208,6 +209,7 @@ make test
 make runtest
 make pycaffe
 echo 'export PYTHONPATH=~/caffe/python' >> ~/.bashrc
+echo 'export CAFFE_ROOT=~/caffe' >> ~/.bashrc
 #=========================================================================================================================
 
 
