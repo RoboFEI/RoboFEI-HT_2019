@@ -2,7 +2,8 @@
 #!/RoboFEI-HT/build/bin
 
 echo "vision"
-echo 'export PYTHONPATH=~/caffe/python'
+export PYTHONPATH=~/caffe/python
+export CAFFE_ROOT=~/caffe
 cd ../Vision/src/
 
 python vision.py
