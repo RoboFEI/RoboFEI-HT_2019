@@ -39,6 +39,7 @@ sys.path.append("./src")
 import numpy as np
 import os
 import time
+from copy import copy
 
 # Used class developed by RoboFEI-HT
 from MainFunctions import * # Declaration the main functions.
@@ -134,26 +135,26 @@ while True:
 			[2, 9, 9, 9],
 			[2, 10, 10, 10],
 			
-			[1, 10, 10, 0],
-			[1, 9, 9, 1],
-			[1, 8, 8, 2],
-			[1, 7, 7, 3],
+			[2, 10, 10, 0],
+			[2, 9, 9, 1],
+			[2, 8, 8, 2],
+			[2, 7, 7, 3],
 			[3, 6, 6, 4],
 			[3, 5, 5, 5],
-			[1, 4, 4, 6],
+			[2, 4, 4, 6],
 			[3, 3, 3, 7],
 			[3, 2, 2, 8],
 			[3, 1, 1, 9],
-			[1, 0, 0, 10],
+			[2, 0, 0, 10],
 			
-			[1, 5, 5, 0],
+			[2, 5, 5, 0],
 			[3, 7, 6, 1],
 			[3, 9, 7, 2],
-			[1, 11, 8, 3],
-			[1, 13, 9, 4],
+			[2, 11, 8, 3],
+			[2, 13, 9, 4],
 			[3, 15, 10, 5],
 			[3, 15, 10, 6],
-			[1, 15, 10, 7],
+			[2, 15, 10, 7],
 			[3, 15, 10, 8],
 			[3, 15, 10, 9],
 			[3, 15, 10, 10],
@@ -161,22 +162,26 @@ while True:
 		
 		if datarobots != []:
 			oldtime = datarobots[0][3]
-			datarobots = copy(robots)
+			robotstesting = copy(robots)
 			
 			obs = 0
 			while(obs < len(datarobots)):
-				if oldtime != obs[3]:
-					datarobots = copy(robots)
+				print "Entrou", len(datarobots), "passo:", obs
+				if oldtime != datarobots[obs][3]:
+					print "Novos dados"
+					robotstesting = copy(robots)
 					oldtime = datarobots[obs][3]
 				
-				if datarobots is []:
+				if robotstesting == []:
+					print "Novo Robô"
 					newrobots[0].insertObservation(datarobots[obs])
 					robots.append(newrobots.pop(0))
 					datarobots.remove(datarobots[obs])
-					obs -= 1
 					continue
 				
 				observation = datarobots[obs]
+				
+				remove todos os elementos de robôs de cores erradas
 				
 				sort(robots, reverse = True)
 				

@@ -18,6 +18,15 @@ class Robots(BasicThread):
 	
 	# ---- Variables ----
 	
+	## observation
+	# .
+	observation = None
+	
 	## Constructor Class
-	def __init__(self, s):
+	def __init__(self, s, obs):
 		super(Robots, self).__init__(s)
+		self.observation = obs
+		
+	## insertObservation
+	def insertObservation(self, position):
+		print position
