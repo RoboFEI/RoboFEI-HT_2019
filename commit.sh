@@ -1,8 +1,8 @@
 #!/bin/bash
 
-blue='\33[0;34m'
-LightRed='\33[1;31m'
-NC='\33[0m' # No Color
+LightBlue='\e[1;34m'
+LightRed='\e[1;31m'
+NC='\e[0m' # No Color
 #font colors:
 #Black				0;30		Dark Gray			1;30
 #Blue					0;34		Light Blue		1;34
@@ -20,10 +20,10 @@ git config --global --unset-all user.email
 git config --unset-all user.name
 git config --unset-all user.email
 
-echo -e "${blue}Insira seu nome: ${NC}"
+echo -e "${LightBlue}Insira seu nome: ${NC}"
 read name
 
-echo -e "${blue}Insira seu email do git: ${NC}"
+echo -e "${LightBlue}Insira seu email do git: ${NC}"
 read email
 
 git config --global user.name "${name}"
