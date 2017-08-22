@@ -20,10 +20,10 @@ git config --global --unset-all user.email
 git config --unset-all user.name
 git config --unset-all user.email
 
-echo "${blue}Insira seu nome: ${NC}"
+echo -e "${blue}Insira seu nome: ${NC}"
 read name
 
-echo "${blue}Insira seu email do git: ${NC}"
+echo -e "${blue}Insira seu email do git: ${NC}"
 read email
 
 git config --global user.name "${name}"
@@ -31,15 +31,15 @@ git config --global user.email "${email}"
 
 git cola
 
-echo "${LightRed}Certifique se está conectado a internet e logado, precione enter para continuar${NC}"
+echo -e "${LightRed}Certifique se está conectado a internet e logado, precione enter para continuar${NC}"
 read a
 
 git pull -f --all
-echo "${LightRed}Certifique se foi realizado corretamente o pull, precione enter para continuar${NC}"
+echo -e "${LightRed}Certifique se foi realizado corretamente o pull, precione enter para continuar${NC}"
 read a
 
 git push -f --all
-echo "${LightRed}Certifique se foi realizado corretamente o push, precione enter para continuar${NC}"
+echo -e "${LightRed}Certifique se foi realizado corretamente o push, precione enter para continuar${NC}"
 read a
 
 git config --global --unset-all user.name
