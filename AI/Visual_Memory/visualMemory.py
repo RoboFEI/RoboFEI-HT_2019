@@ -181,7 +181,7 @@ while True:
 				
 				observation = datarobots[obs]
 				
-				remove todos os elementos de robôs de cores erradas
+				print 'remove todos os elementos de robôs de cores erradas'
 				
 				sort(robots, reverse = True)
 				
