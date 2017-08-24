@@ -116,62 +116,120 @@ class MonteCarlo():
     #----------------------------------------------------------------------------------------------
     #   Tests which is the best information to be acquired.
     #----------------------------------------------------------------------------------------------
-    def PerfectInformation(self, u, time=0):
+    def PerfectInformation(self, u, pos, time=0):
         np.random.shuffle(self.particles)
 
+        pan = [-90,0,90]
+        utility = len(pan)*[0]
+
         poses = []
-        for P in self.particles[:30]:
-            poses.append([P.x, P.y])
+        for P in self.particles[0:30]:
+            poses.append(Particle(*P.copy(), factors=P.factors))
 
-        poses = np.matrix(np.array(poses)-np.array([self.mean[0], self.mean[1]]))
+        st = []
+        for p in poses:
+            uf = [u[0], u[1], u[2], time]
+            p.Movement(*uf, meanw=self.meanweight)
+            st.append([p.x, p.y, np.cos(np.radians(p.rotation))+np.sin(np.radians(p.rotation))*1j])
 
-        cov = (poses.T * poses)/(31.)
+        st = np.array(st)
+        st = np.matrix(st - np.mean(st,0))
+        st = np.sqrt(np.abs(np.linalg.det(((st.T * st) / (31.)))))
 
-        P = [self.particles[0].x, self.particles[0].y, self.particles[0].rotation]
-        R = [2., 2., 2.]
-        X = np.rint(np.log(cov[0,0])/np.log(10))
-        Y = np.rint(np.log(cov[1,1])/np.log(10))
+        for c in xrange(len(pan)):
+            z = [None, None, poses[0].rotation, poses[0].GetDistance(pan[c])]
+            tw = 0
+            for P in poses:
+                tw += P.Sensor(*z)
 
-        if P[0] >= field[0][1]-400:
-            if -45 <= P[2] and P[2] <= 45:
-                R[1] += X
-            elif -135 <= P[2] and P[2] <= -45:
-                R[0] += X
-            elif 45 <= P[2] and P[2] <= 135:
-                R[2] += X
+            step = tw / (31.)
+            s = 0
 
-        if P[0] <= field[0][0]+400:
-            if P[2] <= -135 or 135 <= P[2]:
-                R[1] += X
-            elif -135 <= P[2] and P[2] <= -45:
-                R[2] += X
-            elif 45 <= P[2] and P[2] <= 135:
-                R[0] += X
+            i = 1
+            j = 30
+
+            nstd = []
+            while i <= 31 and j >= 0:
+                # If the cumulative sum of steps is bigger than the cumulative sum of weights
+                if step * i > s:
+                    j -= 1 # Change the particle to be tested
+                    s += poses[j].weight # Compute the new cumulative weight
+                else:
+                    i += 1 # Moves one step
+                    p = poses[j]
+                    # Saves the position for computing the standard deviation
+                    nstd.append([p.x, p.y, np.cos(np.radians(p.rotation))+np.sin(np.radians(p.rotation))*1j])
+
+            nstd = np.array(nstd)
+            nstd = np.matrix(nstd - np.mean(nstd,0))
+            nstd = np.sqrt(np.abs(np.linalg.det(((nstd.T * nstd) / (31.)))))
+
+            utility[c] = max(st - nstd - 10*np.abs(pos-pan[c])/180., 0)
+
+        rnd = np.random.random() * sum(utility)
+
+        for c in xrange(len(pan)):
+            if rnd < utility[c]:
+                return pan[c]
+            rnd -= utility[c]
+
+        return -999
+
+        # np.random.shuffle(self.particles)
+
+        # poses = []
+        # for P in self.particles[:30]:
+        #     poses.append([P.x, P.y])
+
+        # poses = np.matrix(np.array(poses)-np.array([self.mean[0], self.mean[1]]))
+
+        # cov = (poses.T * poses)/(31.)
+
+        # P = [self.particles[0].x, self.particles[0].y, self.particles[0].rotation]
+        # R = [0., 0., 0.]
+        # X = np.rint(np.log(cov[0,0])/np.log(10))
+        # Y = np.rint(np.log(cov[1,1])/np.log(10))
+
+        # if P[0] >= field[0][1]-400:
+        #     if -45 <= P[2] and P[2] <= 45:
+        #         R[1] += X
+        #     elif -135 <= P[2] and P[2] <= -45:
+        #         R[0] += X
+        #     elif 45 <= P[2] and P[2] <= 135:
+        #         R[2] += X
+
+        # if P[0] <= field[0][0]+400:
+        #     if P[2] <= -135 or 135 <= P[2]:
+        #         R[1] += X
+        #     elif -135 <= P[2] and P[2] <= -45:
+        #         R[2] += X
+        #     elif 45 <= P[2] and P[2] <= 135:
+        #         R[0] += X
 
     
-        if P[1] <= field[1][0]+400:
-            if 45 <= P[2] and P[2] <= 135:
-                R[1] += Y
-            elif -45 <= P[2] and P[2] <= 45:
-                R[0] += Y
-            elif P[2] <= -135 or 135 <= P[2]:
-                R[2] += Y
+        # if P[1] <= field[1][0]+400:
+        #     if 45 <= P[2] and P[2] <= 135:
+        #         R[1] += Y
+        #     elif -45 <= P[2] and P[2] <= 45:
+        #         R[0] += Y
+        #     elif P[2] <= -135 or 135 <= P[2]:
+        #         R[2] += Y
 
-        if P[1] >= field[1][1]-400:
-            if -135 <= P[2] and P[2] <= -45:
-                R[1] += Y
-            elif -45 <= P[2] and P[2] <= 45:
-                R[2] += Y
-            elif P[2] <= -135 or 135 <= P[2]:
-                R[0] += Y
+        # if P[1] >= field[1][1]-400:
+        #     if -135 <= P[2] and P[2] <= -45:
+        #         R[1] += Y
+        #     elif -45 <= P[2] and P[2] <= 45:
+        #         R[2] += Y
+        #     elif P[2] <= -135 or 135 <= P[2]:
+        #         R[0] += Y
 
-        rand = np.random.random() * sum(R)
-        if R[0] > rand:
-            return -90
-        if R[0] + R[1] > rand:
-            return 0
-        if R[0] + R[1] + R[2] > rand:
-            return 90
+        # rand = np.random.random() * sum(R)
+        # if R[0] > rand:
+        #     return -90
+        # if R[0] + R[1] > rand:
+        #     return 0
+        # if R[0] + R[1] + R[2] > rand:
+        #     return 90
 
         # if u[3] <= 1:
         #     np.random.shuffle(self.particles) # Shuffles the particle set.

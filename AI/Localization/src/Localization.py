@@ -184,8 +184,8 @@ class Localization():
                 if not vipflag:
                     hp = -999
                     self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', -999)
-                elif fieldpoints != None or distances != None or self.bkb.read_int(self.Mem, 'DECISION_LOCALIZATION') == 999:
-                    hp = PF.PerfectInformation(u, 5)
+                elif (fieldpoints != None or distances != None) and (np.abs(self.bkb.read_int(self.Mem, 'DECISION_LOCALIZATION')) == 999) :
+                    hp = PF.PerfectInformation(u, np.int(distances), 5)
                     self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', hp)
 
                 if PF.meanweight < 1:                
@@ -210,7 +210,7 @@ class Localization():
                 print 'Localization: Saving data.'
                 # Finish
                 i = bhv - 400
-                np.save('/home/aislan/Dropbox/Masters/Dissertação/Experiments/simulated/loca'+str(exp+i), np.array(save))
+                np.save('/home/aislan/Dropbox/Masters/Dissertação/Experiments/simulated/local'+str(exp+i), np.array(save))
                 self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', bhv+100)
 
             if bhv == 910:

@@ -299,24 +299,30 @@ class Particle(object):
             aux = np.abs(pan - distances)
             dist = 1.0/aux
 
-            alpha = np.abs(-self.rotation + pan) # x -> 1040
-            beta = np.abs(90 - self.rotation + pan) # y -> 0
-            gamma = np.abs(-90 - self.rotation + pan) # y -> 740
-            delta = min(np.abs(180 - self.rotation + pan), np.abs(-180 - self.rotation + pan))  # x -> 0
+            alpha = np.radians(- self.rotation + pan)
+            alpha = np.abs(np.arctan2(np.sin(alpha), np.cos(alpha)))
+
+            beta = np.radians(90 - self.rotation + pan) # y -> 0
+            beta = np.abs(np.arctan2(np.sin(beta), np.cos(beta)))
+
+            gamma = np.radians(-90 - self.rotation + pan) # y -> 740
+            gamma = np.abs(np.arctan2(np.sin(gamma), np.cos(gamma)))
+
+            delta = np.radians(180 - self.rotation + pan)  # x -> 0
+            delta = np.abs(np.arctan2(np.sin(delta), np.cos(delta)))
 
             maxd = 9999
 
-            if alpha < 90:
-                maxd = min(maxd, (1040-self.x)/np.cos(np.radians(alpha)))
-            if beta < 90:
-                maxd = min(maxd, self.y/np.cos(np.radians(beta)))
-            if gamma < 90:
-                maxd = min(maxd, (740-self.y)/np.cos(np.radians(gamma)))
-            if delta < 90:
-                maxd = min(maxd, self.x/np.cos(np.radians(delta)))
+            if alpha < np.pi/2:
+                maxd = min(maxd, (1040-self.x)/np.cos(alpha))
+            if beta < np.pi/2:
+                maxd = min(maxd, self.y/np.cos(beta))
+            if gamma < np.pi/2:
+                maxd = min(maxd, (740-self.y)/np.cos(gamma))
+            if delta < np.pi/2:
+                maxd = min(maxd, self.x/np.cos(delta))
 
             weight *= np.exp(-np.power(dist-maxd, 2)/(2 * np.power(50, 2)))
-
 
             factorweight *= np.exp(fwl)
 
@@ -355,6 +361,35 @@ class Particle(object):
 
         # Return the points values
         return ret, pan
+
+    def GetDistance(self, pan=0):
+        alpha = np.radians(- self.rotation + pan)
+        alpha = np.abs(np.arctan2(np.sin(alpha), np.cos(alpha)))
+
+        beta = np.radians(90 - self.rotation + pan) # y -> 0
+        beta = np.abs(np.arctan2(np.sin(beta), np.cos(beta)))
+
+        gamma = np.radians(-90 - self.rotation + pan) # y -> 740
+        gamma = np.abs(np.arctan2(np.sin(gamma), np.cos(gamma)))
+
+        delta = np.radians(180 - self.rotation + pan)  # x -> 0
+        delta = np.abs(np.arctan2(np.sin(delta), np.cos(delta)))
+
+        maxd = 9999
+
+        if alpha < np.pi/2:
+            maxd = min(maxd, (1040-self.x)/np.cos(alpha))
+        if beta < np.pi/2:
+            maxd = min(maxd, self.y/np.cos(beta))
+        if gamma < np.pi/2:
+            maxd = min(maxd, (740-self.y)/np.cos(gamma))
+        if delta < np.pi/2:
+            maxd = min(maxd, self.x/np.cos(delta))
+
+        if pan < 0:
+            return int(pan) - 1.0/maxd
+        else:
+            return int(pan) + 1.0/maxd
 
     #----------------------------------------------------------------------------------------------
     #   Computes the max weight of the particles, generally 1.

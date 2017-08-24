@@ -35,7 +35,7 @@ class VISION():
         self.maxpan = 90 # Max pan
         self.minpan = -90 # Min pan
 
-        self.headspd = 90 # Max head speed, in degrees per second
+        self.headspd = 123 # Max head speed, in degrees per second
 
         # Observation points
         self.vpoints = v
@@ -70,8 +70,8 @@ class VISION():
 
     # Updates the head position
     def headmotion(self):
-        self.headtilt += np.sign(self.tiltpos-self.headtilt) * np.min([abs(self.tiltpos-self.headtilt), self.headspd]) / self.clk
-        self.headpan += np.sign(self.panpos-self.headpan) * np.min([abs(self.panpos-self.headpan), self.headspd]) / self.clk
+        self.headtilt += np.sign(self.tiltpos-self.headtilt) * np.min([abs(self.tiltpos-self.headtilt)*self.clk/3., self.headspd]) / self.clk
+        self.headpan += np.sign(self.panpos-self.headpan) * np.min([abs(self.panpos-self.headpan)*self.clk/3., self.headspd]) / self.clk
 
         self.headtilt = np.min([self.maxtilt, np.max([self.mintilt, self.headtilt])])
         self.headpan = np.min([self.maxpan, np.max([self.minpan, self.headpan])])
@@ -257,21 +257,28 @@ class VISION():
             else:
                 orient = self.robot.rotate
 
-            alpha = np.abs(-orient + self.headpan) # x -> 1040
-            beta = np.abs(90 - orient + self.headpan) # y -> 0
-            gamma = np.abs(-90 - orient + self.headpan) # y -> 740
-            delta = min(np.abs(180 - orient + self.headpan), np.abs(-180 - orient + self.headpan))  # x -> 0
+            alpha = np.radians(- orient + self.headpan)
+            alpha = np.abs(np.arctan2(np.sin(alpha), np.cos(alpha)))
+
+            beta = np.radians(90 - orient + self.headpan) # y -> 0
+            beta = np.abs(np.arctan2(np.sin(beta), np.cos(beta)))
+
+            gamma = np.radians(-90 - orient + self.headpan) # y -> 740
+            gamma = np.abs(np.arctan2(np.sin(gamma), np.cos(gamma)))
+
+            delta = np.radians(180 - orient + self.headpan)  # x -> 0
+            delta = np.abs(np.arctan2(np.sin(delta), np.cos(delta)))
             
             dist = 9999
 
-            if alpha < 90:
-                dist = min(dist, (1040-self.robot.x)/np.cos(np.radians(alpha)))
-            if beta < 90:
-                dist = min(dist, self.robot.y/np.cos(np.radians(beta)))
-            if gamma < 90:
-                dist = min(dist, (740-self.robot.y)/np.cos(np.radians(gamma)))
-            if delta < 90:
-                dist = min(dist, self.robot.x/np.cos(np.radians(delta)))
+            if alpha < np.pi/2:
+                dist = min(dist, (1040-self.robot.x)/np.cos(alpha))
+            if beta < np.pi/2:
+                dist = min(dist, self.robot.y/np.cos(beta))
+            if gamma < np.pi/2:
+                dist = min(dist, (740-self.robot.y)/np.cos(gamma))
+            if delta < np.pi/2:
+                dist = min(dist, self.robot.x/np.cos(delta))
             
             mean_aux = 1./max(self.robot.radius, dist)
             
