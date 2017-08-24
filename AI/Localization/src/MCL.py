@@ -29,6 +29,7 @@ class MonteCarlo():
         for i in range(self.qtd):
             # Randomly generates n particles
             if kidnap:
+                # self.particles.append(Particle(normals=[[[250,10],[370,10],[180,5]]]))
                 self.particles.append(Particle())
             else:
                 self.particles.append(Particle(factors=[1, 2, 1, 0, 5,  1, 2, 1, 0, 7,  1, 2, 1, 0, 5]))

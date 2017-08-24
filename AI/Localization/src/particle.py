@@ -23,8 +23,8 @@ vpoints = [(100,-45),
 # Vars used to compute the particles likelihood
 maxWdelta = None
 
-# field = ((8, 1032), (60, 680), (-180, 180))
-field = ((0, 1040), (0, 740), (-180, 180))
+field = ((8, 1032), (60, 680), (-180, 180))
+# field = ((0, 1040), (0, 740), (-180, 180))
 
 #--------------------------------------------------------------------------------------------------
 #   Class implementing a particle used on Particle Filter Localization

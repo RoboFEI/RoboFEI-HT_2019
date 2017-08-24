@@ -74,112 +74,61 @@ class Localization():
             field = SoccerField(screen) # Draws the field
             simul.field = field # Passes the field to the simulation
 
-        save = []
-        exp = 0
+        PF = MonteCarlo()
+        obsflag = 2
+        vipflag = True
+
+        std = 100
+        hp = -999
+        self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', -999)
+        weight = 1
 
         while True:
-            # Setup the experiment
-            bhv = self.bkb.read_int(self.Mem, 'LOCALIZATION_WORKING')
-            if bhv >= 110 and bhv < 120:
-                print 'Localization: Setting up experiment.'
-                if bhv == 110:
-                    PF = MonteCarlo(1000, 1000, False)
-                    obsflag = 0
-                    vipflag = False
-                    exp = 0
-                elif bhv == 111:
-                    PF = MonteCarlo(1000, 1000, False)
-                    obsflag = 1
-                    vipflag = False
-                    exp = 100
-                elif bhv == 112:
-                    PF = MonteCarlo(1000, 1000, False)
-                    obsflag = 2
-                    vipflag = False
-                    exp = 200
-                elif bhv == 113:
-                    PF = MonteCarlo(1000, 30, False)
-                    obsflag = 0
-                    vipflag = False
-                    exp = 300
-                elif bhv == 114:
-                    PF = MonteCarlo(1000, 1000, False)
-                    obsflag = 0
-                    vipflag = True
-                    exp = 400
-                elif bhv == 115:
-                    PF = MonteCarlo(1000, 1000, True)
-                    obsflag = 0
-                    vipflag = False
-                    exp = 500
-                elif bhv == 116:
-                    PF = MonteCarlo()
-                    obsflag = 0
-                    vipflag = True
-                    exp = 600
+            landmarks = []
 
-                std = 100
-                hp = -999
-                self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', -999)
-                weight = 1
-                self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', bhv+10)
-                save = []
+            # Process interactions events
+            if self.args.graphs:
+                simul.perform_events()
 
-            if bhv == 200 or bhv == 600:
-                landmarks = []
+            # Gets the motion command from the blackboard.
+            u = self.GetU(self.bkb.read_int(self.Mem, 'CONTROL_ACTION'))
 
-                # Process interactions events
-                if self.args.graphs:
-                    simul.perform_events()
-
-                # Gets the motion command from the blackboard.
-                u = self.GetU(self.bkb.read_int(self.Mem, 'CONTROL_ACTION'))
-
-                # Gets the measured variable from the blackboard,
-                # and free them.
-                if obsflag == 1:
-                    landmarks.append(self.bkb.read_float(self.Mem, 'VISION_FIRST_GOALPOST'))
-                    self.bkb.write_float(self.Mem, 'VISION_FIRST_GOALPOST', -999)
-                    landmarks.append(self.bkb.read_float(self.Mem, 'VISION_SECOND_GOALPOST'))
-                    self.bkb.write_float(self.Mem, 'VISION_SECOND_GOALPOST', -999)
-                    landmarks.append(self.bkb.read_float(self.Mem, 'VISION_THIRD_GOALPOST'))
-                    self.bkb.write_float(self.Mem, 'VISION_THIRD_GOALPOST', -999)
-                    landmarks.append(self.bkb.read_float(self.Mem, 'VISION_FOURTH_GOALPOST'))
-                    self.bkb.write_float(self.Mem, 'VISION_FOURTH_GOALPOST', -999)
-                    
+            # Gets the measured variable from the blackboard,
+            # and free them.
+            if obsflag == 1:
+                landmarks.append(self.bkb.read_float(self.Mem, 'VISION_FIRST_GOALPOST'))
+                self.bkb.write_float(self.Mem, 'VISION_FIRST_GOALPOST', -999)
+                landmarks.append(self.bkb.read_float(self.Mem, 'VISION_SECOND_GOALPOST'))
+                self.bkb.write_float(self.Mem, 'VISION_SECOND_GOALPOST', -999)
+                landmarks.append(self.bkb.read_float(self.Mem, 'VISION_THIRD_GOALPOST'))
+                self.bkb.write_float(self.Mem, 'VISION_THIRD_GOALPOST', -999)
+                landmarks.append(self.bkb.read_float(self.Mem, 'VISION_FOURTH_GOALPOST'))
+                self.bkb.write_float(self.Mem, 'VISION_FOURTH_GOALPOST', -999)
+                
+                fieldpoints = None
+                distances = None
+            elif obsflag == 2:
+                x = self.bkb.read_int(self.Mem, 'iVISION_FIELD')
+                y = self.bkb.read_float(self.Mem, 'fVISION_FIELD')
+                fieldpoints = [read(x), y]
+                if x == 0:
                     fieldpoints = None
-                    distances = None
-                elif obsflag == 2:
-                    x = self.bkb.read_int(self.Mem, 'iVISION_FIELD')
-                    y = self.bkb.read_float(self.Mem, 'fVISION_FIELD')
-                    fieldpoints = [read(x), y]
-                    if x == 0:
-                        fieldpoints = None
-                    else:
-                        self.bkb.write_int(self.Mem, 'iVISION_FIELD', 0)
-                        self.bkb.write_float(self.Mem, 'fVISION_FIELD', 0)
-
-                    landmarks = None
-                    distances = None
-                elif obsflag == 0:
-                    x = self.bkb.read_float(self.Mem, 'fVISION_FIELD')
-                    self.bkb.write_float(self.Mem, 'fVISION_FIELD', 0)
-                    if x == 0:
-                        distances = None
-                    else:
-                        distances = x
-
-                    landmarks = None
-                    fieldpoints = None
-
-                orientation = self.bkb.read_float(self.Mem, 'IMU_EULER_Z')
-
-                if fieldpoints == None and landmarks == None and distances == None:
-                    z = [None, None, None, None]
                 else:
-                    z = [landmarks, fieldpoints, orientation, distances]
+                    self.bkb.write_int(self.Mem, 'iVISION_FIELD', 0)
+                    self.bkb.write_float(self.Mem, 'fVISION_FIELD', 0)
 
-                pos, std = PF.main(u,z)
+                landmarks = None
+                distances = None
+            elif obsflag == 0:
+                x = self.bkb.read_float(self.Mem, 'fVISION_FIELD')
+                self.bkb.write_float(self.Mem, 'fVISION_FIELD', 0)
+                if x == 0:
+                    distances = None
+                else:
+                    distances = x
+
+                landmarks = None
+                fieldpoints = None
 
                 if not vipflag:
                     hp = -999
@@ -188,23 +137,19 @@ class Localization():
                     hp = PF.PerfectInformation(u, np.int(distances), 5)
                     self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', hp)
 
-                if PF.meanweight < 1:                
-                    weight = np.log(0.05)/np.log(PF.meanweight)
-                
-                save.append([time.time(), pos[0], pos[1], pos[2], std, PF.qtd])
+            if fieldpoints == None and landmarks == None and distances == None:
+                z = [None, None, None, None]
+            else:
+                z = [landmarks, fieldpoints, orientation, distances]
 
-                if self.args.log:
-                    print '\t\x1b[32mRobot at', # Prints header
-                    print 'ent\x1b[32m[x:\x1b[34m{} cm'.format(int(pos[0])), #  Prints the x position
-                    print '\x1b[32m| y:\x1b[34m{} cm'.format(int(pos[1])), # Prints the y position
-                    print u'\x1b[32m| \u03B8:\x1b[34m{}\u00B0'.format(int(pos[2])), # Prints the theta
-                    print u'\x1b[32m| \u03C3:\x1b[34m{} cm\x1b[32m]'.format(int(std)) # Prints the standard deviation
+            pos, std = PF.main(u,z)
 
-                # Write the robot's position on Black Board to be read by telemetry
-                self.bkb.write_int(self.Mem, 'LOCALIZATION_X', int(pos[0]))
-                self.bkb.write_int(self.Mem, 'LOCALIZATION_Y', int(pos[1]))
-                self.bkb.write_int(self.Mem, 'LOCALIZATION_THETA', int(pos[2]))
-                self.bkb.write_float(self.Mem, 'LOCALIZATION_RBT01_X', std)
+            if not vipflag:
+                hp = -999
+                self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', -999)
+            elif fieldpoints != None or distances != None or self.bkb.read_int(self.Mem, 'DECISION_LOCALIZATION') == 999:
+                hp = PF.PerfectInformation(u, 5)
+                self.bkb.write_int(self.Mem, 'DECISION_LOCALIZATION', hp)
 
             if bhv >= 400 and bhv < 500:
                 print 'Localization: Saving data.'
@@ -213,10 +158,18 @@ class Localization():
                 np.save('/home/aislan/Dropbox/Masters/Dissertação/Experiments/simulated/local'+str(exp+i), np.array(save))
                 self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', bhv+100)
 
-            if bhv == 910:
-                print 'Localization: Finalized by the mindcontroller.'
-                self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 0)
-                exit()
+            if self.args.log:
+                print '\t\x1b[32mRobot at', # Prints header
+                print 'ent\x1b[32m[x:\x1b[34m{} cm'.format(int(pos[0])), #  Prints the x position
+                print '\x1b[32m| y:\x1b[34m{} cm'.format(int(pos[1])), # Prints the y position
+                print u'\x1b[32m| \u03B8:\x1b[34m{}\u00B0'.format(int(pos[2])), # Prints the theta
+                print u'\x1b[32m| \u03C3:\x1b[34m{} cm\x1b[32m]'.format(int(std)) # Prints the standard deviation
+
+            # Write the robot's position on Black Board to be read by telemetry
+            self.bkb.write_int(self.Mem, 'LOCALIZATION_X', int(pos[0]))
+            self.bkb.write_int(self.Mem, 'LOCALIZATION_Y', int(pos[1]))
+            self.bkb.write_int(self.Mem, 'LOCALIZATION_THETA', int(pos[2]))
+            self.bkb.write_float(self.Mem, 'LOCALIZATION_RBT01_X', std)
 
             if self.args.graphs:
                 # Redraws the screen background
