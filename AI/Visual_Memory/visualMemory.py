@@ -38,7 +38,6 @@ sys.path.append("./src")
 # The standard libraries used in the Visual Memory System.
 import numpy as np
 import os
-import time
 from copy import copy
 
 # Used class developed by RoboFEI-HT
@@ -48,7 +47,6 @@ from Robots import * # Class used to track robot.
 from Landmark import * # Class used to track landmark.
 from Ball import * # Class used to track ball.
 from Speeds import * # Classes used to manage robot speed values.
-from ConfigIni import * # Used to read file "config.ini".
 
 # ---- Main Code ----
 
