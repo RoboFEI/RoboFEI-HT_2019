@@ -97,18 +97,26 @@ class objectDetect():
                             print("----------------------------------------------------------------------")
                             print("----------------------------------------------------------------------")
                             print("----------------------------------------------------------------------")
+                      
                             if not self.withoutservo:
+                                self.servo.writeWord(self.config.SERVO_TILT_ID, 30, self.config.POSITION_SERVO_TILT)
                                 self.status = self.SearchLostBall()
 
         if (x!=0 and y!=0 and raio!=0):
             BallFound = True
+            print("achei a bola")
+            if self.bkb.read_float(self.Mem,'VISION_TILT_DEG') == 70:
+                self.servo.writeWord(self.config.SERVO_TILT_ID,30, self.config.POSITION_SERVO_TILT + 70)
+            if self.bkb.read_float(self.Mem, 'VISION_TILT_DEG') == 0:
+		self.servo.writeWord(self.config.SERVO_TILT_ID, 30, self.config.POSITION_SERVO_TILT)
+	        
         return frame, x, y, raio, BallFound, self.status
 
     #Varredura
     def SearchLostBall(self):
 
         if self.bkb.read_int(self.Mem,'IMU_STATE')==0:
-            print("achei a bola")
+            
             if self.Count == 0:
                 self.servo.writeWord(self.config.SERVO_PAN_ID,30 , self.config.CENTER_SERVO_PAN - self.config.SERVO_PAN_LEFT) #olha para a esquerda
                 time.sleep(1)
