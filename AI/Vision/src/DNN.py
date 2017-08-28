@@ -108,6 +108,7 @@ class objectDetect():
     def SearchLostBall(self):
 
         if self.bkb.read_int(self.Mem,'IMU_STATE')==0:
+            print("achei a bola")
             if self.Count == 0:
                 self.servo.writeWord(self.config.SERVO_PAN_ID,30 , self.config.CENTER_SERVO_PAN - self.config.SERVO_PAN_LEFT) #olha para a esquerda
                 time.sleep(1)
@@ -121,8 +122,13 @@ class objectDetect():
             if self.Count == 2:
                 self.servo.writeWord(self.config.SERVO_PAN_ID,30, self.config.CENTER_SERVO_PAN + self.config.SERVO_PAN_RIGHT)#olha para a direita 850- 440
                 time.sleep(1)
-                self.Count = 0
+                self.Count += 1
                 return 2
+            if self.Count == 3:
+                self.servo.writeWord(self.config.SERVO_PAN_ID,30 , self.config.CENTER_SERVO_PAN) #olha para o centro
+                time.sleep(1)
+                self.Count = 0
+                return 3
 
 
 
