@@ -219,7 +219,7 @@ class ballStatus():
 	#	# O eixo em pixels é de cima para baixo ja as distancias são ao contrario.
 	#	# Quanto mais alto a bola na tela menor o valor em pixels 
 	#	# e mais longe estará a bola do robô
-		#Bola abaixo
+		#Bola acima
 		if (y < self.config.y_longe):
 			bkb.write_float(Mem,'VISION_TILT_DEG', 70) # Variavel da telemetria
 			print ("Bola acima")
@@ -227,7 +227,7 @@ class ballStatus():
 		if (y < self.config.y_chute and y > self.config.y_longe):
 			bkb.write_float(Mem,'VISION_TILT_DEG', 45) # Variavel da telemetria
 			print ("Bola Centralizada")
-		#Bola acima
+		#Bola abaixo
 		if (y >= self.config.y_chute):
 			bkb.write_float(Mem,'VISION_TILT_DEG', 0) # Variavel da telemetria
 			print ("Bola abaixo")
