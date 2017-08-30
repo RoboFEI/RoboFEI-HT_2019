@@ -10,7 +10,6 @@ sys.path.append('../src')
 # The standard libraries used in the visual memory system.
 import time
 import numpy as np
-import sympy as sym
 
 # Used class developed by RoboFEI-HT.
 from Basic import * # Class with implementations and basic variables

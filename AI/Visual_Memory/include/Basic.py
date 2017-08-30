@@ -10,6 +10,8 @@ sys.path.append('../src')
 # The standard libraries used in the visual memory system.
 from abc import ABCMeta, abstractmethod # Used to create abstract classes.
 from ConfigIni import * # Used to read file "config.ini".
+from copy import copy
+import sympy as sym
 
 # Used class developed by RoboFEI-HT.
 

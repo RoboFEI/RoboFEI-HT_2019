@@ -8,7 +8,6 @@ sys.path.append("../include")
 sys.path.append("../src")
 
 # The standard libraries used in the visual memory system.
-from copy import copy
 
 # Used class developed by RoboFEI-HT.
 from BasicThread import * # Class responsible for implementing thread
