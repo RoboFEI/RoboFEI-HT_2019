@@ -63,27 +63,28 @@ class objectDetect():
         white_mask = cv2.inRange(YUV_frame[:,:,0], self.config.white_threshould, 255)
 
         if visionMask:
-            cv2.imshow('Frame Mascara', white_mask)
+            
+            cv2.imshow('Frame Mascara', cv2.resize(white_mask, (640, 360)) )
 
 
 #        start2 = time.time()
         BallFound = False
         frame, x, y, raio, maskM = self.Morphology(image , white_mask,self.kernel_perto, self.kernel_perto2,1)
         if visionMorph1:
-            cv2.imshow('Morfologia 1', maskM)
+            cv2.imshow('Morfologia 1',cv2.resize(maskM, (640, 360)))
 #        print "Search = ", time.time() - start2 
         if (x==0 and y==0 and raio==0):
             frame, x, y, raio, maskM = self.Morphology(image, white_mask,self.kernel_medio ,self.kernel_medio2,2)
             if visionMorph2:
-                cv2.imshow('Morfologia 2', maskM)
+                cv2.imshow('Morfologia 2', cv2.resize(maskM, (640, 360)))
             if (x==0 and y==0 and raio==0):
                 frame, x, y, raio, maskM = self.Morphology(image, white_mask,self.kernel_longe , self.kernel_longe2,3)
                 if visionMorph3:
-                    cv2.imshow('Morfologia 3', maskM)
+                    cv2.imshow('Morfologia 3', cv2.resize(maskM, (640, 360)))
                 if (x==0 and y==0 and raio==0):
                     frame, x, y, raio, maskM = self.Morphology(image, white_mask,self.kernel_muito_longe, self.kernel_muito_longe2,4)
                     if visionMorph4: 
-                        cv2.imshow('Morfologia 4', maskM) 
+                        cv2.imshow('Morfologia 4', cv2.resize(maskM, (640, 360))) 
                     if (x==0 and y==0 and raio==0):
                         self.CountLostFrame +=1
                         print("@@@@@@@@@@@@@@@@@@@",self.CountLostFrame)
@@ -130,22 +131,27 @@ class objectDetect():
 
         start3 = time.time()
         contador = 0
-
+    #   variavel com imagen completa
+        frametemp = white_mask
+    #   corte do frame parte de cima 
+        if k == 1:
+            white_mask =white_mask[700:,:]
     #    cv2.imshow('mask',white_mask)
         mask = cv2.morphologyEx(white_mask, cv2.MORPH_OPEN, kernel)
         mask = cv2.morphologyEx(mask, cv2.MORPH_DILATE, kernel2,1)
+        
     # Se a morfologia de perto k =1, recorta a parte de cima
-        if k ==1:
-            mask[0:200,:]=0
+    #    if k ==1:
+    #        mask[0:200,:]=0
     # Se a morfologia medio k =2, recorta a parte de baixo
-        if k ==2:
-            mask[650:,:]=0
+    #    if k ==2:
+    #        mask[650:,:]=0
     # Se a morfologia de longe k =3, recorta a parte de baixo
-        if k ==3:
-            mask[450:,:]=0
+    #    if k ==3:
+    #        mask[450:,:]=0
     # Se a morfologia de muito longe k = 4, recorta a parte de baixo
-        if k ==4:
-            mask[350:,:]=0
+    #    if k ==4:
+    #        mask[350:,:]=0
 
 
         ret,th1 = cv2.threshold(mask,25,255,cv2.THRESH_BINARY)
@@ -171,7 +177,7 @@ class objectDetect():
 
                 return frame, x+w/2, y+h/2, (w+h)/4, mask
             #=================================================================================================
-    #    print "CONTOURS = ", time.time() - start 
+    #    print "CONTOURS = ", time.time() - start3
         return frame, 0, 0, 0, mask
 
 
