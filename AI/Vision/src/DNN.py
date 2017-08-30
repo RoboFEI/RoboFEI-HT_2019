@@ -104,12 +104,13 @@ class objectDetect():
 
         if (x!=0 and y!=0 and raio!=0):
             BallFound = True
-            print("achei a bola")
-            if self.bkb.read_float(self.Mem,'VISION_TILT_DEG') == 70:
-                self.servo.writeWord(self.config.SERVO_TILT_ID,30, self.config.POSITION_SERVO_TILT + 70)
-            if self.bkb.read_float(self.Mem, 'VISION_TILT_DEG') == 0:
-		self.servo.writeWord(self.config.SERVO_TILT_ID, 30, self.config.POSITION_SERVO_TILT)
-	        
+            print('y ',y, 'x ',x ,'ball_up', self.config.when_ball_up, self.config.SERVO_TILT_ID, self.config.when_ball_down)
+            if y<self.config.when_ball_up:
+                self.servo.writeWord(self.config.SERVO_TILT_ID,30, self.config.POSITION_SERVO_TILT + self.config.head_up)
+            if y>self.config.when_ball_down:
+                if not self.withoutservo:
+                    self.servo.writeWord(self.config.SERVO_TILT_ID, 30, self.config.POSITION_SERVO_TILT)
+
         return frame, x, y, raio, BallFound, self.status
 
     #Varredura
@@ -130,13 +131,8 @@ class objectDetect():
             if self.Count == 2:
                 self.servo.writeWord(self.config.SERVO_PAN_ID,30, self.config.CENTER_SERVO_PAN + self.config.SERVO_PAN_RIGHT)#olha para a direita 850- 440
                 time.sleep(1)
-                self.Count += 1
-                return 2
-            if self.Count == 3:
-                self.servo.writeWord(self.config.SERVO_PAN_ID,30 , self.config.CENTER_SERVO_PAN) #olha para o centro
-                time.sleep(1)
                 self.Count = 0
-                return 3
+                return 2
 
 
 
