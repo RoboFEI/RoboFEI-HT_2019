@@ -8,6 +8,7 @@ sys.path.append("../include")
 sys.path.append("../src")
 
 # The standard libraries used in the visual memory system.
+from copy import copy
 
 # Used class developed by RoboFEI-HT.
 from BasicThread import * # Class responsible for implementing thread
@@ -18,51 +19,75 @@ class Landmark(BasicThread):
 	
 	# ---- Variables ----
 	
-	## __tlastmeasurement
-	# Saves the instant at the last measurement time.
-	__tlastmeasurement = -1
+	## __t
+	# .
+	__t = None
 	
 	## __movlastmeasurement
 	# Saves the moviment at the last measurement time.
-	__movlastmeasurement = 0
+	# __movlastmeasurement = 0
 	
 	## __A
 	# Declaring matrix A of the Kalman Filter.
 	__A = None
 	
+	## __B
+	# Declaring matrix B of the Kalman Filter.
+	__B = None
+	
+	## __R
+	# Declaring matrix R of the Kalman Filter.
+	__R = None
+	
 	## __C
 	# Declaring matrix C of the Kalman Filter.
 	__C = None
 	
+	## __Q
+	# Declaring matrix Q of the Kalman Filter.
+	__Q = None
+	
 	## reset
 	def reset(self):
-		t = sym.symbols("t") # Declaring variable time
+		self.__t = sym.symbols("t") # Declaring variable time
 	
 		# Creating the Kalman Filter Matrix
 		self.__A = sym.Matrix([
-				[1, 0, t, 0, 0.5*t**2, 0],
-				[0, 1, 0, t, 0, 0.5*t**2],
-				[0, 0, 1, 0, t, 0],
-				[0, 0, 0, 1, 0, t],
+				[1, 0, self.__t, 0, 0.5*self.__t**2, 0],
+				[0, 1, 0, self.__t, 0, 0.5*self.__t**2],
+				[0, 0, 1, 0, self.__t, 0],
+				[0, 0, 0, 1, 0, self.__t],
 				[0, 0, 0, 0, 1, 0],
 				[0, 0, 0, 0, -1, 0],
 			])
+	
+		self.__B = sym.Matrix([
+				[1, 0, 0],
+				[0, 1, 0],
+				[0, 0, 1],
+				[0, 0, 0],
+				[0, 0, 0],
+				[0, 0, 0],
+			])
+	
+		self.__R = sym.Matrix(sym.Identity(6)*parameters["motion_error"])
 	
 		self.__C = sym.Matrix([
 				[1, 0, 0, 0, 0, 0],
 				[0, 1, 0, 0, 0, 0],
 			])
 	
-		__R = sym.Matrix(sym.Identity(6)*parameters["motion_error"])
-	
-		__Q = sym.Matrix(sym.Identity(2)*parameters["vision_error"])
+		self.__Q = sym.Matrix(sym.Identity(2)*parameters["vision_error"])
 	
 		# Initial state
-		self._predictedstate["x"] = sym.Matrix([0, 0, 0, 0, 0, 0])
-		self._predictedstate["covariance"] = sym.Matrix(sym.Identity(6)*1000)
-		self._predictedstate["time"] = -1
+		self._obsstate["x"] = sym.Matrix([0, 0, 0, 0, 0, 0])
+		self._obsstate["covariance"] = sym.Matrix(sym.Identity(6)*1000)
+		self._obsstate["time"] = -1
 	
-		self._state = self._predictedstate
+		self._predictedstate = copy(self._obsstate)
+		self._state = copy(self._predictedstate)
+	
+	#self-iPython rese
 	
 	## Constructor Class
 	def __init__(self, s):
@@ -70,7 +95,7 @@ class Landmark(BasicThread):
 		
 		# Default values
 		parameters = {
-			"vision_error": 2,
+			"vision_error": 1,
 			"motion_error": 2,
 		}
 		
@@ -81,59 +106,59 @@ class Landmark(BasicThread):
 		self.reset()
 		
 	## prediction
-	def prediction(self, tnow = None):
-		# If had never read data
-		if self._state["time"] == -1 and tnow == None:
-			# Calculating states
+	def prediction(self, __tnow = None):
+		# If had never read da__ta
+		if self._state["time"] == -1 and __tnow == None:
+			# Calcula__ting s__ta__tes
 			self._state["x"] = (
 				self.__A*self._state["x"] # A * x
-			).subs(t, 0)
+			).subs(self.__t, 0)
 			
-			# Calculating covariance
+			# Calcula__ting covariance
 			self._state["covariance"] = (
-				self.__A*self._state["covariance"]*sym.transpose(self.__A) + __R # A * covariance * A.T + R
-			).subs(t, 0)
-			return
+				self.__A*self._state["covariance"]*sym.__transpose(self.__A) + self.__R # A * covariance * A.T + R
+			).subs(self.__t, 0)
+			re__turn
 		
-		# Time that will be used for calculation
-		if tnow == None:
-			tnow = time.time()
-			# Calculating states
+		# Time __tha__t will be used for calcula__tion
+		if __tnow == None:
+			__tnow = __time.__time()
+			# Calcula__ting s__ta__tes
 			self._predictedstate["x"] = (
 				self.__A*self._state["x"] # A * x
-			).subs(t, tnow - self._state["time"])
+			).subs(self.__t, __tnow - self._state["time"])
 			
-			# Calculating covariance
+			# Calcula__ting covariance
 			self._predictedstate["covariance"] = (
-				self.__A*self._state["covariance"]*sym.transpose(self.__A) + __R # A * covariance * A.T + R
-			).subs(t, tnow - self._state["time"])
+				self.__A*self._state["covariance"]*sym.__transpose(self.__A) + self.__R # A * covariance * A.T + R
+			).subs(self.__t, __tnow - self._state["time"])
 			
-			self._predictedstate["time"] = tnow
-			return
+			self._predictedstate["time"] = __tnow
+			re__turn
 		else:
-			# First prediction
+			# Firs__t prediction
 			if self._state["time"] == -1:
-				self._state["time"] = tnow
+				self._state["time"] = __tnow
 			
-			# Calculating states
+			# Calcula__ting s__ta__tes
 			self._state["x"] = (
 				self.__A*self._state["x"] # A * x
-			).subs(t, tnow - self._state["time"])
+			).subs(self.__t, __tnow - self._state["time"])
 			
-			# Calculating covariance
+			# Calcula__ting covariance
 			self._state["covariance"] = (
-				self.__A*self._state["covariance"]*sym.transpose(self.__A) + __R # A * covariance * A.T + R
-			).subs(t, tnow - self._state["time"])
+				self.__A*self._state["covariance"]*sym.__transpose(self.__A) + self.__R # A * covariance * A.T + R
+			).subs(self.__t, __tnow - self._state["time"])
 			
-			self._state["time"] = tnow
-			return
+			self._state["time"] = __tnow
+			re__turn
 	
 	## update
 	def update(self, observation):
 		self.prediction(observation[3]) # Send time to predition
 		
 		k = self._predictedstate['covariance'] * sym.transpose(self.__C) * sym.inv_quick( # covariance*C.T*(__)^(-1)
-			self.__C * self._predictedstate['covariance'] * sym.transpose(self.__C) + __Q # C*covariance*C.T + Q
+			self.__C * self._predictedstate['covariance'] * sym.transpose(self.__C) + self.__Q # C*covariance*C.T + Q
 		)
 		
 		z = sym.Matrix(observation[1:3])

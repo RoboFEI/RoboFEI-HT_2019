@@ -1,6 +1,7 @@
 # coding: utf-8
 
 from sympy import *
+import numpy as np
 init_printing()
 
 ## Para landmark
@@ -41,7 +42,7 @@ A, x, A*x
 
 eq = A*x
 
-covariance = Identity(6)
+covariance = Matrix(Identity(6))
 R = Matrix(Identity(6)*0.1)
 eq_cov = A*covariance*transpose(A) + R
 
@@ -98,9 +99,9 @@ A_t = Matrix([
 A_t, x, A_t*x
 
 f_vr_x, f_vr_y, f_omegar = symbols("f_{vr_x}, f_{vr_y}, f_{\\omega\ r}")
-f_vr_x = 1
-f_vr_y = 1
-f_omegar = 1
+# f_vr_x = 1
+# f_vr_y = 1
+# f_omegar = 1
 
 u_t = Matrix([
 	[f_vr_x],
