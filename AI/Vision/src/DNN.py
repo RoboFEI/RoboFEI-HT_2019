@@ -18,6 +18,7 @@ import sys
 from servo import Servo
 
 import Condensation
+import random as rd
 
 #SERVO_PAN = 19
 #SERVO_TILT = 20
@@ -168,7 +169,7 @@ class objectDetect():
         for cnt in contours:
             contador = contador + 1
             x,y,w,h = cv2.boundingRect(cnt)
-                #Passa para o classificador as imagens recortadas-----------------------
+            #Passa para o classificador as imagens recortadas-----------------------
             type_label, results = classify(cv2.cvtColor(frame[y:y+h,x:x+w], cv2.COLOR_BGR2RGB),
                                                                self.net, self.transformer,
                                                                mean_file=self.mean_file, labels=self.labels,
@@ -178,6 +179,7 @@ class objectDetect():
     #            print results, type_label
         #       cv2.imshow('janela',images[0])
             if type_label == 'Ball':
+#                cv2.imwrite("./frames_extracted_by_DNN/"+str(rd.random()) +"image.png", cv2.cvtColor(frame[y:y+h,x:x+w], cv2.COLOR_BGR2RGB))
 
                 return frame, x+w/2, y+h/2, (w+h)/4, mask
             #=================================================================================================
