@@ -11,7 +11,9 @@ NC='\e[0m' # No Color
 #Light Gray   0;37     White         1;37
 
 echo -e "${blue} Configurando sistema...${NC}"
-
+cp ./Config/bashrc ~/.bashrc
+./Config/git-completion.bash ~/git-completion.bash
+./Config/git-prompt.sh ~/git-prompt.sh
 sleep 2
 
 #updates/system changes
@@ -19,8 +21,6 @@ echo -e "${blue} Upgrade ${NC}"
 sudo apt -y upgrade
 echo -e "${blue} Update ${NC}"
 sudo apt -y update
-echo -e "${blue} Terminal color ${NC}"
-sudo sed -i 's/#force/force/g' ~/.bashrc
 
 echo -e "${blue} Instalando softwares...${NC}"
 
