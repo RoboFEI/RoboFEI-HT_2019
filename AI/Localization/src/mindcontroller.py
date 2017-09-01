@@ -40,34 +40,34 @@ class MINDREADER():
     def main(self):
         try:
             self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 0)
-            # Experiment zero - reference
-            print 'mindcontroller: Experiment zero'
-            for i in xrange(30):
-                # Sets up the experiment
-                print '\tSetting up experiment', i
-                self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 100)
-                # Waits until all processes are ready
-                while self.bkb.read_int(self.Mem, 'LOCALIZATION_WORKING') != 120:
-                    time.sleep(0.1)
+            # # Experiment zero - reference
+            # print 'mindcontroller: Experiment zero'
+            # for i in xrange(1):
+            #     # Sets up the experiment
+            #     print '\tSetting up experiment', i
+            #     self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 100)
+            #     # Waits until all processes are ready
+            #     while self.bkb.read_int(self.Mem, 'LOCALIZATION_WORKING') != 120:
+            #         time.sleep(0.1)
 
-                print '\x1b[1F\x1b[2K\tRunning experiment', i
-                # Starts the experiment
-                self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 200)
+            #     print '\x1b[1F\x1b[2K\tRunning experiment', i
+            #     # Starts the experiment
+            #     self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 200)
 
-                # State Machine
-                self.FirstTrack()
-                # Stop
-                self.bkb.write_int(self.Mem, 'DECISION_ACTION_A', 0)
+            #     # State Machine
+            #     self.FirstTrack()
+            #     # Stop
+            #     self.bkb.write_int(self.Mem, 'DECISION_ACTION_A', 0)
 
-                print '\x1b[1F\x1b[2K\tFinishing experiment', i
-                # Finishes the experiment
-                self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 300+i)
-                while self.bkb.read_int(self.Mem, 'LOCALIZATION_WORKING') != 500+i:
-                    time.sleep(0.1)
+            #     print '\x1b[1F\x1b[2K\tFinishing experiment', i
+            #     # Finishes the experiment
+            #     self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 300+i)
+            #     while self.bkb.read_int(self.Mem, 'LOCALIZATION_WORKING') != 500+i:
+            #         time.sleep(0.1)
 
             # # Experiment one - using landmarks
             # print 'Experiment one'
-            # for i in xrange(30):
+            # for i in xrange(1):
             #     # Sets up the experiment
             #     print '\tSetting up experiment', i
             #     self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 101)
@@ -116,58 +116,58 @@ class MINDREADER():
             #         time.sleep(0.1)
 
             # Experiment three - Quantity of particles
-            print 'Experiment three'
-            for i in xrange(30):
-                # Sets up the experiment
-                print '\tSetting up experiment', i
-                self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 103)
-                # Waits until all processes are ready
-                while self.bkb.read_int(self.Mem, 'LOCALIZATION_WORKING') != 123:
-                    time.sleep(0.1)
+            # print 'Experiment three'
+            # for i in xrange(1):
+            #     # Sets up the experiment
+            #     print '\tSetting up experiment', i
+            #     self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 103)
+            #     # Waits until all processes are ready
+            #     while self.bkb.read_int(self.Mem, 'LOCALIZATION_WORKING') != 123:
+            #         time.sleep(0.1)
                 
-                print '\x1b[1F\x1b[2K\tRunning experiment', i
-                # Starts the experiment
-                self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 200)
+            #     print '\x1b[1F\x1b[2K\tRunning experiment', i
+            #     # Starts the experiment
+            #     self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 200)
 
-                # State Machine
-                self.FirstTrack()
-                # Stop
-                self.bkb.write_int(self.Mem, 'DECISION_ACTION_A', 0)
+            #     # State Machine
+            #     self.FirstTrack()
+            #     # Stop
+            #     self.bkb.write_int(self.Mem, 'DECISION_ACTION_A', 0)
 
-                print '\x1b[1F\x1b[2K\tFinishing experiment', i
-                # Finishes the experiment
-                self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 300+i)
-                while self.bkb.read_int(self.Mem, 'LOCALIZATION_WORKING') != 500+i:
-                    time.sleep(0.1)
+            #     print '\x1b[1F\x1b[2K\tFinishing experiment', i
+            #     # Finishes the experiment
+            #     self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 300+i)
+            #     while self.bkb.read_int(self.Mem, 'LOCALIZATION_WORKING') != 500+i:
+            #         time.sleep(0.1)
 
-            # Experiment four - Value of Perfect Information
-            print 'Experiment four'
-            for i in xrange(30):
-                # Sets up the experiment
-                print '\tSetting up experiment', i
-                self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 104)
-                # Waits until all processes are ready
-                while self.bkb.read_int(self.Mem, 'LOCALIZATION_WORKING') != 124:
-                    time.sleep(0.1)
+            # # Experiment four - Value of Perfect Information
+            # print 'Experiment four'
+            # for i in xrange(1):
+            #     # Sets up the experiment
+            #     print '\tSetting up experiment', i
+            #     self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 104)
+            #     # Waits until all processes are ready
+            #     while self.bkb.read_int(self.Mem, 'LOCALIZATION_WORKING') != 124:
+            #         time.sleep(0.1)
                 
-                print '\x1b[1F\x1b[2K\tRunning experiment', i
-                # Starts the experiment
-                self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 200)
+            #     print '\x1b[1F\x1b[2K\tRunning experiment', i
+            #     # Starts the experiment
+            #     self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 200)
 
-                # State Machine
-                self.FirstTrack()
-                # Stop
-                self.bkb.write_int(self.Mem, 'DECISION_ACTION_A', 0)
+            #     # State Machine
+            #     self.FirstTrack()
+            #     # Stop
+            #     self.bkb.write_int(self.Mem, 'DECISION_ACTION_A', 0)
 
-                print '\x1b[1F\x1b[2K\tFinishing experiment', i
-                # Finishes the experiment
-                self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 300+i)
-                while self.bkb.read_int(self.Mem, 'LOCALIZATION_WORKING') != 500+i:
-                    time.sleep(0.1)
+            #     print '\x1b[1F\x1b[2K\tFinishing experiment', i
+            #     # Finishes the experiment
+            #     self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 300+i)
+            #     while self.bkb.read_int(self.Mem, 'LOCALIZATION_WORKING') != 500+i:
+            #         time.sleep(0.1)
 
             # Experiment five - kidnap
             print 'Experiment five'
-            for i in xrange(30):
+            for i in xrange(1):
                 # Sets up the experiment
                 print '\tSetting up experiment', i
                 self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 105)
@@ -198,38 +198,38 @@ class MINDREADER():
                 while self.bkb.read_int(self.Mem, 'LOCALIZATION_WORKING') != 500+i:
                     time.sleep(0.1)
 
-            # Experiment six - all
-            print 'Experiment six'
-            for i in xrange(30):
-                # Sets up the experiment
-                print '\tSetting up experiment', i
-                self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 106)
-                # Waits until all processes are ready
-                while self.bkb.read_int(self.Mem, 'LOCALIZATION_WORKING') != 126:
-                    time.sleep(0.1)
+            # # Experiment six - all
+            # print 'Experiment six'
+            # for i in xrange(1):
+            #     # Sets up the experiment
+            #     print '\tSetting up experiment', i
+            #     self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 106)
+            #     # Waits until all processes are ready
+            #     while self.bkb.read_int(self.Mem, 'LOCALIZATION_WORKING') != 126:
+            #         time.sleep(0.1)
                 
-                print '\x1b[1F\x1b[2K\tRunning experiment', i
-                # Starts the experiment
-                self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 200)
+            #     print '\x1b[1F\x1b[2K\tRunning experiment', i
+            #     # Starts the experiment
+            #     self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 200)
 
-                # State Machine
-                self.FirstTrack()
-                # Stop
-                self.bkb.write_int(self.Mem, 'DECISION_ACTION_A', 0)
-                # Jump
-                self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 600)
-                # Wait
-                time.sleep(1)
-                # State Machine
-                self.SecondTrack()
-                # Stop
-                self.bkb.write_int(self.Mem, 'DECISION_ACTION_A', 0)
+            #     # State Machine
+            #     self.FirstTrack()
+            #     # Stop
+            #     self.bkb.write_int(self.Mem, 'DECISION_ACTION_A', 0)
+            #     # Jump
+            #     self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 600)
+            #     # Wait
+            #     time.sleep(1)
+            #     # State Machine
+            #     self.SecondTrack()
+            #     # Stop
+            #     self.bkb.write_int(self.Mem, 'DECISION_ACTION_A', 0)
 
-                print '\x1b[1F\x1b[2K\tFinishing experiment', i
-                # Finishes the experiment
-                self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 300+i)
-                while self.bkb.read_int(self.Mem, 'LOCALIZATION_WORKING') != 500+i:
-                    time.sleep(0.1)
+            #     print '\x1b[1F\x1b[2K\tFinishing experiment', i
+            #     # Finishes the experiment
+            #     self.bkb.write_int(self.Mem, 'LOCALIZATION_WORKING', 300+i)
+            #     while self.bkb.read_int(self.Mem, 'LOCALIZATION_WORKING') != 500+i:
+            #         time.sleep(0.1)
             
         except:
             print '\n\nLocalization: Force quit!'
