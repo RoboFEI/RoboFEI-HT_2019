@@ -106,9 +106,11 @@ class objectDetect():
             BallFound = True
             print("achei a bola")
             if self.bkb.read_float(self.Mem,'VISION_TILT_DEG') == 70:
-                self.servo.writeWord(self.config.SERVO_TILT_ID,30, self.config.POSITION_SERVO_TILT + 70)
+		if not self.withoutservo:
+	                self.servo.writeWord(self.config.SERVO_TILT_ID,30, self.config.POSITION_SERVO_TILT + 70)
             if self.bkb.read_float(self.Mem, 'VISION_TILT_DEG') == 0:
-		self.servo.writeWord(self.config.SERVO_TILT_ID, 30, self.config.POSITION_SERVO_TILT)
+		if not self.withoutservo:		
+			self.servo.writeWord(self.config.SERVO_TILT_ID, 30, self.config.POSITION_SERVO_TILT)
 	        
         return frame, x, y, raio, BallFound, self.status
 
