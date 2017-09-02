@@ -108,7 +108,7 @@ class Landmark(BasicThread):
 	def prediction(self, __tnow = None):
 		# If had never read da__ta
 		if self._state["time"] == -1 and __tnow == None:
-			# Calcula__ting s__ta__tes
+			# Calcula__ting states
 			self._state["x"] = (
 				self.__A*self._state["x"] # A * x
 			).subs(self.__t, 0)
