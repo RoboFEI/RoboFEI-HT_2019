@@ -57,16 +57,19 @@ class Landmark(BasicThread):
 				[0, 0, 1, 0, self.__t, 0],
 				[0, 0, 0, 1, 0, self.__t],
 				[0, 0, 0, 0, 1, 0],
-				[0, 0, 0, 0, -1, 0],
+				[0, 0, 0, 0, 0, 1],
 			])
 	
+		p_x, p_y = sym.symbols("p_x, p_y")
+		v_x, v_y = sym.symbols("v_x, v_y")
+		a_x, a_y = sym.symbols("a_x, a_y")
 		self.__B = sym.Matrix([
-				[1, 0, 0],
-				[0, 1, 0],
-				[0, 0, 1],
-				[0, 0, 0],
-				[0, 0, 0],
-				[0, 0, 0],
+				[-self.__t, 0, p_x, p_y],
+				[0, -self.__t, p_y, -p_x],
+				[0, 0, v_x, v_y],
+				[0, 0, v_y, -v_x],
+				[0, 0, a_x, a_y],
+				[0, 0, a_y, -a_x],
 			])
 	
 		self.__R = sym.Matrix(sym.Identity(6)*parameters["motion_error"])
@@ -79,14 +82,21 @@ class Landmark(BasicThread):
 		self.__Q = sym.Matrix(sym.Identity(2)*parameters["vision_error"])
 	
 		# Initial state
-		self._obsstate["x"] = sym.Matrix([0, 0, 0, 0, 0, 0])
-		self._obsstate["covariance"] = sym.Matrix(sym.Identity(6)*1000)
-		self._obsstate["time"] = -1
+		self._predictedstate["x"] = sym.Matrix([0, 0, 0, 0, 0, 0])
+		self._predictedstate["covariance"] = sym.Matrix(sym.Identity(6)*1000)
+		self._predictedstate["time"] = -1
 	
-		self._predictedstate = copy(self._obsstate)
 		self._state = copy(self._predictedstate)
-	
-	#self-iPython rese
+		
+		# To landmark
+		self.__A = sym.Matrix([
+				[1, 0, self.__t, 0, 0.5*self.__t**2, 0],
+				[0, 1, 0, self.__t, 0, 0.5*self.__t**2],
+				[0, 0, 1, 0, self.__t, 0],
+				[0, 0, 0, 1, 0, self.__t],
+				[0, 0, 0, 0, 1, 0],
+				[0, 0, 0, 0, -1, 0],
+			])
 	
 	## Constructor Class
 	def __init__(self, s):
