@@ -19,6 +19,7 @@ class classConfig():
 		self.SERVO_PAN_VALUE = None
 		
 		self.max_count_lost_frame = None
+		self.max_count_lost_frame_far_ball = None
 		self.head_up = None
 		self.cut_edge_image = None
 
@@ -65,6 +66,7 @@ class classConfig():
 				self.white_threshould = 	self.Config.getint('Basic Settings', 'white_threshould')
 
 				self.max_count_lost_frame =   self.Config.getint('Basic Settings', 'max_count_lost_frame')
+				self.max_count_lost_frame_far_ball =   self.Config.getint('Basic Settings', 'max_count_lost_frame_far_ball')
 				self.head_up = self.Config.getint('Basic Settings', 'head_up')
 				self.cut_edge_image = self.Config.getint('Basic Settings', 'cut_edge_image')
 
@@ -108,6 +110,7 @@ class classConfig():
 				self.Config.set('Basic Settings', 'white_threshould'        , str(200)+'\t;Threshould')
 
 				self.Config.set('Basic Settings', 'max_count_lost_frame'        , str(10)+'\t;Threshould')
+				self.Config.set('Basic Settings', 'max_count_lost_frame_far_ball'        , str(30)+'\t;Quanto que o robo espera apos achar a bola de longe')
 				self.Config.set('Basic Settings', 'head_up'        , str(70)+'\t;Quanto que a cabeca sobe quando bola esta acima')
 				self.Config.set('Basic Settings', 'cut_edge_image'        , str(150)+'\t;Corta as bordas pretas da imagem')
 
