@@ -195,7 +195,7 @@ if __name__ == '__main__':
         cap.set(3,1280) #720 1280 1920
         cap.set(4,720) #480 720 1080
 	os.system("v4l2-ctl -d /dev/video0 -c focus_auto=0 && v4l2-ctl -d /dev/video0 -c focus_absolute=0")
-	os.system("v4l2-ctl -d /dev/video0 -c saturation=200")
+	os.system("v4l2-ctl -d /dev/video0 -c saturation=255")
 
 	cut_right = 1280-config.cut_edge_image
 
