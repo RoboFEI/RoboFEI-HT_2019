@@ -152,17 +152,17 @@ class objectDetect():
         mask = cv2.morphologyEx(mask, cv2.MORPH_DILATE, kernel2,1)
         
     # Se a morfologia de perto k =1, recorta a parte de cima
-    #    if k ==1:
-    #        mask[0:200,:]=0
+        if k ==1:
+            mask[0:50,:]=0
     # Se a morfologia medio k =2, recorta a parte de baixo
-    #    if k ==2:
-    #        mask[650:,:]=0
+        if k ==2:
+            mask[650:,:]=0
     # Se a morfologia de longe k =3, recorta a parte de baixo
-    #    if k ==3:
-    #        mask[450:,:]=0
+        if k ==3:
+            mask[450:,:]=0
     # Se a morfologia de muito longe k = 4, recorta a parte de baixo
-    #    if k ==4:
-    #        mask[350:,:]=0
+        if k ==4:
+            mask[350:,:]=0
 
 
         ret,th1 = cv2.threshold(mask,25,255,cv2.THRESH_BINARY)
