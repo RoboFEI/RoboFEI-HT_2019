@@ -104,6 +104,7 @@ class ballStatus():
 		if (y < self.config.y_longe):
 			bkb.write_float(Mem,'VISION_TILT_DEG', 70) # Variavel da telemetria
 			print ("Bola acima")
+			self.config.max_count_lost_frame
 		#Bola ao centro
 		if (y < self.config.y_chute and y > self.config.y_longe):
 			bkb.write_float(Mem,'VISION_TILT_DEG', 45) # Variavel da telemetria

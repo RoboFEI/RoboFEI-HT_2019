@@ -112,6 +112,8 @@ class objectDetect():
                     self.servo.writeWord(self.config.SERVO_TILT_ID,30, self.config.POSITION_SERVO_TILT + self.config.head_up)
                 if y>self.config.when_ball_down:
                     self.servo.writeWord(self.config.SERVO_TILT_ID, 30, self.config.POSITION_SERVO_TILT)
+                    self.config.max_count_lost_frame -= self.config.max_count_lost_frame_far_ball
+
 
         return frame, x, y, raio, BallFound, self.status
 
