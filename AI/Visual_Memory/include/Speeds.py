@@ -130,6 +130,7 @@ class Speeds( ):
 			[omegar, self.__movementslist[vector[0]]["speed"][2]]
 		])
 	
+		# Calculating matrix U
 		self.__movementslist[vector[0]]["U"] = self.__u.subs([
 			[vr_x, self.__movementslist[vector[0]]["speed"][0]],
 			[vr_y, self.__movementslist[vector[0]]["speed"][1]],
