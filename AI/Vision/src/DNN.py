@@ -133,9 +133,13 @@ class objectDetect():
             if self.Count == 2:
                 self.servo.writeWord(self.config.SERVO_PAN_ID,30, self.config.CENTER_SERVO_PAN + self.config.SERVO_PAN_RIGHT)#olha para a direita 850- 440
                 time.sleep(1)
-                self.Count = 0
+                self.Count +=1
                 return 2
-
+            if self.Count == 3:
+                self.servo.writeWord(self.config.SERVO_PAN_ID,30, self.config.CENTER_SERVO_PAN)#olha pro centro
+                time.sleep(1)
+                self.Count = 0
+                return 1
 
 
     def Morphology(self, frame, white_mask, kernel, kernel2, k):
