@@ -107,10 +107,10 @@ class objectDetect():
         if (x!=0 and y!=0 and raio!=0):
             BallFound = True
             print('y ',y, 'x ',x ,'ball_up', self.config.when_ball_up, self.config.SERVO_TILT_ID, self.config.when_ball_down)
-            if y<self.config.when_ball_up:
-                self.servo.writeWord(self.config.SERVO_TILT_ID,30, self.config.POSITION_SERVO_TILT + self.config.head_up)
-            if y>self.config.when_ball_down:
-                if not self.withoutservo:
+            if not self.withoutservo:
+                if y<self.config.when_ball_up:
+                    self.servo.writeWord(self.config.SERVO_TILT_ID,30, self.config.POSITION_SERVO_TILT + self.config.head_up)
+                if y>self.config.when_ball_down:
                     self.servo.writeWord(self.config.SERVO_TILT_ID, 30, self.config.POSITION_SERVO_TILT)
 
         return frame, x, y, raio, BallFound, self.status
@@ -144,25 +144,30 @@ class objectDetect():
         contador = 0
     #   variavel com imagen completa
         frametemp = white_mask
-    #   corte do frame parte de cima 
-        if k == 1:
-            white_mask =white_mask[700:,:]
+
+        if k ==1 or k==4:
     #    cv2.imshow('mask',white_mask)
-        mask = cv2.morphologyEx(white_mask, cv2.MORPH_OPEN, kernel)
-        mask = cv2.morphologyEx(mask, cv2.MORPH_DILATE, kernel2,1)
+            mask = cv2.morphologyEx(white_mask, cv2.MORPH_DILATE, kernel2,1)
+            mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+            mask = cv2.morphologyEx(mask, cv2.MORPH_DILATE, kernel2,1)
+        else:
+            mask = cv2.morphologyEx(white_mask, cv2.MORPH_DILATE, kernel2,1)
+            mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+
         
     # Se a morfologia de perto k =1, recorta a parte de cima
         if k ==1:
-            mask[0:200,:]=0
+            mask[0:300,:]=0
     # Se a morfologia medio k =2, recorta a parte de baixo
         if k ==2:
-            mask[650:,:]=0
+            mask[0:170,:]=0
+            mask[530:,:]=0
     # Se a morfologia de longe k =3, recorta a parte de baixo
         if k ==3:
-            mask[450:,:]=0
+            mask[350:,:]=0
     # Se a morfologia de muito longe k = 4, recorta a parte de baixo
         if k ==4:
-            mask[350:,:]=0
+            mask[300:,:]=0
 
 
         ret,th1 = cv2.threshold(mask,25,255,cv2.THRESH_BINARY)
