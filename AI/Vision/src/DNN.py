@@ -185,7 +185,7 @@ class objectDetect():
     #            print results, type_label
         #       cv2.imshow('janela',images[0])
             if type_label == 'Ball':
-#                cv2.imwrite("./frames_extracted_by_DNN/"+str(rd.random()) +"image.png", cv2.cvtColor(frame[y:y+h,x:x+w], cv2.COLOR_BGR2RGB))
+#                cv2.imwrite("/home/fei/Documents/frames_extracted_by_DNN/"+str(rd.random()) +"image.png", frame[y:y+h,x:x+w])
 
                 return frame, x+w/2, y+h/2, (w+h)/4, mask
             #=================================================================================================
