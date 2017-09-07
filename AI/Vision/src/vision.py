@@ -134,7 +134,7 @@ def thread_DNN():
 			ballS.BallStatus(x,y,status)
 		if args2.visionball:
 			cv2.circle(frame_b, (x, y), raio, (0, 255, 0), 4)
-			cv2.imshow('frame',frame_b)
+			cv2.imshow('frame', cv2.resize(frame_b, (720, 480)))
 #===============================================================================
 #		print "tempo de varredura = ", time.time() - start
 		if cv2.waitKey(1) & 0xFF == ord('q'):
