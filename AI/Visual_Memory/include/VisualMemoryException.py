@@ -5,17 +5,14 @@
 class VisualMemoryException(Exception):
 	
 	## Constructor Class
+	# Displays the error message.
 	def __init__(self, numbererror, message):
 		self.numbererror = numbererror
-		if numbererror == 5:
-			print 'Solicitação encerramento de processo pela thread', message
+		if numbererror == 5: # Request to terminate processes by one of the threads.
+			print 'Request process termination by thread', message
 			return
-		print 'Vision System Error:', 
-		if numbererror == 0:
+		print 'Vision Memory System Error:',
+		if numbererror == 0: # Generic error messages
 			print message
-		elif numbererror == 1:
-			print 'No connected cameras found'
-		elif numbererror == 2:
-			print 'Unable to connect to port'
-		elif numbererror == 3:
+		elif numbererror == 3: # Detecting external kill
 			print 'Process kill command detected'

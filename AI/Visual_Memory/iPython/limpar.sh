@@ -34,7 +34,7 @@ then
 	exit
 fi
 
-echo -e "${Blue}Apagando arquivos python${NC}"
+echo -e "${Blue}Apagando arquivos temporarios${NC}"
 sleep 1
 if !( find -iname "*~" -exec rm {} \; )
 then

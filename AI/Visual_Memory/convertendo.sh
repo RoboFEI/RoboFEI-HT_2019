@@ -19,13 +19,13 @@ NC='\e[0m' # No Color
 cd iPython/
 ./convertendo.sh
 
-echo -e "${Blue}Movendo arquivos${NC}"
-sleep 1
-if !( mv visualMemory.py ../visualMemory.py ) then
-	echo -e "${Light_Red}"
-	read -p "Erro, precione qualquer tecla para finalizar"
-	exit
-fi
+# echo -e "${Blue}Movendo arquivos${NC}"
+# sleep 1
+# if !( mv visualMemory.py ../visualMemory.py ) then
+# 	echo -e "${Light_Red}"
+# 	read -p "Erro, precione qualquer tecla para finalizar"
+# 	exit
+# fi
 
 if !( mkdir ../src/ )
 then
@@ -34,12 +34,12 @@ then
 	exit
 fi
 
-if !( mv MainFunctions.py ../src/MainFunctions.py )
-then
-	echo -e "${Light_Red}"
-	read -p "Erro, precione qualquer tecla para finalizar"
-	exit
-fi
+# if !( mv MainFunctions.py ../src/MainFunctions.py )
+# then
+# 	echo -e "${Light_Red}"
+# 	read -p "Erro, precione qualquer tecla para finalizar"
+# 	exit
+# fi
 
 if !( mkdir ../include/ )
 then

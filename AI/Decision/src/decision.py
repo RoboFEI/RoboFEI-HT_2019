@@ -15,14 +15,14 @@
 #  Program to execute the Decision process
 #  ****************************************************************************
 
-#import parser for arguments    
+#import parser for arguments
 import argparse
 
 from behavior import *
 
 print
 print '################### Decision #########################'
-print 
+print
 
 #create arguments for each behavior
 parser = argparse.ArgumentParser(description='Robot behavior', epilog= 'If there is not a selected argument an ordinary behavior will be adopted!')
@@ -37,50 +37,6 @@ parser.add_argument('--localize', '-l', action="store_true", help = 'selects dec
 
 args = parser.parse_args()
 
-#Golie decision:
-if args.golie == True:
-    robot = Golie()
-    
-#Quarterback decicion:    
-elif args.quarterback == True:
-    robot = Quarterback()
-    
-#Attacker decision:    
-elif args.attacker == True:
-    robot = Attacker()
+robot = Ordinary()
 
-#Naive decision:
-elif args.naive == True:
-    robot = Naive()
-
-# Naive decision with orientation:
-elif args.naive_imu == True:
-    robot = NaiveIMU()
-    
-# Naive decision with orientation:
-elif args.naive_imu_dec_turning == True:
-    robot = NaiveIMUDecTurning()
-
-# Decision with Localization:
-elif args.localize == True:
-    robot = LocaLoca()
-
-#Ordinary decision:
-else:
-    robot = Ordinary()
-
-
-#loop
-while True:
-
-    if robot.get_referee_usage() == 'yes':
-        robot.decision(robot.get_referee()) #will read the referee 
-    else:
-        robot.decision(2) #always on play
-
-    robot.bkb.write_int(robot.mem, 'DECISION_WORKING', 1)
-
-    time.sleep(0.05) 
-    
-    
-    
+robot.run()

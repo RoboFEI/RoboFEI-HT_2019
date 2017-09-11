@@ -4,8 +4,8 @@
 
 # Libraries to be used.
 import sys
-sys.path.append('../include')
-sys.path.append('../src')
+sys.path.append("../include")
+sys.path.append("../src")
 
 # The standard libraries used in the vision system.
 import configparser # Used to read ini files
@@ -15,76 +15,88 @@ from VisualMemoryException import * # Used to handle exceptions
 
 ## Class to config ini
 # Class used to read the ini file from the view.
-class ConfigIni( ):
+class ConfigIni(object):
+	
+	# ---- Variables ----
+	
+	## Address
+	# Path of the config.ini file.
+	__address = "./Data/config.ini"
 	
 	## Dictionary
-	# Section used.
+	# Dictionary to be used.
 	__dictionary = None
 	
 	## myobject
+	# Class requesting variable reading.
 	__myobject = None
 	
 	## function
+	# Function that requests the reading of variables.
 	__function = None
 	
 	## __conf
+	# Variable for instantiation of the configparser responsible for reading ini files.
 	__conf = None
 	
 	## Constructor Class
 	def __init__(self, obj, func):
+		# Instantiating class variables.
 		self.__myobject = obj
 		self.__function = func
 		self.__conf = configparser.RawConfigParser()
-		if self.__conf.read("./Data/config.ini") is not [] and (self.__myobject + " " + self.__function).upper() in self.__conf.sections():
-			self.__dictionary = {}
-			for key in self.__conf[(self.__myobject + " " + self.__function).upper()].keys():
-				try:
-					self.__dictionary[str(key)] = self.__conf.getint((self.__myobject + " " + self.__function).upper(), str(key))
-					continue
-				except:
-					pass
 		
-				try:
-					self.__dictionary[str(key)] = self.__conf.getfloat((self.__myobject + " " + self.__function).upper(), str(key))
-					continue
-				except:
-					pass
-		
-				try:
-					self.__dictionary[str(key)] = self.__conf.getboolean((self.__myobject + " " + self.__function).upper(), str(key))
-					continue
-				except:
-					pass
-		
-				try:
-					self.__dictionary[str(key)] = self.__conf.get((self.__myobject + " " + self.__function).upper(), str(key))
-					continue
-				except:
-					pass
+		# Checking file existence
+		if self.__conf.read(self.__address) is []:
+			print "Config.ini file not found!"
+			
+		# Checking section existence
+		if (self.__myobject + " - " + self.__function).upper() in self.__conf.sections():
+			return
 		else:
-			self.__dictionary = -1
+			print (self.__myobject + " - " + self.__function).upper(), "section not found!"
 		
-	## read
-	def read(self, base):
-		# Data not found
-		if self.__dictionary == -1:
-			self.__dictionary = base
-			return base
+	## readVariables
+	# Function used to instantiate the dictionary that was used and update it with the config variables.
+	# @ param base Used dictionary.
+	def readVariables(self, base):
+		self.__dictionary = base # Saving class dictionary.
 		
-		# Updating data
-		for k in self.__dictionary.keys():
-			base[k] = self.__dictionary[k]
+		# Checking section existence
+		if (self.__myobject + " - " + self.__function).upper() in self.__conf.sections():
+			# Completing/Overwriting dictionary values.
+			for key in self.__conf[(self.__myobject + " - " + self.__function).upper()].keys():
+				try: # Reading int
+					self.__dictionary[str(key)] = self.__conf.getint((self.__myobject + " - " + self.__function).upper(), str(key))
+					continue
+				except ValueError:
+					pass
+	
+				try: # Reading float
+					self.__dictionary[str(key)] = self.__conf.getfloat((self.__myobject + " - " + self.__function).upper(), str(key))
+					continue
+				except ValueError:
+					pass
+	
+				try: # Reading bool
+					self.__dictionary[str(key)] = self.__conf.getboolean((self.__myobject + " - " + self.__function).upper(), str(key))
+					continue
+				except ValueError:
+					pass
+	
+				try: # Reading string
+					self.__dictionary[str(key)] = self.__conf.get((self.__myobject + " - " + self.__function).upper(), str(key))
+					continue
+				except ValueError:
+					pass
 		
-		# Updating and returning
-		self.__dictionary = base
 		return self.__dictionary
 	
-	## finalize
-	def finalize(self, dictionary):
-		self.__dictionary = dictionary # Saving dictionary in class
-		
-		self.__conf.read("./Data/config.ini")
+	## end
+	# Responsible for saving the changes in config file.
+	def end(self):
+		self.__conf.read(self.__address)
 			
-		with open('./Data/config.ini', 'wb') as configfile:
-			self.__conf[(self.__myobject + " " + self.__function).upper()] = self.__dictionary
+		with open(self.__address, "wb") as configfile:
+			self.__conf[(self.__myobject + " - " + self.__function).upper()] = self.__dictionary
 			self.__conf.write(configfile)
