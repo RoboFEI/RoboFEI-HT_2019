@@ -41,6 +41,5 @@ class Basic(object):
 		
 	## _end
 	# Finishing classes.
-	@abstractmethod
 	def _end(self):
 		self._conf.end( )

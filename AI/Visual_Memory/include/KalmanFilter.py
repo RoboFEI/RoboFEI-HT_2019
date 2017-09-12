@@ -151,7 +151,7 @@ class KalmanFilter(Basic):
 	
 	## __predictTime
 	# Uses a current instant in time and updates the observation and the current state.
-	def __predictTime(self, time = None, movements = None):
+	def __predictTime(self, tnow = None, movements = None):
 		# Calculating states
 		self._predictedstate["x"] = (
 			self._A*self._predictedstate["x"] # A * x
