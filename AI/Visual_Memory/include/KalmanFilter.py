@@ -61,15 +61,15 @@ class KalmanFilter(Basic):
 			])
 	
 		self._B = sym.Matrix([
-				[-self._t, 0, self._p_x, self._p_y],
-				[0, -self._t, self._p_y, -self._p_x],
-				[0, 0, self._v_x, self._v_y],
-				[0, 0, self._v_y, -self._v_x],
-				[0, 0, self._a_x, self._a_y],
-				[0, 0, self._a_y, -self._a_x],
+				[-self._t, 0, self._p_x, self._p_y, 0],
+				[0, -self._t, self._p_y, -self._p_x, 0],
+				[0, 0, self._v_x, self._v_y, 0],
+				[0, 0, self._v_y, -self._v_x, 0],
+				[0, 0, self._a_x, self._a_y, 0],
+				[0, 0, self._a_y, -self._a_x, 0],
 			])
 	
-		self._R = sym.Matrix(sym.Identity(6)*self._parameters["motion_error"])
+		self._R = sym.Identity(6)
 	
 		self._C = sym.Matrix([
 				[1, 0, 0, 0, 0, 0],
@@ -91,12 +91,12 @@ class KalmanFilter(Basic):
 	def __init__(self, s, obj):
 		
 		# Instantiating parent class
-		super(KalmanFilter,self)._init_("Kalman Filter", obj)
+		super(KalmanFilter,self).__init__("Kalman Filter", obj)
 		
 		# Creating standard parameters and reading
 		self._parameters = {
-			"motion_error": 1,
 			"vision_error": 1,
+			"zero": 1e-1,
 		}
 		
 		self._parameters = self._conf.readVariables(self._parameters)
@@ -111,13 +111,14 @@ class KalmanFilter(Basic):
 		self._v_x, self._v_y = sym.symbols("v_x, v_y")
 		self._a_x, self._a_y = sym.symbols("a_x, a_y")
 		
-		self._reset()
-		
 	## __predictNow
 	# Performs the prediction using the current instant in time to determine the new state.
-	def __predictNow(self, time = None, movements = None):
-		# Time that will be used for calculation
-		tnow = time.time()
+	def __predictNow(self, tnow = None, movements = None):
+		if self._state["time"] != -1: # Checking if you can hear at least one measurement.
+			# Time that will be used for calculation
+			tnow = time.time()
+		else:
+			tnow = -1
 	
 		# Calculating states
 		self._state["x"] = (
@@ -146,12 +147,26 @@ class KalmanFilter(Basic):
 		).subs([
 			[self._t, tnow - self._state["time"]],
 		])
+		
+		self._state["x"] = sym.Matrix(self._state["x"])
+		for x in xrange(2,len(self._state["x"])):
+			if abs(self._state["x"][x]) < self._parameters["zero"]:
+				self._state["x"][x] = 0
+			if (x == 2 or x == 3) and self._state["x"][x] == 0:
+				self._state["x"][x+2] = 0
 	
 		self._state["time"] = tnow
 	
 	## __predictTime
 	# Uses a current instant in time and updates the observation and the current state.
 	def __predictTime(self, tnow = None, movements = None):
+		
+		if self._predictedstate["time"] == -1: # Checking if you can hear at least one measurement.
+			self._predictedstate["time"] = tnow
+			
+		times = [tnow, -self._predictedstate["x"][2]/self._predictedstate["x"][4], -self._predictedstate["x"][3]/self._predictedstate["x"][5]]
+		if tnow > min([n for n in times if n>0]):
+			
 		# Calculating states
 		self._predictedstate["x"] = (
 			self._A*self._predictedstate["x"] # A * x
@@ -175,10 +190,15 @@ class KalmanFilter(Basic):
 	
 		# Calculating covariance
 		self._predictedstate["covariance"] = (
-			self._A*self._predictedstate["covariance"]*sym.transpose(self._A) + self._R # A * covariance * A.T + R
+			self._A*self._predictedstate["covariance"]*sym.transpose(self._A) + self._R*self._speeds[movements]["R"] # A * covariance * A.T + R
 		).subs([
 			[self._t, tnow - self._predictedstate["time"]],
 		])
+		
+		self._predictedstate["x"] = sym.Matrix(self._predictedstate["x"])
+		for x in xrange(2,3):
+			if self._predictedstate["x"][x] == 0:
+				self._predictedstate["x"][x+2] = 0
 	
 		self._predictedstate["time"] = tnow
 		
@@ -196,7 +216,7 @@ class KalmanFilter(Basic):
 	# .
 	def update(self, data):
 		# Predicting value in observation time.
-		self.predict(data["time"], 0)
+		self.predict(data["time"], data["movement"])
 		
 		k = self._predictedstate["covariance"] * sym.transpose(self._C) * sym.inv_quick( # covariance*C.T*(_)^(-1)
 			self._C * self._predictedstate["covariance"] * sym.transpose(self._C) + self._Q # C*covariance*C.T + Q
@@ -206,5 +226,12 @@ class KalmanFilter(Basic):
 		
 		self._predictedstate["x"] = self._predictedstate["x"] + k*(z - self._C*self._predictedstate["x"])
 		self._predictedstate["covariance"] = (sym.Matrix(sym.Identity(6)) - k*self._C) * self._predictedstate["covariance"]
+		
+		self._predictedstate["x"] = sym.Matrix(self._predictedstate["x"])
+		for x in xrange(2,len(self._predictedstate["x"])):
+			if abs(self._predictedstate["x"][x]) < self._parameters["zero"]:
+				self._predictedstate["x"][x] = 0
+			if (x == 2 or x == 3) and self._predictedstate["x"][x] == 0:
+				self._predictedstate["x"][x+2] = 0
 		
 		self._state = copy(self._predictedstate)

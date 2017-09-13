@@ -52,6 +52,7 @@ class Speeds( ):
 				[0], # vr_y
 				[1], # cos(ωr*t)
 				[0], # sin(ωr*t)
+				[1], # constant
 			]),
 		
 			"R": sym.Matrix(sym.Identity(6)*0)
@@ -70,6 +71,7 @@ class Speeds( ):
 			[vr_y],
 			[sym.cos(omegar*__t)],
 			[sym.sin(omegar*__t)],
+			[1],
 		])
 		
 		self.__R = sym.Matrix(sym.Identity(6)*1000)
@@ -101,6 +103,7 @@ class Speeds( ):
 						[0], # vr_y
 						[1], # cos(ωr*t)
 						[0], # sin(ωr*t)
+						[1],
 					]),
 	
 					"R": copy(self.__R)
@@ -142,4 +145,30 @@ class Speeds( ):
 	# @param x Vector position to be accessed.
 	# @return Returns the dictionary that will be used.
 	def __getitem__(self, x):
+		if x + 1 > len(self.__movementslist):
+			while x + 1 > len(self.__movementslist):
+				self.__movementslist.append({
+					"speed": sym.Matrix([
+						[0], # speed in x (vr_x)
+						[0], # speed in y (vr_y)
+						[0], # angular velocity (ωr)
+					]),
+	
+					"x_speed": sym.Matrix([
+						[0], # v_x
+						[0], # v_y
+						[0], # a_x
+						[0], # a_y
+					]),
+	
+					"U": sym.Matrix([
+						[0], # vr_x
+						[0], # vr_y
+						[1], # cos(ωr*t)
+						[0], # sin(ωr*t)
+						[1],
+					]),
+	
+					"R": copy(self.__R)
+				})
 		return self.__movementslist[x]
