@@ -46,7 +46,7 @@ class KalmanFilter(Basic):
     _A = None; _B = None; _R = None; _C = None; _Q = None
     
     # _Status variables.
-    _p_x = None; _p_y = None; _v_x = None; _v_y = None; _a_x = None; _a_y = None; _b_x = None; _b_y = None
+    _px = None; _py = None; _vx = None; _vy = None; _ax = None; _ay = None; _b_x = None; _b_y = None
     
     # _Support variables.
     _sin = None; _cos = None
@@ -64,12 +64,12 @@ class KalmanFilter(Basic):
             ])
     
         self._B = sym.Matrix([
-            [-self._t, 0, -0.5*self._t**2, 0, self._p_x],
-            [0, -self._t, 0, -0.5*self._t**2, self._p_y],
-            [0, 0, 0, 0, self._v_x - self._v_x*(1-self._cos) - self._v_y*self._sin],
-            [0, 0, 0, 0, self._v_y - self._v_y*(1-self._cos) + self._v_x*self._sin],
-            [0, 0, 0, 0, self._a_x - self._a_x*(1-self._cos) - self._a_y*self._sin],
-            [0, 0, 0, 0, self._a_y - self._a_y*(1-self._cos) + self._a_x*self._sin],
+            [-self._t, 0, -0.5*self._t**2, 0, self._px],
+            [0, -self._t, 0, -0.5*self._t**2, self._py],
+            [0, 0, 0, 0, self._vx - self._vx*(1-self._cos) - self._vy*self._sin],
+            [0, 0, 0, 0, self._vy - self._vy*(1-self._cos) + self._vx*self._sin],
+            [0, 0, 0, 0, self._ax - self._ax*(1-self._cos) - self._ay*self._sin],
+            [0, 0, 0, 0, self._ay - self._ay*(1-self._cos) + self._ax*self._sin],
         ])
     
         self._R = sym.Matrix(sym.Identity(6))
@@ -99,6 +99,7 @@ class KalmanFilter(Basic):
         # Creating standard parameters and reading
         self._parameters = {
             "vision_error": 0.1,
+            "linear_acceleration": False,
         }
         
         self._parameters = self._conf.readVariables(self._parameters)
@@ -109,9 +110,9 @@ class KalmanFilter(Basic):
         self._t = sym.symbols("t") # Declaring variable time
         
         # _Status variables
-        self._p_x, self._p_y = sym.symbols("p_x, p_y")
-        self._v_x, self._v_y = sym.symbols("v_x, v_y")
-        self._a_x, self._a_y = sym.symbols("a_x, a_y")
+        self._px, self._py = sym.symbols("p_x p_y")
+        self._vx, self._vy = sym.symbols("v_x v_y")
+        self._ax, self._ay = sym.symbols("a_x a_y")
         
         # _Sine and cosine variables
         self._cos, self._sin = sym.symbols("C S")
@@ -122,27 +123,28 @@ class KalmanFilter(Basic):
         
         # Checking if you can hear at least one measurement.
         if self._state["time"] == -1:
-            self._state["time"] = tnow
+            return
             
         #--------------------------------------------------------------------------------------------------
         
         # Calculating stop time (speed equal to zero)
-        times = [tnow]
-        for i in xrange(2,4):
-            a = -self._state["x"][i]/self._state["x"][i+2]
-            if a == sym.nan or a == sym.zoo or a < 0 :
-                times.append(tnow)
-            else:
-                times.append(float(self._state["time"] + a))
-        while tnow > min([n for n in times if n>=0]):
-            self.__predictNow(tnow=min([n for n in times if n>0]), movements=movements)
+        if self._parameters["linear_acceleration"] == False:
             times = [tnow]
             for i in xrange(2,4):
                 a = -self._state["x"][i]/self._state["x"][i+2]
-                if a == sym.nan or a == sym.zoo:
+                if a == sym.nan or a == sym.zoo or a < 0 :
                     times.append(tnow)
                 else:
                     times.append(float(self._state["time"] + a))
+            while tnow > min([n for n in times if n>=0]):
+                self.__predictNow(tnow=min([n for n in times if n>0]), movements=movements)
+                times = [tnow]
+                for i in xrange(2,4):
+                    a = -self._state["x"][i]/self._state["x"][i+2]
+                    if a == sym.nan or a == sym.zoo:
+                        times.append(tnow)
+                    else:
+                        times.append(float(self._state["time"] + a))
             
         #--------------------------------------------------------------------------------------------------
         
@@ -159,18 +161,18 @@ class KalmanFilter(Basic):
                 self._B*self._speeds[movements]["x_speed"] # B * U
             ).subs([        
                 # Auxiliary variables
-                [self._cos, sym.cos(sym.atan2(0.5*self._speeds[movements]["x_speed"][3]*__t**2, 0.5*self._speeds[movements]["x_speed"][2]*__t**2))],
-                [self._sin, sym.sin(sym.atan2(0.5*self._speeds[movements]["x_speed"][3]*__t**2, 0.5*self._speeds[movements]["x_speed"][2]*__t**2))],
+                [self._cos, sym.cos(sym.atan2(0.5*self._speeds[movements]["x_speed"][3]*self._t**2, 0.5*self._speeds[movements]["x_speed"][2]*self._t**2))],
+                [self._sin, sym.sin(sym.atan2(0.5*self._speeds[movements]["x_speed"][3]*self._t**2, 0.5*self._speeds[movements]["x_speed"][2]*self._t**2))],
     
                 [self._t, tnow - self._state["time"]], # Inserting delta time
     
                 # State Variables
-                [self._p_x, self._state["x"][0]],
-                [self._p_y, self._state["x"][1]],
-                [self._v_x, self._state["x"][2]],
-                [self._v_y, self._state["x"][3]],
-                [self._a_x, self._state["x"][4]],
-                [self._a_y, self._state["x"][5]],
+                [self._px, self._state["x"][0]],
+                [self._py, self._state["x"][1]],
+                [self._vx, self._state["x"][2]],
+                [self._vy, self._state["x"][3]],
+                [self._ax, self._state["x"][4]],
+                [self._ay, self._state["x"][5]],
             ])
         else:
             self._state["x"] = (
@@ -183,12 +185,12 @@ class KalmanFilter(Basic):
                 [self._t, tnow - self._state["time"]], # Inserting delta time
     
                 # State Variables
-                [self._p_x, self._state["x"][0]],
-                [self._p_y, self._state["x"][1]],
-                [self._v_x, self._state["x"][2]],
-                [self._v_y, self._state["x"][3]],
-                [self._a_x, self._state["x"][4]],
-                [self._a_y, self._state["x"][5]],
+                [self._px, self._state["x"][0]],
+                [self._py, self._state["x"][1]],
+                [self._vx, self._state["x"][2]],
+                [self._vy, self._state["x"][3]],
+                [self._ax, self._state["x"][4]],
+                [self._ay, self._state["x"][5]],
             ])
     
         #--------------------------------------------------------------------------------------------------
@@ -211,9 +213,10 @@ class KalmanFilter(Basic):
         #--------------------------------------------------------------------------------------------------
         
         # Resetting acceleration if velocity is zero.
-        for x in xrange(2, len(self._state["x"]) - 2):
-            if abs(self._state["x"][x]) == 0.0:
-                self._state["x"][x+2] = 0.0
+        if self._parameters["linear_acceleration"] == False:
+            for x in xrange(2, len(self._state["x"]) - 2):
+                if abs(self._state["x"][x]) == 0.0:
+                    self._state["x"][x+2] = 0.0
         
         self._state["time"] = tnow
     
@@ -228,22 +231,23 @@ class KalmanFilter(Basic):
         #--------------------------------------------------------------------------------------------------
         
         # Calculating stop time (speed equal to zero)
-        times = [tnow]
-        for i in xrange(2,4):
-            a = -self._predictedstate["x"][i]/self._predictedstate["x"][i+2]
-            if a == sym.nan or a == sym.zoo or a < 0 :
-                times.append(tnow)
-            else:
-                times.append(float(self._predictedstate["time"] + a))
-        while tnow > min([n for n in times if n>=0]):
-            self.__predictTime(tnow=min([n for n in times if n>0]), movements=movements)
+        if self._parameters["linear_acceleration"] == False:
             times = [tnow]
             for i in xrange(2,4):
                 a = -self._predictedstate["x"][i]/self._predictedstate["x"][i+2]
-                if a == sym.nan or a == sym.zoo:
+                if a == sym.nan or a == sym.zoo or a < 0 :
                     times.append(tnow)
                 else:
                     times.append(float(self._predictedstate["time"] + a))
+            while tnow > min([n for n in times if n>=0]):
+                self.__predictTime(tnow=min([n for n in times if n>0]), movements=movements)
+                times = [tnow]
+                for i in xrange(2,4):
+                    a = -self._predictedstate["x"][i]/self._predictedstate["x"][i+2]
+                    if a == sym.nan or a == sym.zoo:
+                        times.append(tnow)
+                    else:
+                        times.append(float(self._predictedstate["time"] + a))
             
         #--------------------------------------------------------------------------------------------------
         
@@ -260,18 +264,18 @@ class KalmanFilter(Basic):
                 self._B*self._speeds[movements]["x_speed"] # B * U
             ).subs([        
                 # Auxiliary variables
-                [self._cos, sym.cos(sym.atan2(0.5*self._speeds[movements]["x_speed"][3]*__t**2, 0.5*self._speeds[movements]["x_speed"][2]*__t**2))],
-                [self._sin, sym.sin(sym.atan2(0.5*self._speeds[movements]["x_speed"][3]*__t**2, 0.5*self._speeds[movements]["x_speed"][2]*__t**2))],
+                [self._cos, sym.cos(sym.atan2(0.5*self._speeds[movements]["x_speed"][3]*self._t**2, 0.5*self._speeds[movements]["x_speed"][2]*self._t**2))],
+                [self._sin, sym.sin(sym.atan2(0.5*self._speeds[movements]["x_speed"][3]*self._t**2, 0.5*self._speeds[movements]["x_speed"][2]*self._t**2))],
     
                 [self._t, tnow - self._predictedstate["time"]], # Inserting delta time
     
                 # State Variables
-                [self._p_x, self._predictedstate["x"][0]],
-                [self._p_y, self._predictedstate["x"][1]],
-                [self._v_x, self._predictedstate["x"][2]],
-                [self._v_y, self._predictedstate["x"][3]],
-                [self._a_x, self._predictedstate["x"][4]],
-                [self._a_y, self._predictedstate["x"][5]],
+                [self._px, self._predictedstate["x"][0]],
+                [self._py, self._predictedstate["x"][1]],
+                [self._vx, self._predictedstate["x"][2]],
+                [self._vy, self._predictedstate["x"][3]],
+                [self._ax, self._predictedstate["x"][4]],
+                [self._ay, self._predictedstate["x"][5]],
             ])
         else:
             self._predictedstate["x"] = (
@@ -284,12 +288,12 @@ class KalmanFilter(Basic):
                 [self._t, tnow - self._predictedstate["time"]], # Inserting delta time
     
                 # State Variables
-                [self._p_x, self._predictedstate["x"][0]],
-                [self._p_y, self._predictedstate["x"][1]],
-                [self._v_x, self._predictedstate["x"][2]],
-                [self._v_y, self._predictedstate["x"][3]],
-                [self._a_x, self._predictedstate["x"][4]],
-                [self._a_y, self._predictedstate["x"][5]],
+                [self._px, self._predictedstate["x"][0]],
+                [self._py, self._predictedstate["x"][1]],
+                [self._vx, self._predictedstate["x"][2]],
+                [self._vy, self._predictedstate["x"][3]],
+                [self._ax, self._predictedstate["x"][4]],
+                [self._ay, self._predictedstate["x"][5]],
             ])
     
         #--------------------------------------------------------------------------------------------------
@@ -312,9 +316,10 @@ class KalmanFilter(Basic):
         #--------------------------------------------------------------------------------------------------
         
         # Resetting acceleration if velocity is zero.
-        for x in xrange(2, len(self._predictedstate["x"]) - 2):
-            if abs(self._predictedstate["x"][x]) == 0.0:
-                self._predictedstate["x"][x+2] = 0.0
+        if self._parameters["linear_acceleration"] == False:
+            for x in xrange(2, len(self._predictedstate["x"]) - 2):
+                if abs(self._predictedstate["x"][x]) == 0.0:
+                    self._predictedstate["x"][x+2] = 0.0
         
         self._predictedstate["time"] = tnow
         

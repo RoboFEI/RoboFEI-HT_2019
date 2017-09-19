@@ -4,8 +4,8 @@
 
 # Libraries to be used.
 import sys
-sys.path.append('../include')
-sys.path.append('../src')
+sys.path.append("../include")
+sys.path.append("../src")
 
 # The standard libraries used in the visual memory system.
 
@@ -24,12 +24,12 @@ class Landmark(KalmanFilter):
         super(Landmark, self)._reset( )
         
         self._B = sym.Matrix([
-            [0, 0, 0, 0, self._p_x],
-            [0, 0, 0, 0, self._p_y],
-            [0, 0, 0, 0, self._v_x],
-            [0, 0, 0, 0, self._v_y],
-            [0, 0, 0, 0, self._a_x],
-            [0, 0, 0, 0, self._a_y],
+            [0, 0, 0, 0, self._px],
+            [0, 0, 0, 0, self._py],
+            [0, 0, 0, 0, self._vx],
+            [0, 0, 0, 0, self._vy],
+            [0, 0, 0, 0, self._ax],
+            [0, 0, 0, 0, self._ay],
         ])
         
         self._R = sym.zeros(6) 
@@ -40,7 +40,9 @@ class Landmark(KalmanFilter):
         super(Landmark, self).__init__(s, "Landmarks")
         
         # Creating characteristic variables for landmarks and reading.
-        self._parameters.update({ })
+        self._parameters.update({
+            "linear_acceleration": True
+        })
         self._parameters = self._conf.readVariables(self._parameters)
         
         self.reset( )
@@ -48,6 +50,9 @@ class Landmark(KalmanFilter):
     ## update
     # .
     def update(self, data):
+        self._predictedstate["x"][2:, 0] = -self._speeds[data["movement"]]["x_speed"][:len(self._speeds[data["movement"]]["x_speed"])-1, 0]
+        self._predictedstate["covariance"] = self._speeds[data["movement"]]["R"]
+        
         super(Landmark, self).update(data)
         
-        return [data["movement"], self._state['x'], self._state['covariance']]
+        return [data["movement"], self._predictedstate["x"], self._predictedstate["covariance"]]

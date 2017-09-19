@@ -14,7 +14,7 @@ from Basic import * # Class with implementations and basic variables
 
 ## Class to Speeds
 # Class responsible for managing the robot's possible speeds (me).
-class Speeds( ):
+class Speeds(Basic):
     
     # ---- Variables ----
     
@@ -39,7 +39,7 @@ class Speeds( ):
                 [0], # v_y
                 [0], # a_x
                 [0], # a_y
-                [1], # cosntant
+                [1], # constant
             ]),
                 
             "R": sym.Matrix(sym.Identity(6)*0)
@@ -48,8 +48,8 @@ class Speeds( ):
         __t = sym.symbols("t") # Declaring variable time
         
         # Robot speed and acceleration variables
-        self.vr_x, self.vr_y = sym.symbols("self.vr_x self.vr_y")
-        self.ar_x, self.ar_y = sym.symbols("self.ar_x self.ar_y")
+        self.vrx, self.vry = sym.symbols("vr_x vr_y")
+        self.arx, self.ary = sym.symbols("ar_x ar_y")
         
         # Kalman filter matrices
         self.__u = sym.Matrix([
@@ -66,6 +66,9 @@ class Speeds( ):
     # Adds average robot speeds or upgrades to speeds.
     # @param vector Observed speed.
     def update(self, vector):
+        if vector[0] == 0:
+            return
+        
         if vector[0] + 1 > len(self.__movementslist):
             while vector[0] + 1 > len(self.__movementslist):
                 self.__movementslist.append({
@@ -79,6 +82,9 @@ class Speeds( ):
     
                     "R": copy(self.__R)
                 })
+        
+        self.__movementslist[vector[0]]["x_speed"] = -sym.Matrix(vector[1][2:]).row_insert(4, sym.Matrix([-1]))
+        self.__movementslist[vector[0]]["R"] = vector[2]
     
     ## __getitem__
     # Returns the dictionary of motion vectors.
