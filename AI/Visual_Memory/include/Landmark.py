@@ -44,8 +44,6 @@ class Landmark(KalmanFilter):
         self._parameters = self._conf.readVariables(self._parameters)
         
         self.reset( )
-        # self.x = _state
-        # self.pre = _predictedstate
         
     ## update
     # .

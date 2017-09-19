@@ -47,11 +47,9 @@ class Speeds( ):
         
         __t = sym.symbols("t") # Declaring variable time
         
-        self.p_x, self.p_y, self.v_x, self.v_y, self.a_x, self.a_y = sym.symbols("self.p_x, self.p_y, self.v_x, self.v_y, self.a_x, self.a_y") # Object state variables
-        
         # Robot speed and acceleration variables
         self.vr_x, self.vr_y = sym.symbols("self.vr_x self.vr_y")
-        ar_x, ar_y = sym.symbols("ar_x ar_y")
+        self.ar_x, self.ar_y = sym.symbols("self.ar_x self.ar_y")
         
         # Kalman filter matrices
         self.__u = sym.Matrix([
@@ -64,9 +62,38 @@ class Speeds( ):
         
         self.__R = sym.Matrix(sym.Identity(6)*1000)
         
-                        [1], # cos(ωr*t)
-                        [0], # sin(ωr*t)
-                        [1],
+    ## update
+    # Adds average robot speeds or upgrades to speeds.
+    # @param vector Observed speed.
+    def update(self, vector):
+        if vector[0] + 1 > len(self.__movementslist):
+            while vector[0] + 1 > len(self.__movementslist):
+                self.__movementslist.append({
+                    "x_speed": sym.Matrix([
+                        [0], # v_x
+                        [0], # v_y
+                        [0], # a_x
+                        [0], # a_y
+                        [1], # constant
+                    ]),
+    
+                    "R": copy(self.__R)
+                })
+    
+    ## __getitem__
+    # Returns the dictionary of motion vectors.
+    # @param x Vector position to be accessed.
+    # @return Returns the dictionary that will be used.
+    def __getitem__(self, x):
+        if x + 1 > len(self.__movementslist):
+            while x + 1 > len(self.__movementslist):
+                self.__movementslist.append({
+                    "x_speed": sym.Matrix([
+                        [0], # v_x
+                        [0], # v_y
+                        [0], # a_x
+                        [0], # a_y
+                        [1], # constant
                     ]),
     
                     "R": copy(self.__R)
