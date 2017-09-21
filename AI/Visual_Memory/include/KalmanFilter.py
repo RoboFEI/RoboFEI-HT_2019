@@ -55,29 +55,29 @@ class KalmanFilter(Basic):
     def _reset(self):
         # Creating the Kalman Filter Matrix
         self._A = sym.Matrix([
-                [1, 0, self._t, 0, 0.5*self._t**2, 0],
-                [0, 1, 0, self._t, 0, 0.5*self._t**2],
-                [0, 0, 1, 0, self._t, 0],
-                [0, 0, 0, 1, 0, self._t],
-                [0, 0, 0, 0, 1, 0],
-                [0, 0, 0, 0, 0, 1],
-            ])
+          [1, 0, self._t, 0, 0.5*self._t**2, 0],
+          [0, 1, 0, self._t, 0, 0.5*self._t**2],
+          [0, 0, 1, 0, self._t, 0],
+          [0, 0, 0, 1, 0, self._t],
+          [0, 0, 0, 0, 1, 0],
+          [0, 0, 0, 0, 0, 1],
+        ])
     
         self._B = sym.Matrix([
-            [-self._t, 0, -0.5*self._t**2, 0, self._px],
-            [0, -self._t, 0, -0.5*self._t**2, self._py],
-            [0, 0, 0, 0, self._vx - self._vx*(1-self._cos) - self._vy*self._sin],
-            [0, 0, 0, 0, self._vy - self._vy*(1-self._cos) + self._vx*self._sin],
-            [0, 0, 0, 0, self._ax - self._ax*(1-self._cos) - self._ay*self._sin],
-            [0, 0, 0, 0, self._ay - self._ay*(1-self._cos) + self._ax*self._sin],
+        [-self._t, 0, -0.5*self._t**2, 0, self._px],
+        [0, -self._t, 0, -0.5*self._t**2, self._py],
+        [0, 0, 0, 0, self._vx - self._vx*(1-self._cos) + self._vy*self._sin],
+        [0, 0, 0, 0, self._vy - self._vy*(1-self._cos) + self._vx*self._sin],
+        [0, 0, 0, 0, self._ax - self._ax*(1-self._cos) - self._ay*self._sin],
+        [0, 0, 0, 0, self._ay - self._ay*(1-self._cos) + self._ax*self._sin],
         ])
     
         self._R = sym.Matrix(sym.Identity(6))
     
         self._C = sym.Matrix([
-                [1, 0, 0, 0, 0, 0],
-                [0, 1, 0, 0, 0, 0],
-            ])
+          [1, 0, 0, 0, 0, 0],
+          [0, 1, 0, 0, 0, 0],
+        ])
     
         self._Q = sym.Matrix(sym.Identity(2)*self._parameters["vision_error"])
     
