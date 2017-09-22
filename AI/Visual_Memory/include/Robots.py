@@ -18,9 +18,17 @@ class Robots(BasicThread):
     
     # ---- Variables ----
     
-    ## __listfunction
+    ## listfunction
     # .
     __listfunction = None
+    
+    ## robotnumber
+    # .
+    __robotnumber = None
+    
+    ## timenumber
+    # .
+    __timenumber = 0
     
     ## reset
     # .
@@ -36,9 +44,15 @@ class Robots(BasicThread):
         self._predictedstate["covariance"] = self._predictedstate["covariance"][:-2,:-2]
     
     ## Constructor Class
-    def __init__(self, s):
+    def __init__(self, s, mynumber, totalnumber):
         # Instantiating constructor for inherited class.
         super(Robots, self).__init__(s, "Robots")
+        
+        # Determining robot number
+        if mynumber > totalnumber/2:
+            self.__robotnumber = mynumber - totalnumber/2
+        else:
+            self.__robotnumber = mynumber
         
         # Creating characteristic variables for Robots and reading.
         self._parameters.update({ })
@@ -51,12 +65,40 @@ class Robots(BasicThread):
     ## __predictVector
     # .
     def __predictVector(self, vector):
-        super(Robots, self).self.predict(vector[0], vector[1])
+        tnow, movements = vector
+        super(Robots, self).self.predict(tnow, movements)
         
-        if vector[0] == None and vector[1] == None:
-            kalman._bkb()
-            
-    #self-iPython __predictVecto
+        if tnow == None and self.__timenumber != 0:
+            if self.__timenumber == 1:
+                self._bkb.write_float(
+                    "VISUAL_MEMORY_AL_" + str(self.__robotnumber).zfill(2) + "_X",
+                    self._state["x"][0]
+                )
+                self._bkb.write_float(
+                    "VISUAL_MEMORY_AL_" + str(self.__robotnumber).zfill(2) + "_Y",
+                    self._state["x"][1]
+                )
+                
+                if sym.sqrt(self._state["x"][2]**2 + self._state["x"][3]**2) > self._bkb.read_float("VISUAL_MEMORY_AL_" + str(self.__robotnumber).zfill(2) + "_MAX_VEL"):
+                    self._bkb.write_float(
+                        "VISUAL_MEMORY_AL_" + str(self.__robotnumber).zfill(2) + "_MAX_VEL",
+                        sym.sqrt(self._state["x"][2]**2 + self._state["x"][3]**2)
+                    )
+            else:
+                self._bkb.write_float(
+                    "VISUAL_MEMORY_OP_" + str(self.__robotnumber).zfill(2) + "_X",
+                    self._state["x"][0]
+                )
+                self._bkb.write_float(
+                    "VISUAL_MEMORY_OP_" + str(self.__robotnumber).zfill(2) + "_Y",
+                    self._state["x"][1]
+                )
+                
+                if sym.sqrt(self._state["x"][2]**2 + self._state["x"][3]**2) > self._bkb.read_float("VISUAL_MEMORY_AL_" + str(self.__robotnumber).zfill(2) + "_MAX_VEL"):
+                    self._bkb.write_float(
+                        "VISUAL_MEMORY_OP_" + str(self.__robotnumber).zfill(2) + "_MAX_VEL",
+                        sym.sqrt(self._state["x"][2]**2 + self._state["x"][3]**2)
+                    )
     
     ## predictThread
     # .
@@ -67,12 +109,15 @@ class Robots(BasicThread):
     ## updateVector
     # .
     def __updateVector(self, vector):
-        kalman.self.update(vector[0])
+        super(Robots, self).update(data)
+        
+        if data["tag"] != 0:
+            self.__timenumber = data["tag"]
     
     ## updateThread
     # .
     def updateThread(self, tnow = None, movements = None):
-        self.__listfunction.append([self.__updateVector, [data]])
+        self.__listfunction.append([self.__updateVector, data])
         _resume( )
     
     ## run
@@ -89,5 +134,6 @@ class Robots(BasicThread):
     ## end
     # .
     def end(self):
+        self.__listfunction = [ ]
         self._finalize( )
         super(Robots, self)._end( )
