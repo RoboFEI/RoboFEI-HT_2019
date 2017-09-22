@@ -26,9 +26,17 @@ class Robots(BasicThread):
     # .
     __robotnumber = None
     
+    ## posdata
+    # .
+    __posdata = None
+    
     ## timenumber
     # .
-    __timenumber = 0
+    timenumber = 0
+    
+    ## weight
+    # .
+    weight = 0
     
     ## reset
     # .
@@ -44,15 +52,11 @@ class Robots(BasicThread):
         self._predictedstate["covariance"] = self._predictedstate["covariance"][:-2,:-2]
     
     ## Constructor Class
-    def __init__(self, s, mynumber, totalnumber):
+    def __init__(self, s, pos):
         # Instantiating constructor for inherited class.
         super(Robots, self).__init__(s, "Robots")
         
-        # Determining robot number
-        if mynumber > totalnumber/2:
-            self.__robotnumber = mynumber - totalnumber/2
-        else:
-            self.__robotnumber = mynumber
+        self.__posdata = pos
         
         # Creating characteristic variables for Robots and reading.
         self._parameters.update({ })
@@ -68,8 +72,8 @@ class Robots(BasicThread):
         tnow, movements = vector
         super(Robots, self).self.predict(tnow, movements)
         
-        if tnow == None and self.__timenumber != 0:
-            if self.__timenumber == 1:
+        if tnow == None and __time__robotnumber != 0:
+            if __time__robotnumber == 1:
                 self._bkb.write_float(
                     "VISUAL_MEMORY_AL_" + str(self.__robotnumber).zfill(2) + "_X",
                     self._state["x"][0]
@@ -112,7 +116,7 @@ class Robots(BasicThread):
         super(Robots, self).update(data)
         
         if data["tag"] != 0:
-            self.__timenumber = data["tag"]
+            self.timenumber = data["tag"]
     
     ## updateThread
     # .

@@ -34,7 +34,7 @@ then
 	exit
 fi
 
-if !( mv VisualMemory.py ../../src/VisualMemory.py )
+if !( mv Behavior.py ../../src/Behavior.py )
 then
 	echo -e "${Light_Red}"
 	read -p "Erro, precione qualquer tecla para finalizar"
