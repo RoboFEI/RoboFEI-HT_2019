@@ -13,8 +13,8 @@ from threading import Thread, Condition, Lock # Used to create classes with thre
 # Used class developed by RoboFEI-HT.
 from KalmanFilter import * # Class responsible for implementing kalman filter methods.
 
-## Class to config ini
-# Class used to read the ini file from the view.
+## Class to BasicThread
+# Responsible for implementing the methods and variables responsible for managing the thread.
 class BasicThread(KalmanFilter, Thread):
     __metaclass__ = ABCMeta
     
@@ -61,13 +61,20 @@ class BasicThread(KalmanFilter, Thread):
         # Stopping the process.
         self._pause( )
         
-        ## run
-        # .
-        @abstractmethod
-        def run(self):
-            self.__running = True
-            while self.__running:
-                with self._pausethread:
-                    print "Hello Word !"
-                    time.sleep(1)
-                self._pause( )
+    ## run
+    # .
+    @abstractmethod
+    def run(self):
+        self.__running = True
+        while self.__running:
+            with self._pausethread:
+                print "Hello Word !"
+                time.sleep(1)
+            self._pause( )
+    
+    ## _finalize
+    # .
+    def _finalize(self):
+        self.__running = False
+        self._resume( )
+        self.join( )

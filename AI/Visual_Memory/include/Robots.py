@@ -10,13 +10,17 @@ sys.path.append("../src")
 # The standard libraries used in the visual memory system.
 
 # Used class developed by RoboFEI-HT.
-from KalmanFilter import * # Class responsible for implementing kalman filter methods.
+from BasicThread import * # Responsible for implementing the methods and variables responsible for managing the thread.
 
 ## Class to Robots
 # Class responsible for performing robots tracking.
-class Robots(KalmanFilter):
+class Robots(BasicThread):
     
     # ---- Variables ----
+    
+    ## __listfunction
+    # .
+    __listfunction = None
     
     ## reset
     # .
@@ -41,3 +45,49 @@ class Robots(KalmanFilter):
         self._parameters = self._conf.readVariables(self._parameters)
         
         self.reset( )
+        
+        self.__listfunction = [ ]
+        
+    ## __predictVector
+    # .
+    def __predictVector(self, vector):
+        super(Robots, self).self.predict(vector[0], vector[1])
+        
+        if vector[0] == None and vector[1] == None:
+            kalman._bkb()
+            
+    #self-iPython __predictVecto
+    
+    ## predictThread
+    # .
+    def predictThread(self, tnow = None, movements = None):
+        self.__listfunction.append([self.__predictVector, [tnow, movements]])
+        _resume( )
+    
+    ## updateVector
+    # .
+    def __updateVector(self, vector):
+        kalman.self.update(vector[0])
+    
+    ## updateThread
+    # .
+    def updateThread(self, tnow = None, movements = None):
+        self.__listfunction.append([self.__updateVector, [data]])
+        _resume( )
+    
+    ## run
+    # .
+    def run(self):
+        self.__running = True
+        while self.__running:
+            with self._pausethread:
+                while self.__listfunction != []:
+                    func, data = self.__listfunction.pop(0)
+                    func(data)
+            self._pause( )
+    
+    ## end
+    # .
+    def end(self):
+        self._finalize( )
+        super(Robots, self)._end( )

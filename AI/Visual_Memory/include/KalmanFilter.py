@@ -119,11 +119,6 @@ class KalmanFilter(Basic):
         # _Sine and cosine variables
         self._cos, self._sin = sym.symbols("C S")
         
-    ## __predictNow
-    # Performs the prediction using the current instant in time to determine the new state.
-    def __predictNow(self, tnow = None, movements = None):
-        pass
-    
     ## __listVariables
     # .
     def __listVariables(self, tnow, movements):
@@ -164,6 +159,81 @@ class KalmanFilter(Basic):
                 ])
         
         return listsub
+    
+    ## __predictNow
+    # Performs the prediction using the current instant in time to determine the new state.
+    def __predictNow(self, tnow = None, movements = None):
+        
+        # Checking if you can hear at least one measurement.
+        if self._state["time"] == -1:
+            return
+        else:
+            tnow = time.time( )
+            
+        #--------------------------------------------------------------------------------------------------
+        
+        # Calculating stop time (speed equal to zero)
+        if self._parameters["linear_acceleration"] == False and len(self._state["x"]) == 6:
+            times = [tnow]
+            for i in xrange(2,4):
+                a = -self._state["x"][i]/self._state["x"][i+2]
+                if a == sym.nan or a == sym.zoo or a < 0 :
+                    times.append(tnow)
+                else:
+                    times.append(float(self._state["time"] + a))
+            while tnow > min([n for n in times if n>=0]):
+                self.__predictNow(tnow=min([n for n in times if n>0]), movements=movements)
+                times = [tnow]
+                for i in xrange(2,4):
+                    a = -self._state["x"][i]/self._state["x"][i+2]
+                    if a == sym.nan or a == sym.zoo:
+                        times.append(tnow)
+                    else:
+                        times.append(float(self._state["time"] + a))
+            
+        #--------------------------------------------------------------------------------------------------
+        
+        listsub = self.__listVariables(tnow, movements)
+        
+        # Calculating states
+        self._state["x"] = (
+            self._A*self._state["x"] # A * x
+        ).subs(listsub)
+        
+        listsub = self.__listVariables(tnow, movements)
+        
+        self._state["x"] = (
+            self._B*self._speeds[movements]["x_speed"] # B * U
+        ).subs(listsub)
+        
+        listsub = self.__listVariables(tnow, movements)
+    
+        #--------------------------------------------------------------------------------------------------
+            
+        # Calculating covariance
+        self._state["covariance"] = (
+            self._A*self._state["covariance"]*sym.transpose(self._A) + self._R*self._speeds[movements]["R"][:self._R.shape[0], :self._R.shape[1]] # A*covariance*A.T + R
+        ).subs(listsub)
+        
+        listsub = self.__listVariables(tnow, movements)
+        
+        #--------------------------------------------------------------------------------------------------
+        
+        # Rounding value with precision
+        self._state["x"] = sym.Matrix(self._state["x"])
+        for x in xrange(len(self._state["x"])):
+            if abs(self._state["x"][x]) < self._parameters["vision_error"]/2:
+                self._state["x"][x] = 0.0
+        
+        #--------------------------------------------------------------------------------------------------
+        
+        # Resetting acceleration if velocity is zero.
+        if self._parameters["linear_acceleration"] == False and len(self._state["x"]) == 6:
+            for x in xrange(2, len(self._state["x"]) - 2):
+                if abs(self._state["x"][x]) == 0.0:
+                    self._state["x"][x+2] = 0.0
+        
+        self._state["time"] = tnow
     
     ## __predictTime
     # Uses a current instant in time and updates the observation and the current state.
