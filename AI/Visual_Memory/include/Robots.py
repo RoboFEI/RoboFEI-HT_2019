@@ -66,6 +66,8 @@ class Robots(BasicThread):
         
         self.__listfunction = [ ]
         
+        self.start( )
+        
     ## __predictVector
     # .
     def __predictVector(self, vector):
@@ -108,11 +110,11 @@ class Robots(BasicThread):
     # .
     def predictThread(self, tnow = None, movements = None):
         self.__listfunction.append([self.__predictVector, [tnow, movements]])
-        _resume( )
+        self._resume( )
     
     ## updateVector
     # .
-    def __updateVector(self, vector):
+    def __updateVector(self, data):
         super(Robots, self).update(data)
         
         if data["tag"] != 0:
@@ -120,9 +122,9 @@ class Robots(BasicThread):
     
     ## updateThread
     # .
-    def updateThread(self, tnow = None, movements = None):
+    def updateThread(self, data):
         self.__listfunction.append([self.__updateVector, data])
-        _resume( )
+        self._resume( )
     
     ## run
     # .

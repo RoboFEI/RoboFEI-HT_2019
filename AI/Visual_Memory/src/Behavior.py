@@ -20,7 +20,7 @@ class Behavior(Basic):
     
     # ---- Variables ----
     
-    ## posrobot
+    ## __posrobot
     # Variable used to instantiate class responsible for robot speed.
     __posrobot = None
     
@@ -50,9 +50,10 @@ class Behavior(Basic):
         
         self.robots = []
         self.__newrobots = []
+        self.__posrobot = [0, 0]
         
         for i in xrange(self.parameters["number_robots"]-1):
-            self.__newrobots.append(Robots(me, posrobot))
+            self.__newrobots.append(Robots(me, self.__posrobot))
         
     ## readDataLandmarks
     # Responsible for reading the data coming from the vision system.
@@ -85,7 +86,9 @@ class Behavior(Basic):
             
             self._bkb.write_float("VISION_RB" + str(number).zfill(2) + "_TAG", 0)
         
-        return old + data
+        data = sorted(old + data, key= lambda k: k["time"])
+        
+        return data
     
     ## distributeDataRobots
     # .
@@ -98,6 +101,24 @@ class Behavior(Basic):
         while index < len(datarobots):
             data = datarobots[index]
             
+            # First input data
+            if self.robots == []:
+                candidates = self.__newrobots.pop(0)
+                candidates.updateThread(data)
+                self.robots.append(candidates)
+                datarobots.pop(index)
+                continue
+                
+            if data["time"] != time:
+                opponent = [ robot for robot in self.robots if robot.timenumber == -1 ]
+                indefinite = [ robot for robot in self.robots if robot.timenumber == 0 ]
+                teammate = [ robot for robot in self.robots if robot.timenumber == 1 ]
+                print "Criado listas:"
+                print "opponent:", opponent
+                print "indefinite:", indefinite
+                print "teammate:", teammate
+                time = data["time"]
+    
             # Calculates the similarity of the data with the objects
             #  Saving position
             self.__posrobot[0], self.__posrobot[1] = data["pos"]
@@ -114,7 +135,8 @@ class Behavior(Basic):
             candidates.sort()
             
             #  Sends the data to the most similar object and run object update
-            if candidates[0].weight > self.parameters["weight_robot"] and self.__newrobots != []:
+            if candidates[0].weight < self.parameters["weight_robot"] and self.__newrobots != []:
+                print "Nenhum candidato proximo"
                 candidates = self.__newrobots.pop(0)
                 candidates.updateThread(data)
                 self.robots.append(candidates)
@@ -122,16 +144,19 @@ class Behavior(Basic):
                 index -= 1
             else:
                 if candidates[0].timenumber == -1:
+                    print "candidato adversario"
                     opponent.remove(candidates[0])
                     candidates[0].updateThread(data)
                     datarobots.pop(index)
                     index -= 1
                 elif candidates[0].timenumber == 1:
+                    print "cadidato aliado"
                     teammate.remove(candidates[0])
                     candidates[0].updateThread(data)
                     datarobots.pop(index)
                     index -= 1
                 else:
+                    print "candidato sei lá"
                     indefinite.remove(candidates[0])
                     candidates[0].updateThread(data)
                     datarobots.pop(index)
