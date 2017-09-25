@@ -41,7 +41,7 @@ visualmemory = Behavior( )
 
 # ---- Run process ----
 
-# visualmemory.run( )
+visualmemory.run( )
 
 # ---- Finalizing process ----
 

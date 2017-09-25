@@ -28,10 +28,6 @@ class Behavior(Basic):
     # Variable used to instantiate class responsible for robot speed.
     parameters = None
     
-    ## Robots
-    # List of robots
-    robots = __newrobots = None
-    
     ## Constructor Class
     def __init__(self):
         super(Behavior, self).__init__("Settings", "Visual Memory")
@@ -45,24 +41,26 @@ class Behavior(Basic):
         self.parameters = self._conf.readVariables(self.parameters)
         
         # Creating objects to be tracking
-        me = Speeds( )
-        land = Landmark(me)
+        self.me = Speeds( )
+        self.land = Landmark(self.me)
         
+        # Support Variables
         self.robots = []
         self.__newrobots = []
         self.__posrobot = [0, 0]
         
         for i in xrange(self.parameters["number_robots"]-1):
-            self.__newrobots.append(Robots(me, self.__posrobot))
+            self.__newrobots.append(Robots(self.me, self.__posrobot))
         
     ## readDataLandmarks
     # Responsible for reading the data coming from the vision system.
-    def readDataLandmarks(self):
+    def readDataLandmarks(self, old):
         if self._bkb.read_float("VISION_LAND_TAG") == 1:
             data = [{
                     "tag": 1,
                     "pos": [self._bkb.read_float("VISION_LAND_X"), self._bkb.read_float("VISION_LAND_Y")],
                     "time": self._bkb.read_float("VISION_LAND_TIME"),
+                    "movement": self._bkb.read_float("VISION_LAND_MOV"),
                 }]
             
             self._bkb.write_float("VISION_LAND_TAG", 0)
@@ -72,7 +70,7 @@ class Behavior(Basic):
     
     ## readDataRobots
     # .
-    def readDataRobots(self):
+    def readDataRobots(self, old):
         data = []
         for number in xrange(1, self.parameters["number_robots"]):
             if self._bkb.read_float("VISION_RB" + str(number).zfill(2) + "_TAG") == 0:
@@ -82,6 +80,7 @@ class Behavior(Basic):
                 "tag": self._bkb.read_float("VISION_RB" + str(number).zfill(2) + "_TAG") - 2,
                 "pos": [self._bkb.read_float("VISION_RB" + str(number).zfill(2) + "_X"), self._bkb.read_float("VISION_RB" + str(number).zfill(2) + "_Y")],
                 "time": self._bkb.read_float("VISION_RB" + str(number).zfill(2) + "_TIME"),
+                "movement": self._bkb.read_float("VISION_RB" + str(number).zfill(2) + "_MOV"),
             })
             
             self._bkb.write_float("VISION_RB" + str(number).zfill(2) + "_TAG", 0)
@@ -92,7 +91,7 @@ class Behavior(Basic):
     
     ## distributeDataRobots
     # .
-    def distributeDataRobots(self):
+    def distributeDataRobots(self, datarobots):
         if datarobots == []:
             return
         
@@ -113,10 +112,6 @@ class Behavior(Basic):
                 opponent = [ robot for robot in self.robots if robot.timenumber == -1 ]
                 indefinite = [ robot for robot in self.robots if robot.timenumber == 0 ]
                 teammate = [ robot for robot in self.robots if robot.timenumber == 1 ]
-                print "Criado listas:"
-                print "opponent:", opponent
-                print "indefinite:", indefinite
-                print "teammate:", teammate
                 time = data["time"]
     
             # Calculates the similarity of the data with the objects
@@ -135,7 +130,7 @@ class Behavior(Basic):
             candidates.sort()
             
             #  Sends the data to the most similar object and run object update
-            if candidates[0].weight < self.parameters["weight_robot"] and self.__newrobots != []:
+            if (candidates == [] or candidates[0].weight > self.parameters["weight_robot"]) and self.__newrobots != []:
                 print "Nenhum candidato proximo"
                 candidates = self.__newrobots.pop(0)
                 candidates.updateThread(data)
@@ -164,29 +159,66 @@ class Behavior(Basic):
             
             index += 1
     
+    ## readDataBall
+    # Responsible for reading the data coming from the vision system.
+    def readDataBall(self):
+        if self._bkb.read_float("VISION_BALL_TAG") == 1:
+            data = [{
+                    "tag": 1,
+                    "pos": [self._bkb.read_float("VISION_BALL_X"), self._bkb.read_float("VISION_BALL_Y")],
+                    "time": self._bkb.read_float("VISION_BALL_TIME"),
+                    "movement": self._bkb.read_float("VISION_BALL_MOV"),
+                }]
+            
+            self._bkb.write_float("VISION_BALL_TAG", 0)
+            return old + data
+        else:
+            return old
+    
     ## run
     # .
     def run(self):
-        # Start counting time
+        # Initiating variables
         datalandmarks = []
         datarobots = []
+        databall = []
         
-        start = time.time()
-        
-        # Reading data from landmarks
-        datalandmarks = self.readDataLandmarks(datalandmarks)
-        
-        if datalandmarks != []:
-            # Predict robot speed (me)
-            me.update(land(datalandmarks.pop(0)))
-        else:
-            # Predicts only the new landmarks position
-            land.predict(movements = 1)
-        
-        # Reading robots data
-        datarobots = self.readDataRobots(datarobots)
-        
-        # Distribute the data to the robot objects
-        self.distributeDataRobots(datarobots)
-        
-        #self-iPython ru
+        while True:
+            # Start counting time
+            start = time.time()
+            
+            # Reading data from landmarks
+            datalandmarks = self.readDataLandmarks(datalandmarks)
+            
+            if datalandmarks != []:
+                # Predict robot speed (me)
+                self.me.update(self.land(datalandmarks.pop(0)))
+            else:
+                # Predicts only the new landmarks position
+                self.land.predict(movements = 1)
+            
+            # Reading robots data
+            datarobots = self.readDataRobots(datarobots)
+            
+            # Distribute the data to the robot objects
+            self.distributeDataRobots(datarobots)
+            
+            ## Reading ball data
+            # databall = readDataBall(databall)
+            
+            ## Distribute the data to the ball objects
+            # Batata
+            
+            ## Doing cleaning and objects (lost objects)
+            # Batata
+            
+            ## Predicts objects (Now)
+            # Batata
+            
+            ## Send object for vision screening
+            # Batata
+            
+            # Wait an instant on the remaining time
+            delta = self.parameters["execution_period_ms"]*1e-3 - time.time() + start
+            if delta > 0:
+                time.sleep(delta)

@@ -30,6 +30,10 @@ class Robots(BasicThread):
     # .
     __posdata = None
     
+    ## __lastposdata
+    # .
+    __lastposdata = None
+    
     ## timenumber
     # .
     timenumber = 0
@@ -115,10 +119,10 @@ class Robots(BasicThread):
     ## updateVector
     # .
     def __updateVector(self, data):
-        super(Robots, self).update(data)
-        
         if data["tag"] != 0:
             self.timenumber = data["tag"]
+        
+        super(Robots, self).update(data)
     
     ## updateThread
     # .
@@ -143,3 +147,24 @@ class Robots(BasicThread):
         self.__listfunction = [ ]
         self._finalize( )
         super(Robots, self)._end( )
+    
+    ## calculatesDistance
+    # .
+    def calculatesDistance(self):
+        if self.__lastposdata == self.__posdata:
+            return
+        
+        self.__lastposdata = copy(self.__posdata)
+        
+        self.weight = sym.exp(
+            -0.5*sym.transpose(sym.Matrix(self.__posdata) - self.state["x"][:2,:2])*
+            self.state["covariance"][:2,:2]*
+            (sym.Matrix(self.__posdata) - self.state["x"][:2,:2])
+        )[0]
+    
+    ## __lt__
+    # .
+    def __lt__(self, other):
+        self.calculatesDistance( )
+        other.calculatesDistance( )
+        return self.weight < other.weight
