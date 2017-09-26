@@ -10,7 +10,7 @@ sys.path.append("../src")
 # The standard libraries used in the visual memory system.
 
 # Used class developed by RoboFEI-HT.
-from KalmanFilter import * # Class responsible for implementing kalman filter methods.
+from KalmanFilter import * # Class responsible for implementing Kalman filter methods.
 
 ## Class to Landmark
 # Class responsible for performing landmarks tracking.
@@ -32,8 +32,8 @@ class Landmark(KalmanFilter):
             [0, 0, 0, 0, self._ay],
         ])
         
-        self._R = sym.zeros(6) 
-    
+        self._R = sym.zeros(6)
+       
     ## Constructor Class
     def __init__(self, s):
         # Instantiating constructor for inherited class.
@@ -43,6 +43,7 @@ class Landmark(KalmanFilter):
         self._parameters.update({
             "linear_acceleration": True
         })
+        
         self._parameters = self._conf.readVariables(self._parameters)
         
         self.reset( )
@@ -56,3 +57,8 @@ class Landmark(KalmanFilter):
         super(Landmark, self).update(data)
         
         return [data["movement"], self._predictedstate["x"], self._predictedstate["covariance"]]
+    
+    ## end
+    # .
+    def end(self):
+        self._end( )

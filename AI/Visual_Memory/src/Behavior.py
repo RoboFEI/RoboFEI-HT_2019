@@ -3,6 +3,8 @@
 # ---- Imports ----
 
 # Libraries to be used.
+import os
+import signal # Class used for external interrupt detection.
 import sys
 sys.path.append('../include')
 sys.path.append('../src')
@@ -28,17 +30,27 @@ class Behavior(Basic):
     # Variable used to instantiate class responsible for robot speed.
     parameters = None
     
+    def signal_term_handler(self, signal, frame):
+        raise VisualMemoryException(3, '')
+    
+    def killedProcess(self):
+        signal.signal(signal.SIGTERM, self.signal_term_handler)
+    
     ## Constructor Class
     def __init__(self):
+        self.killedProcess( )
         super(Behavior, self).__init__("Settings", "Visual Memory")
         
         # Creating default values and reading values
         self.parameters = {
-            "number_robots": 4,
+            "number_robots": 8,
             "execution_period_ms": 100,
-            "weight_robot": 10,
+            "weight_robot": 0.6,
         }
         self.parameters = self._conf.readVariables(self.parameters)
+        
+        if self.parameters["number_robots"] < 0 or self.parameters["number_robots"] > 22:
+            raise VisualMemoryException(1, self.parameters["number_robots"])
         
         # Creating objects to be tracking
         self.me = Speeds( )
@@ -60,7 +72,7 @@ class Behavior(Basic):
                     "tag": 1,
                     "pos": [self._bkb.read_float("VISION_LAND_X"), self._bkb.read_float("VISION_LAND_Y")],
                     "time": self._bkb.read_float("VISION_LAND_TIME"),
-                    "movement": self._bkb.read_float("VISION_LAND_MOV"),
+                    "movement": int(self._bkb.read_float("VISION_LAND_MOV")),
                 }]
             
             self._bkb.write_float("VISION_LAND_TAG", 0)
@@ -80,7 +92,7 @@ class Behavior(Basic):
                 "tag": self._bkb.read_float("VISION_RB" + str(number).zfill(2) + "_TAG") - 2,
                 "pos": [self._bkb.read_float("VISION_RB" + str(number).zfill(2) + "_X"), self._bkb.read_float("VISION_RB" + str(number).zfill(2) + "_Y")],
                 "time": self._bkb.read_float("VISION_RB" + str(number).zfill(2) + "_TIME"),
-                "movement": self._bkb.read_float("VISION_RB" + str(number).zfill(2) + "_MOV"),
+                "movement": int(self._bkb.read_float("VISION_RB" + str(number).zfill(2) + "_MOV")),
             })
             
             self._bkb.write_float("VISION_RB" + str(number).zfill(2) + "_TAG", 0)
@@ -131,7 +143,6 @@ class Behavior(Basic):
             
             #  Sends the data to the most similar object and run object update
             if (candidates == [] or candidates[0].weight > self.parameters["weight_robot"]) and self.__newrobots != []:
-                print "Nenhum candidato proximo"
                 candidates = self.__newrobots.pop(0)
                 candidates.updateThread(data)
                 self.robots.append(candidates)
@@ -139,19 +150,16 @@ class Behavior(Basic):
                 index -= 1
             else:
                 if candidates[0].timenumber == -1:
-                    print "candidato adversario"
                     opponent.remove(candidates[0])
                     candidates[0].updateThread(data)
                     datarobots.pop(index)
                     index -= 1
                 elif candidates[0].timenumber == 1:
-                    print "cadidato aliado"
                     teammate.remove(candidates[0])
                     candidates[0].updateThread(data)
                     datarobots.pop(index)
                     index -= 1
                 else:
-                    print "candidato sei lá"
                     indefinite.remove(candidates[0])
                     candidates[0].updateThread(data)
                     datarobots.pop(index)
@@ -184,41 +192,59 @@ class Behavior(Basic):
         databall = []
         
         while True:
-            # Start counting time
-            start = time.time()
+            try:
+                # Start counting time
+                start = time.time()
             
-            # Reading data from landmarks
-            datalandmarks = self.readDataLandmarks(datalandmarks)
+                # Reading data from landmarks
+                datalandmarks = self.readDataLandmarks(datalandmarks)
             
-            if datalandmarks != []:
-                # Predict robot speed (me)
-                self.me.update(self.land(datalandmarks.pop(0)))
-            else:
-                # Predicts only the new landmarks position
-                self.land.predict(movements = 1)
+                if datalandmarks != []:
+                    # Predict robot speed (me)
+                    self.me.update(self.land.update(datalandmarks.pop(0)))
+                else:
+                    # Predicts only the new landmarks position
+                    self.land.predict(movements = 1)
             
-            # Reading robots data
-            datarobots = self.readDataRobots(datarobots)
+                # Reading robots data
+                datarobots = self.readDataRobots(datarobots)
             
-            # Distribute the data to the robot objects
-            self.distributeDataRobots(datarobots)
+                # Distribute the data to the robot objects
+                self.distributeDataRobots(datarobots)
             
-            ## Reading ball data
-            # databall = readDataBall(databall)
+                ## Reading ball data
+                # databall = readDataBall(databall)
             
-            ## Distribute the data to the ball objects
-            # Batata
+                ## Distribute the data to the ball objects
+                # Batata
             
-            ## Doing cleaning and objects (lost objects)
-            # Batata
+                ## Doing cleaning and objects (lost objects)
+                # Batata
             
-            ## Predicts objects (Now)
-            # Batata
+                ## Predicts objects (Now)
+                # Batata
             
-            ## Send object for vision screening
-            # Batata
+                ## Send object for vision screening
+                # Batata
             
-            # Wait an instant on the remaining time
-            delta = self.parameters["execution_period_ms"]*1e-3 - time.time() + start
-            if delta > 0:
-                time.sleep(delta)
+                # Wait an instant on the remaining time
+                delta = self.parameters["execution_period_ms"]*1e-3 - time.time() + start
+                if delta > 0:
+                    time.sleep(delta)
+            except KeyboardInterrupt:
+                os.system('clear') # Cleaning terminal
+                print "Keyboard interrupt detected"
+                break
+            except VisualMemoryException as e:
+                break
+    
+    ## end
+    # .
+    def end(self):
+        self._end( )
+        kill = self.robots + self.__newrobots
+        
+        for robot in kill:
+            robot.end( )
+        
+        self.land.end( )

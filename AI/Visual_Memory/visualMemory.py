@@ -1,17 +1,5 @@
 # coding: utf-8
 
-# ini-iPython
-
-## Executando no diretório principal
-
-import os
-os.chdir('../../') #Executando na pasta Visual_Memory
-import sys
-sys.path.append('./include')
-sys.path.append('./src')
-sys.path.append('./Workbench/iPython')
-# end-iPython
-
 #  ----------------------------------------------------------------------------
 #  ****************************************************************************
 #  * @file: visualMemory.py
@@ -45,4 +33,4 @@ visualmemory.run( )
 
 # ---- Finalizing process ----
 
-# visualmemory.end( )
+visualmemory.end( )

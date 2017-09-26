@@ -20,9 +20,9 @@ class BasicThread(KalmanFilter, Thread):
     
     # ---- Variables ----
     
-    ## __running
+    ## _running
     # Reports whether the thread is still running.
-    __running = False
+    _running = False
     
     ## __pauseistrue
     # Variable responsible for managing thread pause and execution.
@@ -65,8 +65,8 @@ class BasicThread(KalmanFilter, Thread):
     # .
     @abstractmethod
     def run(self):
-        self.__running = True
-        while self.__running:
+        self._running = True
+        while self._running:
             with self._pausethread:
                 print "Hello Word !"
                 time.sleep(1)
@@ -75,6 +75,6 @@ class BasicThread(KalmanFilter, Thread):
     ## _finalize
     # .
     def _finalize(self):
-        self.__running = False
+        self._running = False
         self._resume( )
         self.join( )

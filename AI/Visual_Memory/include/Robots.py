@@ -133,8 +133,8 @@ class Robots(BasicThread):
     ## run
     # .
     def run(self):
-        self.__running = True
-        while self.__running:
+        self._running = True
+        while self._running:
             with self._pausethread:
                 while self.__listfunction != []:
                     func, data = self.__listfunction.pop(0)
