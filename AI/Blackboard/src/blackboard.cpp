@@ -105,8 +105,7 @@ int* using_shared_memory(int KEY)
             // perror("Erro shmctl()");
              // return(1) ;
             //}
-    
-    printf("%d\n",(*mem));
+
     return(mem); 
 
 }
