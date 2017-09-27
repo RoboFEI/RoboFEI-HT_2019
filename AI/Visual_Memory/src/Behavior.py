@@ -3,13 +3,14 @@
 # ---- Imports ----
 
 # Libraries to be used.
-import os
-import signal # Class used for external interrupt detection.
 import sys
 sys.path.append('../include')
 sys.path.append('../src')
 
 # The standard libraries used in the visual memory system.
+import os # Class used for communication with the system
+import signal # Class used for external interrupt detection.
+from math import log10, floor # Functions used for rounding UI
 
 # Used class developed by RoboFEI-HT.
 from Basic import * # Standard and abstract class.
@@ -37,8 +38,10 @@ class Behavior(Basic):
         signal.signal(signal.SIGTERM, self.signal_term_handler)
     
     ## Constructor Class
-    def __init__(self):
-        self.killedProcess( )
+    def __init__(self, a):
+        self.killedProcess( ) # Function to monitor external process kill.
+        self.args = a # Input arguments.
+        
         super(Behavior, self).__init__("Settings", "Visual Memory")
         
         # Creating default values and reading values
@@ -48,6 +51,12 @@ class Behavior(Basic):
             "weight_robot": 0.6,
         }
         self.parameters = self._conf.readVariables(self.parameters)
+        
+        if self.args.numberrobots != None:
+            self.parameters["number_robots"] = self.args.numberrobots
+        
+        if self.args.executionperiod != None:
+            self.parameters["execution_period_ms"] = self.args.executionperiod
         
         if self.parameters["number_robots"] < 0 or self.parameters["number_robots"] > 22:
             raise VisualMemoryException(1, self.parameters["number_robots"])
@@ -104,7 +113,7 @@ class Behavior(Basic):
     ## distributeDataRobots
     # .
     def distributeDataRobots(self, datarobots):
-        if datarobots == []:
+        if datarobots == [] or self.__newrobots + self.robots == []:
             return
         
         index = 0
@@ -183,6 +192,75 @@ class Behavior(Basic):
         else:
             return old
     
+    ## printPreviousLine
+    # .
+    def printPreviousLine(self, text, lines=1, back=True):
+        for i in xrange(lines):
+            print "\033[F\r",
+        print text
+    
+        if back:
+            for i in xrange(lines - 1):
+                print ""
+    
+    ## roundUI
+    # .
+    def roundUI(self, x, digits = 4):
+        try:
+            return round(x, (digits - 1)-int(floor(log10(abs(x)))))
+        except ValueError:
+            return 0
+    
+    ## updatingScreen
+    # .
+    def updatingScreen(self):
+        # Update landmark
+        if self._bkb.read_float("VISUAL_MEMORY_LAND_LOC") == 0:
+            text = "+---+ Landmark +     Não    +--------------+           00000          +      "
+        else:
+            text = "+---+ Landmark +     Sim    +--------------+           00000          +      "
+        
+        texts = [
+            "| x |          |            |     "+ str(self.roundUI(self._bkb.read_float("VISUAL_MEMORY_LAND_X"))).zfill(5) +"    |                          |      ",
+            text,
+            "| y |          |            |     "+ str(self.roundUI(self._bkb.read_float("VISUAL_MEMORY_LAND_Y"))).zfill(5) +"    |                          |      ",
+        ]
+        if self.parameters["number_robots"] > 1:
+            for i, text in zip(range(4 + (self.parameters["number_robots"] - 1)*4, 4 + (self.parameters["number_robots"] - 1)*4 - 3, -1), texts):
+                self.printPreviousLine(text, lines=i)
+        else:
+            for i, text in zip(range(4, 1, -1), texts):
+                self.printPreviousLine(text, lines=i)
+        
+        # Update robots
+        for robot in xrange(1, self.parameters["number_robots"]):
+            # Update friend robots
+            if robot <= (self.parameters["number_robots"] - 1)/2:
+                if self._bkb.read_float("VISUAL_MEMORY_AL_"+ str(robot).zfill(2) +"_LOC") == 0:
+                    text = "+---+  Aliado  +     Não    +--------------+           "+ str(self.roundUI(self._bkb.read_float("VISUAL_MEMORY_AL_"+ str(robot).zfill(2) +"_MAX_VEL"))).zfill(5) +"          +      "
+                else:
+                    text = "+---+  Aliado  +     Sim    +--------------+           "+ str(self.roundUI(self._bkb.read_float("VISUAL_MEMORY_AL_"+ str(robot).zfill(2) +"_MAX_VEL"))).zfill(5) +"          +      "
+    
+                texts = [
+                    "| x |          |            |     "+ str(self.roundUI(self._bkb.read_float("VISUAL_MEMORY_AL_"+ str(robot).zfill(2) +"_X"))).zfill(5) +"    |                          |      ",
+                    text,
+                    "| y |          |            |     "+ str(self.roundUI(self._bkb.read_float("VISUAL_MEMORY_AL_"+ str(robot).zfill(2) +"_Y"))).zfill(5) +"    |                          |      ",
+                ]
+            else:
+                if self._bkb.read_float("VISUAL_MEMORY_OP_"+ str(robot - (self.parameters["number_robots"] - 1)/2).zfill(2) +"_LOC") == 0:
+                    text = "+---+ Oponente +     Não    +--------------+           "+ str(self.roundUI(self._bkb.read_float("VISUAL_MEMORY_OP_"+ str(robot - (self.parameters["number_robots"] - 1)/2).zfill(2) +"_MAX_VEL"))).zfill(5) +"          +      "
+                else:
+                    text = "+---+ Oponente +     Sim    +--------------+           "+ str(self.roundUI(self._bkb.read_float("VISUAL_MEMORY_OP_"+ str(robot - (self.parameters["number_robots"] - 1)/2).zfill(2) +"_MAX_VEL"))).zfill(5) +"          +      "
+    
+                texts = [
+                    "| x |          |            |     "+ str(self.roundUI(self._bkb.read_float("VISUAL_MEMORY_OP_"+ str(robot - (self.parameters["number_robots"] - 1)/2).zfill(2) +"_X"))).zfill(5) +"    |                          |      ",
+                    text,
+                    "| y |          |            |     "+ str(self.roundUI(self._bkb.read_float("VISUAL_MEMORY_OP_"+ str(robot - (self.parameters["number_robots"] - 1)/2).zfill(2) +"_Y"))).zfill(5) +"    |                          |      ",
+                ]
+            
+            for i, text in zip(range((self.parameters["number_robots"] - robot)*4, (self.parameters["number_robots"] - robot)*4 - 3, -1), texts):
+                self.printPreviousLine(text, lines=i)
+    
     ## run
     # .
     def run(self):
@@ -190,6 +268,27 @@ class Behavior(Basic):
         datalandmarks = []
         datarobots = []
         databall = []
+        
+        if self.args.debug:
+            print "\nPeríodo de execução:", self.parameters["execution_period_ms"], "\tPeso mínimo:", self.parameters["weight_robot"]*100, "%"
+            print "+---+----------+------------+--------------+--------------------------+      "
+            print "|   |   Nome   | Localizado | Posição (cm) | Velocidade máxima (cm/s) |      "
+            print "+---+----------+------------+--------------+--------------------------+      "
+            print "| x |          |            |     00000    |                          |      "
+            print "+---+ Landmark +     Não    +--------------+           00000          +      "
+            print "| y |          |            |     00000    |                          |      "
+            print "+---+----------+------------+--------------+--------------------------+      "
+            
+            for i in xrange((self.parameters["number_robots"] - 1)/2):
+                print "| x |          |            |     00000    |                          |      "
+                print "+---+  Aliado  +     Não    +--------------+           00000          +      "
+                print "| y |          |            |     00000    |                          |      "
+                print "+---+----------+------------+--------------+--------------------------+      "
+            for i in xrange((self.parameters["number_robots"] - 1)/2, (self.parameters["number_robots"] - 1)):
+                print "| x |          |            |     00000    |                          |      "
+                print "+---+ Oponente +     Não    +--------------+           00000          +      "
+                print "| y |          |            |     00000    |                          |      "
+                print "+---+----------+------------+--------------+--------------------------+      "
         
         while True:
             try:
@@ -226,7 +325,11 @@ class Behavior(Basic):
             
                 ## Send object for vision screening
                 # Batata
-            
+                
+                # Displaying debug values
+                if self.args.debug:        
+                    self.updatingScreen( )
+                
                 # Wait an instant on the remaining time
                 delta = self.parameters["execution_period_ms"]*1e-3 - time.time() + start
                 if delta > 0:
