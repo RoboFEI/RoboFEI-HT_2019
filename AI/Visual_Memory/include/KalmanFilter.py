@@ -123,19 +123,19 @@ class KalmanFilter(Basic):
     # .
     def __listVariables(self, tnow, movements):
         # Tested null acceleration condition
-        if self._speeds[movements]["x_speed"][2] != 0.0 or self._speeds[movements]["x_speed"][3] != 0:
+        if self._speeds[movements]["x_speed"][2, 0] != 0.0 or self._speeds[movements]["x_speed"][3, 0] != 0:
             listsub = [        
                 # Auxiliary variables
-                [self._cos, sym.cos(sym.atan2(0.5*self._speeds[movements]["x_speed"][3]*self._t**2, 0.5*self._speeds[movements]["x_speed"][2]*self._t**2))],
-                [self._sin, sym.sin(sym.atan2(0.5*self._speeds[movements]["x_speed"][3]*self._t**2, 0.5*self._speeds[movements]["x_speed"][2]*self._t**2))],
+                [self._cos, sym.cos(sym.atan2(0.5*self._speeds[movements]["x_speed"][3, 0]*self._t**2, 0.5*self._speeds[movements]["x_speed"][2, 0]*self._t**2))],
+                [self._sin, sym.sin(sym.atan2(0.5*self._speeds[movements]["x_speed"][3, 0]*self._t**2, 0.5*self._speeds[movements]["x_speed"][2, 0]*self._t**2))],
     
                 [self._t, tnow - self._predictedstate["time"]], # Inserting delta time
     
                 # State Variables
-                [self._px, self._predictedstate["x"][0]],
-                [self._py, self._predictedstate["x"][1]],
-                [self._vx, self._predictedstate["x"][2]],
-                [self._vy, self._predictedstate["x"][3]],
+                [self._px, self._predictedstate["x"][0, 0]],
+                [self._py, self._predictedstate["x"][1, 0]],
+                [self._vx, self._predictedstate["x"][2, 0]],
+                [self._vy, self._predictedstate["x"][3, 0]],
             ]
         else:
             listsub = [        
@@ -146,16 +146,16 @@ class KalmanFilter(Basic):
                 [self._t, tnow - self._predictedstate["time"]], # Inserting delta time
     
                 # State Variables
-                [self._px, self._predictedstate["x"][0]],
-                [self._py, self._predictedstate["x"][1]],
-                [self._vx, self._predictedstate["x"][2]],
-                [self._vy, self._predictedstate["x"][3]],
+                [self._px, self._predictedstate["x"][0, 0]],
+                [self._py, self._predictedstate["x"][1, 0]],
+                [self._vx, self._predictedstate["x"][2, 0]],
+                [self._vy, self._predictedstate["x"][3, 0]],
             ]
         
         if len(self._predictedstate["x"]) == 6:
             listsub.extend([
-                    [self._ax, self._predictedstate["x"][4]],
-                    [self._ay, self._predictedstate["x"][5]],
+                    [self._ax, self._predictedstate["x"][4, 0]],
+                    [self._ay, self._predictedstate["x"][5, 0]],
                 ])
         
         return listsub
@@ -222,16 +222,19 @@ class KalmanFilter(Basic):
         # Rounding value with precision
         self._state["x"] = sym.Matrix(self._state["x"])
         for x in xrange(len(self._state["x"])):
-            if abs(self._state["x"][x]) < self._parameters["vision_error"]/2:
-                self._state["x"][x] = 0.0
+            try:
+                if abs(self._state["x"][x, 0]) < self._parameters["vision_error"]/2:
+                    self._state["x"][x, 0] = 0.0
+            except TypeError:
+                self._state["x"][x, 0] = 0.0
         
         #--------------------------------------------------------------------------------------------------
         
         # Resetting acceleration if velocity is zero.
         if self._parameters["linear_acceleration"] == False and len(self._state["x"]) == 6:
             for x in xrange(2, len(self._state["x"]) - 2):
-                if abs(self._state["x"][x]) == 0.0:
-                    self._state["x"][x+2] = 0.0
+                if abs(self._state["x"][x, 0]) == 0.0:
+                    self._state["x"][x+2, 0] = 0.0
         
         self._state["time"] = tnow
     
@@ -269,6 +272,7 @@ class KalmanFilter(Basic):
         listsub = self.__listVariables(tnow, movements)
         
         # Calculating states
+        
         self._predictedstate["x"] = (
             self._A*self._predictedstate["x"] # A * x
         ).subs(listsub)
@@ -280,7 +284,7 @@ class KalmanFilter(Basic):
         ).subs(listsub)
         
         listsub = self.__listVariables(tnow, movements)
-    
+        
         #--------------------------------------------------------------------------------------------------
             
         # Calculating covariance
@@ -288,23 +292,24 @@ class KalmanFilter(Basic):
             self._A*self._predictedstate["covariance"]*sym.transpose(self._A) + self._R*self._speeds[movements]["R"][:self._R.shape[0], :self._R.shape[1]] # A*covariance*A.T + R
         ).subs(listsub)
         
-        listsub = self.__listVariables(tnow, movements)
-        
         #--------------------------------------------------------------------------------------------------
         
         # Rounding value with precision
         self._predictedstate["x"] = sym.Matrix(self._predictedstate["x"])
         for x in xrange(len(self._predictedstate["x"])):
-            if abs(self._predictedstate["x"][x]) < self._parameters["vision_error"]/2:
-                self._predictedstate["x"][x] = 0.0
+            try:
+                if abs(self._predictedstate["x"][x, 0]) < self._parameters["vision_error"]/2:
+                    self._predictedstate["x"][x, 0] = 0.0
+            except TypeError:
+                self._predictedstate["x"][x, 0] = 0.0
         
         #--------------------------------------------------------------------------------------------------
         
         # Resetting acceleration if velocity is zero.
         if self._parameters["linear_acceleration"] == False and len(self._predictedstate["x"]) == 6:
             for x in xrange(2, len(self._predictedstate["x"]) - 2):
-                if abs(self._predictedstate["x"][x]) == 0.0:
-                    self._predictedstate["x"][x+2] = 0.0
+                if abs(self._predictedstate["x"][x, 0]) == 0.0:
+                    self._predictedstate["x"][x+2, 0] = 0.0
         
         self._predictedstate["time"] = tnow
         
@@ -338,15 +343,18 @@ class KalmanFilter(Basic):
         # Rounding value with precision
         self._predictedstate["x"] = sym.Matrix(self._predictedstate["x"])
         for x in xrange(len(self._predictedstate["x"])):
-            if abs(self._predictedstate["x"][x]) < self._parameters["vision_error"]/2:
-                self._predictedstate["x"][x] = 0.0
+            try:
+                if abs(self._predictedstate["x"][x, 0]) < self._parameters["vision_error"]/2:
+                    self._predictedstate["x"][x, 0] = 0.0
+            except TypeError:
+                self._predictedstate["x"][x, 0] = 0.0
         
         #--------------------------------------------------------------------------------------------------
         
         # Resetting acceleration if velocity is zero.
         if self._parameters["linear_acceleration"] == False and len(self._predictedstate["x"]) == 6:
             for x in xrange(2, len(self._predictedstate["x"]) - 2):
-                if abs(self._predictedstate["x"][x]) == 0.0:
-                    self._predictedstate["x"][x+2] = 0.0
+                if abs(self._predictedstate["x"][x, 0]) == 0.0:
+                    self._predictedstate["x"][x+2, 0] = 0.0
         
         self._state = copy(self._predictedstate)

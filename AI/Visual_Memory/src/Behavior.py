@@ -70,8 +70,10 @@ class Behavior(Basic):
         self.__newrobots = []
         self.__posrobot = [0, 0]
         
-        for i in xrange(self.parameters["number_robots"]-1):
-            self.__newrobots.append(Robots(self.me, self.__posrobot))
+        for i in xrange(-self.parameters["number_robots"]/2, self.parameters["number_robots"]/2):
+            if i == 0:
+                continue
+            self.__newrobots.append(Robots(self.me, self.__posrobot, i))
         
     ## readDataLandmarks
     # Responsible for reading the data coming from the vision system.
@@ -110,6 +112,8 @@ class Behavior(Basic):
         
         return data
     
+    ### Teste readDataRobots
+    
     ## distributeDataRobots
     # .
     def distributeDataRobots(self, datarobots):
@@ -124,6 +128,7 @@ class Behavior(Basic):
             # First input data
             if self.robots == []:
                 candidates = self.__newrobots.pop(0)
+                candidates.timenumber = data["tag"]*(len([ robot for robot in self.robots if robot.timenumber == data["tag"] ]) + 1)
                 candidates.updateThread(data)
                 self.robots.append(candidates)
                 datarobots.pop(index)
@@ -148,34 +153,36 @@ class Behavior(Basic):
                 candidates = opponent + indefinite + teammate
             
             #  Calculates the similarity
-            candidates.sort()
+            candidates.sort(reverse=True)
             
             #  Sends the data to the most similar object and run object update
-            if (candidates == [] or candidates[0].weight > self.parameters["weight_robot"]) and self.__newrobots != []:
+            if (candidates == [] or candidates[0].weight < self.parameters["weight_robot"]) and self.__newrobots != []:
                 candidates = self.__newrobots.pop(0)
+                candidates.timenumber = data["tag"]*(len([ robot for robot in self.robots if robot.timenumber == data["tag"] ]) + 1)
                 candidates.updateThread(data)
                 self.robots.append(candidates)
                 datarobots.pop(index)
                 index -= 1
             else:
-                if candidates[0].timenumber == -1:
+                if candidates != [] and candidates[0].timenumber == -1:
                     opponent.remove(candidates[0])
                     candidates[0].updateThread(data)
                     datarobots.pop(index)
                     index -= 1
-                elif candidates[0].timenumber == 1:
+                elif candidates != [] and candidates[0].timenumber == 1:
                     teammate.remove(candidates[0])
                     candidates[0].updateThread(data)
                     datarobots.pop(index)
                     index -= 1
-                else:
+                elif candidates != []:
                     indefinite.remove(candidates[0])
+                    candidates[0].timenumber = data["tag"]*(len([ robot for robot in self.robots if robot.timenumber == data["tag"] ]) + 1)
                     candidates[0].updateThread(data)
                     datarobots.pop(index)
                     index -= 1
             
             index += 1
-    
+       
     ## readDataBall
     # Responsible for reading the data coming from the vision system.
     def readDataBall(self):
@@ -268,17 +275,17 @@ class Behavior(Basic):
         datalandmarks = []
         datarobots = []
         databall = []
-        
+    
         if self.args.debug:
-            print "\nPeríodo de execução:", self.parameters["execution_period_ms"], "\tPeso mínimo:", self.parameters["weight_robot"]*100, "%"
-            print "+---+----------+------------+--------------+--------------------------+      "
-            print "|   |   Nome   | Localizado | Posição (cm) | Velocidade máxima (cm/s) |      "
+            print "\nPeríodo de execução:", self.parameters["execution_period_ms"], "\tPeso mínimo:", self.parameters["weight_robot"]*100, "%", "\tTempo:", time.strftime("%H:%M:%S", time.localtime(time.time( )))
+            print "    +----------+------------+--------------+--------------------------+      "
+            print "    |   Nome   | Localizado | Posição (cm) | Velocidade máxima (cm/s) |      "
             print "+---+----------+------------+--------------+--------------------------+      "
             print "| x |          |            |     00000    |                          |      "
             print "+---+ Landmark +     Não    +--------------+           00000          +      "
             print "| y |          |            |     00000    |                          |      "
             print "+---+----------+------------+--------------+--------------------------+      "
-            
+    
             for i in xrange((self.parameters["number_robots"] - 1)/2):
                 print "| x |          |            |     00000    |                          |      "
                 print "+---+  Aliado  +     Não    +--------------+           00000          +      "
@@ -289,47 +296,54 @@ class Behavior(Basic):
                 print "+---+ Oponente +     Não    +--------------+           00000          +      "
                 print "| y |          |            |     00000    |                          |      "
                 print "+---+----------+------------+--------------+--------------------------+      "
-        
+    
         while True:
             try:
                 # Start counting time
                 start = time.time()
-            
+        
                 # Reading data from landmarks
                 datalandmarks = self.readDataLandmarks(datalandmarks)
-            
+        #         print "datalandmarks:", datalandmarks
+        
                 if datalandmarks != []:
                     # Predict robot speed (me)
                     self.me.update(self.land.update(datalandmarks.pop(0)))
                 else:
                     # Predicts only the new landmarks position
                     self.land.predict(movements = 1)
-            
+        
                 # Reading robots data
                 datarobots = self.readDataRobots(datarobots)
-            
+        #         print "datarobots:", datarobots
+                
                 # Distribute the data to the robot objects
                 self.distributeDataRobots(datarobots)
-            
+                
                 ## Reading ball data
                 # databall = readDataBall(databall)
-            
+        
                 ## Distribute the data to the ball objects
                 # Batata
-            
+        
                 ## Doing cleaning and objects (lost objects)
                 # Batata
-            
+        
                 ## Predicts objects (Now)
-                # Batata
-            
+                for robot in self.robots:
+                    robot.predictThread(movements=1)
+        
                 ## Send object for vision screening
                 # Batata
-                
+        
                 # Displaying debug values
                 if self.args.debug:        
+                    self.printPreviousLine(
+                        "Período de execução: " + str(self.parameters["execution_period_ms"]) + "\tPeso mínimo: " + str(self.parameters["weight_robot"]*100) + "%\tTempo: " + time.strftime("%H:%M:%S", time.localtime(time.time( ))),
+                        lines=8+4*(self.parameters["number_robots"]-1)
+                    )            
                     self.updatingScreen( )
-                
+        
                 # Wait an instant on the remaining time
                 delta = self.parameters["execution_period_ms"]*1e-3 - time.time() + start
                 if delta > 0:

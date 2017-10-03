@@ -55,15 +55,33 @@ class Robots(BasicThread):
         self._predictedstate["x"] = self._predictedstate["x"][:-2,:]
         self._predictedstate["covariance"] = self._predictedstate["covariance"][:-2,:-2]
     
+        if self.timenumber == 0:
+            return
+        elif self.timenumber < 0:
+            self._bkb.write_float("VISUAL_MEMORY_OP_"+ str(-self.timenumber).zfill(2) +"_X", 0)
+            self._bkb.write_float("VISUAL_MEMORY_OP_"+ str(-self.timenumber).zfill(2) +"_Y", 0)
+            self._bkb.write_float("VISUAL_MEMORY_OP_"+ str(-self.timenumber).zfill(2) +"_MAX_VEL", 0)
+            self._bkb.write_float("VISUAL_MEMORY_OP_"+ str(-self.timenumber).zfill(2) +"_LOC", 0)
+        else:
+            self._bkb.write_float("VISUAL_MEMORY_AL_"+ str(self.timenumber).zfill(2) +"_X", 0)
+            self._bkb.write_float("VISUAL_MEMORY_AL_"+ str(self.timenumber).zfill(2) +"_Y", 0)
+            self._bkb.write_float("VISUAL_MEMORY_AL_"+ str(self.timenumber).zfill(2) +"_MAX_VEL", 0)
+            self._bkb.write_float("VISUAL_MEMORY_AL_"+ str(self.timenumber).zfill(2) +"_LOC", 0)
+        self.timenumber = 0 
+    
     ## Constructor Class
-    def __init__(self, s, pos):
+    def __init__(self, s, pos, n):
         # Instantiating constructor for inherited class.
         super(Robots, self).__init__(s, "Robots")
+        
+        self.timenumber = n
         
         self.__posdata = pos
         
         # Creating characteristic variables for Robots and reading.
-        self._parameters.update({ })
+        self._parameters.update({
+            "precision": 0.6
+        })
         self._parameters = self._conf.readVariables(self._parameters)
         
         self.reset( )
@@ -76,39 +94,61 @@ class Robots(BasicThread):
     # .
     def __predictVector(self, vector):
         tnow, movements = vector
-        super(Robots, self).self.predict(tnow, movements)
+        super(Robots, self).predict(tnow, movements)
         
-        if tnow == None and __time__robotnumber != 0:
-            if __time__robotnumber == 1:
+        if tnow == None and self.timenumber != 0:
+            if self._predictedstate["covariance"][0, 0] > self._parameters['precision'] or self._predictedstate["covariance"][1, 1] > self._parameters['precision']:
+                if self.timenumber > 0:
+                    self._bkb.write_float(
+                        "VISUAL_MEMORY_AL_" + str(int(self.timenumber)).zfill(2) + "_LOC",
+                        0
+                    )
+                else:
+                    self._bkb.write_float(
+                        "VISUAL_MEMORY_OP_" + str(-int(self.timenumber)).zfill(2) + "_LOC",
+                        0
+                    )
+            
+            elif self.timenumber > 0:
                 self._bkb.write_float(
-                    "VISUAL_MEMORY_AL_" + str(self.__robotnumber).zfill(2) + "_X",
-                    self._state["x"][0]
+                    "VISUAL_MEMORY_AL_" + str(int(self.timenumber)).zfill(2) + "_X",
+                    self._state["x"][0, 0]
                 )
                 self._bkb.write_float(
-                    "VISUAL_MEMORY_AL_" + str(self.__robotnumber).zfill(2) + "_Y",
-                    self._state["x"][1]
+                    "VISUAL_MEMORY_AL_" + str(int(self.timenumber)).zfill(2) + "_Y",
+                    self._state["x"][1, 0]
                 )
                 
-                if sym.sqrt(self._state["x"][2]**2 + self._state["x"][3]**2) > self._bkb.read_float("VISUAL_MEMORY_AL_" + str(self.__robotnumber).zfill(2) + "_MAX_VEL"):
+                if sym.sqrt(self._state["x"][2, 0]**2 + self._state["x"][3, 0]**2) > self._bkb.read_float("VISUAL_MEMORY_AL_" + str(int(self.timenumber)).zfill(2) + "_MAX_VEL"):
                     self._bkb.write_float(
-                        "VISUAL_MEMORY_AL_" + str(self.__robotnumber).zfill(2) + "_MAX_VEL",
-                        sym.sqrt(self._state["x"][2]**2 + self._state["x"][3]**2)
+                        "VISUAL_MEMORY_AL_" + str(int(self.timenumber)).zfill(2) + "_MAX_VEL",
+                        sym.sqrt(self._state["x"][2, 0]**2 + self._state["x"][3, 0]**2)
                     )
+                
+                self._bkb.write_float(
+                    "VISUAL_MEMORY_AL_" + str(int(self.timenumber)).zfill(2) + "_LOC",
+                    1
+                )
             else:
                 self._bkb.write_float(
-                    "VISUAL_MEMORY_OP_" + str(self.__robotnumber).zfill(2) + "_X",
-                    self._state["x"][0]
+                    "VISUAL_MEMORY_OP_" + str(-int(self.timenumber)).zfill(2) + "_X",
+                    self._state["x"][0, 0]
                 )
                 self._bkb.write_float(
-                    "VISUAL_MEMORY_OP_" + str(self.__robotnumber).zfill(2) + "_Y",
-                    self._state["x"][1]
+                    "VISUAL_MEMORY_OP_" + str(-int(self.timenumber)).zfill(2) + "_Y",
+                    self._state["x"][1, 0]
                 )
                 
-                if sym.sqrt(self._state["x"][2]**2 + self._state["x"][3]**2) > self._bkb.read_float("VISUAL_MEMORY_AL_" + str(self.__robotnumber).zfill(2) + "_MAX_VEL"):
+                if sym.sqrt(self._state["x"][2, 0]**2 + self._state["x"][3, 0]**2) > self._bkb.read_float("VISUAL_MEMORY_OP_" + str(-int(self.timenumber)).zfill(2) + "_MAX_VEL"):
                     self._bkb.write_float(
-                        "VISUAL_MEMORY_OP_" + str(self.__robotnumber).zfill(2) + "_MAX_VEL",
-                        sym.sqrt(self._state["x"][2]**2 + self._state["x"][3]**2)
+                        "VISUAL_MEMORY_OP_" + str(-int(self.timenumber)).zfill(2) + "_MAX_VEL",
+                        sym.sqrt(self._state["x"][2, 0]**2 + self._state["x"][3, 0]**2)
                     )
+                
+                self._bkb.write_float(
+                    "VISUAL_MEMORY_OP_" + str(-int(self.timenumber)).zfill(2) + "_LOC",
+                    1
+                )
     
     ## predictThread
     # .
@@ -119,9 +159,6 @@ class Robots(BasicThread):
     ## updateVector
     # .
     def __updateVector(self, data):
-        if data["tag"] != 0:
-            self.timenumber = data["tag"]
-        
         super(Robots, self).update(data)
     
     ## updateThread
@@ -157,10 +194,10 @@ class Robots(BasicThread):
         self.__lastposdata = copy(self.__posdata)
         
         self.weight = sym.exp(
-            -0.5*sym.transpose(sym.Matrix(self.__posdata) - self.state["x"][:2,:2])*
-            self.state["covariance"][:2,:2]*
-            (sym.Matrix(self.__posdata) - self.state["x"][:2,:2])
-        )[0]
+            -0.5*sym.transpose(sym.Matrix(self.__posdata) - self._state["x"][:2,:2])*
+            self._state["covariance"][:2,:2]*
+            (sym.Matrix(self.__posdata) - self._state["x"][:2,:2])
+        )[0, 0]
     
     ## __lt__
     # .

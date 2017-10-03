@@ -41,7 +41,8 @@ class Landmark(KalmanFilter):
         
         # Creating characteristic variables for landmarks and reading.
         self._parameters.update({
-            "linear_acceleration": True
+            "linear_acceleration": True,
+            "precision": 0.6,
         })
         
         self._parameters = self._conf.readVariables(self._parameters)
@@ -55,6 +56,13 @@ class Landmark(KalmanFilter):
         self._predictedstate["covariance"] = self._speeds[data["movement"]]["R"]
         
         super(Landmark, self).update(data)
+        
+        if self._predictedstate["covariance"][0, 0] < self._parameters['precision'] and self._predictedstate["covariance"][1, 1] < self._parameters['precision']:
+            self._bkb.write_float("VISUAL_MEMORY_LAND_X", self._predictedstate["x"][0,0])
+            self._bkb.write_float("VISUAL_MEMORY_LAND_Y", self._predictedstate["x"][1,0])
+            self._bkb.write_float("VISUAL_MEMORY_LAND_LOC", 1)
+        else:        
+            self._bkb.write_float("VISUAL_MEMORY_LAND_LOC", 0)
         
         return [data["movement"], self._predictedstate["x"], self._predictedstate["covariance"]]
     
