@@ -91,12 +91,12 @@ class KalmanFilter(Basic):
     ## Constructor Class
     # Responsible for starting the matrices of kalman patterns.
     @abstractmethod
-    def __init__(self, s, obj):
+    def __init__(self, a, s, obj):
         self._predictedstate = { }
         self._state = { }
         
         # Instantiating parent class
-        super(KalmanFilter,self).__init__("Kalman Filter", obj)
+        super(KalmanFilter,self).__init__(a, "Kalman Filter", obj)
         
         # Creating standard parameters and reading
         self._parameters = {

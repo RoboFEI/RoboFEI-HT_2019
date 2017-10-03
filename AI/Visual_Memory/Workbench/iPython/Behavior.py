@@ -73,7 +73,7 @@ class Behavior(Basic):
         for i in xrange(-self.parameters["number_robots"]/2, self.parameters["number_robots"]/2):
             if i == 0:
                 continue
-            self.__newrobots.append(Robots(self.me, self.__posrobot, i))
+            self.__newrobots.append(Robots(self.args, self.me, self.__posrobot, i))
         
     ## readDataLandmarks
     # Responsible for reading the data coming from the vision system.

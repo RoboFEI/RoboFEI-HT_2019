@@ -23,6 +23,10 @@ class Basic(object):
     
     # ---- Variables ----
     
+    ## _args
+    # Input arguments.
+    _args = None
+    
     ## _conf
     # Variable used to instantiate class ConfigIni.
     _conf = None
@@ -34,8 +38,8 @@ class Basic(object):
     ## Constructor Class
     # Instantiating default classes.
     @abstractmethod
-    def __init__(self, obj, func):
-        # Instantiating default classes
+    def __init__(self, a, obj, func):
+        self._args = a
         self._conf = ConfigIni(obj, func)
         self._bkb = Blackboard( )
         

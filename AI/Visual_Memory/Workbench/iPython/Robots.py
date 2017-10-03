@@ -47,10 +47,10 @@ class Robots(BasicThread):
     def reset(self):
         super(Robots, self)._reset( )
         
-        self._A = self._A[:-2,:-2]
-        self._B = self._B[:-2,:]
-        self._R = self._R[:-2,:-2]
-        self._C = self._C[:,:-2]
+        self.self._A = self.self._A[:-2,:-2]
+        self.self._B = self.self._B[:-2,:]
+        self.self._R = self.self._R[:-2,:-2]
+        self.self._C = self.self._C[:,:-2]
         
         self._predictedstate["x"] = self._predictedstate["x"][:-2,:]
         self._predictedstate["covariance"] = self._predictedstate["covariance"][:-2,:-2]
@@ -70,9 +70,9 @@ class Robots(BasicThread):
         self.timenumber = 0 
     
     ## Constructor Class
-    def __init__(self, s, pos, n):
+    def __init__(self, a, s, pos, n):
         # Instantiating constructor for inherited class.
-        super(Robots, self).__init__(s, "Robots")
+        super(Robots, self).__init__(a, s, "Robots")
         
         self.timenumber = n
         
@@ -82,7 +82,7 @@ class Robots(BasicThread):
         self._parameters.update({
             "precision": 0.6
         })
-        self._parameters = self._conf.readVariables(self._parameters)
+        self._parameters = self.self._conf.readVariables(self._parameters)
         
         self.reset( )
         
@@ -96,6 +96,16 @@ class Robots(BasicThread):
         tnow, movements = vector
         super(Robots, self).predict(tnow, movements)
         
+        if self._args.savedata == True:
+            np.save(
+                "./Data/" + self.getName() + "-Robots.txt",
+                [
+                    [float(i) for i in self._state["x"][:,0]],
+                    [self._state["covariance"][i,i] for i in xrange(self._state["covariance"].shape[0])],
+                    [float(i) for i in self._state["covariance"][:,0]],
+                    self._state["time"]
+                ]                
+            )
         if tnow == None and self.timenumber != 0:
             if self._predictedstate["covariance"][0, 0] > self._parameters['precision'] or self._predictedstate["covariance"][1, 1] > self._parameters['precision']:
                 if self.timenumber > 0:
@@ -154,7 +164,7 @@ class Robots(BasicThread):
     # .
     def predictThread(self, tnow = None, movements = None):
         self.__listfunction.append([self.__predictVector, [tnow, movements]])
-        self._resume( )
+        self.self._resume( )
     
     ## updateVector
     # .

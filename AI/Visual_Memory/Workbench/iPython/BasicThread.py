@@ -16,7 +16,6 @@ from KalmanFilter import * # Class responsible for implementing kalman filter me
 ## Class to BasicThread
 # Responsible for implementing the methods and variables responsible for managing the thread.
 class BasicThread(KalmanFilter, Thread):
-    __metaclass__ = ABCMeta
     
     # ---- Variables ----
     
@@ -48,10 +47,9 @@ class BasicThread(KalmanFilter, Thread):
             self.__pauseistrue = False
     
     ## Constructor Class
-    @abstractmethod
-    def __init__(self, s, obj):
+    def __init__(self, a, s, obj):
         # Starting parent classes
-        super(BasicThread, self).__init__(s, obj)
+        super(BasicThread, self).__init__(a, s, obj)
         
         Thread.__init__(self)
         
@@ -63,7 +61,6 @@ class BasicThread(KalmanFilter, Thread):
         
     ## run
     # .
-    @abstractmethod
     def run(self):
         self._running = True
         while self._running:
