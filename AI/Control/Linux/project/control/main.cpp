@@ -19,10 +19,12 @@ Arquivo fonte contendo o programa que controla os servos do corpo do robô
 #include <stdlib.h>
 #include <signal.h>
 #include <fstream>
+#include <sstream>
 #include <time.h>
 
 #include "minIni.h"
 #include <string>
+#include <sstream>
 
 #include "MX28.h"
 #include "MotionManager.h"
@@ -53,6 +55,8 @@ int kbhit(); //Function kbhit.cpp
 int check_servo(CM730 *cm730, int idServo, bool &stop_gait);
 
 int Initialize_servo(char *string1);
+
+void Get_Servo_Pos(CM730 *cm730, int V[], int x);
 
 void logInit();
 
@@ -119,6 +123,23 @@ int main(int argc, char **argv)
     po::store(po::parse_command_line(argc, argv, desc), variables);
     po::notify(variables); 
     //--------------------------------------------------------------------------
+
+    //======================== Set motor`s variables on blackboard ====================    
+ 
+    int n = 12; 		// Número de motores que serão escritos na blackboard	
+    int V[12] = {		// Atribuindo para cada valor do vetor a variável correspondente na blackboard
+		Motor_Read_7, 
+		Motor_Read_8, 
+		Motor_Read_9, 
+		Motor_Read_10, 
+		Motor_Read_11,
+		Motor_Read_12, 
+		Motor_Read_13, 
+		Motor_Read_14,
+		Motor_Read_15,
+		Motor_Read_16,
+		Motor_Read_17,
+		Motor_Read_18};
 
     //////////////////// Framework Initialize ////////////////////////////
     // ---- Open USBDynamixel -----------------------------------------------{
@@ -212,7 +233,7 @@ int main(int argc, char **argv)
         {
             int key = kbhit();
             usleep(20*1000);
-
+	    Get_Servo_Pos(&cm730, V, n); //Chamada da função que escreve a posição dos servos na blackboard
             //mantem o key com valor da tecla f ou k para realizar o soft_starter-----
             if(key!=0)
             {
@@ -354,6 +375,7 @@ int main(int argc, char **argv)
     logInit(); // save the time when start the control process
     while(1)
     {
+	    Get_Servo_Pos(&cm730, V, n);
             //Confere se o movimento atual e o mesmo do anterior----------
             if(buffer==read_int(mem, DECISION_ACTION_A))
                 same_moviment = true;
@@ -524,6 +546,17 @@ int Initialize_servo(char *string1)
     std::cout<<"Endereço: "<<"/dev/robot/body"<<std::endl;
     std::cout<<"\e[0;36mVerifique se a chave que liga os servos motores está na posição ligada.\n\n\e[0m"<<std::endl;
     return 1;
+}
+
+void Get_Servo_Pos(CM730 *cm730, int V[], int x)
+{
+    int Pos_Servo;
+    for(int i=0; i<x; i++) // Varrendo o vetor e escrevendo a posição dos motores em sua respectiva blackboard
+    {
+	int id=i+7;
+	cm730->ReadWord(id, MX28::P_PRESENT_POSITION_L, &Pos_Servo, 0); // Read the servo position 
+	write_int(mem, V[i], Pos_Servo); //Writing the servo position on the blackboard
+    }
 }
 
 int check_servo(CM730 *cm730, int idServo, bool &stop_gait)

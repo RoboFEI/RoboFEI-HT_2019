@@ -5,9 +5,9 @@ include_directories(
 )
 
 set(LIB_DARWIN ${RoboFEI-HT_SOURCE_DIR}/Control/Linux/lib/darwin.a)
-add_executable(Odometria ${RoboFEI-HT_SOURCE_DIR}/Odometria/Odometria.cpp)
+add_executable(Odometry ${RoboFEI-HT_SOURCE_DIR}/Odometry/Odometry.cpp)
 
-target_link_libraries(Odometria blackboard ${LIB_DARWIN} -Wno-write-strings -lpthread -lrt ${Boost_LIBRARIES})
+target_link_libraries(Odometry blackboard ${LIB_DARWIN} -Wno-write-strings -lpthread -lrt ${Boost_LIBRARIES})
 
 
 
