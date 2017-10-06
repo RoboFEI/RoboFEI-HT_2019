@@ -553,7 +553,7 @@ void Get_Servo_Pos(CM730 *cm730, int V[], int x)
     int Pos_Servo;
     for(int i=0; i<x; i++) // Varrendo o vetor e escrevendo a posição dos motores em sua respectiva blackboard
     {
-	int id=i+7;
+	int id=i+7; // Coinicidir com os respectivos valores de id 
 	cm730->ReadWord(id, MX28::P_PRESENT_POSITION_L, &Pos_Servo, 0); // Read the servo position 
 	write_int(mem, V[i], Pos_Servo); //Writing the servo position on the blackboard
     }
