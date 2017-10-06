@@ -10,6 +10,7 @@ int main()
 {
 	unsigned int microseconds;
 
+	int M[12], Motor, i=0, k, id;
 	float x, y, z;
 
 	minIni* ini;
@@ -21,12 +22,25 @@ int main()
 		x = read_float(mem, IMU_EULER_X);
 		y = read_float(mem, IMU_EULER_Y);
 		z = read_float(mem, IMU_EULER_Z);
+
+		for(id=7; id<19; id++) 
+    		{
+			Motor = id+101; //soma 101 para que os valores de id sejam equivalentes aos indices de variáveis da blackboard
+			M[i] = read_int(mem, Motor); //Read the servo position on the blackboard
+			i++;
+    		}
 	
 		cout<<"x: "<<x<<endl;
 		cout<<"y: "<<y<<endl;
 		cout<<"z: "<<z<<endl;
-		
-		cout <<"\033[2J\033[1;1H";
+
+		for(i=0; i<12; i++) 
+    		{
+			k = i+7; //Incrementa o indice do respectivo motor
+			cout << "Motor"<<k<<": "<<M[i]<<endl; //Apresenta valores dos motores
+    		}
+	
+		cout <<"\033[2J\033[1;1H"; //Clean the terminal screen
 		
 		usleep(100000);
 	}
