@@ -20,7 +20,7 @@ NC='\e[0m' # No Color
 echo -e "${Blue}Apagando pastas e arquivos${NC}"
 sleep 1
 cd ..
-rm ./Data/config.ini
+find ./Data/ -not -iname README.md -exec rm {} \;
 rm -r ./include
 rm -r ./src
 rm visualMemory.py
