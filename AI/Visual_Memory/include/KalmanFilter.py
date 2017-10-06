@@ -317,7 +317,7 @@ class KalmanFilter(Basic):
     
     ## predict
     # .
-    def predict(self, tnow = None, movements = None):
+    def _predict(self, tnow = None, movements = None):
         {
             (float, int): self.__predictTime,
             (type(None), int): self.__predictNow,
@@ -325,9 +325,9 @@ class KalmanFilter(Basic):
     
     ## update
     # .
-    def update(self, data):
+    def _update(self, data):
         # Predicting value in observation time.
-        self.predict(data["time"], data["movement"])
+        self._predict(data["time"], data["movement"])
         
         k = self._predictedstate["covariance"] * sym.transpose(self._C) * sym.inv_quick( # covariance*C.T*(_)^(-1)
             self._C * self._predictedstate["covariance"] * sym.transpose(self._C) + self._Q # C*covariance*C.T + Q

@@ -47,6 +47,14 @@ parser.add_argument(
     'Displays the calculated information the parameters used.' # Description of the variable
 )
 
+parser.add_argument(
+    '--savedata', # Full name
+    '--sd', # Abbreviation for the name
+    action = "store_true", # Type variable
+    help = 'Gera dados sobre as previsões feitas.\\' \
+    'Generates data on the forecasts made.' # Description of the variable
+)
+
 args = parser.parse_args()
 
 # ---- Imports ----

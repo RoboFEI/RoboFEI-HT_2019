@@ -42,7 +42,7 @@ class Behavior(Basic):
         self.killedProcess( ) # Function to monitor external process kill.
         self.args = a # Input arguments.
         
-        super(Behavior, self).__init__("Settings", "Visual Memory")
+        super(Behavior, self).__init__(a, "Settings", "Visual Memory")
         
         # Creating default values and reading values
         self.parameters = {
@@ -63,7 +63,7 @@ class Behavior(Basic):
         
         # Creating objects to be tracking
         self.me = Speeds( )
-        self.land = Landmark(self.me)
+        self.land = Landmark(self.args, self.me)
         
         # Support Variables
         self.robots = []
@@ -307,7 +307,7 @@ class Behavior(Basic):
         #         print "datalandmarks:", datalandmarks
         
                 if datalandmarks != []:
-                    # Predict robot speed (me)
+                    # Predict new landmarks position and robot speed (me)
                     self.me.update(self.land.update(datalandmarks.pop(0)))
                 else:
                     # Predicts only the new landmarks position
