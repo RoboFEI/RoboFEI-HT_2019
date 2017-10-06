@@ -11,7 +11,9 @@ NC='\e[0m' # No Color
 #Light Gray   0;37     White         1;37
 
 echo -e "${blue} Configurando sistema...${NC}"
-
+cp ./Config/bashrc ~/.bashrc
+./Config/git-completion.bash ~/git-completion.bash
+./Config/git-prompt.sh ~/git-prompt.sh
 sleep 2
 
 #updates/system changes
@@ -19,8 +21,6 @@ echo -e "${blue} Upgrade ${NC}"
 sudo apt -y upgrade
 echo -e "${blue} Update ${NC}"
 sudo apt -y update
-echo -e "${blue} Terminal color ${NC}"
-sudo sed -i 's/#force/force/g' ~/.bashrc
 
 echo -e "${blue} Instalando softwares...${NC}"
 
@@ -62,6 +62,7 @@ echo -e "${blue} cheese ${NC}"
 sudo apt -y install cheese
 echo -e "${blue} Core library dependencies (Robô Jimmy) ${NC}"
 sudo apt -y install build-essential libncurses5-dev libjpeg-dev mplayer mplayer-skins
+sudo apt -y install git-cola
 
 #Ajuste do auto foco na camera
 sudo apt -y install v4l-utils
@@ -208,6 +209,7 @@ make test
 make runtest
 make pycaffe
 echo 'export PYTHONPATH=~/caffe/python' >> ~/.bashrc
+echo 'export CAFFE_ROOT=~/caffe' >> ~/.bashrc
 #=========================================================================================================================
 
 
@@ -220,6 +222,3 @@ echo -e "${blue} Update ${NC}"
 sudo apt -y update
 
 echo -e "${blue} Configuração realizada ${NC}"
-
-
-
