@@ -11,6 +11,7 @@ import time
 from math import log,exp,tan,radians
 import thread
 import imutils
+from ClassConfig import *
 
 #from BallVision import *
 from DNN import *
@@ -56,126 +57,6 @@ parser.add_argument('--head', '--he', action="store_true", help = 'Configurando 
 #----------------------------------------------------------------------------------------------------------------------------------
 
 
-class classConfig():
-
-	def __init__(self):
-		# Read config.ini
-		self.Config = ConfigParser()
-		x = 0
-		y = 0
-		raio = 0
-
-		self.SERVO_PAN = None
-		self.SERVO_TILT  = None
-
-		self.SERVO_PAN_LEFT = None
-		self.SERVO_PAN_RIGHT  = None
-
-		self.SERVO_TILT_VALUE = None
-		self.SERVO_PAN_VALUE = None
-
-		self.kernel_perto = None
-		self.kernel_perto2 = None
-	
-		self.kernel_medio = None
-		self.kernel_medio2 = None
-
-		self.kernel_longe = None
-		self.kernel_longe2 = None
-
-		self.kernel_muito_longe = None
-		self.kernel_muito_longe2 = None
-
-		self.x_left = None
-		self.x_center_left = None
-		self.x_center = None
-		self.x_center_right = None
-		self.x_right = None
-
-		self.y_chute = None
-		self.y_longe = None
-		self.CheckConfig()
-
-
-
-	def CheckConfig(self):
-		# Read file config.ini
-		while True:
-			if self.Config.read('../Data/config.ini') != []:
-				print 'Leitura do config.ini'
-				self.CENTER_SERVO_PAN = 	self.Config.getint('Basic Settings', 'center_servo_pan')
-				self.POSITION_SERVO_TILT  = 	self.Config.getint('Basic Settings', 'position_servo_tilt')
-
-				self.SERVO_PAN_LEFT = 		self.Config.getint('Basic Settings', 'servo_pan_left')
-				self.SERVO_PAN_RIGHT  = 	self.Config.getint('Basic Settings', 'servo_pan_right')
-
-				self.SERVO_PAN_ID    = 		self.Config.getint('Basic Settings', 'PAN_ID')
-				self.SERVO_TILT_ID   = 		self.Config.getint('Basic Settings', 'TILT_ID')
-
-				self.DNN_type = 		self.Config.get('Basic Settings', 'dnn_type')
-
-				self.white_threshould = 	self.Config.getint('Basic Settings', 'white_threshould')
-
-				self.max_count_lost_frame =   self.Config.getint('Basic Settings', 'max_count_lost_frame') 
-
-				self.kernel_perto =		self.Config.getint('Kernel Selection', 'kernel_perto')
-				self.kernel_perto2 = 		self.Config.getint('Kernel Selection', 'kernel_perto2')
-			
-				self.kernel_medio = 		self.Config.getint('Kernel Selection','kernel_medio')
-				self.kernel_medio2 = 		self.Config.getint('Kernel Selection','kernel_medio2')
-
-				self.kernel_longe = 		self.Config.getint('Kernel Selection', 'kernel_longe')
-				self.kernel_longe2 = 		self.Config.getint('Kernel Selection', 'kernel_longe2')
-
-				self.kernel_muito_longe = 	self.Config.getint('Kernel Selection', 'kernel_muito_longe')
-				self.kernel_muito_longe2 = 	self.Config.getint('Kernel Selection', 'kernel_muito_longe2')
-
-				self.x_left = 			self.Config.getint('Distance Limits (Pixels)', 'Left_Region_Division')
-				self.x_center = 		self.Config.getint('Distance Limits (Pixels)', 'Center_Region_Division')
-				self.x_right = 			self.Config.getint('Distance Limits (Pixels)', 'Right_Region_Division')
-				self.y_chute = 			self.Config.getint('Distance Limits (Pixels)', 'Down_Region_Division')
-				self.y_longe = 			self.Config.getint('Distance Limits (Pixels)', 'Up_Region_Division')
-				break
-
-			else:
-				print 'Falha na leitura do config.ini, criando arquivo\nVision Ball inexistente, criando valores padrao'
-				self.Config = ConfigParser()
-				self.Config.write('../Data/config.ini')
-
-				self.Config.add_section('Basic Settings')
-				self.Config.set('Basic Settings', 'center_servo_pan'       , str(512)+'\t\t\t;Center Servo PAN Position')
-				self.Config.set('Basic Settings', 'position_servo_tilt'      , str(705)+'\t;Center Servo TILT Position')
-
-				self.Config.set('Basic Settings', 'servo_pan_left'   , str(162)+'\t\t\t;Center Servo PAN Position')
-				self.Config.set('Basic Settings', 'servo_pan_right'  , str(862)+'\t;Center Servo TILT Position')
-
-				self.Config.set('Basic Settings', 'PAN_ID'                 , str(19)+'\t\t\t;Servo Identification number for PAN')
-				self.Config.set('Basic Settings', 'TILT_ID'                , str(20)+'\t;Servo Identification number for TILT')
-
-				self.Config.set('Basic Settings', 'dnn_type'                , "r_80_cv4_32_256.tar.gz"+'\t;Dnn type')
-				self.Config.set('Basic Settings', 'white_threshould'        , str(200)+'\t;Threshould')
-
-				self.Config.set('Basic Settings', 'max_count_lost_frame'        , str(10)+'\t;Threshould') 
-
-				self.Config.add_section('Kernel Selection')
-				self.Config.set('Kernel Selection', 'kernel_perto'    , str(39)+'\t\t\t;Kernel Erosion ball is closest the robot')
-				self.Config.set('Kernel Selection', 'kernel_perto2'   , str(100)+'\t;Kernel Dilation ball is closest the robot')
-				self.Config.set('Kernel Selection', 'kernel_medio' , str(22)+'\t\t\t;Kernel Erosion ball is very close to the robot')
-				self.Config.set('Kernel Selection', 'kernel_medio2', str(80)+'\t;Kernel Dilation ball is very close to the robot')
-				self.Config.set('Kernel Selection', 'kernel_longe'      , str(12)+'\t\t\t;Kernel Erosion ball is close to the robot')
-				self.Config.set('Kernel Selection', 'kernel_longe2'     , str(40)+'\t;Kernel Dilation ball is close to the robot')
-				self.Config.set('Kernel Selection', 'kernel_muito_longe'        , str(7)+'\t\t\t;Kernel Erosion ball is far from the robot')
-				self.Config.set('Kernel Selection', 'kernel_muito_longe2'       , str(30)+'\t;Kernel Dilation ball is far from the robot')
-
-				self.Config.add_section('Distance Limits (Pixels)')
-				self.Config.set('Distance Limits (Pixels)', 'Left_Region_Division'         , str(280)+'\t\t\t;X Screen Left division')
-				self.Config.set('Distance Limits (Pixels)', 'Center_Region_Division'       , str(465)+'\t\t\t;X Screen Center division')
-				self.Config.set('Distance Limits (Pixels)', 'Right_Region_Division'        , str(703)+'\t\t\t;X Screen Right division')
-				self.Config.set('Distance Limits (Pixels)', 'Down_Region_Division'         , str(549)+'\t\t\t;Y Screen Down division')
-				self.Config.set('Distance Limits (Pixels)', 'Up_Region_Division'           , str(220)+'\t\t\t;Y Screen Up division')
-
-				with open('../Data/config.ini', 'wb') as configfile:
-					self.Config.write(configfile)
 
 
 class ballStatus():
@@ -219,7 +100,7 @@ class ballStatus():
 	#	# O eixo em pixels é de cima para baixo ja as distancias são ao contrario.
 	#	# Quanto mais alto a bola na tela menor o valor em pixels 
 	#	# e mais longe estará a bola do robô
-		#Bola abaixo
+		#Bola acima
 		if (y < self.config.y_longe):
 			bkb.write_float(Mem,'VISION_TILT_DEG', 70) # Variavel da telemetria
 			print ("Bola acima")
@@ -227,7 +108,7 @@ class ballStatus():
 		if (y < self.config.y_chute and y > self.config.y_longe):
 			bkb.write_float(Mem,'VISION_TILT_DEG', 45) # Variavel da telemetria
 			print ("Bola Centralizada")
-		#Bola acima
+		#Bola abaixo
 		if (y >= self.config.y_chute):
 			bkb.write_float(Mem,'VISION_TILT_DEG', 0) # Variavel da telemetria
 			print ("Bola abaixo")
@@ -304,7 +185,8 @@ if __name__ == '__main__':
 	number_label =  dict(zip(labels, range(len(labels))))
 	print number_label
 ###    #
-
+	if args2.withoutservo == False:
+		Servo(config.CENTER_SERVO_PAN, config.POSITION_SERVO_TILT)
 	ballS = ballStatus(config)
 	detectBall = objectDetect(net, transformer, mean_file, labels, args2.withoutservo, config, bkb, Mem)
 #	detectBall.servo.writeWord(config.SERVO_TILT_ID,34, 70)#olha para o centro
@@ -314,6 +196,8 @@ if __name__ == '__main__':
         cap.set(4,720) #480 720 1080
 	os.system("v4l2-ctl -d /dev/video0 -c focus_auto=0 && v4l2-ctl -d /dev/video0 -c focus_absolute=0")
 	os.system("v4l2-ctl -d /dev/video0 -c saturation=200")
+
+	cut_right = 1280-config.cut_edge_image
 
 	try:
             thread.start_new_thread(thread_DNN, ())
@@ -336,7 +220,7 @@ if __name__ == '__main__':
 		bkb.write_int(Mem,'VISION_WORKING', 1) # Variavel da telemetria
 
 		ret, frame = cap.read()
-		frame = frame[:,200:1100]
+		frame = frame[:,config.cut_edge_image:cut_right]
 
 
 		time.sleep(0.01)

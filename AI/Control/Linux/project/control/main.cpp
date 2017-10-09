@@ -96,7 +96,6 @@ int main(int argc, char **argv)
     unsigned int buffer = 10000;
     unsigned int count_read=0;
     unsigned int step_time=20; // Determina a frequencia de leitura do blackboard
-    bool enable_soft_starter = true;
 
     //Configurando para prioridade maxima para executar este processo-------
     sprintf(string1,"echo fei 123456| sudo -S renice -20 -p %d", getpid());
@@ -230,8 +229,7 @@ int main(int argc, char **argv)
 	    }
             //-------------------------------------------------------------------------
 
-            if(key != 0 && key != 102 && key != 107) // verifica se foi pressionada uma tecla diferente do
-                enable_soft_starter = true;          // andar lento ou andar rapido
+           
 
             switch(key)
             {
@@ -260,7 +258,7 @@ int main(int argc, char **argv)
                 break;
 
                 case 102: //f
-                    gaitMove.walk_foward_fast(stop_gait, same_moviment, enable_soft_starter);
+                    gaitMove.walk_foward_fast(stop_gait, same_moviment);
                 break;
 
                 case 100: //d
@@ -296,7 +294,7 @@ int main(int argc, char **argv)
                 break;
 
                 case 107: //k
-                    gaitMove.walk_foward_slow(stop_gait, true, same_moviment, enable_soft_starter);
+                    gaitMove.walk_foward_slow(stop_gait, true, same_moviment);
                 break;
 
                 case 114: //r
@@ -364,8 +362,6 @@ int main(int argc, char **argv)
                 same_moviment = false;
                 std::cout<< "\nAction " << read_int(mem, DECISION_ACTION_A); // Mostra o valor da ação
                 count_read=0;
-                if(read_int(mem, DECISION_ACTION_A)!=1 && read_int(mem, DECISION_ACTION_A)!=8)
-                    enable_soft_starter = true;          // se diferente de andar lento ou andar rapido
             }
             buffer = read_int(mem, DECISION_ACTION_A);
             //------------------------------------------------------------
@@ -393,7 +389,7 @@ int main(int argc, char **argv)
                 flag_stop = false;
 
             if(read_int(mem, DECISION_ACTION_A) == 1)
-                gaitMove.walk_foward_fast(stop_gait, same_moviment, enable_soft_starter);
+                gaitMove.walk_foward_fast(stop_gait, same_moviment);
 
             if(read_int(mem, DECISION_ACTION_A) == 2)
                 gaitMove.turn_left(stop_gait, true, same_moviment);
@@ -414,7 +410,7 @@ int main(int argc, char **argv)
                 gaitMove.sidle_right(stop_gait, same_moviment);
 
             if(read_int(mem, DECISION_ACTION_A) == 8)
-                gaitMove.walk_foward_slow(stop_gait, false, same_moviment, enable_soft_starter);
+                gaitMove.walk_foward_slow(stop_gait, true, same_moviment);
 
             if(read_int(mem, DECISION_ACTION_A) == 9)
                 gaitMove.turn_around_ball_left(stop_gait, same_moviment);
