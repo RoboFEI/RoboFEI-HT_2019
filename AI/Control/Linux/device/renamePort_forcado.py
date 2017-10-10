@@ -36,8 +36,8 @@ def findInfo(porta):
     serial = string[index+11:index+19]
 
 
-    index = string.find("ATTRS{devnum}==")
-    devnum = string[index+15:index+17]
+    index = string.find("ATTRS{devpath}==")
+    devpath = string[index+16:index+18]
     
     index = string.find("ATTRS{idProduct}==")
     idProduct = string[index+19:index+23]
@@ -45,8 +45,8 @@ def findInfo(porta):
     index = string.find("ATTRS{idVendor}==")
     idVendor = string[index+18:index+22]
 
-#    print serial, idProduct, idVendor, devnum
-    return serial, idProduct, idVendor, devnum
+#    print serial, idProduct, idVendor, devpath
+    return serial, idProduct, idVendor, devpath
 
 
 for i in range(0,4):
@@ -68,18 +68,18 @@ for i in range(0,4):
 #print "portahead", portahead
 #print "portabody", portabody
 try:
-    HEADserial, HEADidProduct, HEADidVendor, HEADdevnum = findInfo(portahead)
+    HEADserial, HEADidProduct, HEADidVendor, HEADdevpath = findInfo(portahead)
     f1 = open("/etc/udev/rules.d/41-ftdi-head.rules", "w")
-    f1.write("KERNEL==\"ttyUSB?\", SUBSYSTEMS==\"usb\", ATTRS{idVendor}==\""+str(HEADidVendor)+"\",  ATTRS{idProduct}==\""+str(HEADidProduct)+"\", ATTRS{devnum}=="+str(HEADdevnum)+"\", ATTRS{serial}==\""+str(HEADserial)+"\", MODE=\"0777\", SYMLINK+=\"robot/head\"\n")
+    f1.write("KERNEL==\"ttyUSB?\", SUBSYSTEMS==\"usb\", ATTRS{idVendor}==\""+str(HEADidVendor)+"\",  ATTRS{idProduct}==\""+str(HEADidProduct)+"\", ATTRS{devpath}=="+str(HEADdevpath)+"\", ATTRS{serial}==\""+str(HEADserial)+"\", MODE=\"0777\", SYMLINK+=\"robot/head\"\n")
     f1.close()
 except:
     print "Não foi possivel criar as regras head"
     print "Verifique se a chave que liga os servos motores está na posição ligada."
     
 try:
-    BODYserial, BODYidProduct, BODYidVendor, BODYdevnum = findInfo(portabody)
+    BODYserial, BODYidProduct, BODYidVendor, BODYdevpath = findInfo(portabody)
     f2 = open("/etc/udev/rules.d/41-ftdi-body.rules", "w")
-    f2.write("KERNEL==\"ttyUSB?\", SUBSYSTEMS==\"usb\", ATTRS{idVendor}==\""+str(BODYidVendor)+"\",  ATTRS{idProduct}==\""+str(BODYidProduct)+"\", ATTRS{devnum}=="+str(BODYdevnum)+"\", ATTRS{serial}==\""+str(BODYserial)+"\", MODE=\"0777\", SYMLINK+=\"robot/body\"")
+    f2.write("KERNEL==\"ttyUSB?\", SUBSYSTEMS==\"usb\", ATTRS{idVendor}==\""+str(BODYidVendor)+"\",  ATTRS{idProduct}==\""+str(BODYidProduct)+"\", ATTRS{devpath}=="+str(BODYdevpath)+"\", ATTRS{serial}==\""+str(BODYserial)+"\", MODE=\"0777\", SYMLINK+=\"robot/body\"")
     f2.close()
 except:
     print "Não foi possivel criar as regras body"
