@@ -26,8 +26,7 @@ int main()
 		for(id=7; id<19; id++) 
     		{
 			Motor = id+101; //soma 101 para que os valores de id sejam equivalentes aos indices de variáveis da blackboard
-			M[i] = read_int(mem, Motor); //Read the servo position on the blackboard
-			i++;
+			M[id-7] = read_int(mem, Motor); //Read the servo position on the blackboard
     		}
 	
 		cout<<"x: "<<x<<endl;

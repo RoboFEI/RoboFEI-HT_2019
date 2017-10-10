@@ -47,6 +47,8 @@ Arquivo fonte contendo o programa que controla os servos do corpo do robô
 
 #define LIMITE_TEMP 80    // Define a temperatura maxima dos motores
 
+#define Num_Motor 6 	// Numero de motores a serem escritos na blackboard por varredura 
+
 using namespace Robot;
 using namespace std;
 
@@ -127,7 +129,7 @@ int main(int argc, char **argv)
     //======================== Set motor`s variables on blackboard ====================    
  
     int n = 12; 		// Número de motores que serão escritos na blackboard	
-    int V[12] = {		// Atribuindo para cada valor do vetor a variável correspondente na blackboard
+    int V[n] = {		// Atribuindo para cada valor do vetor a variável correspondente na blackboard
 		Motor_Read_7, 
 		Motor_Read_8, 
 		Motor_Read_9, 
@@ -550,12 +552,16 @@ int Initialize_servo(char *string1)
 
 void Get_Servo_Pos(CM730 *cm730, int V[], int x)
 {
+    static int j=0;
     int Pos_Servo;
-    for(int i=0; i<x; i++) // Varrendo o vetor e escrevendo a posição dos motores em sua respectiva blackboard
+    for(int i=0; (i<Num_Motor && j<x); i++, j++) // Varrendo e escrevendo na blackboard a quantidade de motores especificadas pelo define Num_Motor 
     {
-	int id=i+7; // Coinicidir com os respectivos valores de id 
-	cm730->ReadWord(id, MX28::P_PRESENT_POSITION_L, &Pos_Servo, 0); // Read the servo position 
-	write_int(mem, V[i], Pos_Servo); //Writing the servo position on the blackboard
+	cm730->ReadWord((j+7), MX28::P_PRESENT_POSITION_L, &Pos_Servo, 0); // Read the servo position. (i+7):Coinicidir com os respectivos ids
+	write_int(mem, V[j], Pos_Servo); //Writing the servo position on the blackboard
+    }
+    if (j>(x-1))
+    {
+	j = 0;
     }
 }
 
