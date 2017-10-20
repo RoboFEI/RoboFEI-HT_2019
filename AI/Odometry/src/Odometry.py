@@ -28,6 +28,7 @@ class Odometry:
 	def Get_Bkb_Values(self, Item, Type):
 
 		Var={'int': self.bkb.read_int,  'float':self.bkb.read_float}	#Verifica pelo argumento Type se o tipo a ser lido é int ou float
+
 		self.Valbkb = []	#Cria vetor que vai acessar e ler os valores da BlackBoard
 
 		for i in Item:
@@ -65,11 +66,4 @@ ValIMU.Get_Bkb_Values(IMU, 'float')
 
 ValMot.Print()
 ValIMU.Print()
-
-
-
-
-
-
-
 
