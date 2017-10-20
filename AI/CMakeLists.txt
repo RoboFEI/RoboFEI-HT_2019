@@ -6,7 +6,7 @@ add_subdirectory(Communication)
 add_subdirectory(Control)
 add_subdirectory(Vision)
 add_subdirectory(IMU)
-add_subdirectory(Odometry)
+
 
 
 

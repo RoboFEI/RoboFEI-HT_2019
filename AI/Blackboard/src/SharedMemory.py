@@ -144,7 +144,19 @@ class SharedMemory(object):
     'IMU_WORKING': 105,
     'VOLTAGE': 106,
     'DECISION_LOCALIZATION': 107,
-    }
+    'Motor_Read_7': 108,
+    'Motor_Read_8': 109,
+    'Motor_Read_9': 110,
+    'Motor_Read_10': 111,
+    'Motor_Read_11': 112,
+    'Motor_Read_12': 113,
+    'Motor_Read_13': 114,
+    'Motor_Read_14': 115,
+    'Motor_Read_15': 116,
+    'Motor_Read_16': 117,
+    'Motor_Read_17': 118,
+    'Motor_Read_18': 119,
+     }
 
     variable_float = {
     'IMU_GYRO_X': 1,
