@@ -1,5 +1,15 @@
 # coding: utf-8
 
+# ****************************************************************************
+# * @file: Robots.py
+# * @project: ROBOFEI-HT - FEI 😛
+# * @author: Vinicius Nicassio Ferreira
+# * @version: V0.0.1
+# * @created: 23/10/2017
+# * @e-mail: vinicius.nicassio@gmail.com
+# * @brief: Class Robots
+# ****************************************************************************
+
 # ---- Imports ----
 
 # Libraries to be used.

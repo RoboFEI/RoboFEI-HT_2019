@@ -1,5 +1,15 @@
 # coding: utf-8
 
+# ****************************************************************************
+# * @file: KalmanFilter.py
+# * @project: ROBOFEI-HT - FEI 😛
+# * @author: Vinicius Nicassio Ferreira
+# * @version: V0.0.1
+# * @created: 23/10/2017
+# * @e-mail: vinicius.nicassio@gmail.com
+# * @brief: Class KalmanFilter
+# ****************************************************************************
+
 # ---- Imports ----
 
 # Libraries to be used.

@@ -1,5 +1,15 @@
 # coding: utf-8
 
+# ****************************************************************************
+# * @file: ConfigIni.py
+# * @project: ROBOFEI-HT - FEI 😛
+# * @author: Vinicius Nicassio Ferreira
+# * @version: V0.0.1
+# * @created: 23/10/2017
+# * @e-mail: vinicius.nicassio@gmail.com
+# * @brief: Class ConfigIni
+# ****************************************************************************
+
 # ---- Imports ----
 
 # Libraries to be used.
@@ -40,7 +50,11 @@ class ConfigIni(object):
     __conf = None
     
     ## Constructor Class
-    def __init__(self, obj, func):
+    def __init__(self, obj, func, address=None):
+        # Testing new address
+        if address != None:
+            self.__address = address
+        
         # Instantiating class variables.
         self.__myobject = obj
         self.__function = func

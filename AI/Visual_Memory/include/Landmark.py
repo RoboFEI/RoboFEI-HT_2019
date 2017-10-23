@@ -1,5 +1,15 @@
 # coding: utf-8
 
+# ****************************************************************************
+# * @file: Landmark.py
+# * @project: ROBOFEI-HT - FEI 😛
+# * @author: Vinicius Nicassio Ferreira
+# * @version: V0.0.1
+# * @created: 23/10/2017
+# * @e-mail: vinicius.nicassio@gmail.com
+# * @brief: Class Landmark
+# ****************************************************************************
+
 # ---- Imports ----
 
 # Libraries to be used.
@@ -59,7 +69,7 @@ class Landmark(KalmanFilter):
         
         # Updating to current instant in time
         if self._predictedstate["time"] != time.time( ):
-            self.predict(tnow = None, movements = 1)
+            _predict(tnow = None, movements = 1)
         else:
             if self._args.savedata == True:
                 try:

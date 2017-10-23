@@ -1,12 +1,11 @@
 # coding: utf-8
 
-#  ----------------------------------------------------------------------------
 #  ****************************************************************************
 #  * @file: visualMemory.py
 #  * @project: ROBOFEI-HT - FEI 😛
 #  * @author: Vinicius Nicassio Ferreira
 #  * @version: V0.0.1
-#  * @created: 22/09/2017
+#  * @created: 23/10/2017
 #  * @e-mail: vinicius.nicassio@gmail.com
 #  * @brief: Visual Memory
 #  ****************************************************************************
