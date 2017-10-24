@@ -27,8 +27,8 @@ from math import degrees
 #to real robots: 14 centimeters
 #to simulated robots: 28 centimeters
 
-distance_to_kick = 40 #real robot
-#distance_to_kick = 29 #simulated robot
+#distance_to_kick = 40 #real robot
+distance_to_kick = 25 #simulated robot
 
 
 ###############################################################################
@@ -49,6 +49,8 @@ class TreatingRawData(object):
         self.mem = self.bkb.shd_constructor(self.mem_key)
 
         self.flag_move_ac = False
+
+        self.count_steps = 0
 
         print
         print 'Raw data - read (get) and write (set) methods'
@@ -155,7 +157,7 @@ class TreatingRawData(object):
 
     def set_walk_backward(self):
         print 'walk backward'
-        self.bkb.write_int(self.mem,'DECISION_ACTION_A', 10)
+        self.bkb.write_int(self.mem,'DECISION_ACTION_A', 18)
 
     def set_gait(self):
         print 'gait'
@@ -178,6 +180,18 @@ class TreatingRawData(object):
     def set_vision_robot(self):
         self.bkb.write_int(self.mem,'DECISION_ACTION_VISION', 2)
         #return time.sleep(2)
+    
+    def go_back_and_align(self):
+        for i in range(self.count_steps):
+            self.set_walk_backward()
+            time.sleep(0.2)
+        self.count_steps = 0
+        while (self.get_orientation() > 10 or self.get_orientation() < -10):
+            if self.get_orientation() > 10:
+                self.set_turn_right()
+            elif self.get_orientation() < -10:
+                self.set_turn_left()
+        self.set_stand_still()
 
 ##############################################################################
 
@@ -453,8 +467,8 @@ class NaiveIMUDecTurning(TreatingRawData):
     def decision(self, referee):
 
         print self.get_motor_pan_degrees()
-	print self.get_motor_tilt_degrees()
-	print 'search status ', self.get_search_status()
+        print self.get_motor_tilt_degrees()
+        print 'search status ', self.get_search_status()
 
         if referee == 1:  # stopped
             print 'stand'
@@ -638,10 +652,188 @@ class Quarterback(Ordinary):
 
 ##############################################################################
 
+class GolieSimulator(Ordinary):
+    " " " Golie class " " "
+
+    def __init__(self):
+        super(GolieSimulator, self).__init__()
+        print
+        print  'Golie behavior called'
+        print
+        self.kickoff_ctrl = 0
+
+    def decision(self, referee):
+        print self.get_motor_pan_degrees()
+        print self.get_motor_tilt_degrees()
+        print 'search status ', self.get_search_status()
+
+        if referee == 1:  # stopped
+            print 'stand'
+            self.set_stand_still()
+
+        elif referee == 11:  # ready
+            print 'ready'
+            #new rule: the robot must to enter in the soccer field
+            self.set_stand_still()
+
+        elif referee == 12:  # set
+            print 'set'
+            self.set_stand_still()
+
+
+        elif referee == 2:  # play
+            self.kickoff_ctrl = 1
+            #print 'dist_ball', self.get_dist_ball()
+            print 'orientation', self.get_orientation()
+
+            if self.bkb.read_int(self.mem, 'CONTROL_MOVING') == 1 and self.flag_move_ac==True:
+                self.bkb.write_int(self.mem, 'DECISION_ACTION_A', 0) # Writing in the memory
+                self.flag_move_ac=False
+
+            if self.get_search_status() == 1: # 1 - vision lost
+                print 'vision lost'
+                self.set_stand_still()
+                #thiago decision
+                self.set_vision_search()
+                #self.set_turn_right()
+            elif self.get_search_status() == 0: # 0 - object found
+                # align to the ball
+                if self.get_motor_pan_degrees() > 20 and self.get_motor_pan_degrees() < 160:
+                    self.set_turn_left()
+                    #self.set_stand_still()
+                elif self.get_motor_pan_degrees() < -20 and self.get_motor_pan_degrees() > -160:
+                    self.set_turn_right()
+                    #self.set_stand_still()
+                else:
+
+                    if self.get_dist_ball() < distance_to_kick and self.get_motor_pan_degrees() <= 0:
+                        if self.get_orientation() <= 90 and self.get_orientation() >= -90:
+                            self.set_kick_right()
+                            #self.go_back_and_align()
+                        elif self.get_orientation() > 90:
+                            #revolve_clockwise:
+                            self.set_pass_right()
+                            #########
+                        elif self.get_orientation() < -90:
+                            #revolve_anticlockwise:
+                            self.set_pass_left()
+                            #########
+                    elif self.get_dist_ball() < distance_to_kick and self.get_motor_pan_degrees() > 0:
+                        if self.get_orientation() <= 90 and self.get_orientation() >= -90:
+                            self.set_kick_left()
+                            #self.go_back_and_align()
+                        elif self.get_orientation() > 90:
+                            #revolve_clockwise:
+                            self.set_pass_right()
+                            #########
+                        elif self.get_orientation() < -90:
+                            #revolve_anticlockwise:
+                            self.set_pass_left()
+                            #########
+                    elif self.get_dist_ball() > 100:
+                        self.go_back_and_align()
+                        self.set_stand_still()
+                    else:
+                        self.set_walk_forward_slow((self.get_dist_ball() / 6))
+                        self.count_steps += 1
+                        print 'steps: ',self.count_steps
+
+                        # time.sleep(0.5)
+                        # self.set_stand_still()
+        else:
+            print 'Invalid argument received from referee!'
+            print referee
+
+
+
 class Golie(Ordinary):
     " " " Golie class " " "
 
     def __init__(self):
+        super(Golie, self).__init__()
         print
         print  'Golie behavior called'
         print
+        self.kickoff_ctrl = 0
+
+    def decision(self, referee):
+        print self.get_motor_pan_degrees()
+        print self.get_motor_tilt_degrees()
+        print 'search status ', self.get_search_status()
+
+        if referee == 1:  # stopped
+            print 'stand'
+            self.set_stand_still()
+
+        elif referee == 11:  # ready
+            print 'ready'
+            #new rule: the robot must to enter in the soccer field
+            self.set_stand_still()
+
+        elif referee == 12:  # set
+            print 'set'
+            self.set_stand_still()
+
+
+        elif referee == 2:  # play
+            self.kickoff_ctrl = 1
+            #print 'dist_ball', self.get_dist_ball()
+            print 'orientation', self.get_orientation()
+
+            if self.bkb.read_int(self.mem, 'CONTROL_MOVING') == 1 and self.flag_move_ac==True:
+                self.bkb.write_int(self.mem, 'DECISION_ACTION_A', 0) # Writing in the memory
+                self.flag_move_ac=False
+
+            if self.get_search_status() == 1: # 1 - vision lost
+                print 'vision lost'
+                self.go_back_and_align()
+                self.set_stand_still()
+                #thiago decision
+                self.set_vision_search()
+                #self.set_turn_right()
+            elif self.get_search_status() == 0: # 0 - object found
+                # align to the ball
+                if self.get_motor_pan_degrees() == 60:
+                    self.set_turn_left()
+                    #self.set_stand_still()
+                elif self.get_motor_pan_degrees() == -60:
+                    self.set_turn_right()
+                    #self.set_stand_still()
+                else:
+
+                    if self.get_motor_tilt_degrees() == 0 and self.get_motor_pan_degrees() == -30:
+                        if self.get_orientation() <= 40 and self.get_orientation() >= -40:
+                            self.set_kick_right()
+                        elif self.get_orientation() > 40:
+                            #revolve_clockwise:
+                            self.set_pass_right()
+                            #########
+                        elif self.get_orientation() < -40:
+                            #revolve_anticlockwise:
+                            self.set_pass_left()
+                            #########
+                    elif self.get_motor_tilt_degrees() == 0  and self.get_motor_pan_degrees() == 30:
+                        if self.get_orientation() <= 40 and self.get_orientation() >= -40:
+                            self.set_kick_left()
+                        elif self.get_orientation() > 40:
+                            #revolve_clockwise:
+                            self.set_pass_right()
+                            #########
+                        elif self.get_orientation() < -40:
+                            #revolve_anticlockwise:
+                            self.set_pass_left()
+                            #########                       
+                    elif self.get_motor_tilt_degrees() < 70:
+                        self.set_walk_forward_slow((self.get_dist_ball() / 6))
+                        self.count_steps += 1
+                        print 'steps: ',self.count_steps
+                    else:
+                        self.go_back_and_align()
+                        self.set_stand_still()
+
+
+                        # time.sleep(0.5)
+                        # self.set_stand_still()
+        else:
+            print 'Invalid argument received from referee!'
+            print referee
