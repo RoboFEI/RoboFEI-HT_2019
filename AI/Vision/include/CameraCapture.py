@@ -104,7 +104,7 @@ class CameraCapture(BasicThread):
             'fps': 30,
             'focus': 25,
             'saturation': 128,
-            'resolution': '1280x720'
+            'resolution': '2304x1536'
         }
         self.__observation = self._conf.readVariables(self.__observation)
         
@@ -133,13 +133,21 @@ class CameraCapture(BasicThread):
         while self._running:
             start = time.time()
             
-            ret, self.__observation['frame'] = self.__camera.read()
+            __, self.__observation['frame'] = self.__camera.read()
             self.__observation['pos_tilt'] = self._bkb.read_float('VISION_TILT_DEG')
             self.__observation['pos_pan'] = self._bkb.read_float('VISION_PAN_DEG')
             self.__observation['time'] = time.localtime()
             
             if self._args.camera == True:
-                cv2.imshow('Camera parameters', self.__observation['frame'])
+                cv2.imshow(
+                    'Camera parameters',
+                    cv2.resize(
+                        self.__observation['frame'],
+                        None,
+                        fx=380.0/self.__observation['frame'].shape[0],
+                        fy=380.0/self.__observation['frame'].shape[0]
+                    )
+                )
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     self._args.camera = 'off'
                     cv2.destroyAllWindows()
