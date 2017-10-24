@@ -15,19 +15,13 @@ NC='\e[0m' # No Color
 #Brown/Orange	0;33		Yellow				1;33
 #Light Gray		0;37		White					1;37
 
-echo -e "${Blue}Apagando pastas e arquivos${NC}"
-sleep 1
-cd ./include
-rm -r ./*.py ./*.pyc
-cd ../
+echo -e "${Blue}Qual o nome da nova classe${NC}"
+read class
 
-cd ./src
-rm -r ./*.py ./*.pyc
-cd ../
+cp ./Classes/CLASSE_EXEMPLO.ipynb CLASSE_EXEMPLO.ipynb
 
-rm ./vision.py
-rm ./pointsCalibration.py
+sed -i "s/CLASSE_EXEMPLO/$class/g" CLASSE_EXEMPLO.ipynb
 
-echo -e "${Light_Green}"
-read -t 1 -p "Finalizado, pressione qualquer tecla para fechar"
-echo "${NC}"
+mv CLASSE_EXEMPLO.ipynb "$class.ipynb"
+
+notify-send "Classe criada"

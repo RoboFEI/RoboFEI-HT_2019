@@ -1,5 +1,15 @@
 # coding: utf-8
 
+# ****************************************************************************
+# * @file: BasicThread.py
+# * @project: ROBOFEI-HT - FEI 😛
+# * @author: Vinicius Nicassio Ferreira
+# * @version: V0.0.1
+# * @created: 23/10/2017
+# * @e-mail: vinicius.nicassio@gmail.com
+# * @brief: Class BasicThread
+# ****************************************************************************
+
 # ---- Imports ----
 
 # Libraries to be used.
@@ -7,52 +17,88 @@ import sys
 sys.path.append('../include')
 sys.path.append('../src')
 
-# The standard libraries used in the vision system.
-from abc import ABCMeta, abstractmethod # Used to create abstract classes
+# The standard libraries used in the visual memory system.
 from threading import Thread, Condition, Lock # Used to create classes with thread functions
 
 # Used class developed by RoboFEI-HT.
-from BasicClass import * # Class that implements similar functions between classes.
-from Blackboard import * # Class responsible for accessing shared memory.
-from VisionException import * # Used to handle exceptions
+from BasicProcesses import * # Standard and abstract class.
 
-## Basic Class - Thread
-# Class that implements similar functions between classes used thread.
-class BasicThread(BasicClass, Thread):
-	__metaclass__ = ABCMeta
-	
-	# ---- Variables ----
-	
-	## bkb
-	# Protected variable responsible for communication with shared memory (blackboard).
-	_bkb = None
-	
-	## running
-	_running = False
-	
-	## pausethread
-	_pausethread = None
-	
-	## Constructor Class
-	@abstractmethod
-	def __init__(self, arg, name = None, func = None):
-		
-		Thread.__init__(self)
-		
-		if name != None and func != None:
-			super(BasicThread, self).__init__(arg, name, func)
-		else:
-			super(BasicThread, self).__init__(arg)
-		
-		self._bkb = Blackboard( )
-		
-		self._pausethread = Condition(Lock())
-		
-	## pause
-	def _pause(self):
-		self._pausethread.acquire()
-	
-	## resume
-	def _resume(self):
-		self._pausethread.notify()
-		self._pausethread.release()
+## Class to BasicThread
+# Responsible for implementing the methods and variables responsible for managing the thread.
+class BasicThread(BasicProcesses, Thread):
+    __metaclass__ = ABCMeta
+    
+    # ---- Variables ----
+    
+    ## _running
+    # Reports whether the thread is still running.
+    _running = False
+    
+    ## __pauseistrue
+    # Variable responsible for managing thread pause and execution.
+    __pauseistrue = False
+    
+    ## _pausethread
+    # Variable responsible for managing thread pause and execution.
+    _pausethread = None
+    
+    ## pause
+    # Function responsible for stopping thread execution.
+    def _pause(self):
+        if not self.__pauseistrue:
+            self._pausethread.acquire()
+            self.__pauseistrue = True
+    
+    ## resume
+    # Responsible function for releasing the thread for execution.
+    def _resume(self):
+        if self.__pauseistrue:
+            self._pausethread.notify()
+            self._pausethread.release()
+            self.__pauseistrue = False
+    
+    ## Constructor Class
+    @abstractmethod
+    def __init__(self, a, s, obj):
+        # Starting parent classes
+        super(BasicThread, self).__init__(a, s, obj)
+        
+        Thread.__init__(self)
+        
+        # Instantiating control variable.
+        self._pausethread = Condition(Lock( ))
+        
+        # Stopping the process.
+        self._pause( )
+        
+    ## run
+    # Sample function for a thread.
+    @abstractmethod
+    def run(self):
+        self._running = True
+        while self._running:
+            with self._pausethread:
+                print "Hello Word !"
+                time.sleep(1)
+            self._pause( )
+    
+    ## _finalize
+    # Responsible for closing a thread.
+    def _finalize(self):
+        self._running = False
+        self._resume( )
+        self.join( )
+    
+    ## printPreviousLine
+    # Used to print on previous lines.
+    # @param text Text to be printed.
+    # @param lines Number of rows returned.
+    # @param back Go back to where you were.
+    def printPreviousLine(self, text, lines=1, back=True):
+        for i in xrange(lines):
+            print "\033[F\r",
+        print text
+    
+        if back:
+            for i in xrange(lines - 1):
+                print ""
