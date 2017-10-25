@@ -89,7 +89,7 @@ class objectDetect():
                     if (x==0 and y==0 and raio==0):
                         self.CountLostFrame +=1
                         print("@@@@@@@@@@@@@@@@@@@",self.CountLostFrame)
-                        if self.CountLostFrame==self.config.max_count_lost_frame: 
+                        if self.CountLostFrame>=self.config.max_count_lost_frame: 
                             BallFound = False
                             self.CountLostFrame = 0
                             print("----------------------------------------------------------------------")
@@ -106,6 +106,7 @@ class objectDetect():
 
         if (x!=0 and y!=0 and raio!=0):
             BallFound = True
+            self.CountLostFrame = 0
             print('y ',y, 'x ',x ,'ball_up', self.config.when_ball_up, self.config.SERVO_TILT_ID, self.config.when_ball_down)
             if not self.withoutservo:
                 if y<self.config.when_ball_up:
