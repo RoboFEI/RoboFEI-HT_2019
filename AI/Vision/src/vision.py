@@ -10,8 +10,10 @@ import argparse
 import time
 from math import log,exp,tan,radians
 import thread
+from camvideostream import WebcamVideoStream
 import imutils
 from ClassConfig import *
+
 
 #from BallVision import *
 from DNN import *
@@ -116,32 +118,26 @@ class ballStatus():
 
 
 def thread_DNN():
-	time.sleep(1)
-
-	while True:
-#		script_start_time = time.time()
-
-#		print "FRAME = ", time.time() - script_start_time
-		start1 = time.time()
-
+#	time.sleep(1)
+#	script_start_time = time.time()
+#	print "FRAME = ", time.time() - script_start_time
+	start1 = time.time()
 #===============================================================================
-		ball = False
-		frame_b, x, y, raio, ball, status= detectBall.searchball(frame, args2.visionMask, args2.visionMorph1, args2.visionMorph2, args2.visionMorph3, args2.visionMorph4)
-		print "tempo de varredura = ", time.time() - start1
-		if ball ==False:
-			bkb.write_int(Mem,'VISION_LOST', 1)
-		else:
-			bkb.write_int(Mem,'VISION_LOST', 0)
-			ballS.BallStatus(x,y,status)
-		if args2.visionball:
-			cv2.circle(frame_b, (x, y), raio, (0, 255, 0), 4)
-			cv2.imshow('frame', cv2.resize(frame_b, (720, 480)))
+	ball = False
+	frame_b, x, y, raio, ball, status= detectBall.searchball(frame, args2.visionMask, args2.visionMorph1, args2.visionMorph2, args2.visionMorph3, args2.visionMorph4)
+	print "tempo de varredura = ", time.time() - start1
+	if ball ==False:
+		bkb.write_int(Mem,'VISION_LOST', 1)
+	else:
+		bkb.write_int(Mem,'VISION_LOST', 0)
+		ballS.BallStatus(x,y,status)
+	if args2.visionball:
+		cv2.circle(frame_b, (x, y), raio, (0, 255, 0), 4)
+		cv2.imshow('frame', cv2.resize(frame_b, (720, 480)))
 #===============================================================================
-#		print "tempo de varredura = ", time.time() - start
-		if cv2.waitKey(1) & 0xFF == ord('q'):
-			break
-	cap.release()
-	cv2.destroyAllWindows()
+#	print "tempo de varredura = ", time.time() - start
+#	vcap.stop()
+#	cv2.destroyAllWindows()
 
 
 #----------------------------------------------------------------------------------------------------------------------------------
@@ -191,19 +187,18 @@ if __name__ == '__main__':
 	ballS = ballStatus(config)
 	detectBall = objectDetect(net, transformer, mean_file, labels, args2.withoutservo, config, bkb, Mem)
 #	detectBall.servo.writeWord(config.SERVO_TILT_ID,34, 70)#olha para o centro
-
-	cap = cv2.VideoCapture(0) #Abrindo camera
-        cap.set(3,1280) #720 1280 1920
-        cap.set(4,720) #480 720 1080
+	vcap = WebcamVideoStream(src=0).start() #Abrindo camera
+#        cap.set(3,1280) #720 1280 1920
+#        cap.set(4,720) #480 720 1080
 	os.system("v4l2-ctl -d /dev/video0 -c focus_auto=0 && v4l2-ctl -d /dev/video0 -c focus_absolute=0")
 	os.system("v4l2-ctl -d /dev/video0 -c saturation=255")
 
 	cut_right = 1280-config.cut_edge_image
 
-	try:
-            thread.start_new_thread(thread_DNN, ())
-	except:
-            print "Error Thread"
+#	try:
+#            thread.start_new_thread(thread_DNN, ())
+#	except:
+#            print "Error Thread"
 
 	while True:
 
@@ -217,14 +212,15 @@ if __name__ == '__main__':
 #			detectBall.servo.writeWord(config.SERVO_PAN_ID,30, config.CENTER_SERVO_PAN)#olha para o centro
 #		else:
 #			detectBall.servo.writeWord(config.SERVO_TILT_ID,30, config.POSITION_SERVO_TILT)#olha para o centro
-
 		bkb.write_int(Mem,'VISION_WORKING', 1) # Variavel da telemetria
-
-		ret, frame = cap.read()
+		frame = vcap.read()
 		frame = frame[:,config.cut_edge_image:cut_right]
-
-
-		time.sleep(0.01)
+		thread_DNN()
+		if cv2.waitKey(1) & 0xFF == ord('q'):
+			break
+#		time.sleep(0.01)
+	vcap.stop()
+	cv2.destroyAllWindows()
 
 #===============================================================================
 #===============================================================================
