@@ -76,7 +76,7 @@ class VISION():
             dist = rnd.gauss(dist, dist/10.0) # Adds a gaussian error to the distance
             ang = rnd.gauss(ang, 3.0) # Adds a gaussian error to the angle measure
 
-            self.bkb.write_float(self.Mem, 'VISION_BALL_DIST', dist) # Writes to the Black Board
+            self.bkb.write_float(self.Mem, 'VISION_TILT_DEG', dist) # Writes to the Black Board
             self.bkb.write_float(self.Mem, 'VISION_PAN_DEG', ang) # Writes to the Black Board
         elif control == 1:
             y = self.RetLM() # Gets the landmarks angles
