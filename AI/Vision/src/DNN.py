@@ -88,7 +88,7 @@ class objectDetect():
                         cv2.imshow('Morfologia 4', cv2.resize(maskM, (640, 360))) 
                     if (x==0 and y==0 and raio==0):
                         self.CountLostFrame +=1
-                        print("@@@@@@@@@@@@@@@@@@@",self.CountLostFrame)
+                        print("@@@@@@@@@@@@@@@@@@@",self.CountLostFrame, self.config.max_count_lost_frame)
                         if self.CountLostFrame>=self.config.max_count_lost_frame: 
                             BallFound = False
                             self.CountLostFrame = 0
@@ -99,7 +99,6 @@ class objectDetect():
                             print("----------------------------------------------------------------------")
                             print("----------------------------------------------------------------------")
                             print("----------------------------------------------------------------------")
-                      
                             if not self.withoutservo:
                                 self.servo.writeWord(self.config.SERVO_TILT_ID, 30, self.config.POSITION_SERVO_TILT)
                                 self.status = self.SearchLostBall()
@@ -113,7 +112,7 @@ class objectDetect():
                     self.servo.writeWord(self.config.SERVO_TILT_ID,30, self.config.POSITION_SERVO_TILT + self.config.head_up)
                 if y>self.config.when_ball_down:
                     self.servo.writeWord(self.config.SERVO_TILT_ID, 30, self.config.POSITION_SERVO_TILT)
-                    self.config.max_count_lost_frame -= self.config.max_count_lost_frame_far_ball
+
 
 
         return frame, x, y, raio, BallFound, self.status
