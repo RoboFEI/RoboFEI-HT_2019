@@ -53,10 +53,3 @@ vision.run( )
 # ---- Finalizing process ----
 
 vision.end( )
-
-# import tarfile
-
-# import tarfile
-# tar = tarfile.open("./Data/Rede.tar.gz")
-# tar.extractall(path="./Data/Rede")
-# tar.close()
