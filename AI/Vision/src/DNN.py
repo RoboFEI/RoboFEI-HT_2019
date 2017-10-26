@@ -18,6 +18,7 @@ import sys
 from servo import Servo
 
 import Condensation
+import random as rd
 
 #SERVO_PAN = 19
 #SERVO_TILT = 20
@@ -63,31 +64,32 @@ class objectDetect():
         white_mask = cv2.inRange(YUV_frame[:,:,0], self.config.white_threshould, 255)
 
         if visionMask:
-            cv2.imshow('Frame Mascara', white_mask)
+            
+            cv2.imshow('Frame Mascara', cv2.resize(white_mask, (640, 360)) )
 
 
 #        start2 = time.time()
         BallFound = False
         frame, x, y, raio, maskM = self.Morphology(image , white_mask,self.kernel_perto, self.kernel_perto2,1)
         if visionMorph1:
-            cv2.imshow('Morfologia 1', maskM)
+            cv2.imshow('Morfologia 1',cv2.resize(maskM, (640, 360)))
 #        print "Search = ", time.time() - start2 
         if (x==0 and y==0 and raio==0):
             frame, x, y, raio, maskM = self.Morphology(image, white_mask,self.kernel_medio ,self.kernel_medio2,2)
             if visionMorph2:
-                cv2.imshow('Morfologia 2', maskM)
+                cv2.imshow('Morfologia 2', cv2.resize(maskM, (640, 360)))
             if (x==0 and y==0 and raio==0):
                 frame, x, y, raio, maskM = self.Morphology(image, white_mask,self.kernel_longe , self.kernel_longe2,3)
                 if visionMorph3:
-                    cv2.imshow('Morfologia 3', maskM)
+                    cv2.imshow('Morfologia 3', cv2.resize(maskM, (640, 360)))
                 if (x==0 and y==0 and raio==0):
                     frame, x, y, raio, maskM = self.Morphology(image, white_mask,self.kernel_muito_longe, self.kernel_muito_longe2,4)
                     if visionMorph4: 
-                        cv2.imshow('Morfologia 4', maskM) 
+                        cv2.imshow('Morfologia 4', cv2.resize(maskM, (640, 360))) 
                     if (x==0 and y==0 and raio==0):
                         self.CountLostFrame +=1
-                        print("@@@@@@@@@@@@@@@@@@@",self.CountLostFrame)
-                        if self.CountLostFrame==self.config.max_count_lost_frame: 
+                        print("@@@@@@@@@@@@@@@@@@@",self.CountLostFrame, self.config.max_count_lost_frame)
+                        if self.CountLostFrame>=self.config.max_count_lost_frame: 
                             BallFound = False
                             self.CountLostFrame = 0
                             print("----------------------------------------------------------------------")
@@ -97,19 +99,25 @@ class objectDetect():
                             print("----------------------------------------------------------------------")
                             print("----------------------------------------------------------------------")
                             print("----------------------------------------------------------------------")
-                      
                             if not self.withoutservo:
                                 self.servo.writeWord(self.config.SERVO_TILT_ID, 30, self.config.POSITION_SERVO_TILT)
                                 self.status = self.SearchLostBall()
 
         if (x!=0 and y!=0 and raio!=0):
             BallFound = True
+            self.CountLostFrame = 0
             print('y ',y, 'x ',x ,'ball_up', self.config.when_ball_up, self.config.SERVO_TILT_ID, self.config.when_ball_down)
-            if y<self.config.when_ball_up:
-                self.servo.writeWord(self.config.SERVO_TILT_ID,30, self.config.POSITION_SERVO_TILT + self.config.head_up)
-            if y>self.config.when_ball_down:
-                if not self.withoutservo:
+            if not self.withoutservo:
+                if y<self.config.when_ball_up:
+                    self.servo.writeWord(self.config.SERVO_TILT_ID,30, self.config.POSITION_SERVO_TILT + self.config.head_up)
+                if y>self.config.when_ball_down:
                     self.servo.writeWord(self.config.SERVO_TILT_ID, 30, self.config.POSITION_SERVO_TILT)
+#<<<<<<< HEAD
+#=======
+
+
+
+#>>>>>>> vision-UmpaLumpa
         return frame, x, y, raio, BallFound, self.status
 
     #Varredura
@@ -130,31 +138,45 @@ class objectDetect():
             if self.Count == 2:
                 self.servo.writeWord(self.config.SERVO_PAN_ID,30, self.config.CENTER_SERVO_PAN + self.config.SERVO_PAN_RIGHT)#olha para a direita 850- 440
                 time.sleep(1)
-                self.Count = 0
+                self.Count +=1
                 return 2
-
+            if self.Count == 3:
+                self.servo.writeWord(self.config.SERVO_PAN_ID,30, self.config.CENTER_SERVO_PAN)#olha pro centro
+                time.sleep(1)
+                self.Count = 0
+                return 1
 
 
     def Morphology(self, frame, white_mask, kernel, kernel2, k):
 
         start3 = time.time()
         contador = 0
+    #   variavel com imagen completa
+        frametemp = white_mask
 
+        if k ==1 or k==4:
     #    cv2.imshow('mask',white_mask)
-        mask = cv2.morphologyEx(white_mask, cv2.MORPH_OPEN, kernel)
-        mask = cv2.morphologyEx(mask, cv2.MORPH_DILATE, kernel2,1)
+            mask = cv2.morphologyEx(white_mask, cv2.MORPH_DILATE, kernel2,1)
+            mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+            mask = cv2.morphologyEx(mask, cv2.MORPH_DILATE, kernel2,1)
+        else:
+            mask = cv2.morphologyEx(white_mask, cv2.MORPH_DILATE, kernel2,1)
+            mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+
+        
     # Se a morfologia de perto k =1, recorta a parte de cima
         if k ==1:
-            mask[0:200,:]=0
+            mask[0:300,:]=0
     # Se a morfologia medio k =2, recorta a parte de baixo
         if k ==2:
-            mask[650:,:]=0
+            mask[0:170,:]=0
+            mask[530:,:]=0
     # Se a morfologia de longe k =3, recorta a parte de baixo
         if k ==3:
-            mask[450:,:]=0
+            mask[350:,:]=0
     # Se a morfologia de muito longe k = 4, recorta a parte de baixo
         if k ==4:
-            mask[350:,:]=0
+            mask[300:,:]=0
 
 
         ret,th1 = cv2.threshold(mask,25,255,cv2.THRESH_BINARY)
@@ -167,7 +189,7 @@ class objectDetect():
         for cnt in contours:
             contador = contador + 1
             x,y,w,h = cv2.boundingRect(cnt)
-                #Passa para o classificador as imagens recortadas-----------------------
+            #Passa para o classificador as imagens recortadas-----------------------
             type_label, results = classify(cv2.cvtColor(frame[y:y+h,x:x+w], cv2.COLOR_BGR2RGB),
                                                                self.net, self.transformer,
                                                                mean_file=self.mean_file, labels=self.labels,
@@ -177,10 +199,11 @@ class objectDetect():
     #            print results, type_label
         #       cv2.imshow('janela',images[0])
             if type_label == 'Ball':
+#                cv2.imwrite("/home/fei/Documents/frames_extracted_by_DNN/"+str(rd.random()) +"image.png", frame[y:y+h,x:x+w])
 
                 return frame, x+w/2, y+h/2, (w+h)/4, mask
             #=================================================================================================
-    #    print "CONTOURS = ", time.time() - start 
+    #    print "CONTOURS = ", time.time() - start3
         return frame, 0, 0, 0, mask
 
 
