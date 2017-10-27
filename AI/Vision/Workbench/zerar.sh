@@ -21,6 +21,7 @@ echo -e "${Blue}Apagando pastas e arquivos${NC}"
 sleep 1
 cd ..
 find ./Data/ -not -iname README.md -not -iname rede.tar.gz  -exec rm {} \;
+rm -r ./Data/Rede
 rm -r ./include
 rm -r ./src
 rm -r ./Train

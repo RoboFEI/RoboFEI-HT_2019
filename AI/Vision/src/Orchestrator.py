@@ -29,15 +29,11 @@ class Orchestrator(BasicProcesses):
     
     ## camera
     # Object responsible for reading the camera.
-    camera = None
+    camera = True
     
     ## dnn
     # Object responsible for performing a classification use DNN.
     dnn = None
-    
-    ## keyboard
-    # .
-    keyboard = [-1]
     
     ## Constructor Class
     def __init__(self, a):
@@ -45,13 +41,13 @@ class Orchestrator(BasicProcesses):
         
         # Instantiating camera object
         try:
-            self.camera = CameraCapture(a, self.keyboard)
+            self.camera = CameraCapture(a)
         except VisionException as e:
             sys.exit(1)
         
         # Instantiating camera object
         try:
-            self.dnn = DNN(a, self.keyboard)
+            self.dnn = DNN(a)
         except VisionException as e:
             self.camera.finalize()
             sys.exit(1)
@@ -63,7 +59,6 @@ class Orchestrator(BasicProcesses):
             try:
                 observation = self.camera.currentObservation()
                 observation['objects'] = self.dnn.detect(observation)
-                self.keyboard = cv2.waitKey(1)
             except VisionException as e:
                 break
             except KeyboardInterrupt:

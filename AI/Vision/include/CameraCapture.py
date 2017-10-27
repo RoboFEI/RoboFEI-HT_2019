@@ -148,7 +148,7 @@ class CameraCapture(BasicThread):
                         fy=380.0/self.__observation['frame'].shape[0]
                     )
                 )
-                if keyboard == ord('q'):
+                if cv2.waitKey(1) == ord('q'):
                     self._args.camera = 'off'
                     cv2.destroyAllWindows()
             else:

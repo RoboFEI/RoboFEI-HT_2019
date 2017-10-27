@@ -59,6 +59,9 @@ from Orchestrator import *
 
 # ---- Preparing process ----
 
+if args.train == True:
+    args.dnn = True
+
 vision = Orchestrator(args)
 
 # ---- Run process ----

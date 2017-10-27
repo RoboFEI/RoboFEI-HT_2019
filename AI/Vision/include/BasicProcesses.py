@@ -45,15 +45,10 @@ class BasicProcesses(object):
     # Variable used to instantiate class Blackboard.
     _bkb = None
     
-    ## _keyboard
-    # .
-    _keyboard = None
-    
     ## Constructor Class
     # Instantiating default classes.
     @abstractmethod
-    def __init__(self, a, key, obj, func):
-        self._keyboard = key
+    def __init__(self, a, obj, func):
         self._args = a
         self._conf = ConfigIni(obj, func)
         self._bkb = Blackboard( )
