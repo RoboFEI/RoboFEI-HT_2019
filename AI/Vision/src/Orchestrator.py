@@ -19,6 +19,7 @@
 # Used class developed by RoboFEI-HT.
 from BasicProcesses import * # Standard and abstract class.
 from CameraCapture import * # Class responsible for performing the observation of domain.
+from DNN import * # Class that implements object detection using a deep neural network (DNN).
 
 ## Class Orchestrator
 # Class responsible for managing the vision process.
@@ -30,14 +31,29 @@ class Orchestrator(BasicProcesses):
     # Object responsible for reading the camera.
     camera = None
     
+    ## dnn
+    # Object responsible for performing a classification use DNN.
+    dnn = None
+    
+    ## keyboard
+    # .
+    keyboard = [-1]
+    
     ## Constructor Class
     def __init__(self, a):
         super(Orchestrator, self).__init__(a, "Vision", "Parameters")
         
         # Instantiating camera object
         try:
-            self.camera = CameraCapture(a)
+            self.camera = CameraCapture(a, self.keyboard)
         except VisionException as e:
+            sys.exit(1)
+        
+        # Instantiating camera object
+        try:
+            self.dnn = DNN(a, self.keyboard)
+        except VisionException as e:
+            self.camera.finalize()
             sys.exit(1)
         
     ## run
@@ -45,7 +61,9 @@ class Orchestrator(BasicProcesses):
     def run(self):
         while True:
             try:
-                time.sleep(1)
+                observation = self.camera.currentObservation()
+                observation['objects'] = self.dnn.detect(observation)
+                self.keyboard = cv2.waitKey(1)
             except VisionException as e:
                 break
             except KeyboardInterrupt:
@@ -57,4 +75,5 @@ class Orchestrator(BasicProcesses):
     # .
     def end(self):
         self.camera.finalize()
+        self.dnn.finalize()
         #self._end( )

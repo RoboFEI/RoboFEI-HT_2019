@@ -30,6 +30,21 @@ parser.add_argument(
     'Calibrates value for the camera.' # Description of the variable
 )
 
+parser.add_argument(
+    '--dnn', # Full name
+    action = "store_true", # Type variable
+    help = 'Exibe a classificação e a marcação feita pela DNN e ajusta os parametros para \'train\'.\\' \
+    'Displays a DNN sort and markup and set the parameters to \'train\'.' # Description of the variable
+)
+
+parser.add_argument(
+    '--train', # Full name
+    '--tr', # Abbreviation for the name
+    action = "store_true", # Type variable
+    help = 'Salva as imagens que tiveram um baixo percentual de classificação e cria um XML de marcação.\\' \
+    'Saves images that have a low rating percentage and creates a markup XML.' # Description of the variable
+)
+
 args = parser.parse_args()
 
 # ---- Imports ----

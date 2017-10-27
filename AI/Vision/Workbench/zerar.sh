@@ -20,9 +20,10 @@ NC='\e[0m' # No Color
 echo -e "${Blue}Apagando pastas e arquivos${NC}"
 sleep 1
 cd ..
-find ./Data/ -not -iname README.md -exec rm {} \;
+find ./Data/ -not -iname README.md -not -iname rede.tar.gz  -exec rm {} \;
 rm -r ./include
 rm -r ./src
+rm -r ./Train
 rm vision.py
 
 notify-send "Limpeza realizada" "Arquivos da memória visual apagado."

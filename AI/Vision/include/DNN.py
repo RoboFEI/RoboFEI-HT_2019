@@ -15,6 +15,9 @@
 # The standard libraries used in the vision system.
 import tarfile # Used for manipulating tar files.
 import pandas as pd # 
+import os
+import shutil
+import time
 
 # The standard libraries used in the visual memory system.
 import cv2 # OpenCV library used for image processing.
@@ -26,13 +29,17 @@ from utils import label_map_util
 from utils import visualization_utils as vis_util
 
 # Used class developed by RoboFEI-HT.
-from BasicThread import * # Base class with primary functions
+from BasicProcesses import * # Standard and abstract class.
 
 ## Class DNN
-# .
-class DNN(BasicThread):
+# Class that implements object detection using a deep neural network (DNN).
+class DNN(BasicProcesses):
     
     # ---- Variables ----
+    
+    ## __EXTRACTION_DIRECTORY
+    # .
+    __EXTRACTION_DIRECTORY = "./Data/Rede"
     
     ## __PATH_TO_CKPT
     # Path to frozen detection graph. This is the actual model that is used for the object detection.
@@ -41,6 +48,10 @@ class DNN(BasicThread):
     ## __PATH_TO_LABELS
     # List of the strings that is used to add correct label for each box.
     __PATH_TO_LABELS = "object-detection.pbtxt"
+    
+    ## __DIRECTORY_TRAINING_IMAGES
+    # Directory where the training images will be saved.
+    __DIRECTORY_TRAINING_IMAGES = "./Train"
     
     ## __numclasses
     # The Number of classes that are detected by the network.
@@ -120,13 +131,24 @@ class DNN(BasicThread):
         # Creating and updating default parameter values.
         self.__parameters = {
             "network_name": "rede",
-            "threshold_to_train": 0.2,
+            "threshold_to_train_min": 0.2,
+            "threshold_to_train_max": 0.9,
         }
         self.__parameters = self._conf.readVariables(self.__parameters)
         
         # Creating neural network.
         self.__unzipNetwork(self.__parameters["network_name"])
         self.__instantiatingDNNVariables()
+        
+        if self._args.train == True:
+            try:
+                os.makedirs(self.__DIRECTORY_TRAINING_IMAGES+"/images to classify")
+            except OSError:
+                pass
+            try:
+                os.makedirs(self.__DIRECTORY_TRAINING_IMAGES+"/annotations DNN")
+            except OSError:
+                pass
         
     ## detectDNN
     # .
@@ -154,7 +176,7 @@ class DNN(BasicThread):
                 self.category_index,
                 use_normalized_coordinates=True,
                 line_thickness=2,
-                min_score_thresh=self.__parameters["threshold_to_train"],
+                min_score_thresh=self.__parameters["threshold_to_train_min"],
             )
         
         # Creating DataFrame detection.
@@ -172,12 +194,43 @@ class DNN(BasicThread):
     ## detect
     # .
     def detect(self, observation):
+        if self._args.train == True:
+            image = observation['frame'].copy()
+        
         objects, observation['frame'] = self.__detectDNN(observation['frame'])
+        
+        if self._args.dnn == True:
+            cv2.imshow("DNN - Parameters", observation['frame'])
+            if keyboard == ord('q'):
+                cv2.destroyAllWindows()
+                
+        if self._args.train == True:
+            cv2.imwrite(self.__DIRECTORY_TRAINING_IMAGES+"/images to classify/"+"Robot-" + time.strftime('%d-%m-%Y %H:%M:%S', observation['time']) + ".png", image)
     
-    observation = {}
+            if np.any((objects.scores < self.__parameters["threshold_to_train_max"])
+                &(objects.scores > self.__parameters["threshold_to_train_min"])):
+            
+                text = "<annotation>\n\t<folder>images to classify</folder>\n\t<filename>Robot-" + time.strftime('%d-%m-%Y %H:%M:%S', observation['time']) + ".png</filename>\n\t<path>"+ os.getcwd() +"/"+ self.__DIRECTORY_TRAINING_IMAGES.split("/")[-1] +"/imagens to check/Robot-" + time.strftime('%d-%m-%Y %H:%M:%S', observation['time']) + ".png</path>\n\t<source>\n\t\t<database>Unknown</database>\n\t</source>\n\t<size>\n\t\t<width>"+ str(image.shape[1]) +"</width>\n\t\t<height>"+ str(image.shape[0]) +"</height>\n\t\t<depth>"+ str(image.shape[2]) +"</depth>\n\t</size>\n\t<segmented>0</segmented>"
     
-    observation['frame'] = cv2.imread("/home/vinicius/objectDetect_clear/Train/imagenstreino/frames0_040.jpg")
+                for classes, __, box in objects[(objects.scores > self.__parameters["threshold_to_train_min"])].values:
+                    text += "\n\t<object>\n\t\t<name>"+ classes+ "</name>\n\t\t<pose>Unspecified</pose>\n\t\t<truncated>0</truncated>\n\t\t<difficult>0</difficult>\n\t\t<bndbox>\n\t\t\t<xmin>"+ str(int(box[1]*image.shape[1])) +"</xmin>\n\t\t\t<ymin>"+ str(int(box[0]*image.shape[0])) +"</ymin>\n\t\t\t<xmax>"+ str(int(box[3]*image.shape[1])) +"</xmax>\n\t\t\t<ymax>"+ str(int(box[2]*image.shape[0])) +"</ymax>\n\t\t</bndbox>\n\t</object>"
     
-    detect(observation)
+                text += "\n</annotation>"
     
-    #self-iPython detec
+                f = open(self.__DIRECTORY_TRAINING_IMAGES+"/annotations DNN/" + "Robot-" + time.strftime('%d-%m-%Y %H:%M:%S', observation['time']) + ".xml", "w")
+                f.write(text)
+                f.close()
+        
+        return objects[objects.scores > 0.5]
+    
+    ## finalize
+    # .
+    def finalize(self):
+        # Deleting extracted network
+        try:
+            shutil.rmtree("./Data/Rede")
+        except OSError:
+            pass
+        
+        # Saving parameter values
+        self._end()
