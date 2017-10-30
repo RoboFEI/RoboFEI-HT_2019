@@ -25,6 +25,8 @@ var/
 *.manifest
 *.spec
 *~
+AI/Vision/Train/annotations DNN
+AI/Vision/Train/images to classify
 
 pip-log.txt
 pip-delete-this-directory.txt
