@@ -27,13 +27,6 @@ if !( mv test_main.py ../../vision.py ) then
 	exit
 fi
 
-if !( mkdir ../../Train/ )
-then
-	echo -e "${Light_Red}"
-	read -p "Erro, precione qualquer tecla para finalizar"
-	exit
-fi
-
 if !( mv xml_to_csv.py ../../Train/xml_to_csv.py )
 then
 	echo -e "${Light_Red}"

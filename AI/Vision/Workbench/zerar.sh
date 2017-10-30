@@ -24,7 +24,7 @@ find ./Data/ -not -iname README.md -not -iname rede.tar.gz  -exec rm {} \;
 rm -r ./Data/Rede
 rm -r ./include
 rm -r ./src
-rm -r ./Train
+find ./Train/ -not -iname "*mobilenet*.tar.gz"  -not -iname "*README.md" -exec rm {} \;
 rm vision.py
 
 notify-send "Limpeza realizada" "Arquivos da memória visual apagado."
