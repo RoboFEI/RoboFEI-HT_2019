@@ -136,7 +136,7 @@ class CameraCapture(BasicThread):
             __, self.__observation['frame'] = self.__camera.read()
             self.__observation['pos_tilt'] = self._bkb.read_float('VISION_TILT_DEG')
             self.__observation['pos_pan'] = self._bkb.read_float('VISION_PAN_DEG')
-            self.__observation['time'] = time.localtime()
+            self.__observation['time'] = time.time()
             
             if self._args.camera == True:
                 cv2.imshow(

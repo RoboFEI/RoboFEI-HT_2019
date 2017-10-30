@@ -235,17 +235,17 @@ class DNN(BasicProcesses):
                 raise VisionException(5, '')
                 
         if self._args.train == True:
-            cv2.imwrite(self.__DIRECTORY_TRAINING_IMAGES+'/images to classify/'+'Robot-' + time.strftime('%d-%m-%Y %H:%M:%S', observation['time']) + '.png', image)
+            cv2.imwrite(self.__DIRECTORY_TRAINING_IMAGES+'/images to classify/'+'Robot-'+ time.strftime('%d-%m-%Y %H:%M:%S', time.localtime(int(observation['time']))) + str(round(observation['time'] - int(observation['time']), 2))[1:] +'.jpg', image)
     
             if len(objects.scores) != 0:        
-                text = '<annotation>\n\t<folder>images to classify</folder>\n\t<filename>Robot-' + time.strftime('%d-%m-%Y %H:%M:%S', observation['time']) + '.png</filename>\n\t<path>'+ os.getcwd() +'/'+ self.__DIRECTORY_TRAINING_IMAGES.split('/')[-1] +'/imagens to check/Robot-' + time.strftime('%d-%m-%Y %H:%M:%S', observation['time']) + '.png</path>\n\t<source>\n\t\t<database>Unknown</database>\n\t</source>\n\t<size>\n\t\t<width>'+ str(image.shape[1]) +'</width>\n\t\t<height>'+ str(image.shape[0]) +'</height>\n\t\t<depth>'+ str(image.shape[2]) +'</depth>\n\t</size>\n\t<segmented>0</segmented>'
+                text = '<annotation>\n\t<folder>images to classify</folder>\n\t<filename>Robot-'+ time.strftime('%d-%m-%Y %H:%M:%S', time.localtime(int(observation['time']))) + str(round(observation['time'] - int(observation['time']), 2))[1:] +'.jpg</filename>\n\t<path>'+ os.getcwd() +'/'+ self.__DIRECTORY_TRAINING_IMAGES.split('/')[-1] +'/imagens to check/Robot-'+ time.strftime('%d-%m-%Y %H:%M:%S', time.localtime(int(observation['time']))) + str(round(observation['time'] - int(observation['time']), 2))[1:] +'.jpg</path>\n\t<source>\n\t\t<database>Unknown</database>\n\t</source>\n\t<size>\n\t\t<width>'+ str(image.shape[1]) +'</width>\n\t\t<height>'+ str(image.shape[0]) +'</height>\n\t\t<depth>'+ str(image.shape[2]) +'</depth>\n\t</size>\n\t<segmented>0</segmented>'
     
                 for classes, __, box in objects[(objects.scores > self.__parameters['threshold_to_train_min'])].values:
                     text += '\n\t<object>\n\t\t<name>'+ classes+ '</name>\n\t\t<pose>Unspecified</pose>\n\t\t<truncated>0</truncated>\n\t\t<difficult>0</difficult>\n\t\t<bndbox>\n\t\t\t<xmin>'+ str(int(box[1]*image.shape[1])) +'</xmin>\n\t\t\t<ymin>'+ str(int(box[0]*image.shape[0])) +'</ymin>\n\t\t\t<xmax>'+ str(int(box[3]*image.shape[1])) +'</xmax>\n\t\t\t<ymax>'+ str(int(box[2]*image.shape[0])) +'</ymax>\n\t\t</bndbox>\n\t</object>'
     
                 text += '\n</annotation>'
     
-                f = open(self.__DIRECTORY_TRAINING_IMAGES + '/annotations DNN/' + 'Robot-' + time.strftime('%d-%m-%Y %H:%M:%S', observation['time']) + '.xml', 'w')
+                f = open(self.__DIRECTORY_TRAINING_IMAGES + '/annotations DNN/' + 'Robot-'+ time.strftime('%d-%m-%Y %H:%M:%S', time.localtime(int(observation['time']))) + str(round(observation['time'] - int(observation['time']), 2))[1:] +'.xml', 'w')
                 f.write(text)
                 f.close()
         

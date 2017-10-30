@@ -49,10 +49,10 @@ try:
     xmls = [i.rsplit(".", 1)[0] for i in os.listdir("./Train/annotations DNN")]
     images = [i for i in images if i not in xmls]
     for image in images:
-        dicionario["frame"] = cv2.imread("./Train/images to classify/"+image+".png")
-        dicionario["time"] = time.localtime()
+        dicionario["frame"] = cv2.imread("./Train/images to classify/"+image+".jpg")
+        dicionario["time"] = time.time()
         dnn.detect(dicionario)
-        os.system("rm ./Train/images\ to\ classify/"+image.replace(":","\\:").replace(" ","\\ ")+".png")
+        os.system("rm ./Train/images\ to\ classify/"+image.replace(":","\\:").replace(" ","\\ ")+".jpg")
     cv2.destroyAllWindows()
 except:
     pass
