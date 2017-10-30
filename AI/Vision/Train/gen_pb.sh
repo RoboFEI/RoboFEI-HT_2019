@@ -14,5 +14,5 @@ python object_detection/export_inference_graph.py \
   --trained_checkpoint_prefix "$n/models/train/$var" \
   --output_directory "$n/models/rede/"
 
-cd $n
+cd "$n"
 tar -zcvf ../Data/newRede.tar.gz ./models/rede/frozen_inference_graph.pb ./data/object-detection.pbtxt

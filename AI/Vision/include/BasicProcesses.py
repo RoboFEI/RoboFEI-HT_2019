@@ -20,7 +20,6 @@ sys.path.append('../src')
 # The standard libraries used in the visual memory system.
 from abc import ABCMeta, abstractmethod # Used to create abstract classes.
 from copy import copy # Function used to duplicate data.
-import sympy as sym # Class used for manipulation of arrays and symbolic variables.
 
 # Used class developed by RoboFEI-HT.
 from Blackboard import * # Class used to manage blackboard writing and reading.

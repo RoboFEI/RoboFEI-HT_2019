@@ -14,10 +14,10 @@
 
 # The standard libraries used in the vision system.
 import tarfile # Used for manipulating tar files.
-import pandas as pd # 
-import os
-import shutil
-import time
+import pandas as pd # Utilizado para manipular dados e tabelas
+import os # Biblioteca utilizada para interação com o sistema
+import shutil # Biblioteca utilizada para apagar diretorios com arquivos
+import time # Libraries used for time management.
 
 # The standard libraries used in the visual memory system.
 import cv2 # OpenCV library used for image processing.
@@ -37,43 +37,45 @@ class DNN(BasicProcesses):
     
     # ---- Variables ----
     
-    ## __EXTRACTION_DIRECTORY
-    # .
+    ## EXTRACTION_DIRECTORY
+    # Diretorio aonde será extraida a rede.
     __EXTRACTION_DIRECTORY = './Data/Rede'
     
-    ## __PATH_TO_CKPT
+    ## PATH_TO_CKPT
     # Path to frozen detection graph. This is the actual model that is used for the object detection.
     __PATH_TO_CKPT = 'frozen_inference_graph.pb'
     
-    ## __PATH_TO_LABELS
+    ## PATH_TO_LABELS
     # List of the strings that is used to add correct label for each box.
     __PATH_TO_LABELS = 'object-detection.pbtxt'
     
-    ## __DIRECTORY_TRAINING_IMAGES
+    ## DIRECTORY_TRAINING_IMAGES
     # Directory where the training images will be saved.
     __DIRECTORY_TRAINING_IMAGES = './Train'
     
-    ## __numclasses
+    ## numclasses
     # The Number of classes that are detected by the network.
     __numclasses = None
     
-    ## __detection_graph
-    # .
+    ## detection_graph
+    # Variavel de configuração do TensorFlow.
     __detection_graph = None
     
-    ## __sess
-    # .
+    ## sess
+    # Variavel de execução do TensorFlow.
     __sess = None
     
     ## __label
-    # .
+    # Dicionario com as strings das classes que seram detectadas pela rede.
     __label = None
     
     ## __parameters
-    # .
+    # Parametros de configuração para a execução da DNN.
     __parameters = None
     
-    imagetensor = detectionboxes = detectionscores = detectionclasses = numdetections = category_index = None
+    # Variaveis de apoio do TensorFlow
+    
+    __imagetensor = __detectionboxes = __detectionscores = __detectionclasses = __numdetections = __category_index = None
     
     ## __unzipNetwork
     # .
@@ -106,7 +108,7 @@ class DNN(BasicProcesses):
         if self._args.dnn == True:
             self.__numclasses = str(label_map).count('id')
             categories = label_map_util.convert_label_map_to_categories(label_map, max_num_classes=self.__numclasses, use_display_name=True)
-            self.category_index = label_map_util.create_category_index(categories)
+            self.__category_index = label_map_util.create_category_index(categories)
     
         # Creating a section to run the detection.
         with self.__detection_graph.as_default():
@@ -118,11 +120,11 @@ class DNN(BasicProcesses):
                 )
             )
             
-            self.imagetensor = self.__detection_graph.get_tensor_by_name('image_tensor:0')
-            self.detectionboxes = self.__detection_graph.get_tensor_by_name('detection_boxes:0')
-            self.detectionscores = self.__detection_graph.get_tensor_by_name('detection_scores:0')
-            self.detectionclasses = self.__detection_graph.get_tensor_by_name('detection_classes:0')
-            self.numdetections = self.__detection_graph.get_tensor_by_name('num_detections:0')
+            self.__imagetensor = self.__detection_graph.get_tensor_by_name('image_tensor:0')
+            self.__detectionboxes = self.__detection_graph.get_tensor_by_name('detection_boxes:0')
+            self.__detectionscores = self.__detection_graph.get_tensor_by_name('detection_scores:0')
+            self.__detectionclasses = self.__detection_graph.get_tensor_by_name('detection_classes:0')
+            self.__numdetections = self.__detection_graph.get_tensor_by_name('num_detections:0')
     
     ## trackbarThresholdMin
     # .
@@ -185,8 +187,8 @@ class DNN(BasicProcesses):
         # Actual detection.
         image_np_expanded = np.expand_dims(img, axis=0)
         (boxes, scores, classes, num) = self.__sess.run(
-            [self.detectionboxes, self.detectionscores, self.detectionclasses, self.numdetections],
-            feed_dict={self.imagetensor: image_np_expanded}
+            [self.__detectionboxes, self.__detectionscores, self.__detectionclasses, self.__numdetections],
+            feed_dict={self.__imagetensor: image_np_expanded}
         )
         
         if self._args.dnn == True:
@@ -202,7 +204,7 @@ class DNN(BasicProcesses):
                 np.squeeze(boxes),
                 np.squeeze(classes).astype(np.int32),
                 np.squeeze(scores),
-                self.category_index,
+                self.__category_index,
                 use_normalized_coordinates=True,
                 line_thickness=2,
                 min_score_thresh=self.__parameters['threshold_to_train_min'],
