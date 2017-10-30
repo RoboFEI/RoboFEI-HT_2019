@@ -237,9 +237,7 @@ class DNN(BasicProcesses):
         if self._args.train == True:
             cv2.imwrite(self.__DIRECTORY_TRAINING_IMAGES+'/images to classify/'+'Robot-' + time.strftime('%d-%m-%Y %H:%M:%S', observation['time']) + '.png', image)
     
-            if np.any((objects.scores < self.__parameters['threshold_to_train_max'])
-                &(objects.scores > self.__parameters['threshold_to_train_min'])):
-            
+            if len(objects.scores) != 0:        
                 text = '<annotation>\n\t<folder>images to classify</folder>\n\t<filename>Robot-' + time.strftime('%d-%m-%Y %H:%M:%S', observation['time']) + '.png</filename>\n\t<path>'+ os.getcwd() +'/'+ self.__DIRECTORY_TRAINING_IMAGES.split('/')[-1] +'/imagens to check/Robot-' + time.strftime('%d-%m-%Y %H:%M:%S', observation['time']) + '.png</path>\n\t<source>\n\t\t<database>Unknown</database>\n\t</source>\n\t<size>\n\t\t<width>'+ str(image.shape[1]) +'</width>\n\t\t<height>'+ str(image.shape[0]) +'</height>\n\t\t<depth>'+ str(image.shape[2]) +'</depth>\n\t</size>\n\t<segmented>0</segmented>'
     
                 for classes, __, box in objects[(objects.scores > self.__parameters['threshold_to_train_min'])].values:

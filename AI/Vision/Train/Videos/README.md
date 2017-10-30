@@ -1,0 +1,1 @@
+Folders for video storage for training

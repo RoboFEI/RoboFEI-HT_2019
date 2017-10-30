@@ -48,6 +48,13 @@ then
 	exit
 fi
 
+if !( mv check.py ../../Train/check.py )
+then
+	echo -e "${Light_Red}"
+	read -p "Erro, precione qualquer tecla para finalizar"
+	exit
+fi
+
 if !( mv generate_tfrecord.py ../../Train/generate_tfrecord.py )
 then
 	echo -e "${Light_Red}"
@@ -56,6 +63,13 @@ then
 fi
 
 if !( cp gen_pb.sh ../../Train/gen_pb.sh )
+then
+	echo -e "${Light_Red}"
+	read -p "Erro, precione qualquer tecla para finalizar"
+	exit
+fi
+
+if !( cp avell.sh ../../Train/avell.sh )
 then
 	echo -e "${Light_Red}"
 	read -p "Erro, precione qualquer tecla para finalizar"
