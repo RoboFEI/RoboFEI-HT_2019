@@ -21,10 +21,7 @@ sys.path.append("../src")
 import configparser # Used to read ini files
 
 # Used class developed by RoboFEI-HT.
-try:
-    from VisualMemoryException import * # Used to handle exceptions
-except ImportError:
-    from VisionException import * # Used to handle exceptions
+from VisionException import * # Used to handle exceptions
 
 ## Class to config ini
 # Class used to read the ini file from the view.

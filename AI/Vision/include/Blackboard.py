@@ -21,10 +21,7 @@ sys.path.append('../src')
 import configparser # Used to read ini files
 
 # Used class developed by RoboFEI-HT.
-try:
-    from VisualMemoryException import * # Used to handle exceptions
-except ImportError:
-    from VisionException import * # Used to handle exceptions
+from VisionException import * # Used to handle exceptions
 
 # Import a shared memory.
 sys.path.append('../Blackboard/src/')
@@ -55,7 +52,7 @@ class Blackboard(object):
             self.__mem = int(self.__mem["Communication"]["no_player_robofei"])*100
         else:
             # Error while not finding file, section or number of robot.
-            raise VisualMemoryException(0, 'Could not read config, no robot number')
+            raise VisionException(0, 'Could not read config, no robot number')
         
         # Creating blackboard with config.ini read value.
         self.__mem = self.__bkb.shd_constructor(self.__mem)

@@ -27,6 +27,62 @@ if !( mv test_main.py ../../vision.py ) then
 	exit
 fi
 
+if !( mkdir ../../Train/ )
+then
+	echo -e "${Light_Red}"
+	read -p "Erro, precione qualquer tecla para finalizar"
+	exit
+fi
+
+if !( mv xml_to_csv.py ../../Train/xml_to_csv.py )
+then
+	echo -e "${Light_Red}"
+	read -p "Erro, precione qualquer tecla para finalizar"
+	exit
+fi
+
+if !( mv generate_label.py ../../Train/generate_label.py )
+then
+	echo -e "${Light_Red}"
+	read -p "Erro, precione qualquer tecla para finalizar"
+	exit
+fi
+
+if !( mv generate_tfrecord.py ../../Train/generate_tfrecord.py )
+then
+	echo -e "${Light_Red}"
+	read -p "Erro, precione qualquer tecla para finalizar"
+	exit
+fi
+
+if !( cp gen_pb.sh ../../Train/gen_pb.sh )
+then
+	echo -e "${Light_Red}"
+	read -p "Erro, precione qualquer tecla para finalizar"
+	exit
+fi
+
+if !( cp train.sh ../../Train/train.sh )
+then
+	echo -e "${Light_Red}"
+	read -p "Erro, precione qualquer tecla para finalizar"
+	exit
+fi
+
+if !( cp treinando_rede.sh ../../Train/treinando_rede.sh )
+then
+	echo -e "${Light_Red}"
+	read -p "Erro, precione qualquer tecla para finalizar"
+	exit
+fi
+
+if !( mv extratc.py ../../Train/extratc.py )
+then
+	echo -e "${Light_Red}"
+	read -p "Erro, precione qualquer tecla para finalizar"
+	exit
+fi
+
 if !( mkdir ../../src/ )
 then
 	echo -e "${Light_Red}"
