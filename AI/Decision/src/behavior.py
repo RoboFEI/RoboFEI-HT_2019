@@ -27,8 +27,8 @@ from math import degrees
 #to real robots: 14 centimeters
 #to simulated robots: 28 centimeters
 
-#distance_to_kick = 40 #real robot
-distance_to_kick = 25 #simulated robot
+distance_to_kick = 40 #real robot
+#distance_to_kick = 25 #simulated robot
 
 
 ###############################################################################
