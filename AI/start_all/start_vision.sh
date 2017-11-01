@@ -6,4 +6,4 @@ export PYTHONPATH=~/caffe/python
 export CAFFE_ROOT=~/caffe
 cd ../Vision/src/
 
-python vision.py --vb
+python vision.py
