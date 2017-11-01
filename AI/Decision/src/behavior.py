@@ -261,7 +261,6 @@ class Ordinary(TreatingRawData):
 
 class Naive(TreatingRawData):
     " " " Naive class " " "
-
     def __init__(self):
         super(Naive, self).__init__()
         print
