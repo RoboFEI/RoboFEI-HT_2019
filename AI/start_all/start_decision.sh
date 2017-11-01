@@ -16,4 +16,4 @@ cd Decision/src/
 #python decision.py --naive_imu_dec_turning
 python decision.py -nidt
 #python decision.py -ni
-#python decision.py
+#python decision.py -g

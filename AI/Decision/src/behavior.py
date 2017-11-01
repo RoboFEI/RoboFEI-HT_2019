@@ -27,8 +27,8 @@ from math import degrees
 #to real robots: 14 centimeters
 #to simulated robots: 28 centimeters
 
-#distance_to_kick = 40 #real robot
-distance_to_kick = 25 #simulated robot
+distance_to_kick = 40 #real robot
+#distance_to_kick = 25 #simulated robot
 
 
 ###############################################################################
@@ -408,14 +408,14 @@ class NaiveIMU(TreatingRawData):
                         #self.set_turn_right()
                     elif self.get_search_status() == 0: # 0 - object found
                         # align to the ball
-                        if self.get_motor_pan_degrees() > 20 and self.get_motor_pan_degrees() < 160:
+                        if self.get_motor_pan_degrees() > 35 and self.get_motor_pan_degrees() <65:
                             self.set_turn_left()
                             #self.set_stand_still()
-                        elif self.get_motor_pan_degrees() < -20 and self.get_motor_pan_degrees() > -160:
+                        elif self.get_motor_pan_degrees() < -35 and self.get_motor_pan_degrees() > -65:
                             self.set_turn_right()
                             #self.set_stand_still()
                         else:
-
+                            print "Distancia da bola %d" % get_dist_ball()
                             if self.get_dist_ball() < distance_to_kick and self.get_motor_pan_degrees() <= 0:
                                 if self.get_orientation() <= 90 and self.get_orientation() >= -90:
                                     self.set_kick_right()
