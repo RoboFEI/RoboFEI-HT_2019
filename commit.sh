@@ -30,7 +30,7 @@ git config --global user.name "${name}"
 git config --global user.email "${email}"
 
 git cola
-
+git reset --hard
 echo -e "${LightRed}Certifique se está conectado a internet e logado, precione enter para continuar${NC}"
 read a
 
