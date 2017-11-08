@@ -581,28 +581,33 @@ class NaiveIMUDecTurning(TreatingRawData):
                     #self.set_stand_still()
                 else:
 
+                    print self.get_orientation()
                     if self.get_motor_tilt_degrees() == 0 and self.get_motor_pan_degrees() == -30:
 			            #print 'entrei'
-                        if self.get_orientation() <= 40 and self.get_orientation() >= -40:
+                        if self.get_orientation() <= 30 and self.get_orientation() >= -30:
                             self.set_kick_right()
-                        elif self.get_orientation() > 40:
+                        elif self.get_orientation() > 30:
                             #revolve_clockwise:
-                            self.set_pass_right()
+                            #self.set_pass_right()
+                            self.set_revolve_around_ball_clockwise()
                             #########
-                        elif self.get_orientation() < -40:
+                        elif self.get_orientation() < -30:
                             #revolve_anticlockwise:
-                            self.set_pass_left()
+                            #self.set_pass_left()
+                            self.set_revolve_around_ball_anticlockwise()
                             #########
                     elif self.get_motor_tilt_degrees() == 0  and self.get_motor_pan_degrees() == 30:
-                        if self.get_orientation() <= 40 and self.get_orientation() >= -40:
+                        if self.get_orientation() <= 30 and self.get_orientation() >= -30:
                             self.set_kick_left()
-                        elif self.get_orientation() > 40:
+                        elif self.get_orientation() > 30:
                             #revolve_clockwise:
-                            self.set_pass_right()
+                            #self.set_pass_right()
+                            self.set_revolve_around_ball_clockwise()
                             #########
-                        elif self.get_orientation() < -40:
+                        elif self.get_orientation() < -30:
                             #revolve_anticlockwise:
-                            self.set_pass_left()
+                            #self.set_pass_left()
+                            self.set_revolve_around_ball_anticlockwise()
                             #########
                     elif self.get_motor_tilt_degrees() == 70: #longe
                         self.set_walk_forward()
