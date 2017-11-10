@@ -156,8 +156,9 @@ class objectDetect():
 
         if k ==1 or k==4:
     #    cv2.imshow('mask',white_mask)
-            mask = cv2.morphologyEx(white_mask, cv2.MORPH_DILATE, kernel2,1)
-            mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+            kernel_teste = np.ones((35, 35), np.uint8)
+            mask = cv2.morphologyEx(white_mask, cv2.MORPH_DILATE, kernel_teste,1)
+            mask = cv2.morphologyEx(mask, cv2.MORPH_ERODE, kernel)
             mask = cv2.morphologyEx(mask, cv2.MORPH_DILATE, kernel2,1)
         else:
             mask = cv2.morphologyEx(white_mask, cv2.MORPH_DILATE, kernel2,1)
@@ -170,7 +171,7 @@ class objectDetect():
     # Se a morfologia medio k =2, recorta a parte de baixo
         if k ==2:
             mask[0:180,:]=0
-            mask[620:,:]=0
+#            mask[720:,:]=0
     # Se a morfologia de longe k =3, recorta a parte de baixo
         if k ==3:
             mask[350:,:]=0
@@ -196,10 +197,11 @@ class objectDetect():
                                                                batch_size=None)
             #-----------------------------------------------------------------------
 
-    #            print results, type_label
-        #       cv2.imshow('janela',images[0])
+#                print results, type_label
+#               cv2.imshow('janela',images[0])
+            cv2.imwrite("/home/fei/Documents/frames_extracted_by_DNN/"+str(rd.random()) +"image.png", frame[y:y+h,x:x+w])
             if type_label == 'Ball':
-#                cv2.imwrite("/home/fei/Documents/frames_extracted_by_DNN/"+str(rd.random()) +"image.png", frame[y:y+h,x:x+w])
+
 
                 return frame, x+w/2, y+h/2, (w+h)/4, mask
             #=================================================================================================
