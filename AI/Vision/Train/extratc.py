@@ -40,7 +40,7 @@ for video in os.listdir("./Train/Videos"):
             __, dicionario["frame"] = cap.read()
         if dicionario["frame"] is None:
             break
-        dicionario["time"] = time.localtime()
+        dicionario["time"] = time.time()
         dnn.detect(dicionario)
     os.system("rm ./Train/Videos/"+video)
 
