@@ -38,9 +38,13 @@ class CameraCapture(BasicThread):
     # Port where the camera is connected.
     __port = None
     
+    ## parameters variable
+    # .
+    __parameters = None
+    
     ## observation variable
     # Saves the observation of the most recent state.
-    __observation = None
+    __observation = {}
     
     ## running variable
     # Flag responsible for executing camera capture
@@ -49,34 +53,41 @@ class CameraCapture(BasicThread):
     ## cameraOpen
     # Used to locate the port where the camera is connected and connect to it.
     # @return Returns the object of the camera and the port on which it is connected.
-    def __cameraOpen(self):
-        p = os.popen('ls /dev/video*')
-        line = p.readline()
-        if line == '':
-            raise VisionException(1, '')
-        
-        for port in xrange(10):
-            camera = cv2.VideoCapture(port)
-            if camera.isOpened():
-                break
-        
-        if not camera.isOpened():
-            raise VisionException(2, '')
+    def __cameraOpen(self, video):
+        if video == None:
+            p = os.popen('ls /dev/video*')
+            line = p.readline()
+            if line == '':
+                raise VisionException(1, '')
+    
+            for port in xrange(10):
+                camera = cv2.VideoCapture(port)
+                if camera.isOpened():
+                    break
+    
+            if not camera.isOpened():
+                raise VisionException(2, '')
+        else:
+            camera = cv2.VideoCapture(video)
+            if not camera.isOpened():
+                raise VisionException(2, '')
+            port = 0
+            
         return camera, port
     
     ## trackbarFocus
     # Responsible for reading the values of the trackbar.
     # @param value Amount to be processed.
     def __trackbarFocus(self, value):
-        self.__observation['focus'] = value
-        os.system("v4l2-ctl -d /dev/video" + str(self.__port) + " -c focus_absolute=" + str(self.__observation['focus']))
+        self.__parameters['focus'] = value
+        os.system("v4l2-ctl -d /dev/video" + str(self.__port) + " -c focus_absolute=" + str(self.__parameters['focus']))
     
     ## trackbarSaturation
     # Responsible for reading the values of the trackbar.
     # @param value Amount to be processed.
     def __trackbarSaturation(self, value):
-        self.__observation['saturation'] = value
-        os.system("v4l2-ctl -d /dev/video" + str(self.__port) + " -c saturation=" + str(self.__observation['saturation']))
+        self.__parameters['saturation'] = value
+        os.system("v4l2-ctl -d /dev/video" + str(self.__port) + " -c saturation=" + str(self.__parameters['saturation']))
     
     ## finalize
     # Terminates the capture process and saves the generated information
@@ -85,14 +96,6 @@ class CameraCapture(BasicThread):
         super(CameraCapture, self)._finalize()
         self.__camera.release()
         
-        if 'frame' in self.__observation.keys():
-            del self.__observation['frame']
-        if 'pos_tilt' in self.__observation.keys():
-            del self.__observation['pos_tilt']
-        if 'pos_pan' in self.__observation.keys():
-            del self.__observation['pos_pan']
-        if 'time' in self.__observation.keys():
-            del self.__observation['time']
         super(CameraCapture,self)._end( )
     
     ## Constructor Class
@@ -100,22 +103,22 @@ class CameraCapture(BasicThread):
         print '\33[1;33m' + '---- Initializing class camera ----' + '\33[0m'
         super(CameraCapture, self).__init__(arg, 'Camera' , 'parameters')
         
-        self.__observation = {
+        self.__parameters = {
             'fps': 30,
             'focus': 25,
             'saturation': 128,
             'resolution': '2304x1536'
         }
-        self.__observation = self._conf.readVariables(self.__observation)
+        self.__parameters = self._conf.readVariables(self.__parameters)
         
-        self.__camera, self.__port = self.__cameraOpen()
+        self.__camera, self.__port = self.__cameraOpen(self._args.video)
         
-        self.__camera.set(3,int(self.__observation['resolution'].split('x')[0]))
-        self.__camera.set(4,int(self.__observation['resolution'].split('x')[1]))
+        self.__camera.set(3,int(self.__parameters['resolution'].split('x')[0]))
+        self.__camera.set(4,int(self.__parameters['resolution'].split('x')[1]))
         
         os.system("v4l2-ctl -d /dev/video" + str(self.__port) + " -c focus_auto=0")
-        os.system("v4l2-ctl -d /dev/video" + str(self.__port) + " -c focus_absolute=" + str(self.__observation['focus']))
-        os.system("v4l2-ctl -d /dev/video" + str(self.__port) + " -c saturation=" + str(self.__observation['saturation']))
+        os.system("v4l2-ctl -d /dev/video" + str(self.__port) + " -c focus_absolute=" + str(self.__parameters['focus']))
+        os.system("v4l2-ctl -d /dev/video" + str(self.__port) + " -c saturation=" + str(self.__parameters['saturation']))
         
         self.start()
         
@@ -126,8 +129,8 @@ class CameraCapture(BasicThread):
         
         if self._args.camera is True:
             cv2.namedWindow('Camera parameters')
-            cv2.createTrackbar('focus', 'Camera parameters', self.__observation['focus'], 250, self.__trackbarFocus)
-            cv2.createTrackbar('saturation', 'Camera parameters', self.__observation['saturation'], 255, self.__trackbarSaturation)
+            cv2.createTrackbar('focus', 'Camera parameters', self.__parameters['focus'], 250, self.__trackbarFocus)
+            cv2.createTrackbar('saturation', 'Camera parameters', self.__parameters['saturation'], 255, self.__trackbarSaturation)
             print ""
         
         while self._running:
@@ -137,6 +140,10 @@ class CameraCapture(BasicThread):
             self.__observation['pos_tilt'] = self._bkb.read_float('VISION_TILT_DEG')
             self.__observation['pos_pan'] = self._bkb.read_float('VISION_PAN_DEG')
             self.__observation['time'] = time.time()
+            
+            if self.__observation['frame'] is None:
+                cv2.destroyAllWindows()
+                break
             
             if self._args.camera == True:
                 cv2.imshow(
@@ -152,9 +159,10 @@ class CameraCapture(BasicThread):
                     self._args.camera = 'off'
                     cv2.destroyAllWindows()
             else:
-                if start + 1.0/self.__observation['fps'] - time.time() > 0:
+                end = start + 1.0/self.__parameters['fps'] - time.time()
+                if end > 0:
                     time.sleep( # Camera fps
-                        start + 1.0/self.__observation['fps'] - time.time()
+                        end
                     )
             
             if self._args.camera == True or self._args.camera == 'off':
@@ -164,4 +172,9 @@ class CameraCapture(BasicThread):
     
     ## currentObservation
     def currentObservation(self):
+        if self.__observation['frame'] is None:
+            if self._args.video is not None:
+                raise VisionException(5, 'CameraCapture')
+            else:
+                raise VisionException(6, '')
         return self.__observation.copy()

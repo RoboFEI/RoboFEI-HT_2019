@@ -61,6 +61,7 @@ class Orchestrator(BasicProcesses):
                 observation['objects'] = self.dnn.detect(observation)
             except VisionException as e:
                 break
+                    
             except KeyboardInterrupt:
                 os.system("clear")
                 print "\33[1;31mDetect KeyboardInterrupt\33[0m\n"

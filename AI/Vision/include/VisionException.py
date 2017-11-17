@@ -21,3 +21,5 @@ class VisionException(Exception):
             print 'Process kill command detected'
         elif numbererror == 4:
             print 'Could not connect to servos'
+        elif numbererror == 6:
+            print 'Camera disconnected'

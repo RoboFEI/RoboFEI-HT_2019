@@ -47,9 +47,9 @@ class BasicProcesses(object):
     ## Constructor Class
     # Instantiating default classes.
     @abstractmethod
-    def __init__(self, a, obj, func):
+    def __init__(self, a, obj, func, adreess=None):
         self._args = a
-        self._conf = ConfigIni(obj, func)
+        self._conf = ConfigIni(obj, func, adreess)
         self._bkb = Blackboard( )
         
     ## _end

@@ -234,7 +234,7 @@ class DNN(BasicProcesses):
             cv2.imshow('DNN - Parameters', observation['frame'])
             if cv2.waitKey(1) == ord('q'):
                 cv2.destroyAllWindows()
-                raise VisionException(5, '')
+                raise VisionException(5, 'DNN')
                 
         if self._args.train == True:
             cv2.imwrite(self.__DIRECTORY_TRAINING_IMAGES+'/images to classify/'+'Robot-'+ time.strftime('%d-%m-%Y %H:%M:%S', time.localtime(int(observation['time']))) + str(round(observation['time'] - int(observation['time']), 2))[1:] +'.jpg', image)

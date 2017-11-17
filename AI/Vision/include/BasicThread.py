@@ -43,15 +43,15 @@ class BasicThread(BasicProcesses, Thread):
     _pausethread = None
     
     ## pause
-    # Function responsible for stopping thread execution.
     def _pause(self):
+        '''Function responsible for stopping thread execution.'''
         if not self.__pauseistrue:
             self._pausethread.acquire()
             self.__pauseistrue = True
     
     ## resume
-    # Responsible function for releasing the thread for execution.
     def _resume(self):
+        '''Responsible function for releasing the thread for execution.'''
         if self.__pauseistrue:
             self._pausethread.notify()
             self._pausethread.release()
@@ -72,9 +72,9 @@ class BasicThread(BasicProcesses, Thread):
         self._pause( )
         
     ## run
-    # Sample function for a thread.
     @abstractmethod
     def run(self):
+        '''Sample function for a thread.'''
         self._running = True
         while self._running:
             with self._pausethread:
@@ -83,18 +83,18 @@ class BasicThread(BasicProcesses, Thread):
             self._pause( )
     
     ## _finalize
-    # Responsible for closing a thread.
     def _finalize(self):
+        '''Responsible for closing a thread.'''
         self._running = False
         self._resume( )
         self.join( )
     
     ## printPreviousLine
-    # Used to print on previous lines.
-    # @param text Text to be printed.
-    # @param lines Number of rows returned.
-    # @param back Go back to where you were.
     def printPreviousLine(self, text, lines=1, back=True):
+        '''Used to print on previous lines.
+        @param text Text to be printed.
+        @param lines Number of rows returned.
+        @param back Go back to where you were.'''
         for i in xrange(lines):
             print "\033[F\r",
         print text

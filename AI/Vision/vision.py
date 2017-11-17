@@ -23,6 +23,14 @@ parser = argparse.ArgumentParser(
 )
 
 parser.add_argument(
+    '--video', # Full name
+    '--v', # Abbreviation for the name
+    type = str, # Type variable
+    help = 'Utiliza um video para execução do sistema de visão.\\' \
+    'Uses a video for running the vision system.' # Description of the variable
+)
+
+parser.add_argument(
     '--camera', # Full name
     '--c', # Abbreviation for the name
     action = "store_true", # Type variable
