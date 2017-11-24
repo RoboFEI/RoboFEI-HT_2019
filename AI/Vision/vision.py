@@ -53,6 +53,14 @@ parser.add_argument(
     'Saves images that have a low rating percentage and creates a markup XML.' # Description of the variable
 )
 
+parser.add_argument(
+    '--robots', # Full name
+    '--rob', # Abbreviation for the name
+    action = "store_true", # Type variable
+    help = 'adlks.\\' \
+    'adlks.' # Description of the variable
+)
+
 args = parser.parse_args()
 
 # ---- Imports ----
@@ -69,6 +77,10 @@ from Orchestrator import *
 
 if args.train == True:
     args.dnn = True
+
+if args.camera + args.dnn + args.robots > 1:
+    print "Não é possivel a exibição de multiplas tarefas ao mesmo tempo."
+    sys.exit(1)
 
 vision = Orchestrator(args)
 

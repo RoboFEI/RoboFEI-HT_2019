@@ -233,7 +233,6 @@ class DNN(BasicProcesses):
         if self._args.dnn == True:
             cv2.imshow('DNN - Parameters', observation['frame'])
             if cv2.waitKey(1) == ord('q'):
-                cv2.destroyAllWindows()
                 raise VisionException(5, 'DNN')
                 
         if self._args.train == True:
@@ -261,6 +260,9 @@ class DNN(BasicProcesses):
             shutil.rmtree('./Data/Rede')
         except OSError:
             pass
+        
+        if self._args.dnn == True:
+            cv2.destroyAllWindows()
         
         # Saving parameter values
         self._end()

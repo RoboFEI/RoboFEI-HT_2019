@@ -16,6 +16,7 @@
 
 # The standard libraries used in the vision system.
 import cv2 # OpenCV library used for image processing.
+from sklearn.externals import joblib # Reading data recorded by sklearn.
 
 # Used class developed by RoboFEI-HT.
 from DNN import * # Class that implements object detection using a deep neural network (DNN).
@@ -34,21 +35,45 @@ class Robots(BasicThread):
     ## menu
     __menu = 'show'
     
+    ## filename
+    __filename = './Data/distance_network.sav'
+    
+    ## finalize
+    # .
+    def finalize(self):
+        '''Closes the process and saves changes.'''
+       
+        self._finalize()
+        if self._args.robots == True:
+            cv2.destroyAllWindows()
+        
+        for team in self.__teams:
+            team._end()
+        self._end()
+    
     ## Constructor Class
     def __init__(self, a):
         '''Initialize the class and instantiate the objects needed to detect the robots.
         @param a Entry Parameters of the vision system.'''
-        super(Robot, self).__init__(a, 'Robots', 'Parameters')
+        super(Robots, self).__init__(a, 'Robots', 'Parameters')
         
-        __parameters = {
+        self.__parameters = {
             "percentage_time_color": 10,
         }
         
-        __parameters = self._conf.readVariables(__parameters)
+        self.__parameters = self._conf.readVariables(self.__parameters)
         
-        __teams = []
+        self.__teams = []
         self.__teams.append(ColorSegmentation("Cyano", a, False))
         self.__teams.append(ColorSegmentation("Magenta", a, False))
+        
+        self.__nndistance = joblib.load(self.__filename)
+        
+        #Clear blackboard
+        for number in xrange(1,22):
+            self._bkb.write_float("VISION_RB" + str(number).zfill(2) + "_TAG", 0)
+        
+        self.start()
         
     ## cutObject
     def __cutObject(self, index, data):
@@ -65,7 +90,6 @@ class Robots(BasicThread):
     
     ## teamDetection
     def __teamDetection(self, data):
-        global self.__menu #debug-ipython
         '''Detects which team belongs to the robot.
         @param data Data that will be analyzed for the detection of teams.
         @return Returns a DataFrame with the teams.'''
@@ -82,7 +106,7 @@ class Robots(BasicThread):
                             data["frame"][xmin:xmax, ymin:ymax, :]
                         )
                         if cv2.waitKey(1) == ord('q'):
-                            cv2.destroyAllWindows()
+    #                         cv2.destroyWindow(__teams[j].color + ' Segmentation')
                             break
                     self.__teams[j].show = False
                 else:
@@ -90,18 +114,52 @@ class Robots(BasicThread):
                         data["frame"][xmin:xmax, ymin:ymax, :]
                     )
                 area = sum(sum(mask))*100.0/((xmax - xmin)*(ymax - ymin)) 
-                if area >= __parameters["percentage_time_color"] and maxcolor < area:
+                if area >= self.__parameters["percentage_time_color"] and maxcolor < area:
                     maxcolor = area
-                    time = j + 1
+                    time = j*2 - 1
             time_robot.append(time)
         data["objects"]["time"] = np.array(time_robot)
         return data
     
-    ## classification
+    ## estimatedDistance
+    def __estimatedDistance(self, data):
+        '''Estimate the distance of the object using neural network.
+        @param data Data to be used for analysis.
+        @return Returns the increased distance data of the objects.'''
+        listdist = []
+        for ymin, xmin, ymax, xmax in data['objects']['boxes']:
+    
+            listdist.append([
+                np.cos(0.9075712110370513*(0.5 - (xmax + xmin)/2))*self.__nndistance.predict(ymax - ymin)[0],
+                np.sin(0.9075712110370513*(0.5 - (xmax + xmin)/2))*self.__nndistance.predict(ymax - ymin)[0]
+            ])
+            
+        data['objects']['dist'] = listdist    
+        return data
+    
+    ## __writeBlackboard
     # .
-    def classification(self, data):
-        global self.__menu #debug-ipython
+    def __writeBlackboard(self, data):
+        number = 1
+        for __, __, __, robot, [xdist, ydist] in data['objects'].values:
+            while number < 22 and self._bkb.read_float("VISION_RB" + str(number).zfill(2) + "_TAG") != 0:
+                number += 1
+            
+            if number == 22: #Full memory
+                break
+            
+            self._bkb.write_float("VISION_RB" + str(number).zfill(2) + "_X", xdist)
+            self._bkb.write_float("VISION_RB" + str(number).zfill(2) + "_Y", ydist)
+            self._bkb.write_float("VISION_RB" + str(number).zfill(2) + "_TIME", data['time']),
+            self._bkb.write_float("VISION_RB" + str(number).zfill(2) + "_MOV", data['mov']),
+            self._bkb.write_float("VISION_RB" + str(number).zfill(2) + "_TAG", robot + 2)
+    
+    ## __classification
+    def __classification(self, data):
+        '''Sorting Detected Robots and Writing on Blackboard.'''
         self.__teamDetection(data)
+        self.__estimatedDistance(data)
+        self.__writeBlackboard(data)
         
         # Displaying parameter windows
         if self._args.robots == True:
@@ -117,22 +175,17 @@ class Robots(BasicThread):
             )
             keyboard = cv2.waitKey(1)
             if keyboard == ord('s'):
-                cv2.destroyAllWindows()
                 self.__menu = 'setcolor'
             elif keyboard == ord('q'):
-                cv2.destroyAllWindows()
-                raise VisionException(5, 'Robots')
+                self._running = False
     
-    while True:
-        del observation['objects']['time']
-        try:
-            classification(observation)
-        except:
-            break
-    
-    observation['objects']
-    
-    #self-iPython classificatio
+    ## classifyingRobots
+    # .
+    def classifyingRobots(self, data):
+        if self._running == False:
+            raise VisionException(5, 'Robots')
+        self.__listdata.append(data)
+        self._resume()
     
     ## run
     def run(self):
@@ -142,5 +195,5 @@ class Robots(BasicThread):
             with self._pausethread:
                 while self.__listdata != []:
                     data = self.__listdata.pop(0)
-                    self.classification(data)
+                    self.__classification(data)
             self._pause( )

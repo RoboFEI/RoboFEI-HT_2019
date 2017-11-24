@@ -20,6 +20,7 @@
 from BasicProcesses import * # Standard and abstract class.
 from CameraCapture import * # Class responsible for performing the observation of domain.
 from DNN import * # Class that implements object detection using a deep neural network (DNN).
+from Robots import * # Class responsible for detecting thefts and a time of classification they belong.
 
 ## Class Orchestrator
 # Class responsible for managing the vision process.
@@ -35,6 +36,10 @@ class Orchestrator(BasicProcesses):
     # Object responsible for performing a classification use DNN.
     dnn = None
     
+    ## robots
+    # Object responsible for robots classification.
+    robots = None
+    
     ## Constructor Class
     def __init__(self, a):
         super(Orchestrator, self).__init__(a, "Vision", "Parameters")
@@ -45,11 +50,19 @@ class Orchestrator(BasicProcesses):
         except VisionException as e:
             sys.exit(1)
         
-        # Instantiating camera object
+        # Instantiating dnn object
         try:
             self.dnn = DNN(a)
         except VisionException as e:
             self.camera.finalize()
+            sys.exit(1)
+        
+        # Instantiating robots object
+        try:
+            self.robots = Robots(a)
+        except VisionException as e:
+            self.camera.finalize()
+            self.dnn.finalize()
             sys.exit(1)
         
     ## run
@@ -59,6 +72,7 @@ class Orchestrator(BasicProcesses):
             try:
                 observation = self.camera.currentObservation()
                 observation['objects'] = self.dnn.detect(observation)
+                self.robots.classifyingRobots(observation)
             except VisionException as e:
                 break
                     
@@ -72,4 +86,5 @@ class Orchestrator(BasicProcesses):
     def end(self):
         self.camera.finalize()
         self.dnn.finalize()
+        self.robots.finalize()
         #self._end( )

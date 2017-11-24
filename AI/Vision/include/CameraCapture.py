@@ -92,7 +92,9 @@ class CameraCapture(BasicThread):
     ## finalize
     # Terminates the capture process and saves the generated information
     def finalize(self):
-        cv2.destroyAllWindows()
+        if self._args.camera == True:
+            cv2.destroyAllWindows()
+        
         super(CameraCapture, self)._finalize()
         self.__camera.release()
         
@@ -120,6 +122,8 @@ class CameraCapture(BasicThread):
         os.system("v4l2-ctl -d /dev/video" + str(self.__port) + " -c focus_absolute=" + str(self.__parameters['focus']))
         os.system("v4l2-ctl -d /dev/video" + str(self.__port) + " -c saturation=" + str(self.__parameters['saturation']))
         
+        self._pause()
+        
         self.start()
         
     ## run
@@ -139,10 +143,11 @@ class CameraCapture(BasicThread):
             __, self.__observation['frame'] = self.__camera.read()
             self.__observation['pos_tilt'] = self._bkb.read_float('VISION_TILT_DEG')
             self.__observation['pos_pan'] = self._bkb.read_float('VISION_PAN_DEG')
+            self.__observation['mov'] = self._bkb.read_int('DECISION_ACTION_A')
             self.__observation['time'] = time.time()
+            self._resume()
             
             if self.__observation['frame'] is None:
-                cv2.destroyAllWindows()
                 break
             
             if self._args.camera == True:
@@ -157,7 +162,6 @@ class CameraCapture(BasicThread):
                 )
                 if cv2.waitKey(1) == ord('q'):
                     self._args.camera = 'off'
-                    cv2.destroyAllWindows()
             else:
                 end = start + 1.0/self.__parameters['fps'] - time.time()
                 if end > 0:
@@ -172,6 +176,10 @@ class CameraCapture(BasicThread):
     
     ## currentObservation
     def currentObservation(self):
+        with self._pausethread:
+            pass
+        self._pause()
+        
         if self.__observation['frame'] is None:
             if self._args.video is not None:
                 raise VisionException(5, 'CameraCapture')

@@ -47,17 +47,17 @@ class ColorSegmentation(BasicProcesses):
     
     ## Color
     # Color to segmentaion.
-    __color = None
+    color = None
     
     ## Parameters
     # Parameters used to perform color segmentation.
     __parameters = None
     
     ## Constructor Class
-    def __init__(self, color, a, s):
+    def __init__(self, c, a, s):
         self.show = s
-        self.__color = color
-        super(ColorSegmentation, self).__init__(a, self.__color, "Segmentation", adreess="./Data/"+ self.__color +".ini")
+        self.color = c
+        super(ColorSegmentation, self).__init__(a, self.color, "Segmentation", adreess="./Data/"+ self.color +".ini")
         
         # Creating default values and reading config
         self.__parameters = {
@@ -70,7 +70,7 @@ class ColorSegmentation(BasicProcesses):
             'color_b': 0,
             'color_g': 0,
             'color_r': 0,
-            'name': self.__color
+            'name': self.color
         }
         self.__parameters = self._conf.readVariables(self.__parameters)
         
@@ -88,7 +88,7 @@ class ColorSegmentation(BasicProcesses):
         
         cv2.setTrackbarPos( # Adjusting value on trackbar
                 'h_min', # Name of trackbar
-                self.__color + ' Segmentation', # Window Name
+                self.color + ' Segmentation', # Window Name
                 self.__parameters['h_min'] # Value to be set
             )
         
@@ -109,7 +109,7 @@ class ColorSegmentation(BasicProcesses):
         
         cv2.setTrackbarPos( # Adjusting value on trackbar
                 'h_max', # Name of trackbar
-                self.__color + ' Segmentation', # Window Name
+                self.color + ' Segmentation', # Window Name
                 self.__parameters['h_max'] # Value to be set
             )
         
@@ -130,7 +130,7 @@ class ColorSegmentation(BasicProcesses):
         
         cv2.setTrackbarPos( # Adjusting value on trackbar
                 's_min', # Name of trackbar
-                self.__color + ' Segmentation', # Window Name
+                self.color + ' Segmentation', # Window Name
                 self.__parameters['s_min'] # Value to be set
             )
         
@@ -151,7 +151,7 @@ class ColorSegmentation(BasicProcesses):
         
         cv2.setTrackbarPos( # Adjusting value on trackbar
                 's_max', # Name of trackbar
-                self.__color + ' Segmentation', # Window Name
+                self.color + ' Segmentation', # Window Name
                 self.__parameters['s_max'] # Value to be set
             )
         
@@ -172,7 +172,7 @@ class ColorSegmentation(BasicProcesses):
         
         cv2.setTrackbarPos( # Adjusting value on trackbar
                 'v_min', # Name of trackbar
-                self.__color + ' Segmentation', # Window Name
+                self.color + ' Segmentation', # Window Name
                 self.__parameters['v_min'] # Value to be set
             )
         
@@ -193,7 +193,7 @@ class ColorSegmentation(BasicProcesses):
         
         cv2.setTrackbarPos( # Adjusting value on trackbar
                 'v_max', # Name of trackbar
-                self.__color + ' Segmentation', # Window Name
+                self.color + ' Segmentation', # Window Name
                 self.__parameters['v_max'] # Value to be set
             )
         
@@ -242,7 +242,7 @@ class ColorSegmentation(BasicProcesses):
             )
             
             cv2.imshow(
-                self.__color + ' Segmentation',
+                self.color + ' Segmentation',
                 img
             )
             
@@ -250,7 +250,7 @@ class ColorSegmentation(BasicProcesses):
                 self.show = ""
                 cv2.createTrackbar(
                     'h_min',
-                    self.__color + ' Segmentation',
+                    self.color + ' Segmentation',
                     self.__parameters['h_min'],
                     255,
                     self.__trackbarHMin,
@@ -258,7 +258,7 @@ class ColorSegmentation(BasicProcesses):
     
                 cv2.createTrackbar(
                     'h_max',
-                    self.__color + ' Segmentation',
+                    self.color + ' Segmentation',
                     self.__parameters['h_max'],
                     255,
                     self.__trackbarHMax,
@@ -266,7 +266,7 @@ class ColorSegmentation(BasicProcesses):
     
                 cv2.createTrackbar(
                     's_min',
-                    self.__color + ' Segmentation',
+                    self.color + ' Segmentation',
                     self.__parameters['s_min'],
                     255,
                     self.__trackbarSMin,
@@ -274,7 +274,7 @@ class ColorSegmentation(BasicProcesses):
     
                 cv2.createTrackbar(
                     's_max',
-                    self.__color + ' Segmentation',
+                    self.color + ' Segmentation',
                     self.__parameters['s_max'],
                     255,
                     self.__trackbarSMax,
@@ -282,7 +282,7 @@ class ColorSegmentation(BasicProcesses):
     
                 cv2.createTrackbar(
                     'v_min',
-                    self.__color + ' Segmentation',
+                    self.color + ' Segmentation',
                     self.__parameters['v_min'],
                     255,
                     self.__trackbarVMin,
@@ -290,7 +290,7 @@ class ColorSegmentation(BasicProcesses):
     
                 cv2.createTrackbar(
                     'v_max',
-                    self.__color + ' Segmentation',
+                    self.color + ' Segmentation',
                     self.__parameters['v_max'],
                     255,
                     self.__trackbarVMax,
