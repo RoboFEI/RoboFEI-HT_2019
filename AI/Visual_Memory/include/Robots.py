@@ -55,6 +55,11 @@ class Robots(BasicThread):
     ## reset
     # .
     def reset(self):
+        self.__listfunction = [ ]
+        
+        while not self._threadPaused():
+            pass
+        
         super(Robots, self)._reset( )
         
         self._A = self._A[:-2,:-2]
@@ -96,14 +101,12 @@ class Robots(BasicThread):
         
         self.reset( )
         
-        self.__listfunction = [ ]
-        
         self.start( )
         
     ## __predictVector
     # .
     def __predictVector(self, vector):
-        tnow, movements = vector
+        tnow, movements = vector    
         super(Robots, self)._predict(tnow, movements)
         
         if tnow == None and self._args.savedata == True:
@@ -237,3 +240,7 @@ class Robots(BasicThread):
         self.calculatesDistance( )
         other.calculatesDistance( )
         return self.weight < other.weight
+       
+    ## testReset
+    def testReset(self):
+        pass

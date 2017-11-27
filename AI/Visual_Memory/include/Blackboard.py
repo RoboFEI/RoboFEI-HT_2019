@@ -84,3 +84,17 @@ class Blackboard(object):
     # @return Read value of variable.
     def read_int(self, variable):
         return self.__bkb.read_int(self.__mem, variable)
+    
+    ## write_double
+    # Used to do the writing of double variables on the blackboard.
+    # @param variable Name of the variable that will be accessed in the blackboard.
+    # @param value Value to be written.
+    def write_double(self, variable, value):
+        self.__bkb.write_double(self.__mem, variable, value)
+    
+    ## read_double
+    # Used to read double values from the blackboard.
+    # @param variable Variable that will be read from blackbord.
+    # @return Read value of variable.
+    def read_double(self, variable):
+        return self.__bkb.read_double(self.__mem, variable)

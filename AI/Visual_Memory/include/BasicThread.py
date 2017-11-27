@@ -43,15 +43,15 @@ class BasicThread(KalmanFilter, Thread):
     _pausethread = None
     
     ## pause
-    # Function responsible for stopping thread execution.
     def _pause(self):
+        '''Function responsible for stopping thread execution.'''
         if not self.__pauseistrue:
             self._pausethread.acquire()
             self.__pauseistrue = True
     
     ## resume
-    # Responsible function for releasing the thread for execution.
     def _resume(self):
+        '''Responsible function for releasing the thread for execution.'''
         if self.__pauseistrue:
             self._pausethread.notify()
             self._pausethread.release()
@@ -72,9 +72,9 @@ class BasicThread(KalmanFilter, Thread):
         self._pause( )
         
     ## run
-    # .
     @abstractmethod
     def run(self):
+        '''Example of thread execution.'''
         self._running = True
         while self._running:
             with self._pausethread:
@@ -82,9 +82,14 @@ class BasicThread(KalmanFilter, Thread):
                 time.sleep(1)
             self._pause( )
     
-    ## _finalize
-    # .
+    ## finalize
     def _finalize(self):
+        '''Finish the object.'''
         self._running = False
         self._resume( )
         self.join( )
+    
+    ## threadPaused
+    def _threadPaused(self):
+        '''Tests whether the object is still in the crawl tolerance.'''
+        return self.__pauseistrue

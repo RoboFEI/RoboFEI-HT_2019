@@ -88,15 +88,15 @@ class Behavior(Basic):
     ## readDataLandmarks
     # Responsible for reading the data coming from the vision system.
     def readDataLandmarks(self, old):
-        if self._bkb.read_float("VISION_LAND_TAG") == 1:
+        if self._bkb.read_int("VISION_LAND_TAG") == 1:
             data = [{
                     "tag": 1,
                     "pos": [self._bkb.read_float("VISION_LAND_X"), self._bkb.read_float("VISION_LAND_Y")],
-                    "time": self._bkb.read_float("VISION_LAND_TIME"),
-                    "movement": int(self._bkb.read_float("VISION_LAND_MOV")),
+                    "time": self._bkb.read_double("VISION_LAND_TIME"),
+                    "movement": self._bkb.read_int("VISION_LAND_MOV"),
                 }]
             
-            self._bkb.write_float("VISION_LAND_TAG", 0)
+            self._bkb.write_int("VISION_LAND_TAG", 0)
             return old + data
         else:
             return old
@@ -105,18 +105,18 @@ class Behavior(Basic):
     # .
     def readDataRobots(self, old):
         data = []
-        for number in xrange(1, self.parameters["number_robots"]):
-            if self._bkb.read_float("VISION_RB" + str(number).zfill(2) + "_TAG") == 0:
+        for number in xrange(1, 22):
+            if self._bkb.read_int("VISION_RB" + str(number).zfill(2) + "_TAG") == 0:
                 continue
             
             data.append({
-                "tag": self._bkb.read_float("VISION_RB" + str(number).zfill(2) + "_TAG") - 2,
+                "tag": self._bkb.read_int("VISION_RB" + str(number).zfill(2) + "_TAG") - 2,
                 "pos": [self._bkb.read_float("VISION_RB" + str(number).zfill(2) + "_X"), self._bkb.read_float("VISION_RB" + str(number).zfill(2) + "_Y")],
-                "time": self._bkb.read_float("VISION_RB" + str(number).zfill(2) + "_TIME"),
-                "movement": int(self._bkb.read_float("VISION_RB" + str(number).zfill(2) + "_MOV")),
+                "time": self._bkb.read_double("VISION_RB" + str(number).zfill(2) + "_TIME"),
+                "movement": int(self._bkb.read_int("VISION_RB" + str(number).zfill(2) + "_MOV")),
             })
             
-            self._bkb.write_float("VISION_RB" + str(number).zfill(2) + "_TAG", 0)
+            self._bkb.write_int("VISION_RB" + str(number).zfill(2) + "_TAG", 0)
         
         data = sorted(old + data, key= lambda k: k["time"])
         
@@ -134,20 +134,28 @@ class Behavior(Basic):
         time = -1
         while index < len(datarobots):
             data = datarobots[index]
+            print "Dado analisado:", data # debug-iPython
             
             # First input data
             if self.robots == []:
+                print "Primeira leitura" # debug-iPython
                 candidates = self.__newrobots.pop(0)
                 candidates.timenumber = data["tag"]*(len([ robot for robot in self.robots if robot.timenumber == data["tag"] ]) + 1)
                 candidates.updateThread(data)
                 self.robots.append(candidates)
                 datarobots.pop(index)
+                print "\n" # debug-iPython
+                raw_input("Continuar...") # debug-iPython
                 continue
                 
             if data["time"] != time:
                 opponent = [ robot for robot in self.robots if robot.timenumber == -1 ]
                 indefinite = [ robot for robot in self.robots if robot.timenumber == 0 ]
                 teammate = [ robot for robot in self.robots if robot.timenumber == 1 ]
+                print "Criado listas:" # debug-iPython
+                print "opponent:", opponent # debug-iPython
+                print "indefinite:", indefinite # debug-iPython
+                print "teammate:", teammate # debug-iPython
                 time = data["time"]
     
             # Calculates the similarity of the data with the objects
@@ -161,12 +169,17 @@ class Behavior(Basic):
                 candidates = indefinite + teammate
             else:
                 candidates = opponent + indefinite + teammate
+            print "Candidatos feitos:", candidates # debug-iPython
             
             #  Calculates the similarity
             candidates.sort(reverse=True)
             
+            if candidates != []: # debug-iPython
+                print "weight:", candidates[0].weight, candidates[0].weight < self.parameters["weight_robot"] # debug-iPython
+            
             #  Sends the data to the most similar object and run object update
             if (candidates == [] or candidates[0].weight < self.parameters["weight_robot"]) and self.__newrobots != []:
+                print "Nenhum candidato proximo" # debug-iPython
                 candidates = self.__newrobots.pop(0)
                 candidates.timenumber = data["tag"]*(len([ robot for robot in self.robots if robot.timenumber == data["tag"] ]) + 1)
                 candidates.updateThread(data)
@@ -175,23 +188,30 @@ class Behavior(Basic):
                 index -= 1
             else:
                 if candidates != [] and candidates[0].timenumber == -1:
+                    print "candidato adversario" # debug-iPython
                     opponent.remove(candidates[0])
                     candidates[0].updateThread(data)
                     datarobots.pop(index)
                     index -= 1
                 elif candidates != [] and candidates[0].timenumber == 1:
+                    print "cadidato aliado" # debug-iPython
                     teammate.remove(candidates[0])
                     candidates[0].updateThread(data)
                     datarobots.pop(index)
                     index -= 1
                 elif candidates != []:
+                    print "candidato sei lá" # debug-iPython
                     indefinite.remove(candidates[0])
                     candidates[0].timenumber = data["tag"]*(len([ robot for robot in self.robots if robot.timenumber == data["tag"] ]) + 1)
                     candidates[0].updateThread(data)
                     datarobots.pop(index)
                     index -= 1
             
+            print "\n" # debug-iPython
+            raw_input("Continuar...") # debug-iPython
             index += 1
+        print "self.robots:", self.robots # debug-iPython
+        print "newrobots:", self.__newrobots # debug-iPython
        
     ## readDataBall
     # Responsible for reading the data coming from the vision system.
@@ -321,7 +341,7 @@ class Behavior(Basic):
                     self.me.update(self.land.update(datalandmarks.pop(0)))
                 else:
                     # Predicts only the new landmarks position
-                    self.land.predict(movements = 1)
+                    self.land.predict(movements = 0)
         
                 # Reading robots data
                 datarobots = self.readDataRobots(datarobots)
@@ -337,11 +357,16 @@ class Behavior(Basic):
                 # Batata
         
                 ## Doing cleaning and objects (lost objects)
-                # Batata
-        
+                i = 0
+                while i < len(self.robots):
+                    if self.robots[i].testReset( ):
+                        i -= 1
+                        self.__newrobots.append(self.robots.pop(i))
+                    i += 1
+                        
                 ## Predicts objects (Now)
                 for robot in self.robots:
-                    robot.predictThread(movements=1)
+                    robot.predictThread(movements=0)
         
                 ## Send object for vision screening
                 # Batata

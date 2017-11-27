@@ -71,7 +71,7 @@ class Robots(BasicThread):
         
         #Clear blackboard
         for number in xrange(1,22):
-            self._bkb.write_float("VISION_RB" + str(number).zfill(2) + "_TAG", 0)
+            self._bkb.write_int("VISION_RB" + str(number).zfill(2) + "_TAG", 0)
         
         self.start()
         
@@ -142,7 +142,7 @@ class Robots(BasicThread):
     def __writeBlackboard(self, data):
         number = 1
         for __, __, __, robot, [xdist, ydist] in data['objects'].values:
-            while number < 22 and self._bkb.read_float("VISION_RB" + str(number).zfill(2) + "_TAG") != 0:
+            while number < 22 and self._bkb.read_int("VISION_RB" + str(number).zfill(2) + "_TAG") != 0:
                 number += 1
             
             if number == 22: #Full memory
@@ -150,9 +150,9 @@ class Robots(BasicThread):
             
             self._bkb.write_float("VISION_RB" + str(number).zfill(2) + "_X", xdist)
             self._bkb.write_float("VISION_RB" + str(number).zfill(2) + "_Y", ydist)
-            self._bkb.write_float("VISION_RB" + str(number).zfill(2) + "_TIME", data['time']),
-            self._bkb.write_float("VISION_RB" + str(number).zfill(2) + "_MOV", data['mov']),
-            self._bkb.write_float("VISION_RB" + str(number).zfill(2) + "_TAG", robot + 2)
+            self._bkb.write_double("VISION_RB" + str(number).zfill(2) + "_TIME", data['time']),
+            self._bkb.write_int("VISION_RB" + str(number).zfill(2) + "_MOV", data['mov']),
+            self._bkb.write_int("VISION_RB" + str(number).zfill(2) + "_TAG", robot + 2)
     
     ## __classification
     def __classification(self, data):
