@@ -41,6 +41,13 @@ then
 	exit
 fi
 
+if !( mv rename.py ../../Train/rename.py )
+then
+	echo -e "${Light_Red}"
+	read -p "Erro, precione qualquer tecla para finalizar"
+	exit
+fi
+
 if !( mv check.py ../../Train/check.py )
 then
 	echo -e "${Light_Red}"
@@ -55,7 +62,7 @@ then
 	exit
 fi
 
-if !( cp gen_pb.sh ../../Train/gen_pb.sh )
+if !( cp zipNetwork.sh ../../Train/zipNetwork.sh )
 then
 	echo -e "${Light_Red}"
 	read -p "Erro, precione qualquer tecla para finalizar"

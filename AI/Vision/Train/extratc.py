@@ -32,7 +32,7 @@ a = Argumentos()
 dnn = DNN(a)
 
 dicionario = {}
-os.system("mkdir ./Train/images\ to\ classify")
+os.system("mkdir ./Train/imagens\ to\ classify")
 for video in os.listdir("./Train/Videos"):
     cap = cv2.VideoCapture("./Train/Videos/"+video)
     while True:
@@ -45,14 +45,14 @@ for video in os.listdir("./Train/Videos"):
     os.system("rm ./Train/Videos/"+video)
 
 try:
-    images = [i.rsplit(".", 1)[0] for i in os.listdir("./Train/images to classify")]
+    imagens = [i.rsplit(".", 1)[0] for i in os.listdir("./Train/imagens to classify")]
     xmls = [i.rsplit(".", 1)[0] for i in os.listdir("./Train/annotations DNN")]
-    images = [i for i in images if i not in xmls]
-    for image in images:
-        dicionario["frame"] = cv2.imread("./Train/images to classify/"+image+".jpg")
+    imagens = [i for i in imagens if i not in xmls]
+    for image in imagens:
+        dicionario["frame"] = cv2.imread("./Train/imagens to classify/"+image+".jpg")
         dicionario["time"] = time.time()
         dnn.detect(dicionario)
-        os.system("rm ./Train/images\ to\ classify/"+image.replace(":","\\:").replace(" ","\\ ")+".jpg")
+        os.system("rm ./Train/imagens\ to\ classify/"+image.replace(":","\\:").replace(" ","\\ ")+".jpg")
     cv2.destroyAllWindows()
 except:
     pass

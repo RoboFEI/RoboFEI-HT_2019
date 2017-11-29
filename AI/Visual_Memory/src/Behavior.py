@@ -111,7 +111,7 @@ class Behavior(Basic):
             
             data.append({
                 "tag": self._bkb.read_int("VISION_RB" + str(number).zfill(2) + "_TAG") - 2,
-                "pos": [self._bkb.read_float("VISION_RB" + str(number).zfill(2) + "_X"), self._bkb.read_float("VISION_RB" + str(number).zfill(2) + "_Y")],
+                "pos": [self._bkb.read_float("VISION_RB" + str(number).zfill(2) + "_X")*100, self._bkb.read_float("VISION_RB" + str(number).zfill(2) + "_Y")*100],
                 "time": self._bkb.read_double("VISION_RB" + str(number).zfill(2) + "_TIME"),
                 "movement": int(self._bkb.read_int("VISION_RB" + str(number).zfill(2) + "_MOV")),
             })
@@ -171,14 +171,30 @@ class Behavior(Basic):
                 candidates = opponent + indefinite + teammate
             print "Candidatos feitos:", candidates # debug-iPython
             
+            for cad in candidates:
+                print "Pausado antes:", cad._threadPaused(), cad._predictedstate["x"] # debug-iPython
+                while not cad._threadPaused():
+                    pass
+                print "Pausado depois:", cad._threadPaused(), cad._predictedstate["x"] # debug-iPython
+            
             #  Calculates the similarity
-            candidates.sort(reverse=True)
+            if len(candidates) == 1:
+                print "Apenas 1" # debug-iPython
+                candidates[0].calculatesDistance()
+            else:
+                print "Varios" # debug-iPython
+                candidates.sort(reverse=True)
+            
+            # ini-iPython
+            for cad in candidates:
+                print "weight:", cad.weight, cad._predictedstate["x"]
+            # end-iPython
             
             if candidates != []: # debug-iPython
                 print "weight:", candidates[0].weight, candidates[0].weight < self.parameters["weight_robot"] # debug-iPython
             
             #  Sends the data to the most similar object and run object update
-            if (candidates == [] or candidates[0].weight < self.parameters["weight_robot"]) and self.__newrobots != []:
+            if self.__newrobots != [] and (candidates == [] or candidates[0].weight < self.parameters["weight_robot"]):
                 print "Nenhum candidato proximo" # debug-iPython
                 candidates = self.__newrobots.pop(0)
                 candidates.timenumber = data["tag"]*(len([ robot for robot in self.robots if robot.timenumber == data["tag"] ]) + 1)
@@ -207,12 +223,13 @@ class Behavior(Basic):
                     datarobots.pop(index)
                     index -= 1
             
+            print "Robots:", self.robots # debug-iPython
+            print "New Robots:", self.__newrobots # debug-iPython
             print "\n" # debug-iPython
             raw_input("Continuar...") # debug-iPython
             index += 1
-        print "self.robots:", self.robots # debug-iPython
-        print "newrobots:", self.__newrobots # debug-iPython
-       
+    #self-iPython distributeDataRobot
+    
     ## readDataBall
     # Responsible for reading the data coming from the vision system.
     def readDataBall(self):
@@ -299,7 +316,6 @@ class Behavior(Basic):
                 self.printPreviousLine(text, lines=i)
     
     ## run
-    # .
     def run(self):
         # Initiating variables
         datalandmarks = []

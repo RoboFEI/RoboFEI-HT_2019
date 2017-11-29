@@ -20,7 +20,7 @@ mkdir data
 
 echo -e "${Blue}Gerando csv do xml${NC}"
 python xml_to_csv.py
-sed -i "2,\$s@^@$(pwd)/imagesTrain/@" ./data/train_labels.csv
+sed -i "2,\$s@^@$(pwd)/imagensTrain/@" ./data/train_labels.csv
 
 echo -e "${Blue}Gerando Label${NC}"
 python generate_label.py

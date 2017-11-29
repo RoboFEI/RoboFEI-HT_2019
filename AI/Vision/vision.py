@@ -19,7 +19,7 @@ import argparse
 parser = argparse.ArgumentParser(
     description='Vision',
     epilog= 'Responsável por realizar as detecções de objetos utilizando a camera e rastrear os objetos na imagens utilizando os motores.\\' \
-        'Responsible for performing object detections using the camera and tracking the objects in the images using the engines.'
+        'Responsible for performing object detections using the camera and tracking the objects in the imagens using the engines.'
 )
 
 parser.add_argument(
@@ -50,7 +50,7 @@ parser.add_argument(
     '--tr', # Abbreviation for the name
     action = "store_true", # Type variable
     help = 'Salva as imagens que tiveram um baixo percentual de classificação e cria um XML de marcação.\\' \
-    'Saves images that have a low rating percentage and creates a markup XML.' # Description of the variable
+    'Saves imagens that have a low rating percentage and creates a markup XML.' # Description of the variable
 )
 
 parser.add_argument(

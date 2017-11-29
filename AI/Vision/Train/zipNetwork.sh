@@ -6,7 +6,7 @@ cd ./models/train
 var=$(ls model.ckpt-*.index | sort -V | tail -n 1)
 var=${var%.index}
 
-cd ~/models/research
+cd ~/models
 
 python object_detection/export_inference_graph.py \
   --input_type image_tensor \
@@ -15,4 +15,10 @@ python object_detection/export_inference_graph.py \
   --output_directory "$n/models/rede/"
 
 cd "$n"
-tar -zcvf ../Data/newRede.tar.gz ./models/rede/frozen_inference_graph.pb ./data/object-detection.pbtxt
+mkdir newRede
+cp ./models/rede/frozen_inference_graph.pb ./newRede/frozen_inference_graph.pb
+cp ./data/object-detection.pbtxt ./newRede/object-detection.pbtxt
+cd newRede
+tar -czf ../../Data/newRede.tar.gz *
+cd ..
+rm -R newRede
