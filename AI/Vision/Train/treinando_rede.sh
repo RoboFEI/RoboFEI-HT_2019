@@ -28,6 +28,7 @@ python generate_label.py
 echo -e "${Blue}Gerando TFRecords${NC}"
 mkdir models
 mkdir ./models/research
+python rename.py
 python generate_tfrecord.py --csv_input=./data/train_labels.csv  --output_path=./models/research/train.record
 
 echo -e "${Blue}Modelo utilizado${NC}"

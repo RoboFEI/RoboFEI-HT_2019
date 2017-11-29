@@ -23,11 +23,11 @@ sys.path.append('./src')
 key = "S"
 while key.upper() == "S":
     # Selecionando arquivos
-    xmls = [i.rsplit(".", 1)[0] for i in os.listdir("./Train/annotations DNN")][:5]
+    xmls = [i.rsplit(".", 1)[0] for i in os.listdir("./Train/annotations DNN")][:10]
     if xmls == []:
         print "Nenhuma imagens pré-classificada pela DNN"
         time.sleep(1)
-        xmls = [i.rsplit(".", 1)[0] for i in os.listdir("./Train/imagens to classify")][:5]
+        xmls = [i.rsplit(".", 1)[0] for i in os.listdir("./Train/imagens to classify")][:10]
         if xmls == []:
             print "Não tem mais imagens para serem marcadas"
             time.sleep(1)
@@ -57,6 +57,6 @@ while key.upper() == "S":
         os.system('sed -i "s/imagens to check/imagensTrain/g" ./Train/annotations/'+files.replace(":", "\\:").replace(" ", "\\ ")+".xml")
     
     os.system("clear")
-    key = raw_input("Deseja checar/marcar mais 5 imagens ? [S/N]: ")
+    key = raw_input("Deseja checar/marcar mais 10 imagens ? [S/N]: ")
 
 os.system("rm -R ./Train/imagens\ to\ check")
