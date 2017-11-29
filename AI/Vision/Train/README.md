@@ -21,4 +21,4 @@
         Here is where the learning happens, based on the markings, the software will run a series of iterations which will converge for a better output.
         Due to high number of iterations its adviced to stop the process after due time.
 
-5. Run the program `gen_pb.sh`, which can be executed by the command *./gen_pb.sh*, in the console.
+5. Run the program `zipNetwork.sh`, which can be executed by the command *./zipNetwork.sh*, in the console.
