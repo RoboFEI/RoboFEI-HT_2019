@@ -194,7 +194,15 @@ class Robots(BasicThread):
     ## updateVector
     # .
     def __updateVector(self, data):
+        print "Antes da atualização" # debug-iPython
+        print self._state["x"] # debug-iPython
+        print self._state["covariance"] # debug-iPython
+        raw_input() # debug-iPython
         super(Robots, self)._update(data)
+        print "Depois da atualização" # debug-iPython
+        print self._state["x"] # debug-iPython
+        print self._state["covariance"] # debug-iPython
+        raw_input() # debug-iPython
     
     ## updateThread
     # .

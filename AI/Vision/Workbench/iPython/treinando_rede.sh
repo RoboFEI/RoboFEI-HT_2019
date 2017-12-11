@@ -14,11 +14,12 @@ NC='\e[0m' # No Color
 #Light Gray		0;37		White					1;37
 
 echo -e "${Blue}Criando data${NC}"
-rm -R ./models/research
+rm -R ./models/model/
 rm -R data
 mkdir data
 
 echo -e "${Blue}Gerando csv do xml${NC}"
+python rename.py
 python xml_to_csv.py
 sed -i "2,\$s@^@$(pwd)/imagensTrain/@" ./data/train_labels.csv
 
@@ -28,7 +29,6 @@ python generate_label.py
 echo -e "${Blue}Gerando TFRecords${NC}"
 mkdir models
 mkdir ./models/research
-python rename.py
 python generate_tfrecord.py --csv_input=./data/train_labels.csv  --output_path=./models/research/train.record
 
 echo -e "${Blue}Modelo utilizado${NC}"
@@ -45,6 +45,9 @@ sed -i "s@PATH_TO_BE_CONFIGURED/model.ckpt@$(pwd)/models/model/mobilenet_v1_1.0_
 sed -i "s@PATH_TO_BE_CONFIGURED/pet_train.record@$(pwd)/models/research/train.record@g" ./models/model/ssd_mobilenet_v1.config
 sed -i "s@PATH_TO_BE_CONFIGURED/pet_val.record@$(pwd)/models/research/train.record@g" ./models/model/ssd_mobilenet_v1.config
 sed -i "s@PATH_TO_BE_CONFIGURED/pet_label_map.pbtxt@$(pwd)/data/object-detection.pbtxt@g" ./models/model/ssd_mobilenet_v1.config
+# if [ "$(ls -A ./models/train)" ]; then
+# 	sed -i "s/checkpoint: false/checkpoint: true/g" ./models/model/ssd_mobilenet_v1.config
+# fi
 
 echo -e "${Blue}Executando treinamento${NC}"
 gnome-terminal --title="Workspace treinamento" -x sh -c 'tensorboard --logdir="$(pwd)"' &

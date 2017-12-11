@@ -84,6 +84,8 @@ class Behavior(Basic):
             if i == 0:
                 continue
             self.__newrobots.append(Robots(self.args, self.me, self.__posrobot, i))
+        a = self.__newrobots.pop()
+        a.end()
         
     ## readDataLandmarks
     # Responsible for reading the data coming from the vision system.
@@ -131,33 +133,26 @@ class Behavior(Basic):
             return
         
         index = 0
-        time = -1
+        timenow = -1
         while index < len(datarobots):
             data = datarobots[index]
-            print "Dado analisado:", data # debug-iPython
+            
+            # New instant in time.
+            if data["time"] != timenow:
+                opponent = [ robot for robot in self.robots if robot.timenumber < 0 ]
+                indefinite = [ robot for robot in self.robots if robot.timenumber == 0 ]
+                teammate = [ robot for robot in self.robots if robot.timenumber > 1 ]
+                timenow = data["time"]
             
             # First input data
             if self.robots == []:
-                print "Primeira leitura" # debug-iPython
                 candidates = self.__newrobots.pop(0)
-                candidates.timenumber = data["tag"]*(len([ robot for robot in self.robots if robot.timenumber == data["tag"] ]) + 1)
+                candidates.timenumber = data["tag"]*(len([ robot for robot in self.robots if robot.timenumber*data["tag"] > 0 ]) + 1)
                 candidates.updateThread(data)
                 self.robots.append(candidates)
                 datarobots.pop(index)
-                print "\n" # debug-iPython
-                raw_input("Continuar...") # debug-iPython
                 continue
-                
-            if data["time"] != time:
-                opponent = [ robot for robot in self.robots if robot.timenumber == -1 ]
-                indefinite = [ robot for robot in self.robots if robot.timenumber == 0 ]
-                teammate = [ robot for robot in self.robots if robot.timenumber == 1 ]
-                print "Criado listas:" # debug-iPython
-                print "opponent:", opponent # debug-iPython
-                print "indefinite:", indefinite # debug-iPython
-                print "teammate:", teammate # debug-iPython
-                time = data["time"]
-    
+            
             # Calculates the similarity of the data with the objects
             #  Saving position
             self.__posrobot[0], self.__posrobot[1] = data["pos"]
@@ -169,66 +164,44 @@ class Behavior(Basic):
                 candidates = indefinite + teammate
             else:
                 candidates = opponent + indefinite + teammate
-            print "Candidatos feitos:", candidates # debug-iPython
             
             for cad in candidates:
-                print "Pausado antes:", cad._threadPaused(), cad._predictedstate["x"] # debug-iPython
                 while not cad._threadPaused():
-                    pass
-                print "Pausado depois:", cad._threadPaused(), cad._predictedstate["x"] # debug-iPython
+                    time.sleep(0.033333)
             
             #  Calculates the similarity
             if len(candidates) == 1:
-                print "Apenas 1" # debug-iPython
                 candidates[0].calculatesDistance()
             else:
-                print "Varios" # debug-iPython
                 candidates.sort(reverse=True)
             
-            # ini-iPython
-            for cad in candidates:
-                print "weight:", cad.weight, cad._predictedstate["x"]
-            # end-iPython
-            
-            if candidates != []: # debug-iPython
-                print "weight:", candidates[0].weight, candidates[0].weight < self.parameters["weight_robot"] # debug-iPython
-            
-            #  Sends the data to the most similar object and run object update
+            # Sends the data to the most similar object and run object update
             if self.__newrobots != [] and (candidates == [] or candidates[0].weight < self.parameters["weight_robot"]):
-                print "Nenhum candidato proximo" # debug-iPython
                 candidates = self.__newrobots.pop(0)
-                candidates.timenumber = data["tag"]*(len([ robot for robot in self.robots if robot.timenumber == data["tag"] ]) + 1)
+                candidates.timenumber = data["tag"]*(len([ robot for robot in self.robots if robot.timenumber*data["tag"] > 0 ]) + 1)
                 candidates.updateThread(data)
                 self.robots.append(candidates)
                 datarobots.pop(index)
                 index -= 1
             else:
-                if candidates != [] and candidates[0].timenumber == -1:
-                    print "candidato adversario" # debug-iPython
+                if candidates != [] and candidates[0].timenumber < 0:
                     opponent.remove(candidates[0])
                     candidates[0].updateThread(data)
                     datarobots.pop(index)
                     index -= 1
-                elif candidates != [] and candidates[0].timenumber == 1:
-                    print "cadidato aliado" # debug-iPython
+                elif candidates != [] and candidates[0].timenumber > 0:
                     teammate.remove(candidates[0])
                     candidates[0].updateThread(data)
                     datarobots.pop(index)
                     index -= 1
                 elif candidates != []:
-                    print "candidato sei lá" # debug-iPython
                     indefinite.remove(candidates[0])
-                    candidates[0].timenumber = data["tag"]*(len([ robot for robot in self.robots if robot.timenumber == data["tag"] ]) + 1)
+                    candidates[0].timenumber = data["tag"]*(len([ robot for robot in self.robots if robot.timenumber*data["tag"] > 0 ]) + 1)
                     candidates[0].updateThread(data)
                     datarobots.pop(index)
                     index -= 1
             
-            print "Robots:", self.robots # debug-iPython
-            print "New Robots:", self.__newrobots # debug-iPython
-            print "\n" # debug-iPython
-            raw_input("Continuar...") # debug-iPython
             index += 1
-    #self-iPython distributeDataRobot
     
     ## readDataBall
     # Responsible for reading the data coming from the vision system.

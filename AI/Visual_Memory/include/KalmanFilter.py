@@ -26,8 +26,9 @@ from Basic import * # _Standard and abstract class.
 from Speeds import * # Class responsible for managing the robot"s possible speeds (me).
 
 ## Class to KalmanFilter
-# Class responsible for implementing kalman filter methods.
 class KalmanFilter(Basic):
+    '''Class responsible for implementing kalman filter methods.'''
+    
     __metaclass__ = ABCMeta
     
     # ---- Variables ----
@@ -63,6 +64,8 @@ class KalmanFilter(Basic):
     
     ## _reset
     def _reset(self):
+        '''Function used to reset states.'''
+        
         # Creating the Kalman Filter Matrix
         self._A = sym.Matrix([
           [1, 0, self._t, 0, 0.5*self._t**2, 0],
@@ -99,9 +102,9 @@ class KalmanFilter(Basic):
         self._state = copy(self._predictedstate)
     
     ## Constructor Class
-    # Responsible for starting the matrices of kalman patterns.
     @abstractmethod
     def __init__(self, a, s, obj):
+        '''Responsible for starting the matrices of kalman patterns.'''
         self._predictedstate = { }
         self._state = { }
         
@@ -132,6 +135,8 @@ class KalmanFilter(Basic):
     ## __listVariables
     # .
     def __listVariables(self, tnow, movements):
+        '''Create list of variables that will be used in the formulas.'''
+        
         # Tested null acceleration condition
         if self._speeds[movements]["x_speed"][2, 0] != 0.0 or self._speeds[movements]["x_speed"][3, 0] != 0:
             listsub = [        
@@ -171,8 +176,8 @@ class KalmanFilter(Basic):
         return listsub
     
     ## __predictNow
-    # Performs the prediction using the current instant in time to determine the new state.
     def __predictNow(self, tnow = None, movements = None):
+        '''Performs the prediction using the current instant in time to determine the new state.'''
         
         # Checking if you can hear at least one measurement.
         if self._state["time"] == -1:
@@ -249,8 +254,8 @@ class KalmanFilter(Basic):
         self._state["time"] = tnow
     
     ## __predictTime
-    # Uses a current instant in time and updates the observation and the current state.
     def __predictTime(self, tnow = None, movements = None):
+        '''Uses a current instant in time and updates the observation and the current state.'''
         
         # Checking if you can hear at least one measurement.
         if self._predictedstate["time"] == -1:
@@ -326,16 +331,18 @@ class KalmanFilter(Basic):
         self._state = copy(self._predictedstate)
     
     ## predict
-    # .
     def _predict(self, tnow = None, movements = None):
+        '''Used to predict the object.'''
+        
         {
             (float, int): self.__predictTime,
             (type(None), int): self.__predictNow,
         }[(type(tnow), type(movements))](tnow, movements)
     
     ## update
-    # .
     def _update(self, data):
+        '''Function used to perform the data update.'''
+        
         # Predicting value in observation time.
         self._predict(data["time"], data["movement"])
         
