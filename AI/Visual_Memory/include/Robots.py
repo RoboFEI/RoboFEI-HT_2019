@@ -40,6 +40,10 @@ class Robots(BasicThread):
     # .
     __posdata = None
     
+    ## contreset
+    # .
+    __contreset = 0
+    
     ## __lastposdata
     # .
     __lastposdata = None
@@ -132,7 +136,7 @@ class Robots(BasicThread):
                 ]]
             np.save("./Data/" + self.getName() + "-Robots", a)
         if tnow == None and self.timenumber != 0:
-            if self._predictedstate["covariance"][0, 0] > self._parameters['precision'] or self._predictedstate["covariance"][1, 1] > self._parameters['precision']:
+            if self._predictedstate["covariance"][0, 0] > self._parameters['vision_error'] or self._predictedstate["covariance"][1, 1] > self._parameters['vision_error']:
                 if self.timenumber > 0:
                     self._bkb.write_float(
                         "VISUAL_MEMORY_AL_" + str(int(self.timenumber)).zfill(2) + "_LOC",
@@ -194,15 +198,7 @@ class Robots(BasicThread):
     ## updateVector
     # .
     def __updateVector(self, data):
-        print "Antes da atualização" # debug-iPython
-        print self._state["x"] # debug-iPython
-        print self._state["covariance"] # debug-iPython
-        raw_input() # debug-iPython
         super(Robots, self)._update(data)
-        print "Depois da atualização" # debug-iPython
-        print self._state["x"] # debug-iPython
-        print self._state["covariance"] # debug-iPython
-        raw_input() # debug-iPython
     
     ## updateThread
     # .
@@ -251,4 +247,14 @@ class Robots(BasicThread):
        
     ## testReset
     def testReset(self):
-        pass
+        if self._state["covariance"][0,0] + self._state["covariance"][1,1] > self._parameters["vision_error"]:
+            self.__contreset += 1
+        else:
+            self.__contreset = 0
+            
+        if self.__contreset == 30:
+            self.reset()
+            self.__contreset = 0
+            return True
+        else:
+            return False

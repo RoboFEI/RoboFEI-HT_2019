@@ -22,7 +22,7 @@ import time # Libraries used for time management.
 import numpy as np # Used for matrix calculations.
 
 # Used class developed by RoboFEI-HT.
-from Basic import * # _Standard and abstract class.
+from Basic import * # Standard and abstract class.
 from Speeds import * # Class responsible for managing the robot"s possible speeds (me).
 
 ## Class to KalmanFilter
@@ -134,7 +134,7 @@ class KalmanFilter(Basic):
         
     ## __listVariables
     # .
-    def __listVariables(self, tnow, movements):
+    def __listVariables(self, tnow, movements, data):
         '''Create list of variables that will be used in the formulas.'''
         
         # Tested null acceleration condition
@@ -144,13 +144,13 @@ class KalmanFilter(Basic):
                 [self._cos, sym.cos(sym.atan2(0.5*self._speeds[movements]["x_speed"][3, 0]*self._t**2, 0.5*self._speeds[movements]["x_speed"][2, 0]*self._t**2))],
                 [self._sin, sym.sin(sym.atan2(0.5*self._speeds[movements]["x_speed"][3, 0]*self._t**2, 0.5*self._speeds[movements]["x_speed"][2, 0]*self._t**2))],
     
-                [self._t, tnow - self._predictedstate["time"]], # Inserting delta time
+                [self._t, tnow - data["time"]], # Inserting delta time
     
                 # State Variables
-                [self._px, self._predictedstate["x"][0, 0]],
-                [self._py, self._predictedstate["x"][1, 0]],
-                [self._vx, self._predictedstate["x"][2, 0]],
-                [self._vy, self._predictedstate["x"][3, 0]],
+                [self._px, data["x"][0, 0]],
+                [self._py, data["x"][1, 0]],
+                [self._vx, data["x"][2, 0]],
+                [self._vy, data["x"][3, 0]],
             ]
         else:
             listsub = [        
@@ -158,19 +158,19 @@ class KalmanFilter(Basic):
                 [self._cos, 1],
                 [self._sin, 0],
     
-                [self._t, tnow - self._predictedstate["time"]], # Inserting delta time
+                [self._t, tnow - data["time"]], # Inserting delta time
     
                 # State Variables
-                [self._px, self._predictedstate["x"][0, 0]],
-                [self._py, self._predictedstate["x"][1, 0]],
-                [self._vx, self._predictedstate["x"][2, 0]],
-                [self._vy, self._predictedstate["x"][3, 0]],
+                [self._px, data["x"][0, 0]],
+                [self._py, data["x"][1, 0]],
+                [self._vx, data["x"][2, 0]],
+                [self._vy, data["x"][3, 0]],
             ]
         
-        if len(self._predictedstate["x"]) == 6:
+        if len(data["x"]) == 6:
             listsub.extend([
-                    [self._ax, self._predictedstate["x"][4, 0]],
-                    [self._ay, self._predictedstate["x"][5, 0]],
+                    [self._ax, data["x"][4, 0]],
+                    [self._ay, data["x"][5, 0]],
                 ])
         
         return listsub
@@ -178,6 +178,8 @@ class KalmanFilter(Basic):
     ## __predictNow
     def __predictNow(self, tnow = None, movements = None):
         '''Performs the prediction using the current instant in time to determine the new state.'''
+        
+        self._state = copy(self._predictedstate)
         
         # Checking if you can hear at least one measurement.
         if self._state["time"] == -1:
@@ -197,7 +199,7 @@ class KalmanFilter(Basic):
                 else:
                     times.append(float(self._state["time"] + a))
             while tnow > min([n for n in times if n>=0]):
-                self.__predictNow(tnow=min([n for n in times if n>0]), movements=movements)
+                self.self._predict(tnow=min([n for n in times if n>0]), movements=movements)
                 times = [tnow]
                 for i in xrange(2,4):
                     a = -self._state["x"][i]/self._state["x"][i+2]
@@ -208,20 +210,20 @@ class KalmanFilter(Basic):
             
         #--------------------------------------------------------------------------------------------------
         
-        listsub = self.__listVariables(tnow, movements)
+        listsub = self.__listVariables(tnow, movements, self._state)
         
         # Calculating states
         self._state["x"] = (
             self._A*self._state["x"] # A * x
         ).subs(listsub)
         
-        listsub = self.__listVariables(tnow, movements)
+        listsub = self.__listVariables(tnow, movements, self._state)
         
         self._state["x"] = (
             self._B*self._speeds[movements]["x_speed"] # B * U
         ).subs(listsub)
         
-        listsub = self.__listVariables(tnow, movements)
+        listsub = self.__listVariables(tnow, movements, self._state)
     
         #--------------------------------------------------------------------------------------------------
             
@@ -229,8 +231,6 @@ class KalmanFilter(Basic):
         self._state["covariance"] = (
             self._A*self._state["covariance"]*sym.transpose(self._A) + self._R*self._speeds[movements]["R"][:self._R.shape[0], :self._R.shape[1]] # A*covariance*A.T + R
         ).subs(listsub)
-        
-        listsub = self.__listVariables(tnow, movements)
         
         #--------------------------------------------------------------------------------------------------
         
@@ -273,7 +273,7 @@ class KalmanFilter(Basic):
                 else:
                     times.append(float(self._predictedstate["time"] + a))
             while tnow > min([n for n in times if n>=0]):
-                self.__predictTime(tnow=min([n for n in times if n>0]), movements=movements)
+                self.self._predict(tnow=min([n for n in times if n>0]), movements=movements)
                 times = [tnow]
                 for i in xrange(2,4):
                     a = -self._predictedstate["x"][i]/self._predictedstate["x"][i+2]
@@ -284,7 +284,7 @@ class KalmanFilter(Basic):
             
         #--------------------------------------------------------------------------------------------------
         
-        listsub = self.__listVariables(tnow, movements)
+        listsub = self.__listVariables(tnow, movements, self._predictedstate)
         
         # Calculating states
         
@@ -292,13 +292,13 @@ class KalmanFilter(Basic):
             self._A*self._predictedstate["x"] # A * x
         ).subs(listsub)
         
-        listsub = self.__listVariables(tnow, movements)
+        listsub = self.__listVariables(tnow, movements, self._predictedstate)
         
         self._predictedstate["x"] = (
             self._B*self._speeds[movements]["x_speed"] # B * U
         ).subs(listsub)
         
-        listsub = self.__listVariables(tnow, movements)
+        listsub = self.__listVariables(tnow, movements, self._predictedstate)
         
         #--------------------------------------------------------------------------------------------------
             
@@ -327,8 +327,6 @@ class KalmanFilter(Basic):
                     self._predictedstate["x"][x+2, 0] = 0.0
         
         self._predictedstate["time"] = tnow
-        
-        self._state = copy(self._predictedstate)
     
     ## predict
     def _predict(self, tnow = None, movements = None):

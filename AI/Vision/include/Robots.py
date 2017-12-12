@@ -35,6 +35,9 @@ class Robots(BasicThread):
     ## menu
     __menu = 'show'
     
+    ## lastupdate
+    __lastupdate = -1
+    
     ## filename
     __filename = './Data/distance_network.sav'
     
@@ -140,7 +143,7 @@ class Robots(BasicThread):
     ## __writeBlackboard
     # .
     def __writeBlackboard(self, data):
-        number = 1
+        number = 1    
         for __, __, __, robot, [xdist, ydist] in data['objects'].values:
             while number < 22 and self._bkb.read_int("VISION_RB" + str(number).zfill(2) + "_TAG") != 0:
                 number += 1
@@ -157,6 +160,11 @@ class Robots(BasicThread):
     ## __classification
     def __classification(self, data):
         '''Sorting Detected Robots and Writing on Blackboard.'''
+            
+        if self.__lastupdate > data['time']:
+            self.__lastupdate = data['time'] + 1
+            return
+        
         self.__teamDetection(data)
         self.__estimatedDistance(data)
         self.__writeBlackboard(data)

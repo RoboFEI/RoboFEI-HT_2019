@@ -321,16 +321,20 @@ class Behavior(Basic):
                 # Start counting time
                 start = time.time()
         
-                # Reading data from landmarks
-                datalandmarks = self.readDataLandmarks(datalandmarks)
-        #         print "datalandmarks:", datalandmarks
+                # Analyzing landmarks ------------------------------------------------------------
+                
+        #         # Reading data from landmarks
+        #         datalandmarks = readDataLandmarks(datalandmarks)
+        ##         print "datalandmarks:", datalandmarks
         
-                if datalandmarks != []:
-                    # Predict new landmarks position and robot speed (me)
-                    self.me.update(self.land.update(datalandmarks.pop(0)))
-                else:
-                    # Predicts only the new landmarks position
-                    self.land.predict(movements = 0)
+        #         if datalandmarks != []:
+        #             # Predict new landmarks position and robot speed (me)
+        #             me.update(land.update(datalandmarks.pop(0)))
+        #         else:
+        #             # Predicts only the new landmarks position
+        #             land.predict(movements = 0)
+                    
+                # Analyzing robots ------------------------------------------------------------
         
                 # Reading robots data
                 datarobots = self.readDataRobots(datarobots)
