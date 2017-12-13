@@ -146,7 +146,7 @@ class DNN(BasicProcesses):
         self.__parameters = {
             'network_name': 'rede',
             'threshold_to_train_min': 0.2,
-            'threshold_to_train_max': 0.95,
+            'threshold_to_train_max': 0.5,
         }
         self.__parameters = self._conf.readVariables(self.__parameters)
         
@@ -250,7 +250,7 @@ class DNN(BasicProcesses):
                 f.write(text)
                 f.close()
         
-        return objects[objects.scores > 0.5]
+        return objects[objects.scores > self.__parameters['threshold_to_train_max']]
     
     ## finalize
     # .

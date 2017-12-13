@@ -160,10 +160,10 @@ class Robots(BasicThread):
     ## __classification
     def __classification(self, data):
         '''Sorting Detected Robots and Writing on Blackboard.'''
-            
+        
         if self.__lastupdate > data['time']:
-            self.__lastupdate = data['time'] + 1
             return
+        self.__lastupdate = data['time'] + 1
         
         self.__teamDetection(data)
         self.__estimatedDistance(data)
@@ -188,7 +188,6 @@ class Robots(BasicThread):
                 self._running = False
     
     ## classifyingRobots
-    # .
     def classifyingRobots(self, data):
         if self._running == False:
             raise VisionException(5, 'Robots')

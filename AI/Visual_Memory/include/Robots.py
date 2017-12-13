@@ -158,11 +158,11 @@ class Robots(BasicThread):
                     self._state["x"][1, 0]
                 )
                 
-                if sym.sqrt(self._state["x"][2, 0]**2 + self._state["x"][3, 0]**2) > self._bkb.read_float("VISUAL_MEMORY_AL_" + str(int(self.timenumber)).zfill(2) + "_MAX_VEL"):
-                    self._bkb.write_float(
-                        "VISUAL_MEMORY_AL_" + str(int(self.timenumber)).zfill(2) + "_MAX_VEL",
-                        sym.sqrt(self._state["x"][2, 0]**2 + self._state["x"][3, 0]**2)
-                    )
+    #             if sym.sqrt(self._state["x"][2, 0]**2 + self._state["x"][3, 0]**2) > self._bkb.read_float("VISUAL_MEMORY_AL_" + str(int(timenumber)).zfill(2) + "_MAX_VEL"):
+                self._bkb.write_float(
+                    "VISUAL_MEMORY_AL_" + str(int(self.timenumber)).zfill(2) + "_MAX_VEL",
+                    sym.sqrt(self._state["x"][2, 0]**2 + self._state["x"][3, 0]**2)
+                )
                 
                 self._bkb.write_float(
                     "VISUAL_MEMORY_AL_" + str(int(self.timenumber)).zfill(2) + "_LOC",
@@ -178,11 +178,11 @@ class Robots(BasicThread):
                     self._state["x"][1, 0]
                 )
                 
-                if sym.sqrt(self._state["x"][2, 0]**2 + self._state["x"][3, 0]**2) > self._bkb.read_float("VISUAL_MEMORY_OP_" + str(-int(self.timenumber)).zfill(2) + "_MAX_VEL"):
-                    self._bkb.write_float(
-                        "VISUAL_MEMORY_OP_" + str(-int(self.timenumber)).zfill(2) + "_MAX_VEL",
-                        sym.sqrt(self._state["x"][2, 0]**2 + self._state["x"][3, 0]**2)
-                    )
+    #             if sym.sqrt(self._state["x"][2, 0]**2 + self._state["x"][3, 0]**2) > self._bkb.read_float("VISUAL_MEMORY_OP_" + str(-int(timenumber)).zfill(2) + "_MAX_VEL"):
+                self._bkb.write_float(
+                    "VISUAL_MEMORY_OP_" + str(-int(self.timenumber)).zfill(2) + "_MAX_VEL",
+                    sym.sqrt(self._state["x"][2, 0]**2 + self._state["x"][3, 0]**2)
+                )
                 
                 self._bkb.write_float(
                     "VISUAL_MEMORY_OP_" + str(-int(self.timenumber)).zfill(2) + "_LOC",
@@ -252,7 +252,7 @@ class Robots(BasicThread):
         else:
             self.__contreset = 0
             
-        if self.__contreset == 30:
+        if self.__contreset == 100:
             self.reset()
             self.__contreset = 0
             return True

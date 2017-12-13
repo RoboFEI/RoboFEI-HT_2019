@@ -85,7 +85,9 @@ class Behavior(Basic):
                 continue
             self.__newrobots.append(Robots(self.args, self.me, self.__posrobot, i))
         a = self.__newrobots.pop()
+        print "Finalizando"
         a.end()
+        print "Finalizado"
         
     ## readDataLandmarks
     # Responsible for reading the data coming from the vision system.
