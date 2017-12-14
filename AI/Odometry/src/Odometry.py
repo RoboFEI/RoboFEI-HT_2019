@@ -6,7 +6,7 @@ sys.path.append('../../Blackboard/src/')	#adicionando caminho para programa em o
 from SharedMemory import SharedMemory		#Importa a classe do arquivo SharedMemory
 
 from ConfigParser import ConfigParser		#Importando a classe ConfigParser
-import sympy as sy
+import numpy as np
 ##########################################################################################
 
 class Odometry:
@@ -27,8 +27,10 @@ class Odometry:
 		self.posx = 0
 		self.posy = 0
 		self.j = 0		#Se j for par, a perna direita está em movimento, se for ímpar, a perna esquerda está em movimento
-		self.prog_exec = 0 	#Verifica se o programa está sendo executado pela primeira vez
-		
+		self.Posx_i_R = 0
+		self.Posy_i_R = 0
+		self.Posx_i_L = 0
+		self.Posy_i_L = 0
 ##################Leitura dos valores da IMU###############################################
 
 	def Get_Bkb_Values(self, Item1, Item2):
@@ -38,8 +40,11 @@ class Odometry:
 
 		for i in Item1:
 			self.Mot.append((self.bkb.read_int(self.mem, i))*0.005113269 + 0.52359877559)	#Substitui a frase para informar o tipo da leitura e guarda em Valbkb e transforma a leitura em graus.
-		for i in Item2:
-			self.IMU.append(self.bkb.read_float(self.mem, i))
+		for j in Item2:
+			self.IMU.append(self.bkb.read_float(self.mem, j))
+			
+		for k in range(len(Item1)):
+                    print("Motor %f = %f" % (k, self.Mot[k]))
 
 ##################Calculo cinemática########################################################
 
@@ -48,38 +53,38 @@ class Odometry:
 		L4 = 93.0
 		L5 = 93.0
 		Lf = 33.5
-		s7 = sy.sin(self.Mot[0])
-		s8 = sy.sin(self.Mot[1])
-		s9 = sy.sin(self.Mot[2])
-		s10 = sy.sin(self.Mot[3])
-		s11 = sy.sin(self.Mot[4])
-		s12 = sy.sin(self.Mot[5])
-		s13 = sy.sin(self.Mot[6])
-		s14 = sy.sin(self.Mot[7])
-		s15 = sy.sin(self.Mot[8])
-		s16 = sy.sin(self.Mot[9])
-		s17 = sy.sin(self.Mot[10])
-		s18 = sy.sin(self.Mot[11])
-		c7 = sy.cos(self.Mot[0])
-		c8 = sy.cos(self.Mot[1])
-		c9 = sy.cos(self.Mot[2])
-		c10 = sy.cos(self.Mot[3])
-		c11 = sy.cos(self.Mot[4])
-		c12 = sy.cos(self.Mot[5])
-		c13 = sy.cos(self.Mot[6])
-		c14 = sy.cos(self.Mot[7])
-		c15 = sy.cos(self.Mot[8])
-		c16 = sy.cos(self.Mot[9])
-		c17 = sy.cos(self.Mot[10])
-		c18 = sy.cos(self.Mot[11])
-		sabc = sy.sin(self.Mot[2]+self.Mot[6]+self.Mot[10])
-		cabc = sy.cos(self.Mot[2]+self.Mot[6]+self.Mot[10])
-		cab = sy.cos(self.Mot[2]+self.Mot[6])
-		sab = sy.sin(self.Mot[2]+self.Mot[6])
-		slabc = sy.sin(self.Mot[3]+self.Mot[7]+self.Mot[11])
-		clabc = sy.cos(self.Mot[3]+self.Mot[7]+self.Mot[11])
-		clab = sy.cos(self.Mot[3]+self.Mot[7])
-		slab = sy.sin(self.Mot[3]+self.Mot[7])
+		s7 = np.sin(self.Mot[0])
+		s8 = np.sin(self.Mot[1])
+		s9 = np.sin(self.Mot[2])
+		s10 = np.sin(self.Mot[3])
+		s11 = np.sin(self.Mot[4])
+		s12 = np.sin(self.Mot[5])
+		s13 = np.sin(self.Mot[6])
+		s14 = np.sin(self.Mot[7])
+		s15 = np.sin(self.Mot[8])
+		s16 = np.sin(self.Mot[9])
+		s17 = np.sin(self.Mot[10])
+		s18 = np.sin(self.Mot[11])
+		c7 = np.cos(self.Mot[0])
+		c8 = np.cos(self.Mot[1])
+		c9 = np.cos(self.Mot[2])
+		c10 = np.cos(self.Mot[3])
+		c11 = np.cos(self.Mot[4])
+		c12 = np.cos(self.Mot[5])
+		c13 = np.cos(self.Mot[6])
+		c14 = np.cos(self.Mot[7])
+		c15 = np.cos(self.Mot[8])
+		c16 = np.cos(self.Mot[9])
+		c17 = np.cos(self.Mot[10])
+		c18 = np.cos(self.Mot[11])
+		sabc = np.sin(self.Mot[2]+self.Mot[6]+self.Mot[10])
+		cabc = np.cos(self.Mot[2]+self.Mot[6]+self.Mot[10])
+		cab = np.cos(self.Mot[2]+self.Mot[6])
+		sab = np.sin(self.Mot[2]+self.Mot[6])
+		slabc = np.sin(self.Mot[3]+self.Mot[7]+self.Mot[11])
+		clabc = np.cos(self.Mot[3]+self.Mot[7]+self.Mot[11])
+		clab = np.cos(self.Mot[3]+self.Mot[7])
+		slab = np.sin(self.Mot[3]+self.Mot[7])
 
 ########Cinemática_Perna_Direita#######
 
@@ -121,27 +126,21 @@ class Odometry:
 ##################Calculo da Posição########################################################
 
 	def Position_Calc(self):
-		if self.prog_exec == 0:
-			Posx_i_R = 0
-			Posy_i_R = 0
-			Posx_i_L = 0
-			Posy_i_L = 0
-			self.prog_exec = 1
 		if self.j%2: 
-			Var_Posx_L = self.Plx - Posx_i_L #Se não houver o calculo de variação e ela ocorrer no semiplano negativo, ao invés de somar a
-			Var_Posy_L = self.Ply - Posy_i_L # posição, irá decrementá-la, gerando um erro de cálculo.
+			Var_Posx_L = self.Plx - self.Posx_i_L #Se não houver o calculo de variação e ela ocorrer no semiplano negativo, ao invés de somar a
+			Var_Posy_L = self.Ply - self.Posy_i_L # posição, irá decrementá-la, gerando um erro de cálculo.
 			self.posx = self.posx + Var_Posx_L
 			self.posy = self.posy + Var_Posy_L
-			Posx_i_R = self.Prx
-			Posy_i_R = self.Pry
+			self.Posx_i_R = self.Prx
+			self.Posy_i_R = self.Pry
 			self.j-=1
 		else:
-			Var_Posy_R = self.Prx - Posx_i_R
-			Var_Posy_R = self.Pry - Posy_i_R
+			Var_Posy_R = self.Prx - self.Posx_i_R
+			Var_Posy_R = self.Pry - self.Posy_i_R
 			self.posx = self.posx + Var_Posy_R 
 			self.posy = self.posy + Var_Posy_R
-			Posx_i_L = self.Plx
-			Posy_i_L= self.Ply
+			self.Posx_i_L = self.Plx
+			self.Posy_i_L= self.Ply
 			self.j+=1
 ##################Printe dos valores########################################################
 	def Show_Position(self):
@@ -167,9 +166,9 @@ Motores = [	'Motor_Read_7',  #0
 IMU = [	'IMU_EULER_Z']
 while(1):
 	Odometry.Get_Bkb_Values(Motores, IMU)
-	Odometry.Kinematics_Right_Left_Leg()
-	Odometry.Position_Calc()
-	Odometry.Show_Position()
+	#Odometry.Kinematics_Right_Left_Leg()
+	#Odometry.Position_Calc()
+	#Odometry.Show_Position()
 
 
 

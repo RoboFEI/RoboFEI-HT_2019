@@ -129,7 +129,7 @@ int main(int argc, char **argv)
     //======================== Set motor`s variables on blackboard ====================    
  
     int n = 12; 		// Número de motores que serão escritos na blackboard	
-    int V[n] = {		// Atribuindo para cada valor do vetor a variável correspondente na blackboard
+    int V[] = {		// Atribuindo para cada valor do vetor a variável correspondente na blackboard
 		Motor_Read_7, 
 		Motor_Read_8, 
 		Motor_Read_9, 
