@@ -78,7 +78,7 @@ class Behavior(Basic):
         # Support Variables
         self.robots = []
         self.__newrobots = []
-        self.__posrobot = [0, 0]
+        self.__posrobot = [0, 0, 0]
         
         for i in xrange(-self.parameters["number_robots"]/2, self.parameters["number_robots"]/2):
             if i == 0:
@@ -157,7 +157,7 @@ class Behavior(Basic):
             
             # Calculates the similarity of the data with the objects
             #  Saving position
-            self.__posrobot[0], self.__posrobot[1] = data["pos"]
+            self.__posrobot[0], self.__posrobot[1], self.__posrobot[2] = data["pos"] + [data["time"]]
             
             #  Generating Candidates
             if data["tag"] == -1:
@@ -352,12 +352,12 @@ class Behavior(Basic):
                 # Batata
         
                 ## Doing cleaning and objects (lost objects)
-                i = 0
-                while i < len(self.robots):
-                    if self.robots[i].testReset( ):
-                        i -= 1
-                        self.__newrobots.append(self.robots.pop(i))
-                    i += 1
+        #         i = 0
+        #         while i < len(robots):
+        #             if robots[i].testReset( ):
+        #                 __newrobots.append(robots.pop(i))
+        #                 continue
+        #             i += 1
                         
                 ## Predicts objects (Now)
                 for robot in self.robots:

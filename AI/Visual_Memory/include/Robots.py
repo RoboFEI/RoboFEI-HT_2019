@@ -227,16 +227,14 @@ class Robots(BasicThread):
     ## calculatesDistance
     # .
     def calculatesDistance(self):
-        if self.__lastposdata == self.__posdata:
+        if self.__lastposdata == self.__posdata[:2]:
             return
         
-        self.__lastposdata = copy(self.__posdata)
+        self._predict(self.__posdata[2], 0)    
+        self.__lastposdata = copy(self.__posdata[:2])
         
-        self.weight = sym.exp(
-            -0.5*sym.transpose(sym.Matrix(self.__posdata) - self._state["x"][:2,:2])*
-            self._state["covariance"][:2,:2]*
-            (sym.Matrix(self.__posdata) - self._state["x"][:2,:2])
-        )[0, 0]
+        self.weight = sym.Matrix(self.__posdata[:2]) - self._predictedstate["x"][:2,:2]
+        self.weight = 1./(1+(self.weight[0]**2 + self.weight[1]**2)**0.5)
     
     ## __lt__
     # .
@@ -252,7 +250,7 @@ class Robots(BasicThread):
         else:
             self.__contreset = 0
             
-        if self.__contreset == 100:
+        if self.__contreset == 50:
             self.reset()
             self.__contreset = 0
             return True
