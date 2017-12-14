@@ -1,5 +1,6 @@
 #coding: utf-8
 
+import os
 import sys
 sys.path.append('../../Blackboard/src/')	#adicionando caminho para programa em outro diretório
 from SharedMemory import SharedMemory		#Importa a classe do arquivo SharedMemory
@@ -36,7 +37,7 @@ class Odometry:
 		self.IMU = []	#Cria vetor que vai acessar e ler os valores da IMU da blackboard
 
 		for i in Item1:
-			self.Mot.append(self.bkb.read_int(self.mem, i))		#Substitui a frase para informar o tipo da leitura e guarda em Valbkb
+			self.Mot.append((self.bkb.read_int(self.mem, i))*0.005113269 + 0.52359877559)	#Substitui a frase para informar o tipo da leitura e guarda em Valbkb e transforma a leitura em graus.
 		for i in Item2:
 			self.IMU.append(self.bkb.read_float(self.mem, i))
 
@@ -125,6 +126,7 @@ class Odometry:
 			Posy_i_R = 0
 			Posx_i_L = 0
 			Posy_i_L = 0
+			self.prog_exec = 1
 		if self.j%2: 
 			Var_Posx_L = self.Plx - Posx_i_L #Se não houver o calculo de variação e ela ocorrer no semiplano negativo, ao invés de somar a
 			Var_Posy_L = self.Ply - Posy_i_L # posição, irá decrementá-la, gerando um erro de cálculo.
@@ -144,6 +146,7 @@ class Odometry:
 ##################Printe dos valores########################################################
 	def Show_Position(self):
 		print("X = %d \t Y = %d" % (self.posx, self.posy))
+		#os.system('clear') 
 
 ###################Programa principal#######################################################
 Odometry = Odometry()
