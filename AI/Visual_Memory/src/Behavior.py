@@ -58,7 +58,7 @@ class Behavior(Basic):
         self.parameters = {
             "number_robots": 8,
             "execution_period_ms": 100,
-            "weight_robot": 0.6,
+            "weight_robot": 0.0006,
         }
         self.parameters = self._conf.readVariables(self.parameters)
         
