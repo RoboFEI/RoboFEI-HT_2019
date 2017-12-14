@@ -245,12 +245,12 @@ class Robots(BasicThread):
        
     ## testReset
     def testReset(self):
-        if self._state["covariance"][0,0] + self._state["covariance"][1,1] > self._parameters["vision_error"]:
+        if self._state["covariance"][0,0] + self._state["covariance"][1,1] > 10*self._parameters["vision_error"]:
             self.__contreset += 1
         else:
             self.__contreset = 0
             
-        if self.__contreset == 50:
+        if self.__contreset == 1:
             self.reset()
             self.__contreset = 0
             return True

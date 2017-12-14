@@ -96,7 +96,7 @@ class KalmanFilter(Basic):
     
         # Initial state
         self._predictedstate["x"] = sym.Matrix([0, 0, 0, 0, 0, 0])
-        self._predictedstate["covariance"] = sym.Matrix(sym.Identity(6)*100*self._parameters["vision_error"])
+        self._predictedstate["covariance"] = sym.Matrix(sym.Identity(6)*10*self._parameters["vision_error"])
         self._predictedstate["time"] = -1
     
         self._state = copy(self._predictedstate)

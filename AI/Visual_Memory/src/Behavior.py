@@ -352,12 +352,12 @@ class Behavior(Basic):
                 # Batata
         
                 ## Doing cleaning and objects (lost objects)
-        #         i = 0
-        #         while i < len(robots):
-        #             if robots[i].testReset( ):
-        #                 __newrobots.append(robots.pop(i))
-        #                 continue
-        #             i += 1
+                i = 0
+                while i < len(self.robots):
+                    if self.robots[i].testReset( ):
+                        self.__newrobots.append(self.robots.pop(i))
+                        continue
+                    i += 1
                         
                 ## Predicts objects (Now)
                 for robot in self.robots:
