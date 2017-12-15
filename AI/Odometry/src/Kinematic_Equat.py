@@ -1,35 +1,37 @@
 #coding: utf-8
 
-import numpy as np
+import sympy as sy
 
-LEG_SIDE_OFFSET = 37.0
-THIGH_LENGTH = 93.0
-CALF_LENGTH = 93.0
-ANKLE_LENGTH = 33.5
-LEG_LENGTH = 219.5
-pi = 180
+#L4 = 93.0
+#L5 = 93.0
+#Lf = 33.5
+#Ltx = 5
+#Lty = 122.2
+#Ltz = 37
 
-T = np.ones((4, 4))				#Matriz transformação de 0 ao ponto estudado
-Mti = np.ones((4,4))
+r11 = sy.Symbol('r11')
+r12 = sy.Symbol('r21')
+r13 = sy.Symbol('r31')
+r21 = sy.Symbol('r21')
+r22 = sy.Symbol('r22')
+r23 = sy.Symbol('r23')
+r31 = sy.Symbol('r31')
+r32 = sy.Symbol('r32')
+r33 = sy.Symbol('r33')
+Px = sy.Symbol('Px')
+Py = sy.Symbol('Py')
+Pz = sy.Symbol('Pz')
+L4 = sy.Symbol('L4')
+L5 = sy.Symbol('Lt5')
+Lf = sy.Symbol('Lf')
+Ltx = sy.Symbol('Ltx')
+Lty = sy.Symbol('Lty')
+Ltz = sy.Symbol('Ltz')
 
-Pdh = np.array([[ pi,  0  , 0, 20],	#Caso a cinemática do robô mude, é necessário modificar os parâmetros de cinemática 
-		[-pi,  0  , 0, 20],	#nesta matriz.
-		[  0,  37 , 0, 35],
-	        [  0,  93 , 0, 25],
-	        [ pi,   0 , 0, 40],
-		[  0,  93 , 0, 10]])
+T_06 = sy.Matrix([[r11, r12, r13, Px],[r21, r22, r23, Py],[r31, r32, r33, Pz], [0, 0, 0, 1]])
+T_0c = sy.Matrix([[0, -1, 0, -Ltx],[0, 0, -1, -Lty],[1, 0, 0, Ltz], [0, 0, 0, 1]])
+T_6f = sy.Matrix([[1, 0, 0, Lf],[0, 1, 0, 0],[0, 0, 1, 0], [0, 0, 0, 1]])
 
-nrow, ncol = np.shape(Pdh)		
+T = T_06*T_0c*T6f
 
-i = 0
-while (i!=nrow):	
-	Mti =          ([[np.cos(Pdh[i][3])                  ,-np.sin(Pdh[i][3])                  ,0                  ,Pdh[i][1]                  ],
-	             	[np.sin(Pdh[i][3])*np.cos(Pdh[i][0]), np.cos(Pdh[i][3])*np.cos(Pdh[i][0]), -np.sin(Pdh[i][0]),-np.sin(Pdh[i][0])*Pdh[i][2]],
-			[np.cos(Pdh[i][3])                  ,-np.sin(Pdh[i][3])                  ,0                  , np.cos(Pdh[i][0])*Pdh[i][2]],
-	   	      	[0                                  ,0                                   ,0                  ,1                          ]])
-
-	T *= Mti 
-	i+=1
-
-print (T)
-
+print (np.matrix(T))

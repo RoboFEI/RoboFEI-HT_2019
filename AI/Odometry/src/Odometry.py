@@ -102,8 +102,8 @@ class Odometry:
 		r23 = c7*cabc+s7*s11*sabc
 		r33 = c11*sabc
 
-		self.Prx = (L4*s9+L5*sab)*s7-(L4*c9+L5*cab)*c7*s11 + Lf*r11	#Position Right leg x
-		self.Pry = (L4*s9+L5*sab)*s7-(L4*c9+L5*cab)*c7*s11 + Lf*r21	#Position Right leg y
+		self.Prx = (L4*s9+L5*sab)*s7-(L4*c9+L5*cab)*c7*s11+Lf*r11-Ltx*r11-Lty*r12+Ltz*r13
+		self.Pry = (L4*s9+L5*sab)*s7-(L4*c9+L5*cab)*c7*s11+Lf*r21-Ltx*r21-Lty*r22+Ltz*r23	
 		#Prz = (L4*s9+L5*cab)*c11 + Lf*r31			#Position Right leg z
 
 ########Cinemática_Perna_Esquerda#######
@@ -120,9 +120,9 @@ class Odometry:
 		l23 = c8*clabc+s8*s12*slabc
 		l33 = c12*slabc
 
-		self.Plx = (L4*s10+L5*slab)*s8-(L4*c10+L5*clab)*c8*s12 + Lf*l11	#Position Right leg x
-		self.Ply = (L4*s10+L5*slab)*s8-(L4*c10+L5*clab)*c8*s12 + Lf*l21	#Position Right leg y
-		#Plz = (L4*s10+L5*clab)*c12 + Lf*l31				#Position Right leg z
+		self.Plx = (L4*s10+L5*slab)*s8-(L4*c10+L5*clab)*c8*s12+Lf*l11-Ltx*r11-Lty*r12+Ltz*r13
+		self.Ply = (L4*s10+L5*slab)*s8-(L4*c10+L5*clab)*c8*s12+Lf*l21-Ltx*r21-Lty*r22+Ltz*r23
+		#Plz = (L4*s10+L5*clab)*c12 + Lf*l31 -Ltx*r31 - Lty*r32 + Ltz*r33	#Position Right leg z
 
 ##################Calculo da Posição########################################################
 
@@ -173,7 +173,7 @@ Motores = [	'Motor_Read_7',  #0
 IMU = [	'IMU_EULER_Z']
 while(1):
 	Odometry.Get_Bkb_Values(Motores, IMU)
-	time.sleep(0.08)
+	time.sleep(0.8)
 	Odometry.Kinematics_Right_Left_Leg()
 	Odometry.Position_Calc()
 	Odometry.Show_Position()
