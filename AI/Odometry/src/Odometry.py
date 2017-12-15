@@ -2,11 +2,12 @@
 
 import os
 import sys
+import numpy as np
+import time
 sys.path.append('../../Blackboard/src/')	#adicionando caminho para programa em outro diretório
 from SharedMemory import SharedMemory		#Importa a classe do arquivo SharedMemory
-
 from ConfigParser import ConfigParser		#Importando a classe ConfigParser
-import numpy as np
+
 ##########################################################################################
 
 class Odometry:
@@ -31,6 +32,7 @@ class Odometry:
 		self.Posy_i_R = 0
 		self.Posx_i_L = 0
 		self.Posy_i_L = 0
+		
 ##################Leitura dos valores da IMU###############################################
 
 	def Get_Bkb_Values(self, Item1, Item2):
@@ -39,12 +41,12 @@ class Odometry:
 		self.IMU = []	#Cria vetor que vai acessar e ler os valores da IMU da blackboard
 
 		for i in Item1:
-			self.Mot.append((self.bkb.read_int(self.mem, i))*0.005113269 + 0.52359877559)	#Substitui a frase para informar o tipo da leitura e guarda em Valbkb e transforma a leitura em graus.
+			self.Mot.append((self.bkb.read_int(self.mem, i))*0.005113269 + 0.52359877559)#Substitui a frase para informar o tipo da leitura e guarda em Valbkb e transforma a leitura em graus.
+			
+#		for i in Item1:             #For para aquisitar apenas os valores da imu sem tratamento
+#			self.Mot.append(self.bkb.read_int(self.mem, i))	
 		for j in Item2:
 			self.IMU.append(self.bkb.read_float(self.mem, j))
-			
-		for k in range(len(Item1)):
-                    print("Motor %f = %f" % (k, self.Mot[k]))
 
 ##################Calculo cinemática########################################################
 
@@ -104,7 +106,6 @@ class Odometry:
 		self.Pry = (L4*s9+L5*sab)*s7-(L4*c9+L5*cab)*c7*s11 + Lf*r21	#Position Right leg y
 		#Prz = (L4*s9+L5*cab)*c11 + Lf*r31			#Position Right leg z
 
-
 ########Cinemática_Perna_Esquerda#######
 
 		l11 = (s8*slabc-c8*s12*clabc)*c16-c8*c12*s16
@@ -127,27 +128,33 @@ class Odometry:
 
 	def Position_Calc(self):
 		if self.j%2: 
-			Var_Posx_L = self.Plx - self.Posx_i_L #Se não houver o calculo de variação e ela ocorrer no semiplano negativo, ao invés de somar a
-			Var_Posy_L = self.Ply - self.Posy_i_L # posição, irá decrementá-la, gerando um erro de cálculo.
+			Var_Posx_L = self.Plx - self.Posx_i_L #Se não houver o calculo de variação e ela ocorrer no semiplano negativo, ao invés de somar a posição, irá decrementá-la, gerando um erro de cálculo
+			Var_Posy_L = self.Ply - self.Posy_i_L 
 			self.posx = self.posx + Var_Posx_L
 			self.posy = self.posy + Var_Posy_L
 			self.Posx_i_R = self.Prx
 			self.Posy_i_R = self.Pry
 			self.j-=1
 		else:
-			Var_Posy_R = self.Prx - self.Posx_i_R
+			Var_Posx_R = self.Prx - self.Posx_i_R
 			Var_Posy_R = self.Pry - self.Posy_i_R
-			self.posx = self.posx + Var_Posy_R 
+			self.posx = self.posx + Var_Posx_R 
 			self.posy = self.posy + Var_Posy_R
 			self.Posx_i_L = self.Plx
 			self.Posy_i_L= self.Ply
 			self.j+=1
-##################Printe dos valores########################################################
-	def Show_Position(self):
-		print("X = %d \t Y = %d" % (self.posx, self.posy))
-		#os.system('clear') 
 
+##################Printe dos valores########################################################
+
+	def Show_Position(self):
+	
+	    	print("\nposx = %f \t posy = %f" % (self.posx, self.posy))
+
+#    	    print("\nPlx = %f \t Ply = %f" % (self.Plx, self.Ply))
+#           print("\nPrx = %f \t Pry = %f" % (self.Prx, self.Pry))
+        
 ###################Programa principal#######################################################
+
 Odometry = Odometry()
 
 Motores = [	'Motor_Read_7',  #0						
@@ -166,9 +173,10 @@ Motores = [	'Motor_Read_7',  #0
 IMU = [	'IMU_EULER_Z']
 while(1):
 	Odometry.Get_Bkb_Values(Motores, IMU)
-	#Odometry.Kinematics_Right_Left_Leg()
-	#Odometry.Position_Calc()
-	#Odometry.Show_Position()
+	time.sleep(0.08)
+	Odometry.Kinematics_Right_Left_Leg()
+	Odometry.Position_Calc()
+	Odometry.Show_Position()
 
 
 
