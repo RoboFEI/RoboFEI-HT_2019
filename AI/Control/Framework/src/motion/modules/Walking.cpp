@@ -14,6 +14,7 @@
 #include "Walking.h"
 #include "QuadraticStateTransform.h"
 #include <unistd.h>
+#include <blackboard.h>
 
 using namespace Robot;
 
@@ -441,6 +442,7 @@ void Walking::Process()
         update_param_move();
         m_Phase = PHASE3;
     }
+    write_int(mem, PHASE, m_Phase);
     update_param_balance();
 
     // Compute endpoints

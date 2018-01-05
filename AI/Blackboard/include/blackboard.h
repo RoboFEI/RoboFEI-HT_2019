@@ -112,6 +112,7 @@ Arquivo de cabeçalho contendo as funções e definições do black board
 #define Motor_Read_16 117
 #define Motor_Read_17 118
 #define Motor_Read_18 119
+#define PHASE 120
 
 #define IMU_GYRO_X 1
 #define IMU_GYRO_Y 2

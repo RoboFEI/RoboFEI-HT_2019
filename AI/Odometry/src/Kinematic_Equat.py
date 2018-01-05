@@ -1,6 +1,7 @@
 #coding: utf-8
 
 import sympy as sy
+import numpy as np
 
 #L4 = 93.0
 #L5 = 93.0
@@ -32,6 +33,6 @@ T_06 = sy.Matrix([[r11, r12, r13, Px],[r21, r22, r23, Py],[r31, r32, r33, Pz], [
 T_0c = sy.Matrix([[0, -1, 0, -Ltx],[0, 0, -1, -Lty],[1, 0, 0, Ltz], [0, 0, 0, 1]])
 T_6f = sy.Matrix([[1, 0, 0, Lf],[0, 1, 0, 0],[0, 0, 1, 0], [0, 0, 0, 1]])
 
-T = T_06*T_0c*T6f
+T = T_0c*T_06*T_6f
 
 print (np.matrix(T))

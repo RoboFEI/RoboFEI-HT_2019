@@ -156,7 +156,7 @@ class SharedMemory(object):
     'Motor_Read_16': 117,
     'Motor_Read_17': 118,
     'Motor_Read_18': 119,
-     }
+    'PHASE': 120}
 
     variable_float = {
     'IMU_GYRO_X': 1,

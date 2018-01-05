@@ -15,12 +15,12 @@ class Odometry:
 	def __init__(self):
 
 		# instantiate:
-		config = ConfigParser()								#Instanciando um objeto a classe para ler arquivos 
+		config = ConfigParser()								#Instanciando um objeto a classe para ler arquivos
 
 		# looking for the file config.ini:
 		config.read('../../Control/Data/config.ini')
 
-		self.mem_key = int(config.get('Communication', 'no_player_robofei'))*100	#Lendo a comunicação e o número do robô 
+		self.mem_key = int(config.get('Communication', 'no_player_robofei'))*100	#Lendo a comunicação e o número do robô
 		#Instantiate the BlackBoard's class:
 		self.bkb = SharedMemory()							#Instanciando o obj a classe de memória compartilhada
 		self.mem = self.bkb.shd_constructor(self.mem_key)
@@ -32,25 +32,22 @@ class Odometry:
 		self.Posy_i_R = 0
 		self.Posx_i_L = 0
 		self.Posy_i_L = 0
-		
+
 ##################Leitura dos valores da IMU###############################################
 
 	def Get_Bkb_Values(self, Item1, Item2):
- 
+
 		self.Mot = []	#Cria vetor que vai acessar e ler os valores dos motores da blackboard
 		self.IMU = []	#Cria vetor que vai acessar e ler os valores da IMU da blackboard
 
 		for i in Item1:
-			self.Mot.append((self.bkb.read_int(self.mem, i))*0.005113269 + 0.52359877559)#Substitui a frase para informar o tipo da leitura e guarda em Valbkb e transforma a leitura em graus.
-			
-#		for i in Item1:             #For para aquisitar apenas os valores da imu sem tratamento
-#			self.Mot.append(self.bkb.read_int(self.mem, i))	
+			self.Mot.append((self.bkb.read_int(self.mem, i))*0.005113269 + 0.52359877559)	#Substitui a frase para informar o tipo da leitura e guarda em Valbkb e transforma a leitura em graus.
 		for j in Item2:
 			self.IMU.append(self.bkb.read_float(self.mem, j))
 
 ##################Calculo cinemática########################################################
 
-	def Kinematics_Right_Left_Leg(self):
+	def Kinematics_Calc(self):
 
 		L4 = 93.0
 		L5 = 93.0
@@ -90,55 +87,55 @@ class Odometry:
 
 ########Cinemática_Perna_Direita#######
 
-		r11 = (s7*sabc-c7*s11*cabc)*c15-c7*c11*s15
-		r21 = (-c7*sabc-s7*s11*cabc)*c15-s7*c11*s15
-		r31 = -s11*s15+c11*c15*cabc
+		r11 = -((-c7*sabc-s7*s11*cabc)*c15-s7*c11*s15)
+		r12 = -(-(-c7*sabc-s7*s11*cabc)*s15-s7*c11*c15)
+		r13 = -(-c7*cabc+s7*s11*sabc)
 
-		r12 = -(s7*sabc-c7*s11*cabc)*s15-c7*c11*s15
-		r22 = -(-c7*sabc-s7*s11*cabc)*s15-s7*c11*s15
-		r32 = -s11*s15-c11*s15*cabc
+		r21 = -(-s11*s15+c11*c15*cabc)
+		r22 = -(-s11*c15-c11*s15*cabc)
+		r23 = -(-c11*sabc)
 
-		r13 = s7*cabc+c7*s11*sabc
-		r23 = c7*cabc+s7*s11*sabc
-		r33 = c11*sabc
+		r31 = (s7*sabc-c7*s11*cabc)*c15-(c7*c11*s15)
+		r32 = -(s7*sabc-c7*s11*cabc)*s15-c7*c11*c15
+		r33 = s7*cabc+c7*s11*sabc
 
-		self.Prx = (L4*s9+L5*sab)*s7-(L4*c9+L5*cab)*c7*s11+Lf*r11-Ltx*r11-Lty*r12+Ltz*r13
-		self.Pry = (L4*s9+L5*sab)*s7-(L4*c9+L5*cab)*c7*s11+Lf*r21-Ltx*r21-Lty*r22+Ltz*r23	
-		#Prz = (L4*s9+L5*cab)*c11 + Lf*r31			#Position Right leg z
+		Prx = ((L4*s9+L5*sab)*s7-(L4*c9+L5*cab)*c7*s11)
+		Pry = (-(L4*s9+L5*sab)*c7-(L4*c9+L5*cab)*s7*s11)
+		#Prz = ((L4*c9+L5*cab)*c11)
 
 ########Cinemática_Perna_Esquerda#######
 
-		l11 = (s8*slabc-c8*s12*clabc)*c16-c8*c12*s16
-		l21 = (-c8*slabc-s8*s12*clabc)*c16-s8*c12*s16
-		l31 = -s12*s16+c12*c16*clabc
+		l11 = -((-c8*sabc-s8*s12*cabc)*c16-s8*c12*s16)
+		l12 = -(-(-c8*sabc-s8*s12*cabc)*s16-s8*c12*c16)
+		l13 = -(-c8*cabc+s8*s12*sabc)
 
-		l12 = -(s8*slabc-c8*s12*clabc)*s16-c8*c12*s16
-		l22 = -(-c8*slabc-s8*s12*clabc)*s16-s8*c12*s16
-		l32 = -s12*s16-c12*s16*clabc
+		l21 = -(-s12*s16+c12*c16*cabc)
+		l22 = -(-s12*c16-c12*s16*cabc)
+		l23 = -(-c12*sabc)
 
-		l13 = s8*clabc+c8*s18*slabc
-		l23 = c8*clabc+s8*s12*slabc
-		l33 = c12*slabc
+		l31 = (s8*sabc-c8*s12*cabc)*c16-(c8*c12*s16)
+		l32 = -(s8*sabc-c8*s12*cabc)*s16-c8*c12*c16
+		l33 = s8*cabc+c8*s12*sabc
 
-		self.Plx = (L4*s10+L5*slab)*s8-(L4*c10+L5*clab)*c8*s12+Lf*l11-Ltx*r11-Lty*r12+Ltz*r13
-		self.Ply = (L4*s10+L5*slab)*s8-(L4*c10+L5*clab)*c8*s12+Lf*l21-Ltx*r21-Lty*r22+Ltz*r23
-		#Plz = (L4*s10+L5*clab)*c12 + Lf*l31 -Ltx*r31 - Lty*r32 + Ltz*r33	#Position Right leg z
+		Plx = ((L4*s10+L5*sab)*s8-(L4*c10+L5*cab)*c8*s12)
+		Ply = (-(L4*s10+L5*sab)*c8-(L4*c10+L5*cab)*s8*s12)
+		#Plz = ((L4*c10+L5*cab)*c12)
 
 ##################Calculo da Posição########################################################
 
 	def Position_Calc(self):
-		if self.j%2: 
-			Var_Posx_L = self.Plx - self.Posx_i_L #Se não houver o calculo de variação e ela ocorrer no semiplano negativo, ao invés de somar a posição, irá decrementá-la, gerando um erro de cálculo
-			Var_Posy_L = self.Ply - self.Posy_i_L 
+		if self.j%2: 								#Calculo de posição a partir do movimento da perna direita
+			Var_Posx_L = self.Plx - self.Posx_i_L 	#Se não houver o calculo de variação e ela ocorrer no semiplano negativo, ao invés de somar a posição, irá decrementá-la, gerando um erro de cálculo
+			Var_Posy_L = self.Ply - self.Posy_i_L
 			self.posx = self.posx + Var_Posx_L
 			self.posy = self.posy + Var_Posy_L
 			self.Posx_i_R = self.Prx
 			self.Posy_i_R = self.Pry
 			self.j-=1
-		else:
+		else: 										#Calculo de posição a partir do movimneto da perna esquerda
 			Var_Posx_R = self.Prx - self.Posx_i_R
 			Var_Posy_R = self.Pry - self.Posy_i_R
-			self.posx = self.posx + Var_Posx_R 
+			self.posx = self.posx + Var_Posx_R
 			self.posy = self.posy + Var_Posy_R
 			self.Posx_i_L = self.Plx
 			self.Posy_i_L= self.Ply
@@ -147,17 +144,18 @@ class Odometry:
 ##################Printe dos valores########################################################
 
 	def Show_Position(self):
-	
+
 	    	print("\nposx = %f \t posy = %f" % (self.posx, self.posy))
 
-#    	    print("\nPlx = %f \t Ply = %f" % (self.Plx, self.Ply))
-#           print("\nPrx = %f \t Pry = %f" % (self.Prx, self.Pry))
-        
+	  	#print("\nPlx = %f \t Ply = %f" % (self.Plx, self.Ply))
+		#print("\nPrx = %f \t Pry = %f" % (self.Prx, self.Pry))
+
 ###################Programa principal#######################################################
 
 Odometry = Odometry()
 
-Motores = [	'Motor_Read_7',  #0						
+ x = 0
+Motores = [	'Motor_Read_7',  #0
 		'Motor_Read_8',  #1
 		'Motor_Read_9',  #2
 		'Motor_Read_10', #3
@@ -169,15 +167,16 @@ Motores = [	'Motor_Read_7',  #0
 		'Motor_Read_16', #9
 		'Motor_Read_17', #10
 		'Motor_Read_18'] #11
-
 IMU = [	'IMU_EULER_Z']
+
 while(1):
-	Odometry.Get_Bkb_Values(Motores, IMU)
-	time.sleep(0.8)
-	Odometry.Kinematics_Right_Left_Leg()
-	Odometry.Position_Calc()
-	Odometry.Show_Position()
-
-
-
-
+	I = self.bkb.read_int(self.mem, PHASE)
+	if I == 1:
+		if x == 0:
+			Odometry.Get_Bkb_Values(Motores, IMU)
+			Odometry.Kinematics_Calc()
+			Odometry.Position_Calc()
+			Odometry.Show_Position()
+			x = 1
+	if I == 0:
+		x = 0
