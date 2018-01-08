@@ -154,7 +154,7 @@ class Odometry:
 
 Odometry = Odometry()
 
- x = 0
+x = 0
 Motores = [	'Motor_Read_7',  #0
 		'Motor_Read_8',  #1
 		'Motor_Read_9',  #2
@@ -170,7 +170,7 @@ Motores = [	'Motor_Read_7',  #0
 IMU = [	'IMU_EULER_Z']
 
 while(1):
-	I = self.bkb.read_int(self.mem, PHASE)
+	I = Odometry.bkb.read_int(Odometry.mem, 'WALK_PHASE')
 	if I == 1:
 		if x == 0:
 			Odometry.Get_Bkb_Values(Motores, IMU)
