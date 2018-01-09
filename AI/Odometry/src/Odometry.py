@@ -40,9 +40,10 @@ class Odometry:
 		self.Mot = []	#Cria vetor que vai acessar e ler os valores dos motores da blackboard
 		self.IMU = []	#Cria vetor que vai acessar e ler os valores da IMU da blackboard
 
-		for i in Item1:
-			self.Mot.append((self.bkb.read_int(self.mem, i))*0.005113269 + 0.52359877559)	#Substitui a frase para informar o tipo da leitura e guarda em Valbkb e transforma a leitura em graus.
-		for j in Item2:
+		for i in Item1:		#Lê os valores dos motores, convertendo para graus e adiciona no vetor MOT
+			self.Mot.append((self.bkb.read_int(self.mem, i))*0.005113269 + 0.52359877559)
+
+		for j in Item2:		#Lê valores da IMU e adiciona no vetor IMU
 			self.IMU.append(self.bkb.read_float(self.mem, j))
 
 ##################Calculo cinemática########################################################
@@ -121,7 +122,7 @@ class Odometry:
 		Ply = (-(L4*s10+L5*sab)*c8-(L4*c10+L5*cab)*s8*s12)
 		#Plz = ((L4*c10+L5*cab)*c12)
 
-##################Calculo da Posição########################################################
+##################Calculo_de_Posição########################################################
 
 	def Position_Calc(self):
 		if self.j%2: 								#Calculo de posição a partir do movimento da perna direita
@@ -132,7 +133,7 @@ class Odometry:
 			self.Posx_i_R = self.Prx
 			self.Posy_i_R = self.Pry
 			self.j-=1
-		else: 										#Calculo de posição a partir do movimneto da perna esquerda
+		else: 										#Calculo de posição a partir do movimento da perna esquerda
 			Var_Posx_R = self.Prx - self.Posx_i_R
 			Var_Posy_R = self.Pry - self.Posy_i_R
 			self.posx = self.posx + Var_Posx_R
@@ -141,16 +142,14 @@ class Odometry:
 			self.Posy_i_L= self.Ply
 			self.j+=1
 
-##################Printe dos valores########################################################
+##################Print_dos_valores########################################################
 
 	def Show_Position(self):
 
-	    	print("\nposx = %f \t posy = %f" % (self.posx, self.posy))
+		os.system('cls')		#Limpa a tela do terminal antes de escrever os novos valores
+    	print("\nposx = %f \t posy = %f" % (self.posx, self.posy))	#Apresenta os valores valores calculados
 
-	  	#print("\nPlx = %f \t Ply = %f" % (self.Plx, self.Ply))
-		#print("\nPrx = %f \t Pry = %f" % (self.Prx, self.Pry))
-
-###################Programa principal#######################################################
+###################Programa_principal#######################################################
 
 Odometry = Odometry()
 
@@ -167,16 +166,20 @@ Motores = [	'Motor_Read_7',  #0
 		'Motor_Read_16', #9
 		'Motor_Read_17', #10
 		'Motor_Read_18'] #11
+
 IMU = [	'IMU_EULER_Z']
 
 while(1):
-	I = Odometry.bkb.read_int(Odometry.mem, 'WALK_PHASE')
-	if I == 1:
-		if x == 0:
-			Odometry.Get_Bkb_Values(Motores, IMU)
-			Odometry.Kinematics_Calc()
-			Odometry.Position_Calc()
+	I = Odometry.bkb.read_int(Odometry.mem, 'WALK_PHASE')	#Lê valor da flag Phase da blackboard.
+
+	if I == 1:			#Indica que a flag "phase" foi acionada, assim, teoricamente o robô completou seu ciclo de passo
+
+		if x == 0:		#X: Variável de controle, para que o programa execute a cinemática apenas 1 vez a cada passo
+			Odometry.Get_Bkb_Values(Motores, IMU)	#Lê valores dos motores e imu da blackboard
+			Odometry.Kinematics_Calc()				#Realiza o calculo de cinemática direita
+			Odometry.Position_Calc()				#Calcula a posição do robô a pela variação da cinemática
 			Odometry.Show_Position()
-			x = 1
+			x = 1									#Permite que o cálculo seja realizado apenas uma vez
+
 	if I == 0:
 		x = 0

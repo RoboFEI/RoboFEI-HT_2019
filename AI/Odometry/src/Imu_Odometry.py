@@ -46,7 +46,7 @@ class Imu:
 #################Leitura dos valores da IMU############################
 
     def Get_IMU_BKB(self, Item):
-        g = [[0], [0], [1]]             #Forças externas
+        g = [[0], [0], [9.8]]           #Forças externas
         Valbkb = []
 
         for i in Item:                  #Aquisita valores da blackboard da IMU, com valores em função da gravidade
@@ -59,14 +59,14 @@ class Imu:
 #################Calculo da posição utilizando valores da IMU###########
 
     def IMU_CALC_POS(self):
-        tf = time.time()
+        tf = time.time()                #Verifica o tempo atual (sec. Ponto flutuante). Nota: Nem todos os sistemas apresentam uma precisão alta em relação a tempo
         T = tf - ti                     #Calculo do período de calculo
 
-        self.Vx += T*(self.aI[0])        #Calculo da velocidade do movimento no eixo x
-        self.Rx += T*self.Vx              #Calculo de posição relativa do robô no eixo x
+        self.Vx += T*(self.aI[0])       #Calculo da velocidade do movimento no eixo x. (m/s)
+        self.Rx += T*self.Vx            #Calculo de posição relativa do robô no eixo x. (m)
 
-        self.Vy += T*(self.aI[1])        #Calculo da velocidade do movimento no eixo y
-        self.Ry += T*self.Vy              #Calculo de posição relativa do robô no eixo y
+        self.Vy += T*(self.aI[1])       #Calculo da velocidade do movimento no eixo y. (m/s)
+        self.Ry += T*self.Vy            #Calculo de posição relativa do robô no eixo y. (m)
 
         ti = tf
 
