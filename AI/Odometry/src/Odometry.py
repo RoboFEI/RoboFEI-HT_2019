@@ -100,8 +100,8 @@ class Odometry:
 		r32 = -(s7*sabc-c7*s11*cabc)*s15-c7*c11*c15
 		r33 = s7*cabc+c7*s11*sabc
 
-		Prx = ((L4*s9+L5*sab)*s7-(L4*c9+L5*cab)*c7*s11)
-		Pry = (-(L4*s9+L5*sab)*c7-(L4*c9+L5*cab)*s7*s11)
+		self.Prx = ((L4*s9+L5*sab)*s7-(L4*c9+L5*cab)*c7*s11)
+		self.Pry = (-(L4*s9+L5*sab)*c7-(L4*c9+L5*cab)*s7*s11)
 		#Prz = ((L4*c9+L5*cab)*c11)
 
 ########Cinemática_Perna_Esquerda#######
@@ -118,8 +118,8 @@ class Odometry:
 		l32 = -(s8*sabc-c8*s12*cabc)*s16-c8*c12*c16
 		l33 = s8*cabc+c8*s12*sabc
 
-		Plx = ((L4*s10+L5*sab)*s8-(L4*c10+L5*cab)*c8*s12)
-		Ply = (-(L4*s10+L5*sab)*c8-(L4*c10+L5*cab)*s8*s12)
+		self.Plx = ((L4*s10+L5*sab)*s8-(L4*c10+L5*cab)*c8*s12)
+		self.Ply = (-(L4*s10+L5*sab)*c8-(L4*c10+L5*cab)*s8*s12)
 		#Plz = ((L4*c10+L5*cab)*c12)
 
 ##################Calculo_de_Posição########################################################
@@ -147,7 +147,7 @@ class Odometry:
 	def Show_Position(self):
 
 		os.system('cls')		#Limpa a tela do terminal antes de escrever os novos valores
-    	print("\nposx = %f \t posy = %f" % (self.posx, self.posy))	#Apresenta os valores valores calculados
+		print("\nposx = %f \t posy = %f" % (self.posx, self.posy))	#Apresenta os valores valores calculados
 
 ###################Programa_principal#######################################################
 
@@ -170,10 +170,10 @@ Motores = [	'Motor_Read_7',  #0
 IMU = [	'IMU_EULER_Z']
 
 while(1):
-	I = Odometry.bkb.read_int(Odometry.mem, 'WALK_PHASE')	#Lê valor da flag Phase da blackboard.
+	I = Odometry.bkb.read_float(Odometry.mem, 'WALK_PHASE')	#Lê valor da flag Phase da blackboard.
 
-	if I == 1:			#Indica que a flag "phase" foi acionada, assim, teoricamente o robô completou seu ciclo de passo
-
+	if I != 0:			#Indica que a flag "phase" foi acionada, assim, teoricamente o robô completou seu ciclo de passo
+	
 		if x == 0:		#X: Variável de controle, para que o programa execute a cinemática apenas 1 vez a cada passo
 			Odometry.Get_Bkb_Values(Motores, IMU)	#Lê valores dos motores e imu da blackboard
 			Odometry.Kinematics_Calc()				#Realiza o calculo de cinemática direita

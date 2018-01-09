@@ -155,8 +155,7 @@ class SharedMemory(object):
     'Motor_Read_15': 116,
     'Motor_Read_16': 117,
     'Motor_Read_17': 118,
-    'Motor_Read_18': 119,
-    'WALK_PHASE': 120}
+    'Motor_Read_18': 119,}
 
     variable_float = {
     'IMU_GYRO_X': 1,
@@ -281,5 +280,6 @@ class SharedMemory(object):
     'VISION_RED_LANDMARK_DEG': 120,
     'VISION_YELLOW_LANDMARK_DEG': 121,
     'VISION_PURPLE_LANDMARK_DEG': 122,
+    'WALK_PHASE': 123
     }
 #------------------------------------------------------------------------------------------

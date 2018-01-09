@@ -553,6 +553,7 @@ int Initialize_servo(char *string1)
 void Get_Servo_Pos(CM730 *cm730, int V[], int x)
 {
     static int j=0;
+    static float m_Phase = 0;
     int Pos_Servo;
     for(int i=0; (i<Num_Motor && j<x); i++, j++) // Varrendo e escrevendo na blackboard a quantidade de motores especificadas pelo define Num_Motor 
     {
@@ -563,6 +564,10 @@ void Get_Servo_Pos(CM730 *cm730, int V[], int x)
     {
 	j = 0;
     }
+    
+    // Escrita da flag "m_Phase" na blackboard
+    m_Phase = Walking::GetInstance()->GetCurrentPhase();
+    write_float(mem, WALK_PHASE, m_Phase);
 }
 
 int check_servo(CM730 *cm730, int idServo, bool &stop_gait)
