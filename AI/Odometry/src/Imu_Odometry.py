@@ -24,6 +24,7 @@ class Imu:
         self.Vy = 0
         self.Rx = 0
         self.Ry = 0 
+	self.ti = 0
 
         #######################################Calculo da matriz rotação do corpo da imu para o referencial######
 
@@ -84,6 +85,7 @@ class Imu:
 
         os.system('cls')
         print('X = %f, Y = %f'%(self.Rx, self.Ry))
+	print T
 #################Programa principal#####################################
 
 Imu = Imu()
@@ -98,8 +100,8 @@ EULER = ['IMU_EULER_X',
 		
 while (1):
     I = Imu.bkb.read_float(Imu.mem, 'WALK_PHASE')
-    #if I != 0:
-    Imu.ti = time.time()
+    if I != 0:
+    	Imu.ti = time.time()
     while(1):
         Imu.Get_IMU_BKB(ACELER, EULER)
         Imu.IMU_CALC_POS()
