@@ -1,4 +1,6 @@
-import numpy as np        
+import numpy as np 
+import time
+ti = time.clock()       
 L4 = 93.0
 L5 = 93.0
 Lf = 33.5
@@ -32,8 +34,8 @@ r22 = -(-s11*c15-c11*s15*cabc)
 r23 = -(-c11*sabc)
 
 r31 = (s7*sabc-c7*s11*cabc)*c15-(c7*c11*s15)
-r32 = -(s7*sabc-c7*s11*cabc)*s15-c7*c11*c15
-r33 = s7*cabc+c7*s11*sabc
+r32 = (-c7*sabc-s7*s11*cabc)*c15-s7*c11*s15
+r33 = -s11*s15+c11*c15*cabc
 
 P_x = ((L4*s9+L5*sab)*s7-(L4*c9+L5*cab)*c7*s11) 
 P_y = (-(L4*s9+L5*sab)*c7-(L4*c9+L5*cab)*s7*s11) 
@@ -54,9 +56,13 @@ P_z = ((L4*c9+L5*cab)*c11)
 Px = Lf*r11 - Ltx - P_y
 Py = Lf*r21 - Lty - P_z
 Pz = Lf*r31 + Ltz + P_x
+tf = time.clock()
+
+T = tf - ti
 
 print("%f \t %f \t %f \t %f"% (r11, r12, r13, Px))
 print("%f \t %f \t %f \t %f"% (r21, r22, r23, Py))
 print("%f \t %f \t %f \t %f"% (r31, r32, r33, Pz))
+print(T)
 
 

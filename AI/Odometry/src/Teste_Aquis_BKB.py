@@ -32,7 +32,7 @@ class Odometry:
 		self.IMU = []	#Cria vetor que vai acessar e ler os valores da IMU da blackboard
 
 		for i in Item1:
-			self.Mot.append(self.bkb.read_int(self.mem, i))	#Substitui a frase para informar o tipo da leitura e guarda em Valbkb e transforma a leitura em graus.
+			self.Mot.append(self.bkb.read_int(self.mem, i)*0.005113269 + 0.52359877559)	
 		for j in Item2:    
 			self.IMU.append(self.bkb.read_int(self.mem, j))
 		self.Mov =self.bkb.read_float(self.mem, 'WALK_PHASE')
@@ -40,7 +40,7 @@ class Odometry:
 ###################Apresentaçao dos resultados#############################################
 	def Mostra(self, Item1, Item2):
             for k in range(len(Item1)):
-                print("Motor %d = %d" % (k, self.Mot[k]))
+                print("Motor %d = %f" % (k, self.Mot[k]))
             for m in range(len(Item2)):
             	print("Action = %d" % self.IMU[m])
             print (self.Mov)

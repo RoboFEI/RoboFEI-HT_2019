@@ -15,12 +15,12 @@ class Odometry:
 	def __init__(self):
 
 		# instantiate:
-		config = ConfigParser()								#Instanciando um objeto a classe para ler arquivos
+		self.config = ConfigParser()								#Instanciando um objeto a classe para ler arquivos
 
 		# looking for the file config.ini:
-		config.read('../../Control/Data/config.ini')
+		self.config.read('../../Control/Data/config.ini')
 
-		self.mem_key = int(config.get('Communication', 'no_player_robofei'))*100	#Lendo a comunicação e o número do robô
+		self.mem_key = int(self.config.get('Communication', 'no_player_robofei'))*100	#Lendo o número do robô
 		#Instantiate the BlackBoard's class:
 		self.bkb = SharedMemory()							#Instanciando o obj a classe de memória compartilhada
 		self.mem = self.bkb.shd_constructor(self.mem_key)
@@ -34,6 +34,8 @@ class Odometry:
 		self.Posy_i_L = 0
 		self.ti = 0
 		self.tf = 0
+		
+		self.Dic_Key = {102: 'Walking Config', 100: 'Turn Robot Right', 101: 'Turn Robot Left', 109: 'Sidle Left', 110: 'Sidle Right', 111: 'Turn Ball Left', 113: 'Turn Ball Right', 107: 'Walk Slow', 114: 'Walking Backward Slow', 118: 'Walking Backward', 115: 'Gait'}
 
 ##################Leitura dos valores da IMU###############################################
 
@@ -55,6 +57,9 @@ class Odometry:
 		L4 = 93.0
 		L5 = 93.0
 		Lf = 33.5
+		Ltx = 5.0
+		Lty = 122.2
+		Ltz = 37.0
 		s7 = np.sin(self.Mot[0])
 		s8 = np.sin(self.Mot[1])
 		s9 = np.sin(self.Mot[2])
@@ -99,12 +104,15 @@ class Odometry:
 		r23 = -(-c11*sabc)
 
 		r31 = (s7*sabc-c7*s11*cabc)*c15-(c7*c11*s15)
-		r32 = -(s7*sabc-c7*s11*cabc)*s15-c7*c11*c15
-		r33 = s7*cabc+c7*s11*sabc
+		r32 = (-c7*sabc-s7*s11*cabc)*c15-s7*c11*s15
+		r33 = -s11*s15+c11*c15*cabc
 
-		self.Prx = ((L4*s9+L5*sab)*s7-(L4*c9+L5*cab)*c7*s11)
-		self.Pry = (-(L4*s9+L5*sab)*c7-(L4*c9+L5*cab)*s7*s11)
-		#Prz = ((L4*c9+L5*cab)*c11)
+		Pr_x = ((L4*s9+L5*sab)*s7-(L4*c9+L5*cab)*c7*s11)
+		Pr_y = (-(L4*s9+L5*sab)*c7-(L4*c9+L5*cab)*s7*s11)
+		Pr_z = ((L4*c9+L5*cab)*c11)
+		
+		self.Prx = Lf*r11 - Ltx - Pr_y
+		self.Pry = Lf*r21 - Lty - Pr_z
 
 ########Cinemática_Perna_Esquerda#######
 
@@ -117,48 +125,51 @@ class Odometry:
 		l23 = -(-c12*sabc)
 
 		l31 = (s8*sabc-c8*s12*cabc)*c16-(c8*c12*s16)
-		l32 = -(s8*sabc-c8*s12*cabc)*s16-c8*c12*c16
-		l33 = s8*cabc+c8*s12*sabc
+		l32 = (-c8*sabc-s8*s12*cabc)*c16-s8*c12*s16
+		l33 = -s12*s16+c12*c16*cabc
 
-		self.Plx = ((L4*s10+L5*sab)*s8-(L4*c10+L5*cab)*c8*s12)
-		self.Ply = (-(L4*s10+L5*sab)*c8-(L4*c10+L5*cab)*s8*s12)
-		#Plz = ((L4*c10+L5*cab)*c12)
+		Pl_x = ((L4*s10+L5*sab)*s8-(L4*c10+L5*cab)*c8*s12)
+		Pl_y = (-(L4*s10+L5*sab)*c8-(L4*c10+L5*cab)*s8*s12)
+		Pl_z = ((L4*c10+L5*cab)*c12)
+		
+		self.Plx = Lf*l11 - Ltx - Pl_y
+		self.Ply = Lf*l21 - Lty - Pl_z
 
 ##################Calculo_de_Posição########################################################
 
 	def Position_Calc(self):
 		if self.j%2: 	#Calculo de posição a partir do movimento da perna direita
-			Var_Posx_R = self.Prx - self.Posx_i_R	#Se não houver o calculo de variação e ela ocorrer no semiplano negativo, ao invés de somar a posição, irá decrementá-la, gerando um erro de cálculo
-			Var_Posy_R = self.Pry - self.Posy_i_R
-			self.posx = self.posx + Var_Posx_R
-			self.posy = self.posy + Var_Posy_R
-			self.Posx_i_L = self.Plx
-			self.Posy_i_L= self.Ply
-			self.j-=1
-			
-		else: 			#Calculo de posição a partir do movimento da perna esquerda
 			Var_Posx_L = self.Plx - self.Posx_i_L 
 			Var_Posy_L = self.Ply - self.Posy_i_L
 			self.posx = self.posx + Var_Posx_L
 			self.posy = self.posy + Var_Posy_L
 			self.Posx_i_R = self.Prx
 			self.Posy_i_R = self.Pry
+			self.j-=1
+			
+		else: 			#Calculo de posição a partir do movimento da perna esquerda
+			Var_Posx_R = self.Prx - self.Posx_i_R	#Se não houver o calculo de variação e ela ocorrer no semiplano negativo, ao invés de somar a posição, irá decrementá-la, gerando um erro de cálculo
+			Var_Posy_R = self.Pry - self.Posy_i_R
+			self.posx = self.posx + Var_Posx_R
+			self.posy = self.posy + Var_Posy_R
+			self.Posx_i_L = self.Plx
+			self.Posy_i_L= self.Ply
 			self.j+=1
 
 ##################Print_dos_valores########################################################
 
 	def Show_Position(self):
 
-		os.system('cls')		#Limpa a tela do terminal antes de escrever os novos valores
 		print("\nposx = %f \t posy = %f" % (self.posx, self.posy))	#Apresenta os valores valores calculados
 		self.tf = time.clock()
-		time.sleep(self.T/2 - (self.tf-self.ti))	#Aguarda o tempo para meio periodo menos o tempo de toda a rotina de calculo de posiçao.(Tempo para que o em teoria o outro pe de apoio esteja no chao)
+		time.sleep((self.T)/2 - (self.tf-self.ti))	#Aguarda o tempo para meio periodo menos o tempo de toda a rotina de calculo de posiçao.(Tempo para que o em teoria o outro pe de apoio esteja no chao)
 
 ###################Programa_principal#######################################################
 
 Odometry = Odometry()
 
 x = 0
+Past_Key = 0
 Motores = [	'Motor_Read_7',  #0
 		'Motor_Read_8',  #1
 		'Motor_Read_9',  #2
@@ -176,18 +187,22 @@ IMU = [	'IMU_EULER_Z']
 
 while(1):
 	I = Odometry.bkb.read_float(Odometry.mem, 'WALK_PHASE')	#Lê valor da flag Phase da blackboard.
-
+	Mov_Key = Odometry.bkb.read_int(Odometry.mem, 'MOVIMENT')
+	
+	if Mov_Key != 0:
+		Past_Key = Mov_Key
 	if I != 0:			#Indica que a flag "phase" foi acionada, assim, teoricamente o robô completou seu ciclo de passo
-
-		while(1)
+		while(1):
+			Odometry.ti = time.clock()
+			Mov_Key = Odometry.bkb.read_int(Odometry.mem, 'MOVIMENT')
+			if Mov_Key == 0:
+				Mov_Key = Past_Key
+			Odometry.T = float(Odometry.config.get(Odometry.Dic_Key[Mov_Key], 'period_time'))/1000	#Aquisita no config.ini o periodo do movimento e transforma para [s]
 			
-			self.ti = time.clock()
-			#Capturar qual movimento esta sendo feito
-			#Aquisita no config.ini o periodo do movimento e transforma para [s]
 			Odometry.Get_Bkb_Values(Motores, IMU)	#Lê valores dos motores e imu da blackboard
 			Odometry.Kinematics_Calc()				#Realiza o calculo de cinemática direita
 			Odometry.Position_Calc()				#Calcula a posição do robô a pela variação da cinemática
 			Odometry.Show_Position()
- 
+			Past_Key = Mov_Key	#Guarda o valor da tecla acionada caso a proxima seja 0
  
  
