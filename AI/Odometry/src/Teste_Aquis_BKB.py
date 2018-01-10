@@ -7,6 +7,7 @@ from SharedMemory import SharedMemory		#Importa a classe do arquivo SharedMemory
 
 from ConfigParser import ConfigParser		#Importando a classe ConfigParser
 import numpy as np
+import time as time
 ##########################################################################################
 
 class Odometry:
@@ -33,13 +34,18 @@ class Odometry:
 		for i in Item1:
 			self.Mot.append(self.bkb.read_int(self.mem, i))	#Substitui a frase para informar o tipo da leitura e guarda em Valbkb e transforma a leitura em graus.
 		for j in Item2:    
-			self.IMU.append(self.bkb.read_float(self.mem, j))
+			self.IMU.append(self.bkb.read_int(self.mem, j))
+		self.Mov =self.bkb.read_float(self.mem, 'WALK_PHASE')
 			
-		    
-	def Mostra(self, Item):
-            for k in range(len(Item)):
+###################Apresentaçao dos resultados#############################################
+	def Mostra(self, Item1, Item2):
+            for k in range(len(Item1)):
                 print("Motor %d = %d" % (k, self.Mot[k]))
-            print("IMU_EULER_Z = %d" % self.IMU[0])
+            for m in range(len(Item2)):
+            	print("Action = %d" % self.IMU[m])
+            print (self.Mov)
+            time.sleep(0.2)
+            
 ###################Programa principal#######################################################
 Odometry = Odometry()
 
@@ -56,7 +62,9 @@ Motores = [	'Motor_Read_7',  #0
 		'Motor_Read_17', #10
 		'Motor_Read_18'] #11
 
-IMU = [	'IMU_EULER_Z']
+Moviment = ['MOVIMENT']
+
 while(1):
-	Odometry.Get_Bkb_Values(Motores, IMU)
-	Odometry.Mostra(Motores)
+	Odometry.Get_Bkb_Values(Motores, Moviment)
+	Odometry.Mostra(Motores, Moviment)
+	

@@ -250,6 +250,7 @@ int main(int argc, char **argv)
                 key=buffer;
 		same_moviment=true;
 	    }
+	    write_int(mem, MOVIMENT, key);
             //-------------------------------------------------------------------------
 
            

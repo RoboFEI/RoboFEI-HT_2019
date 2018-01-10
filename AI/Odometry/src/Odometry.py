@@ -32,6 +32,8 @@ class Odometry:
 		self.Posy_i_R = 0
 		self.Posx_i_L = 0
 		self.Posy_i_L = 0
+		self.ti = 0
+		self.tf = 0
 
 ##################Leitura dos valores da IMU###############################################
 
@@ -125,21 +127,22 @@ class Odometry:
 ##################Calculo_de_Posição########################################################
 
 	def Position_Calc(self):
-		if self.j%2: 								#Calculo de posição a partir do movimento da perna direita
-			Var_Posx_L = self.Plx - self.Posx_i_L 	#Se não houver o calculo de variação e ela ocorrer no semiplano negativo, ao invés de somar a posição, irá decrementá-la, gerando um erro de cálculo
-			Var_Posy_L = self.Ply - self.Posy_i_L
-			self.posx = self.posx + Var_Posx_L
-			self.posy = self.posy + Var_Posy_L
-			self.Posx_i_R = self.Prx
-			self.Posy_i_R = self.Pry
-			self.j-=1
-		else: 										#Calculo de posição a partir do movimento da perna esquerda
-			Var_Posx_R = self.Prx - self.Posx_i_R
+		if self.j%2: 	#Calculo de posição a partir do movimento da perna direita
+			Var_Posx_R = self.Prx - self.Posx_i_R	#Se não houver o calculo de variação e ela ocorrer no semiplano negativo, ao invés de somar a posição, irá decrementá-la, gerando um erro de cálculo
 			Var_Posy_R = self.Pry - self.Posy_i_R
 			self.posx = self.posx + Var_Posx_R
 			self.posy = self.posy + Var_Posy_R
 			self.Posx_i_L = self.Plx
 			self.Posy_i_L= self.Ply
+			self.j-=1
+			
+		else: 			#Calculo de posição a partir do movimento da perna esquerda
+			Var_Posx_L = self.Plx - self.Posx_i_L 
+			Var_Posy_L = self.Ply - self.Posy_i_L
+			self.posx = self.posx + Var_Posx_L
+			self.posy = self.posy + Var_Posy_L
+			self.Posx_i_R = self.Prx
+			self.Posy_i_R = self.Pry
 			self.j+=1
 
 ##################Print_dos_valores########################################################
@@ -148,6 +151,8 @@ class Odometry:
 
 		os.system('cls')		#Limpa a tela do terminal antes de escrever os novos valores
 		print("\nposx = %f \t posy = %f" % (self.posx, self.posy))	#Apresenta os valores valores calculados
+		self.tf = time.clock()
+		time.sleep(self.T/2 - (self.tf-self.ti))	#Aguarda o tempo para meio periodo menos o tempo de toda a rotina de calculo de posiçao.(Tempo para que o em teoria o outro pe de apoio esteja no chao)
 
 ###################Programa_principal#######################################################
 
@@ -173,13 +178,16 @@ while(1):
 	I = Odometry.bkb.read_float(Odometry.mem, 'WALK_PHASE')	#Lê valor da flag Phase da blackboard.
 
 	if I != 0:			#Indica que a flag "phase" foi acionada, assim, teoricamente o robô completou seu ciclo de passo
-	
-		if x == 0:		#X: Variável de controle, para que o programa execute a cinemática apenas 1 vez a cada passo
+
+		while(1)
+			
+			self.ti = time.clock()
+			#Capturar qual movimento esta sendo feito
+			#Aquisita no config.ini o periodo do movimento e transforma para [s]
 			Odometry.Get_Bkb_Values(Motores, IMU)	#Lê valores dos motores e imu da blackboard
 			Odometry.Kinematics_Calc()				#Realiza o calculo de cinemática direita
 			Odometry.Position_Calc()				#Calcula a posição do robô a pela variação da cinemática
 			Odometry.Show_Position()
-			x = 1									#Permite que o cálculo seja realizado apenas uma vez
-
-	if I == 0:
-		x = 0
+ 
+ 
+ 
