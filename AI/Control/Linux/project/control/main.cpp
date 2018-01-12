@@ -250,7 +250,6 @@ int main(int argc, char **argv)
                 key=buffer;
 		same_moviment=true;
 	    }
-	    write_int(mem, MOVIMENT, key);
             //-------------------------------------------------------------------------
 
            
@@ -568,7 +567,7 @@ void Get_Servo_Pos(CM730 *cm730, int V[], int x)
     
     // Escrita da flag "m_Phase" na blackboard
     m_Phase = Walking::GetInstance()->GetCurrentPhase();
-    write_float(mem, WALK_PHASE, m_Phase);
+    write_int(mem, WALK_PHASE, m_Phase);
 }
 
 int check_servo(CM730 *cm730, int idServo, bool &stop_gait)

@@ -112,7 +112,7 @@ Arquivo de cabeçalho contendo as funções e definições do black board
 #define Motor_Read_16 117
 #define Motor_Read_17 118
 #define Motor_Read_18 119
-#define MOVIMENT 120
+#define WALK_PHASE 120
 
 
 #define IMU_GYRO_X 1
@@ -237,7 +237,6 @@ Arquivo de cabeçalho contendo as funções e definições do black board
 #define VISION_RED_LANDMARK_DEG 120
 #define VISION_YELLOW_LANDMARK_DEG 121
 #define VISION_PURPLE_LANDMARK_DEG 122
-#define WALK_PHASE 123
 
 
 
