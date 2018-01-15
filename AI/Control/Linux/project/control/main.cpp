@@ -47,7 +47,7 @@ Arquivo fonte contendo o programa que controla os servos do corpo do robô
 
 #define LIMITE_TEMP 80    // Define a temperatura maxima dos motores
 
-#define Num_Motor 6 	// Numero de motores a serem escritos na blackboard por varredura 
+#define Num_Motor 12 	// Numero de motores a serem escritos na blackboard por varredura 
 
 using namespace Robot;
 using namespace std;
@@ -58,7 +58,7 @@ int check_servo(CM730 *cm730, int idServo, bool &stop_gait);
 
 int Initialize_servo(char *string1);
 
-void Get_Servo_Pos(CM730 *cm730, int V[], int x);
+void Get_Servo_Pos(CM730 *cm730, int V[], int x, int m_Phase);
 
 void logInit();
 
@@ -102,6 +102,9 @@ int main(int argc, char **argv)
     unsigned int buffer = 10000;
     unsigned int count_read=0;
     unsigned int step_time=20; // Determina a frequencia de leitura do blackboard
+    int m_Phase = 0;
+    int Q = 0;
+    int P = 0;
 
     //Configurando para prioridade maxima para executar este processo-------
     sprintf(string1,"echo fei 123456| sudo -S renice -20 -p %d", getpid());
@@ -233,9 +236,24 @@ int main(int argc, char **argv)
         buffer=0;
         while(1)
         {
+            m_Phase = Walking::GetInstance()->GetCurrentPhase(); 
+            if(m_Phase == 0 && Q == 0)
+            {
+            	P = 1;
+            	Q = 1;
+            }		
+            if(m_Phase == 2 && Q == 1)
+            {
+            	P = 1;
+            	Q = 0;
+            }	  
+        	  if((m_Phase == 0 || m_Phase == 2)&&(P == 1))
+    		  {
+		    	Get_Servo_Pos(&cm730, V, n, m_Phase);
+		    	P = 0;
+		  }
             int key = kbhit();
             usleep(20*1000);
-	    Get_Servo_Pos(&cm730, V, n); //Chamada da função que escreve a posição dos servos na blackboard
             //mantem o key com valor da tecla f ou k para realizar o soft_starter-----
             if(key!=0)
             {
@@ -377,7 +395,22 @@ int main(int argc, char **argv)
     logInit(); // save the time when start the control process
     while(1)
     {
-	    Get_Servo_Pos(&cm730, V, n);
+            m_Phase = Walking::GetInstance()->GetCurrentPhase(); 
+            if(m_Phase == 0 && Q == 0)
+            {
+            	P = 1;
+            	Q = 1;
+            }		
+            if(m_Phase == 2 && Q == 1)
+            {
+            	P = 1;
+            	Q = 0;
+            }	  
+        	  if((m_Phase == 0 || m_Phase == 2)&&(P == 1))
+    		  {
+		    	Get_Servo_Pos(&cm730, V, n, m_Phase);
+		    	P = 0;
+		  }
             //Confere se o movimento atual e o mesmo do anterior----------
             if(buffer==read_int(mem, DECISION_ACTION_A))
                 same_moviment = true;
@@ -550,10 +583,9 @@ int Initialize_servo(char *string1)
     return 1;
 }
 
-void Get_Servo_Pos(CM730 *cm730, int V[], int x)
+void Get_Servo_Pos(CM730 *cm730, int V[], int x, int m_Phase)
 {
     static int j=0;
-    static float m_Phase = 0;
     int Pos_Servo;
     for(int i=0; (i<Num_Motor && j<x); i++, j++) // Varrendo e escrevendo na blackboard a quantidade de motores especificadas pelo define Num_Motor 
     {
@@ -564,9 +596,6 @@ void Get_Servo_Pos(CM730 *cm730, int V[], int x)
     {
 	j = 0;
     }
-    
-    // Escrita da flag "m_Phase" na blackboard
-    m_Phase = Walking::GetInstance()->GetCurrentPhase();
     write_int(mem, WALK_PHASE, m_Phase);
 }
 

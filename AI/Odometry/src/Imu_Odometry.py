@@ -109,16 +109,12 @@ Imu.Accel = []
 
 for i in ACELER:		
     Imu.Accel.append(Imu.bkb.read_float(Imu.mem, i)) #Forcas quando esta parado para que possam ser retiradas nos calculos posteriores
-Imu.g = [[Imu.Accel[0]], [Imu.Accel[1]], [Imu.Accel[2]]]	#Forcas externas
+Imu.g = [[0], [0], [Imu.Accel[2]]]	#Forcas externas
 		    
-while (1):
-	I = Imu.bkb.read_int(Imu.mem, 'WALK_PHASE')
-	
-	#if I != 0:
-	Imu.ti = time.clock()
-	while(1):
-		Imu.Get_IMU_BKB(ACELER, EULER)
-		Imu.IMU_CALC_POS()
+Imu.ti = time.clock()
+while(1):
+	Imu.Get_IMU_BKB(ACELER, EULER)
+	Imu.IMU_CALC_POS()
         
         
         

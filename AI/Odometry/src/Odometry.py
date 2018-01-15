@@ -43,9 +43,12 @@ class Odometry:
 
 		self.Mot = []	#Cria vetor que vai acessar e ler os valores dos motores da blackboard
 		self.IMU = []	#Cria vetor que vai acessar e ler os valores da IMU da blackboard
+		k = 0
 
 		for i in Item1:		#Lê os valores dos motores, convertendo para graus e adiciona no vetor MOT
-			self.Mot.append((self.bkb.read_int(self.mem, i))*0.005113269 + 0.52359877559)
+			self.Mot.append((self.bkb.read_int(self.mem, i) - self.Mot_Var[k])*0.005113269 + 0.52359877559)
+			k += 1
+		print self.Mot
 
 		#for j in Item2:		#Lê valores da IMU e adiciona no vetor IMU
 		#	self.IMU.append(self.bkb.read_float(self.mem, j))
@@ -129,33 +132,34 @@ class Odometry:
 		#l32 = (-c8*sabc-s8*s12*cabc)*c16-s8*c12*s16
 		#l33 = -s12*s16+c12*c16*cabc
 
-		#Pl_x = ((L4*s10+L5*sab)*s8-(L4*c10+L5*cab)*c8*s12)
+		Pl_x = ((L4*s10+L5*sab)*s8-(L4*c10+L5*cab)*c8*s12)
 		Pl_y = (-(L4*s10+L5*sab)*c8-(L4*c10+L5*cab)*s8*s12)
 		Pl_z = ((L4*c10+L5*cab)*c12)
 		
 		self.Plx = Lf*l11 - Ltx - Pl_y
 		self.Ply = Lf*l21 - Lty - Pl_z
+		
+		print Pr_x
+		print Pr_y
+		print Pl_x
+		print Pl_y
 
 ##################Calculo_de_Posição########################################################
 
 	def Position_Calc(self):
 		if self.j%2: 	#Calculo de posição a partir do movimento da perna direita
-			Var_Posx_L = self.Plx - self.Posx_i_L 
-			Var_Posy_L = self.Ply - self.Posy_i_L
-			self.posx = self.posx + Var_Posx_L
-			self.posy = self.posy + Var_Posy_L
+			self.posx = self.posx + (self.Plx - self.Posx_i_L) 	#I = 0
+			self.posy = self.posy + (self.Ply - self.Posy_i_L)
 			self.Posx_i_R = self.Prx
 			self.Posy_i_R = self.Pry
-			print("I = 0")
 			
-		else: 			#Calculo de posição a partir do movimento da perna esquerda
-			Var_Posx_R = self.Prx - self.Posx_i_R	#Se não houver o calculo de variação e ela ocorrer no semiplano negativo, ao invés de somar a posição, irá decrementá-la, gerando um erro de cálculo
-			Var_Posy_R = self.Pry - self.Posy_i_R
-			self.posx = self.posx + Var_Posx_R
-			self.posy = self.posy + Var_Posy_R
+		else: 	#Calculo de posição a partir do movimento da perna esquerda
+			self.posx = self.posx + (self.Prx - self.Posx_i_R)	#I = 2
+			self.posy = self.posy + (self.Pry - self.Posy_i_R)
 			self.Posx_i_L = self.Plx
 			self.Posy_i_L = self.Ply
-			print("I = 2")
+			
+#Se não houver o calculo de variação e ela ocorrer no semiplano negativo, ao invés de somar a posição, irá decrementá-la, gerando um erro de cálculo
 
 ##################Print_dos_valores########################################################
 
@@ -170,7 +174,7 @@ Odometry = Odometry()
 
 x = 0
 k = 1
-Motores = [	'Motor_Read_7',  #0
+Motores = ['Motor_Read_7',  #0
 		'Motor_Read_8',  #1
 		'Motor_Read_9',  #2
 		'Motor_Read_10', #3
@@ -185,27 +189,32 @@ Motores = [	'Motor_Read_7',  #0
 
 IMU = [	'IMU_EULER_Z']
 
+#######verificacao de erro inicial da posicao dos motores###
+Odometry.Mot_Var = []	
+for i in Motores:
+	Odometry.Mot_Var.append(Odometry.bkb.read_int(Odometry.mem, i))
+	
+for i in range(len(Motores)):
+	Odometry.Mot_Var[i] -= 512 #Variacao da posicao inicial com a teorica 
+	
+######Chamada dos calculos###########
+
 while(1):
-	I = Odometry.bkb.read_int(Odometry.mem, 'WALK_PHASE')	#Lê valor da flag Phase da blackboard.
-
-	#if I != 0:			#Indica que a flag "phase" foi acionada, assim, teoricamente o robô completou seu ciclo de passo
-
-	while(1):
-		RC = Odometry.bkb.read_int(Odometry.mem, 'IMU_STATE') #0: Robo em pe, 1: Robo caido
-		I = Odometry.bkb.read_int(Odometry.mem, 'WALK_PHASE')	
-		if (I, k ) == (2, 0):	#Pe esquerdo em contato com o chao
-			Odometry.j = 0
-			k = 1
-			x = 1		#So executara o
-		if (I, k ) == (0, 1):	#Pe direito em contato com o chao 
-			Odometry.j = 1
-			k = 0
-			x = 1
-		if (x, RC) == (1, 0):	#Execuao 1 vez por passo se o robo estiver em pe
-			Odometry.Get_Bkb_Values(Motores, IMU)	#Lê valores dos motores e imu da blackboard
-			Odometry.Kinematics_Calc()#Realiza o calculo de cinemática direita
-			Odometry.Position_Calc()  #Calcula a posição do robô a pela variação da cinemática
-			Odometry.Show_Position()
-			x = 0
+	RC = Odometry.bkb.read_int(Odometry.mem, 'IMU_STATE') #0: Robo em pe, 1: Robo caido
+	I = Odometry.bkb.read_int(Odometry.mem, 'WALK_PHASE')	
+	if (I, k ) == (2, 0):	#Pe esquerdo em contato com o chao
+		Odometry.j = 0
+		k = 1
+		x = 1		#So executara o
+	if (I, k ) == (0, 1):	#Pe direito em contato com o chao 
+		Odometry.j = 1
+		k = 0
+		x = 1
+	if (x, RC) == (1, 0):	#Execuao 1 vez por passo se o robo estiver em pe
+		Odometry.Get_Bkb_Values(Motores, IMU)	#Lê valores dos motores e imu da blackboard
+		Odometry.Kinematics_Calc()#Realiza o calculo de cinemática direita
+		Odometry.Position_Calc()  #Calcula a posição do robô a pela variação da cinemática
+		Odometry.Show_Position()
+		x = 0
  
  
