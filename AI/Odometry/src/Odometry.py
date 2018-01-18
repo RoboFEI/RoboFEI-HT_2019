@@ -3,6 +3,7 @@
 import os
 import sys
 import numpy as np
+import sympy as sy
 import time
 sys.path.append('../../Blackboard/src/')	#adicionando caminho para programa em outro diretório
 from SharedMemory import SharedMemory		#Importa a classe do arquivo SharedMemory
@@ -32,9 +33,14 @@ class Odometry:
 		self.Posy_i_R = 0
 		self.Posx_i_L = 0
 		self.Posy_i_L = 0
-		self.ti = 0
-		self.tf = 0
+		self.Posxy_abs = ([[], [], []])	#Posicao no referencial fixo.
+		self.th =  sy.Symbol('self.th')	# simbolico para o angulo em torno do eixo Z
+		self.Posxy_abs = sy.zeros((3, 1))	#Pos. refer. fixo (abs)
 		
+		self.MT_xy = sy.Matrix([[ sy.cos(self.th), sy.sin(self.th), 0],#Matriz rotacao ao redor de Z
+					   	    [-sy.sin(self.th), sy.cos(self.th), 0],#Transf. de ref. movel para ref.fixo
+					   	    [  0             ,       0        , 1]])
+		 
 
 
 ##################Leitura dos valores da IMU###############################################
@@ -46,12 +52,11 @@ class Odometry:
 		k = 0
 
 		for i in Item1:		#Lê os valores dos motores, convertendo para graus e adiciona no vetor MOT
-			self.Mot.append((self.bkb.read_int(self.mem, i) - self.Mot_Var[k])*0.005113269 + 0.52359877559)
+			self.Mot.append((self.bkb.read_int(self.mem, i) - self.Mot_Ini[k])*0.0051232757)
 			k += 1
-		print self.Mot
 
-		#for j in Item2:		#Lê valores da IMU e adiciona no vetor IMU
-		#	self.IMU.append(self.bkb.read_float(self.mem, j))
+		for j in Item2:		#Lê valores da IMU e adiciona no vetor IMU
+			self.IMU.append(self.bkb.read_float(self.mem, j))
 
 ##################Calculo cinemática########################################################
 
@@ -59,10 +64,10 @@ class Odometry:
 
 		L4 = 9.30	#[cm]
 		L5 = 9.30
-		Lf = 3.35
+		Lf = 5.30
 		Ltx = 0.50
-		Lty = 12.22
-		Ltz = 3.70
+		Lty = 10.50
+		Ltz = 3.30
 		s7 = np.sin(self.Mot[0])
 		s8 = np.sin(self.Mot[1])
 		s9 = np.sin(self.Mot[2])
@@ -91,82 +96,69 @@ class Odometry:
 		cabc = np.cos(self.Mot[2]+self.Mot[6]+self.Mot[10])
 		cab = np.cos(self.Mot[2]+self.Mot[6])
 		sab = np.sin(self.Mot[2]+self.Mot[6])
-		slabc = np.sin(self.Mot[3]+self.Mot[7]+self.Mot[11])
-		clabc = np.cos(self.Mot[3]+self.Mot[7]+self.Mot[11])
-		clab = np.cos(self.Mot[3]+self.Mot[7])
-		slab = np.sin(self.Mot[3]+self.Mot[7])
+		slabc = np.sin(self.Mot[3]-self.Mot[7]+self.Mot[11])
+		clabc = np.cos(self.Mot[3]-self.Mot[7]+self.Mot[11])
+		clab = np.cos(self.Mot[3]-self.Mot[7])
+		slab = np.sin(self.Mot[3]-self.Mot[7])
+		cl14 = np.cos(-self.Mot[7])
+		cl16 = np.cos(-self.Mot[9])
+		cl12 = np.cos(-self.Mot[5])
+		sl14 = np.sin(-self.Mot[7])
+		sl16 = np.sin(-self.Mot[9])
+		sl12 = np.sin(-self.Mot[5])
 
 ########Cinemática_Perna_Direita#######
+	
+		Pr_x = ((L4*s9+L5*sab)*s7-(L4*c9+L5*cab)*c7*s11) 
+		Pr_y = (-(L4*s9+L5*sab)*c7-(L4*c9+L5*cab)*s7*s11) 
+		Pr_z = ((L4*c9+L5*cab)*c11) 
 
-		r11 = -((-c7*sabc-s7*s11*cabc)*c15-s7*c11*s15)
-		#r12 = -(-(-c7*sabc-s7*s11*cabc)*s15-s7*c11*c15)
-		#r13 = -(-c7*cabc+s7*s11*sabc)
-
-		r21 = -(-s11*s15+c11*c15*cabc)
-		#r22 = -(-s11*c15-c11*s15*cabc)
-		#r23 = -(-c11*sabc)
-
-		r31 = (s7*sabc-c7*s11*cabc)*c15-(c7*c11*s15)
-		#r32 = (-c7*sabc-s7*s11*cabc)*c15-s7*c11*s15
-		#r33 = -s11*s15+c11*c15*cabc
-
-		Pr_x = ((L4*s9+L5*sab)*s7-(L4*c9+L5*cab)*c7*s11)
-		Pr_y = (-(L4*s9+L5*sab)*c7-(L4*c9+L5*cab)*s7*s11)
-		Pr_z = ((L4*c9+L5*cab)*c11)
-		
-		self.Prx = Lf*r11 - Ltx - Pr_y
-		self.Pry = Lf*r21 - Lty - Pr_z
-		self.Prz = Lf*r31 + Ltz + Pr_x
+		self.Pry = Lf*(c11*s15*s7 - c15*(-c7*sabc - cabc*s11*s7)) - Ltx - Pr_y
+		self.Prz = Lf*(-c11*c15*cabc + s11*s15) - Lty - Pr_z
+		self.Prx = Lf*(-c11*c7*s15 + c15*(-c7*cabc*s11 + s7*sabc)) + Ltz + Pr_x
 
 ########Cinemática_Perna_Esquerda#######
-
-		l11 = -((-c8*sabc-s8*s12*cabc)*c16-s8*c12*s16)
-		#l12 = -(-(-c8*sabc-s8*s12*cabc)*s16-s8*c12*c16)
-		#l13 = -(-c8*cabc+s8*s12*sabc)
-
-		l21 = -(-s12*s16+c12*c16*cabc)
-		#l22 = -(-s12*c16-c12*s16*cabc)
-		#l23 = -(-c12*sabc)
-
-		#l31 = (s8*sabc-c8*s12*cabc)*c16-(c8*c12*s16)
-		#l32 = (-c8*sabc-s8*s12*cabc)*c16-s8*c12*s16
-		#l33 = -s12*s16+c12*c16*cabc
-
-		Pl_x = ((L4*s10+L5*sab)*s8-(L4*c10+L5*cab)*c8*s12)
-		Pl_y = (-(L4*s10+L5*sab)*c8-(L4*c10+L5*cab)*s8*s12)
-		Pl_z = ((L4*c10+L5*cab)*c12)
 		
-		self.Plx = Lf*l11 - Ltx - Pl_y
-		self.Ply = Lf*l21 - Lty - Pl_z
-		
-		print Pr_x
-		print Pr_y
-		print Pl_x
-		print Pl_y
+		Pl_x = ((L4*s10+L5*slab)*s8-(L4*c10+L5*clab)*c8*sl12) 
+		Pl_y = (-(L4*s10+L5*slab)*c8-(L4*c10+L5*clab)*s8*sl12) 
+		Pl_z = ((L4*c10+L5*clab)*cl12) 
+
+		self.Ply = Lf*(cl12*sl16*s8 - cl16*(-c8*slabc - clabc*sl12*s8)) - Ltx - Pl_y
+		self.Plz = Lf*(-cl12*cl16*clabc + sl12*sl16) - Lty - Pl_z
+		self.Plx = Lf*(-cl12*c8*sl16 + cl16*(-c8*clabc*sl12 + s8*slabc)) + Ltz + Pl_x
 
 ##################Calculo_de_Posição########################################################
 
 	def Position_Calc(self):
 		if self.j%2: 	#Calculo de posição a partir do movimento da perna direita
+			print ("I = 2")
+			self.posx = self.posx + (self.Prx - self.Posx_i_R)	#I = 2
+			self.posy = self.posy + (self.Pry - self.Posy_i_R)
+			self.Posx_i_L = self.Plx
+			self.Posy_i_L = self.Ply
+			
+		else: 	#Calculo de posição a partir do movimento da perna esquerda
+			print ("I = 0")
 			self.posx = self.posx + (self.Plx - self.Posx_i_L) 	#I = 0
 			self.posy = self.posy + (self.Ply - self.Posy_i_L)
 			self.Posx_i_R = self.Prx
 			self.Posy_i_R = self.Pry
 			
-		else: 	#Calculo de posição a partir do movimento da perna esquerda
-			self.posx = self.posx + (self.Prx - self.Posx_i_R)	#I = 2
-			self.posy = self.posy + (self.Pry - self.Posy_i_R)
-			self.Posx_i_L = self.Plx
-			self.Posy_i_L = self.Ply
+		#self.MT_xy = sy.transpose(self.MT_xy.subs(self.th , self.IMU[0]))#Subs. val. Matriz transf. para ref. fixo	
+		#Posxy_r = sy.Matrix([[self.posx], [self.posy], [0]])#Matriz pos. ref. movel
+		#self.Posxy_abs = self.Posxy_abs+self.MT_xy*Posxy_r		#Transformando para pos. ref. fixo (pto 												inicial)
+
 			
 #Se não houver o calculo de variação e ela ocorrer no semiplano negativo, ao invés de somar a posição, irá decrementá-la, gerando um erro de cálculo
 
 ##################Print_dos_valores########################################################
 
 	def Show_Position(self):
-		print ("%f, %f"% (self.Prx, self.Pry))
-		print ("%f, %f"% (self.Plx, self.Ply))
-		print("posx = %f \t posy = %f" % (self.posx, self.posy))	#Apresenta os valores valores calculados
+		print ("\n%f, %f, %f"% (self.Prx, self.Pry, self.Prz))
+		print ("%f, %f, %f"% (self.Plx, self.Ply, self.Plz))
+		#print("posx = %f \t posy = %f" % (self.Posxy_abs[0, 0], self.Posxy_abs[1, 0]))	#Apresenta os valores valores calculados
+		print("posx = %f \t posy = %f" % (self.posx, self.posy))
+		#print(self.IMU[0])
 
 ###################Programa_principal#######################################################
 
@@ -190,12 +182,9 @@ Motores = ['Motor_Read_7',  #0
 IMU = [	'IMU_EULER_Z']
 
 #######verificacao de erro inicial da posicao dos motores###
-Odometry.Mot_Var = []	
+Odometry.Mot_Ini = []	
 for i in Motores:
-	Odometry.Mot_Var.append(Odometry.bkb.read_int(Odometry.mem, i))
-	
-for i in range(len(Motores)):
-	Odometry.Mot_Var[i] -= 512 #Variacao da posicao inicial com a teorica 
+	Odometry.Mot_Ini.append(Odometry.bkb.read_int(Odometry.mem, i))
 	
 ######Chamada dos calculos###########
 
