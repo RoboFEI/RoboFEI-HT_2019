@@ -43,9 +43,9 @@ class Imu:
 		R_v2_B = sy.Matrix([[1,        0   ,       0    ],
 					   [0,  sy.cos(self.R),  sy.sin(self.R)],
 					   [0, -sy.sin(self.R), sy.cos(self.R)]])
-		R_v1_i = R_i_v1.inv()
-		R_v2_v1 = R_v1_v2.inv()
-		R_B_v2 = R_v2_B.inv()
+		R_v1_i = transpose(R_i_v1)
+		R_v2_v1 = transpose(R_v1_v2)
+		R_B_v2 = transpose(R_v2_B)
 
 		self.R_b_i = R_B_v2 * R_v2_v1 * R_v1_i 
 

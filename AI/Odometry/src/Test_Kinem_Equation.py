@@ -6,8 +6,8 @@ Lf = 33.5
 Ltx = 5
 Lty = 122.2
 Ltz = 37
-#Mot = [(0), (0), (0), (0), (0), (0)]
-Mot = [(10*np.pi/180), (-20*np.pi/180), (-30*np.pi/180), (-35*np.pi/180), (60*np.pi/180), (-45*np.pi/180)]
+Mot = [(0), (-np.pi/2), (0), (0), (0), (0)]
+#Mot = [(10*np.pi/180), (-20*np.pi/180), (-30*np.pi/180), (-35*np.pi/180), (60*np.pi/180), (-45*np.pi/180)]
 s7 = np.sin(Mot[0])
 s8 = np.sin(Mot[0])
 s9 = np.sin(Mot[1])
@@ -51,9 +51,9 @@ Pr_x = ((L4*s9+L5*sab)*s7-(L4*c9+L5*cab)*c7*s11)
 Pr_y = (-(L4*s9+L5*sab)*c7-(L4*c9+L5*cab)*s7*s11) 
 Pr_z = ((L4*c9+L5*cab)*c11) 
 
-Prx = Lf*(c11*s15*s7 - c15*(-c7*sabc - cabc*s11*s7)) - Ltx - Pr_y
-Prz = Lf*(-c11*c15*cabc + s11*s15) - Lty - Pr_z
-Pry = Lf*(-c11*c7*s15 + c15*(-c7*cabc*s11 + s7*sabc)) + Ltz + Pr_x
+Pry = Lf*(c11*s15*s7 - c15*(-c7*sabc - cabc*s11*s7)) - Pr_y
+Prz = Lf*(-c11*c15*cabc + s11*s15) - Pr_z
+Prx = Lf*(-c11*c7*s15 + c15*(-c7*cabc*s11 + s7*sabc)) + Pr_x
 
 
 
@@ -61,9 +61,9 @@ Pl_x = ((L4*s10+L5*slab)*s8-(L4*c10+L5*clab)*c8*sl12)
 Pl_y = (-(L4*s10+L5*slab)*c8-(L4*c10+L5*clab)*s8*sl12) 
 Pl_z = ((L4*c10+L5*clab)*cl12) 
 
-Plx = Lf*(cl12*sl16*s8 - cl16*(-c8*slabc - clabc*sl12*s8)) - Ltx - Pl_y
-Plz = Lf*(-cl12*cl16*clabc + sl12*sl16) - Lty - Pl_z
-Ply = Lf*(-cl12*c8*sl16 + cl16*(-c8*clabc*sl12 + s8*slabc)) - Ltz + Pl_x
+Ply = Lf*(cl12*sl16*s8 - cl16*(-c8*slabc - clabc*sl12*s8)) - Pl_y
+Plz = Lf*(-cl12*cl16*clabc + sl12*sl16) - Pl_z
+Plx = Lf*(-cl12*c8*sl16 + cl16*(-c8*clabc*sl12 + s8*slabc)) + Pl_x
 
 print("%f, \t%f"% ( Prx, Plx))
 print("%f, \t%f"% ( Pry, Ply))

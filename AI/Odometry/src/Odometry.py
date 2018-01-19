@@ -33,9 +33,9 @@ class Odometry:
 		self.Posy_i_R = 0
 		self.Posx_i_L = 0
 		self.Posy_i_L = 0
-		self.Posxy_abs = ([[], [], []])	#Posicao no referencial fixo.
+		self.Euler_i = 0
 		self.th =  sy.Symbol('self.th')	# simbolico para o angulo em torno do eixo Z
-		self.Posxy_abs = sy.zeros((3, 1))	#Pos. refer. fixo (abs)
+		self.Posxy_fix = sy.zeros((3, 1))	#Pos. refer. fixo (abs)
 		
 		self.MT_xy = sy.Matrix([[ sy.cos(self.th), sy.sin(self.th), 0],#Matriz rotacao ao redor de Z
 					   	    [-sy.sin(self.th), sy.cos(self.th), 0],#Transf. de ref. movel para ref.fixo
@@ -113,9 +113,9 @@ class Odometry:
 		Pr_y = (-(L4*s9+L5*sab)*c7-(L4*c9+L5*cab)*s7*s11) 
 		Pr_z = ((L4*c9+L5*cab)*c11) 
 
-		self.Pry = Lf*(c11*s15*s7 - c15*(-c7*sabc - cabc*s11*s7)) - Ltx - Pr_y
-		self.Prz = Lf*(-c11*c15*cabc + s11*s15) - Lty - Pr_z
-		self.Prx = Lf*(-c11*c7*s15 + c15*(-c7*cabc*s11 + s7*sabc)) + Ltz + Pr_x
+		self.Pry = Lf*(c11*s15*s7 - c15*(-c7*sabc - cabc*s11*s7)) - Pr_y
+		self.Prz = Lf*(-c11*c15*cabc + s11*s15) - Pr_z
+		self.Prx = Lf*(-c11*c7*s15 + c15*(-c7*cabc*s11 + s7*sabc)) + Pr_x
 
 ########Cinemática_Perna_Esquerda#######
 		
@@ -123,9 +123,9 @@ class Odometry:
 		Pl_y = (-(L4*s10+L5*slab)*c8-(L4*c10+L5*clab)*s8*sl12) 
 		Pl_z = ((L4*c10+L5*clab)*cl12) 
 
-		self.Ply = Lf*(cl12*sl16*s8 - cl16*(-c8*slabc - clabc*sl12*s8)) - Ltx - Pl_y
-		self.Plz = Lf*(-cl12*cl16*clabc + sl12*sl16) - Lty - Pl_z
-		self.Plx = Lf*(-cl12*c8*sl16 + cl16*(-c8*clabc*sl12 + s8*slabc)) + Ltz + Pl_x
+		self.Ply = Lf*(cl12*sl16*s8 - cl16*(-c8*slabc - clabc*sl12*s8)) - Pl_y
+		self.Plz = Lf*(-cl12*cl16*clabc + sl12*sl16) - Pl_z
+		self.Plx = Lf*(-cl12*c8*sl16 + cl16*(-c8*clabc*sl12 + s8*slabc)) + Pl_x
 
 ##################Calculo_de_Posição########################################################
 
@@ -144,6 +144,20 @@ class Odometry:
 			self.Posx_i_R = self.Prx
 			self.Posy_i_R = self.Pry
 			
+		if(self.IMU[0] > np.pi/2):
+			Euler_imu_z = np.pi - self.IMU[0] 
+		elif(self.IMU[0] < -np.pi/2):
+			Euler_imu_z = -np.pi - self.IMU[0] 
+		else:
+			Euler_imu_z = self.IMU[0]
+			
+		Vec = np.sqrt(self.posx**2+self.posy**2)	#Vetor posicao ref. movel
+		px = Vec*np.sin(Euler_imu_z)	#Desmembra o vetor em x
+		py = Vec*np.cos(Euler_imu_z)	#Desmembra o vetor em y
+		
+		self.Posxy_fix[0, 0] += px
+		self.Posxy_fix[1, 0] += py
+						
 		#self.MT_xy = sy.transpose(self.MT_xy.subs(self.th , self.IMU[0]))#Subs. val. Matriz transf. para ref. fixo	
 		#Posxy_r = sy.Matrix([[self.posx], [self.posy], [0]])#Matriz pos. ref. movel
 		#self.Posxy_abs = self.Posxy_abs+self.MT_xy*Posxy_r		#Transformando para pos. ref. fixo (pto 												inicial)
@@ -185,6 +199,7 @@ IMU = [	'IMU_EULER_Z']
 Odometry.Mot_Ini = []	
 for i in Motores:
 	Odometry.Mot_Ini.append(Odometry.bkb.read_int(Odometry.mem, i))
+	#Odometry.Mot_Ini.append(512)
 	
 ######Chamada dos calculos###########
 
