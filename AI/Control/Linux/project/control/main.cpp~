@@ -587,15 +587,15 @@ void Get_Servo_Pos(CM730 *cm730, int V[], int x, int m_Phase)
 {
     static int j=0;
     int Pos_Servo;
-//    for(int i=0; (i<Num_Motor && j<x); i++, j++) // Varrendo e escrevendo na blackboard a quantidade de motores especificadas pelo define Num_Motor 
-//    {
-//	cm730->ReadWord((j+7), MX28::P_PRESENT_POSITION_L, &Pos_Servo, 0); // Read the servo position. (i+7):Coinicidir com os respectivos ids
-//	write_int(mem, V[j], Pos_Servo); //Writing the servo position on the blackboard
-//    }
-//    if (j>(x-1))
-//    {
-//	j = 0;
-//    }
+    for(int i=0; (i<Num_Motor && j<x); i++, j++) // Varrendo e escrevendo na blackboard a quantidade de motores especificadas pelo define Num_Motor 
+    {
+	cm730->ReadWord((j+7), MX28::P_PRESENT_POSITION_L, &Pos_Servo, 0); // Read the servo position. (i+7):Coinicidir com os respectivos ids
+	write_int(mem, V[j], Pos_Servo); //Writing the servo position on the blackboard
+    }
+    if (j>(x-1))
+    {
+	j = 0;
+    }
     write_int(mem, WALK_PHASE, m_Phase);
 }
 

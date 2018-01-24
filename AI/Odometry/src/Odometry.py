@@ -34,8 +34,10 @@ class Odometry:
 		self.Posx_i_L = 0
 		self.Posy_i_L = 0
 		self.Euler_i = 0
+		self.Euler_imu_z =0
 		self.th =  sy.Symbol('self.th')	# simbolico para o angulo em torno do eixo Z
 		self.Posxy_fix = sy.zeros((3, 1))	#Pos. refer. fixo (abs)
+		self.Angulo = 0.0
 		
 		self.MT_xy = sy.Matrix([[ sy.cos(self.th), sy.sin(self.th), 0],#Matriz rotacao ao redor de Z
 					   	    [-sy.sin(self.th), sy.cos(self.th), 0],#Transf. de ref. movel para ref.fixo
@@ -52,7 +54,7 @@ class Odometry:
 		k = 0
 
 		for i in Item1:		#Lê os valores dos motores, convertendo para graus e adiciona no vetor MOT
-			self.Mot.append((-self.bkb.read_int(self.mem, i) + self.Mot_Ini[k])*0.0051232757)
+			self.Mot.append((self.bkb.read_int(self.mem, i) - self.Mot_Ini[k])*0.0051232757)
 			print self.bkb.read_int(self.mem, i), self.Mot_Ini[k], self.Mot[k]
 			k += 1
 
@@ -69,52 +71,57 @@ class Odometry:
 		Ltx = 0.50
 		Lty = 10.50
 		Ltz = 3.30
+		
+		#7, 15, 17
+		
 		s7 = np.sin(self.Mot[0])
 		s8 = np.sin(self.Mot[1])
-		s9 = np.sin(self.Mot[4])
+		s9 = np.sin(-self.Mot[4])
 		s10 = np.sin(self.Mot[5])
-		s11 = np.sin(self.Mot[2])
-		s12 = np.sin(self.Mot[3])
-		s13 = np.sin(self.Mot[6])
-		s14 = np.sin(self.Mot[7])
-		s15 = np.sin(self.Mot[10])
-		s16 = np.sin(self.Mot[11])
+		s11 = np.sin(-self.Mot[2])
+		sl12 = np.sin(-self.Mot[3])
+		s13 = np.sin(-self.Mot[6])
+		sl14 = np.sin(self.Mot[7])
+		s15 = np.sin(-self.Mot[10])
+		sl16 = np.sin(-self.Mot[11])
 		s17 = np.sin(self.Mot[8])
-		s18 = np.sin(self.Mot[9])
+		s18 = np.sin(-self.Mot[9])
 		c7 = np.cos(self.Mot[0])
 		c8 = np.cos(self.Mot[1])
-		c9 = np.cos(self.Mot[4])
+		c9 = np.cos(-self.Mot[4])
 		c10 = np.cos(self.Mot[5])
-		c11 = np.cos(self.Mot[2])
-		c12 = np.cos(self.Mot[3])
-		c13 = np.cos(self.Mot[6])
-		c14 = np.cos(self.Mot[7])
-		c15 = np.cos(self.Mot[10])
-		c16 = np.cos(self.Mot[11])
-		c17 = np.cos(self.Mot[8])
-		c18 = np.cos(self.Mot[9])
-		sabc = np.sin(self.Mot[4]+self.Mot[6]+self.Mot[8])
-		cabc = np.cos(self.Mot[4]+self.Mot[6]+self.Mot[8])
-		cab = np.cos(self.Mot[4]+self.Mot[6])
-		sab = np.sin(self.Mot[4]+self.Mot[6])
-		slabc = np.sin(self.Mot[5]-self.Mot[7]+self.Mot[9])
-		clabc = np.cos(self.Mot[5]-self.Mot[7]+self.Mot[9])
-		clab = np.cos(self.Mot[5]-self.Mot[7])
-		slab = np.sin(self.Mot[5]-self.Mot[7])
-		cl14 = np.cos(-self.Mot[7])
-		cl16 = np.cos(-self.Mot[11])
+		c11 = np.cos(-self.Mot[2])
 		cl12 = np.cos(-self.Mot[3])
-		sl14 = np.sin(-self.Mot[7])
-		sl16 = np.sin(-self.Mot[11])
-		sl12 = np.sin(-self.Mot[3])
+		c13 = np.cos(-self.Mot[6])
+		cl14 = np.cos(self.Mot[7])
+		c15 = np.cos(-self.Mot[10])
+		cl16 = np.cos(-self.Mot[11])
+		c17 = np.cos(self.Mot[8])
+		c18 = np.cos(-self.Mot[9])
+		sabc = np.sin(-self.Mot[4]-self.Mot[6]+self.Mot[8])
+		cabc = np.cos(-self.Mot[4]-self.Mot[6]+self.Mot[8])
+		cab = np.cos(-self.Mot[4]-self.Mot[6])
+		sab = np.sin(-self.Mot[4]-self.Mot[6])
+		slabc = np.sin(self.Mot[5]+self.Mot[7]-self.Mot[9])
+		clabc = np.cos(self.Mot[5]+self.Mot[7]-self.Mot[9])
+		clab = np.cos(self.Mot[5]+self.Mot[7])
+		slab = np.sin(self.Mot[5]+self.Mot[7])
 
 ########Cinemática_Perna_Direita#######
+
+		r11 = -((-c7*sabc-s7*s11*cabc)*c15-s7*c11*s15)
+		r21 = -(-s11*s15+c11*c15*cabc)
+		self.Rr = sy.atan2(r21, r11)
 
 		self.Prx = Lf*(c11*s15*s7 - c15*(-c7*sabc - cabc*s11*s7)) - (-(L4*s9+L5*sab)*c7 + (L4*c9+L5*cab)*s7*s11)
 		self.Prz = Lf*(-c11*c15*cabc + s11*s15) - Lty - c11*(L4*c9+L5*cab)
 		self.Pry = Lf*(-c11*c7*s15 + c15*(-c7*cabc*s11 + s7*sabc)) + ((L4*s9+L5*sab)*s7-(L4*c9+L5*cab)*c7*s11)
 
-########Cinemática_Perna_Esquerda#######
+########Cinemática_Perna_Esquerda#######		
+
+		l11 = -((-c8*slabc-s8*sl12*clabc)*cl16-s8*cl12*sl16)
+		l21 = -(-sl12*sl16+cl12*cl16*clabc)
+		self.Rl = sy.atan2(l21, l11)
 
 		self.Plx = Lf*(cl12*sl16*s8 - cl16*(-c8*slabc - clabc*sl12*s8)) - (-(L4*s10+L5*slab)*c8 + (L4*c10+L5*clab)*s8*sl12)
 		self.Plz = Lf*(-cl12*cl16*clabc + sl12*sl16) - Lty - cl12*(L4*c10+L5*clab)
@@ -125,39 +132,51 @@ class Odometry:
 	def Position_Calc(self):
 		if self.j%2: 	#Calculo de posição a partir do movimento da perna direita
 			print ("I = 2")
-			self.posx = self.posx + (self.Prx - self.Posx_i_R)	#I = 2
-			self.posy = self.posy + (self.Pry - self.Posy_i_R)
+#			self.posx = self.posx + (self.Prx - self.Posx_i_R)	#I = 2
+#			self.posy = self.posy + (self.Pry - self.Posy_i_R)
 			self.Posx_i_L = self.Plx
 			self.Posy_i_L = self.Ply
 			
+			POSX = (self.Prx - self.Posx_i_R)
+			POSY = (self.Pry - self.Posy_i_R)
+
+			self.Angulo = np.float32(self.Rr)
+			
+			
 		else: 	#Calculo de posição a partir do movimento da perna esquerda
 			print ("I = 0")
-			self.posx = self.posx + (self.Plx - self.Posx_i_L) 	#I = 0
-			self.posy = self.posy + (self.Ply - self.Posy_i_L)
+#			self.posx = self.posx + (self.Plx - self.Posx_i_L) 	#I = 0
+#			self.posy = self.posy + (self.Ply - self.Posy_i_L)
 			self.Posx_i_R = self.Prx
 			self.Posy_i_R = self.Pry
 			
-#		if(self.IMU[0] > np.pi/2):
-#			Euler_imu_z = np.pi - self.IMU[0] 
-#		elif(self.IMU[0] < -np.pi/2):
-#			Euler_imu_z = -np.pi - self.IMU[0] 
-#		else:
-#			Euler_imu_z = self.IMU[0]
-#			
-#		Vec = np.sqrt(self.posx**2+self.posy**2)	#Vetor posicao ref. movel
-#		px = Vec*np.sin(Euler_imu_z)	#Desmembra o vetor em x
-#		py = Vec*np.cos(Euler_imu_z)	#Desmembra o vetor em y
-#		
-#		self.Posxy_fix[0, 0] += px
-#		self.Posxy_fix[1, 0] += py
+			POSX = (self.Plx - self.Posx_i_L)
+			POSY = (self.Ply - self.Posy_i_L)
+			
+			self.Angulo = np.float32(self.Rl)
+
+#		px = Vec*np.sin(self.Euler_imu_z)	#Desmembra o vetor em x
+#		py = Vec*np.cos(self.Euler_imu_z)	#Desmembra o vetor em y
+		
+		if(self.IMU[0] > np.pi/2):
+			self.Euler_imu_z = np.pi - self.IMU[0] - self.Euler_imu_z
+		elif(self.IMU[0] < -np.pi/2):
+			self.Euler_imu_z = -np.pi - self.IMU[0] - self.Euler_imu_z
+		else:
+			self.Euler_imu_z = self.IMU[0] - self.Euler_imu_z
+		
+		self.Posxy_fix[0, 0] += POSX*np.cos(self.Euler_imu_z) - POSY*np.sin(self.Euler_imu_z)
+		self.Posxy_fix[1, 0] += POSX*np.sin(self.Euler_imu_z) + POSY*np.cos(self.Euler_imu_z)
+		self.posx = POSX*np.cos(self.Angulo) - POSY*np.sin(self.Angulo)
+		self.posy = POSX*np.sin(self.Angulo) + POSY*np.cos(self.Angulo)
 
 ##################Print_dos_valores########################################################
 
 	def Show_Position(self):
-		print ("\n%f, %f, %f"% (self.Prx, self.Pry, self.Prz))
-		print ("%f, %f, %f"% (self.Plx, self.Ply, self.Plz))
-		#print("posx = %f \t posy = %f" % (self.Posxy_fix[0, 0], self.Posxy_fix[1, 0]))	#Apresenta os valores valores calculados
-		print("posx = %f \t posy = %f" % (self.posx, self.posy))
+		print ("\n%f, %f, %f, %f, %f"% (self.Prx, self.Pry, self.Prz, self.Rr, self.Angulo))
+		print ("%f, %f, %f, %f, %f"% (self.Plx, self.Ply, self.Plz, self.Rl, self.IMU[0]))
+		print("posx = %f \t posy = %f" % (self.Posxy_fix[0, 0], self.Posxy_fix[1, 0]))	#Apresenta os valores valores calculados
+		print("posx = %f \t posy = %f\n\n" % (self.posx, self.posy))
 
 ###################Programa_principal#######################################################
 

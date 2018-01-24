@@ -446,28 +446,22 @@ void Walking::Process()
     }
     if(m_Phase == 0 && INTERT = 0)
     {
-	   G = 1
-    	   INTERT = 1
-    }
-    if(m_Phase == 2 && INTERT = 1)
-    {
-    		G = 1
-    	   INTERT = 0
-    }
-    if(G == 1)
-    {
-        	static int j=0;
+    		static int j=0;
     		int Pos_Servo;
 	    	for(int i=0; (i<12 && j<x); i++, j++) // Varrendo e escrevendo na blackboard a quantidade de motores especificadas pelo define Num_Motor 
 	    {
-			Motor[i] = cm730->ReadWord((j+7), MX28::P_PRESENT_POSITION_L, &Pos_Servo, 0); // Read the servo position. (i+7):Coinicidir com os respectivos ids
+			Motor[i]cm730->ReadWord((j+7), MX28::P_PRESENT_POSITION_L, &Pos_Servo, 0); // Read the servo position. (i+7):Coinicidir com os respectivos ids
 	    }
 	        if (j>(x-1))
 		   {
 			j = 0;
 		   }
-		   G = 0
-	}
+    	   INTERT = 1
+    }
+    if(m_Phase == 2 && INTERT = 1)
+    {
+    	   INTERT = 0
+    }
     update_param_balance();
 
     // Compute endpoints
