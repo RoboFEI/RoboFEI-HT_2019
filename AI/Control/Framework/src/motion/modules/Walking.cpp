@@ -26,7 +26,6 @@ Walking* Walking::m_UniqueInstance = new Walking();
 
 Walking::Walking()
 {
-	INTERT = 0
 
 	X_OFFSET_START = X_OFFSET = -15;
 	Y_OFFSET = 5;
@@ -408,7 +407,6 @@ void Walking::Process()
                 m_Real_Running = false;
             }
             else
-            {
                 X_MOVE_AMPLITUDE = 0;
                 Y_MOVE_AMPLITUDE = 0;
                 A_MOVE_AMPLITUDE = 0;
@@ -444,30 +442,6 @@ void Walking::Process()
         update_param_move();
         m_Phase = PHASE3;
     }
-    if(m_Phase == 0 && INTERT = 0)
-    {
-	   G = 1
-    	   INTERT = 1
-    }
-    if(m_Phase == 2 && INTERT = 1)
-    {
-    		G = 1
-    	   INTERT = 0
-    }
-    if(G == 1)
-    {
-        	static int j=0;
-    		int Pos_Servo;
-	    	for(int i=0; (i<12 && j<x); i++, j++) // Varrendo e escrevendo na blackboard a quantidade de motores especificadas pelo define Num_Motor 
-	    {
-			Motor[i] = cm730->ReadWord((j+7), MX28::P_PRESENT_POSITION_L, &Pos_Servo, 0); // Read the servo position. (i+7):Coinicidir com os respectivos ids
-	    }
-	        if (j>(x-1))
-		   {
-			j = 0;
-		   }
-		   G = 0
-	}
     update_param_balance();
 
     // Compute endpoints
@@ -687,6 +661,7 @@ void Walking::Process()
         m_Joint.SetIGain(id, I_GAIN);
         m_Joint.SetDGain(id, D_GAIN);
 	}
+	
 }
 
 double Walking::splineBalance(double angle, double vel, double gain)

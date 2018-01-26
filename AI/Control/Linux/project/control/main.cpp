@@ -236,22 +236,22 @@ int main(int argc, char **argv)
         buffer=0;
         while(1)
         {
-            m_Phase = Walking::GetInstance()->GetCurrentPhase(); 
-            if(m_Phase == 0 && Q == 0)
-            {
-            	P = 1;
-            	Q = 1;
-            }		
-            if(m_Phase == 2 && Q == 1)
-            {
-            	P = 1;
-            	Q = 0;
-            }	  
-        	  if((m_Phase == 0 || m_Phase == 2)&&(P == 1))
-    		  {
-		    	Get_Servo_Pos(&cm730, V, n, m_Phase);
-		    	P = 0;
-		  }
+//            m_Phase = Walking::GetInstance()->GetCurrentPhase(); 
+//            if(m_Phase == 0 && Q == 0)
+//            {
+//            	P = 1;
+//            	Q = 1;
+//            }		
+//            if(m_Phase == 2 && Q == 1)
+//            {
+//            	P = 1;
+//            	Q = 0;
+//            }	  
+//        	  if((m_Phase == 0 || m_Phase == 2)&&(P == 1))
+//    		  {
+//		    	Get_Servo_Pos(&cm730, V, n, m_Phase);
+//		    	P = 0;
+//		  }
             int key = kbhit();
             usleep(20*1000);
             //mantem o key com valor da tecla f ou k para realizar o soft_starter-----
@@ -395,22 +395,22 @@ int main(int argc, char **argv)
     logInit(); // save the time when start the control process
     while(1)
     {
-            m_Phase = Walking::GetInstance()->GetCurrentPhase(); 
-            if(m_Phase == 0 && Q == 0)
-            {
-            	P = 1;
-            	Q = 1;
-            }		
-            if(m_Phase == 2 && Q == 1)
-            {
-            	P = 1;
-            	Q = 0;
-            }	  
-        	  if((m_Phase == 0 || m_Phase == 2)&&(P == 1))
-    		  {
-		    	Get_Servo_Pos(&cm730, V, n, m_Phase);
-		    	P = 0;
-		  }
+//            m_Phase = Walking::GetInstance()->GetCurrentPhase(); 
+//            if(m_Phase == 0 && Q == 0)
+//            {
+//            	P = 1;
+//            	Q = 1;
+//            }		
+//            if(m_Phase == 2 && Q == 1)
+//            {
+//            	P = 1;
+//            	Q = 0;
+//            }	  
+//        	  if((m_Phase == 0 || m_Phase == 2)&&(P == 1))
+//    		  {
+//		    	Get_Servo_Pos(&cm730, V, n, m_Phase);
+//		    	P = 0;
+//		  }
             //Confere se o movimento atual e o mesmo do anterior----------
             if(buffer==read_int(mem, DECISION_ACTION_A))
                 same_moviment = true;
@@ -585,8 +585,26 @@ int Initialize_servo(char *string1)
 
 void Get_Servo_Pos(CM730 *cm730, int V[], int x, int m_Phase)
 {
-    static int j=0;
-    int Pos_Servo;
+//	static int j=0;
+//	int *Pos_servo; 
+//	Pos_servo = Walking::GetInstance()->MotPosition();
+//	std::cout<<*(Walking::GetInstance()->MotPosition())<<endl;
+//    	for(int i=0; (i<Num_Motor && j<x); i++, j++)  
+//    	{
+//		write_int(mem, V[j], *(Pos_servo+sizeof(int)*j));
+//		std::cout<<*(Pos_servo+i)<<endl;
+//		write_int(mem, WALK_PHASE, m_Phase);
+//    	}
+//    	if (j>(x-1))
+//    	{
+//		j = 0;
+//    	}
+}
+
+//void Get_Servo_Pos(CM730 *cm730, int V[], int x, int m_Phase)
+//{
+//    static int j=0;
+//    int Pos_Servo;
 //    for(int i=0; (i<Num_Motor && j<x); i++, j++) // Varrendo e escrevendo na blackboard a quantidade de motores especificadas pelo define Num_Motor 
 //    {
 //	cm730->ReadWord((j+7), MX28::P_PRESENT_POSITION_L, &Pos_Servo, 0); // Read the servo position. (i+7):Coinicidir com os respectivos ids
@@ -596,8 +614,8 @@ void Get_Servo_Pos(CM730 *cm730, int V[], int x, int m_Phase)
 //    {
 //	j = 0;
 //    }
-    write_int(mem, WALK_PHASE, m_Phase);
-}
+//    write_int(mem, WALK_PHASE, m_Phase);
+//}
 
 int check_servo(CM730 *cm730, int idServo, bool &stop_gait)
 {
