@@ -26,10 +26,6 @@
 
 using namespace Robot;
 
-int INTERT = 0;
-int Motor[12] = {0};
-int G =0;
-
 // Torque adaption every second
 const int TORQUE_ADAPTION_CYCLES = 1000 / MotionModule::TIME_UNIT;
 const int DEST_TORQUE = 1023;
@@ -326,33 +322,6 @@ void MotionManager::Process()
         m_torqueAdaptionCounter = TORQUE_ADAPTION_CYCLES;
         adaptTorqueToVoltage();
     }
-    
-///////////// Leitura dos motores para a Odometria///////////////
-
-    int m_Phase = Walking::GetInstance()->GetCurrentPhase();
-    if(m_Phase == 0 && INTERT == 0)
-    {
-	   G = 1;
-    	   INTERT = 1;
-    }
-    if(m_Phase == 2 && INTERT == 1)
-    {
-    		G = 1;
-    	   	INTERT = 0;
-    }
-    if(G == 1)
-    {
-	    	for(int i=0; i<12; i++) 
-	    	{
-	    		printf("Entrou\n");
-			cm730->ReadWord((i+7), MX28::P_PRESENT_POSITION_L, &Pos_Servo, 0); // Read the servo position. (i+7):Coinicidir com os respectivos ids
-			write_int(mem, V[j], Pos_Servo);
-			write_int(mem, WALK_PHASE, m_Phase);
-	    	}
-		G = 0;
-	}
-	
-////////////////////////////////////////////////////////////////
 }
 
 void MotionManager::SetEnable(bool enable)
