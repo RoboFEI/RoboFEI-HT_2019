@@ -12,7 +12,7 @@
 
 # ---- Imports ----
 
-# Libraries to be used.
+# Libraries to be used
 import time
 import sys
 import os
