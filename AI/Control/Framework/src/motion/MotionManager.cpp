@@ -9,7 +9,7 @@
 * @e-mail isaac25silva@yahoo.com.br
 * @brief MotionManager 😛
 ****************************************************************************
-**************************************************************************** 
+****************************************************************************
 ---------------------------------------------------------------------------*/
 
 #include <stdio.h>
@@ -17,6 +17,7 @@
 #include "FSR.h"
 #include "MX28.h"
 #include "MotionManager.h"
+#include "Walking.h"
 #include <unistd.h>
 #include <assert.h>
 #include <stdlib.h>
@@ -29,6 +30,20 @@ using namespace Robot;
 // Torque adaption every second
 const int TORQUE_ADAPTION_CYCLES = 1000 / MotionModule::TIME_UNIT;
 const int DEST_TORQUE = 1023;
+
+int V[] = {		// Atribuindo para cada valor do vetor a variável correspondente na blackboard
+Motor_Read_7,
+Motor_Read_8,
+Motor_Read_9,
+Motor_Read_10,
+Motor_Read_11,
+Motor_Read_12,
+Motor_Read_13,
+Motor_Read_14,
+Motor_Read_15,
+Motor_Read_16,
+Motor_Read_17,
+Motor_Read_18};
 
 //#define LOG_VOLTAGES 1
 
@@ -78,7 +93,7 @@ bool MotionManager::Initialize(CM730 *cm730, bool fadeIn)
 	{
 		if(DEBUG_PRINT == true)
 			fprintf(stderr, "ID:%d initializing...", id);
-		
+
 		if(m_CM730->ReadWord(id, MX28::P_PRESENT_POSITION_L, &value, &error) == CM730::SUCCESS)
 		{
 			MotionStatus::m_CurrentJoints.SetValue(id, value);
@@ -123,7 +138,7 @@ bool MotionManager::Reinitialize()
 	{
 		if(DEBUG_PRINT == true)
 			fprintf(stderr, "ID:%d initializing...", id);
-		
+
 		if(m_CM730->ReadWord(id, MX28::P_PRESENT_POSITION_L, &value, &error) == CM730::SUCCESS)
 		{
 			MotionStatus::m_CurrentJoints.SetValue(id, value);
@@ -214,6 +229,36 @@ void MotionManager::SaveINISettings(minIni* ini, const std::string &section)
 void MotionManager::Process()
 {
 	//printf("entrou\n");
+
+  ////////////////////Atualização dos motores para odometria///////////////
+    int *Pos_Servo;
+    static int m_Phase = 0;
+    static int Q = 0;
+    static int P = 0;
+
+    m_Phase = Walking::GetInstance()->GetCurrentPhase();
+    if(m_Phase == 0 && Q == 0)
+    {
+      P = 1;
+      Q = 1;
+    }
+    if(m_Phase == 2 && Q == 1)
+    {
+      P = 1;
+      Q = 0;
+    }
+    if((m_Phase == 0 || m_Phase == 2)&&(P == 1))
+    {
+        int Pos_Servo;
+        for(int i=0; i<12; i++) // Varrendo e escrevendo na blackboard a quantidade de motores especificadas pelo define Num_Motor
+        {
+          m_CM730->ReadWord((i+7), MX28::P_PRESENT_POSITION_L, &Pos_Servo, 0); // Read the servo position. (i+7):Coinicidir com os respectivos ids
+          write_int(mem, V[i], Pos_Servo); //Writing the servo position on the blackboard
+        }
+        write_int(mem, WALK_PHASE, m_Phase);
+        P = 0;
+    }
+
     if(m_fadeIn && m_torque_count < DEST_TORQUE) {
         m_CM730->WriteWord(CM730::ID_BROADCAST, MX28::P_TORQUE_LIMIT_L, m_torque_count, 0);
         m_torque_count += 2;
@@ -221,7 +266,7 @@ void MotionManager::Process()
 
     if(m_ProcessEnable == false || m_IsRunning == true)
         return;
-		
+
 		m_IsRunning = true;
 
 
@@ -313,7 +358,7 @@ void MotionManager::Process()
 	m_CM730->SyncWrite(MX28::P_CW_COMPLIANCE_SLOPE, MX28::PARAM_BYTES, joint_num, param);
 
 	}
-		
+
 
     m_IsRunning = false;
 

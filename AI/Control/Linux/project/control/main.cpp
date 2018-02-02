@@ -9,7 +9,7 @@
 * @e-mail isaac25silva@yahoo.com.br
 * @brief control 😛
 ****************************************************************************
-**************************************************************************** 
+****************************************************************************
 Arquivo fonte contendo o programa que controla os servos do corpo do robô
 ---------------------------------------------------------------------------*/
 
@@ -47,8 +47,6 @@ Arquivo fonte contendo o programa que controla os servos do corpo do robô
 
 #define LIMITE_TEMP 80    // Define a temperatura maxima dos motores
 
-#define Num_Motor 12 	// Numero de motores a serem escritos na blackboard por varredura 
-
 using namespace Robot;
 using namespace std;
 
@@ -57,8 +55,6 @@ int kbhit(); //Function kbhit.cpp
 int check_servo(CM730 *cm730, int idServo, bool &stop_gait);
 
 int Initialize_servo(char *string1);
-
-void Get_Servo_Pos(CM730 *cm730, int V[], int x, int m_Phase);
 
 void logInit();
 
@@ -72,7 +68,7 @@ void change_current_dir()
 void sighandler(int sig)
 {
     cout<< "\nProgram being closed!" << endl;
-    exit(1); 
+    exit(1);
 }
 
 int main(int argc, char **argv)
@@ -102,7 +98,6 @@ int main(int argc, char **argv)
     unsigned int buffer = 10000;
     unsigned int count_read=0;
     unsigned int step_time=20; // Determina a frequencia de leitura do blackboard
-    int m_Phase = 0;
     int Q = 0;
     int P = 0;
 
@@ -123,28 +118,11 @@ int main(int argc, char **argv)
     ("t", "Verifica a temperatura dos servos do corpo")
     ("g", "Inicia o controle para usar com a interface grafica")
     ;
-  
+
     po::variables_map variables;
     po::store(po::parse_command_line(argc, argv, desc), variables);
-    po::notify(variables); 
+    po::notify(variables);
     //--------------------------------------------------------------------------
-
-    //======================== Set motor`s variables on blackboard ====================    
- 
-    int n = 12; 		// Número de motores que serão escritos na blackboard	
-    int V[] = {		// Atribuindo para cada valor do vetor a variável correspondente na blackboard
-		Motor_Read_7, 
-		Motor_Read_8, 
-		Motor_Read_9, 
-		Motor_Read_10, 
-		Motor_Read_11,
-		Motor_Read_12, 
-		Motor_Read_13, 
-		Motor_Read_14,
-		Motor_Read_15,
-		Motor_Read_16,
-		Motor_Read_17,
-		Motor_Read_18};
 
     //////////////////// Framework Initialize ////////////////////////////
     // ---- Open USBDynamixel -----------------------------------------------{
@@ -158,9 +136,9 @@ int main(int argc, char **argv)
         return 0;
     }
     MotionManager::GetInstance()->memBB = mem;
-    //================================================================================== 
+    //==================================================================================
 
-    //======================== check voltage ===========================================     
+    //======================== check voltage ===========================================
     if (variables.count("v")) //verifica se foi chamado o argumento de controle pelo teclado
     {
         if(cm730.ReadByte(12, MX28::P_PRESENT_VOLTAGE, &value, 0) != CM730::SUCCESS)
@@ -168,9 +146,9 @@ int main(int argc, char **argv)
         std::cout<<"Tensao = "<<float(value)/10<<"V"<<std::endl;
         return 0;
     }
-    //================================================================================== 
-    
-    //======================== check temperature =======================================     
+    //==================================================================================
+
+    //======================== check temperature =======================================
     if (variables.count("t")) //verifica se foi chamado o argumento de controle pelo teclado
     {
         for(int id = 0; id < JointData::NUMBER_OF_JOINTS-2; id++)
@@ -181,7 +159,7 @@ int main(int argc, char **argv)
         }
         return 0;
     }
-    //================================================================================== 
+    //==================================================================================
 
 //    MotionManager::GetInstance()->LoadINISettings(ini);
 
@@ -194,7 +172,7 @@ int main(int argc, char **argv)
     //**************************************************************************
 
 //    MotionManager::GetInstance()->LoadINISettings(ini);
-//    Walking::GetInstance()->LoadINISettings(ini); 
+//    Walking::GetInstance()->LoadINISettings(ini);
 //    MotionManager::GetInstance()->AddModule((MotionModule*)Action::GetInstance());
 //    MotionManager::GetInstance()->AddModule((MotionModule*)Walking::GetInstance());
     LinuxMotionTimer linuxMotionTimer;
@@ -236,22 +214,6 @@ int main(int argc, char **argv)
         buffer=0;
         while(1)
         {
-            m_Phase = Walking::GetInstance()->GetCurrentPhase(); 
-            if(m_Phase == 0 && Q == 0)
-            {
-            	P = 1;
-            	Q = 1;
-            }		
-            if(m_Phase == 2 && Q == 1)
-            {
-            	P = 1;
-            	Q = 0;
-            }	  
-        	  if((m_Phase == 0 || m_Phase == 2)&&(P == 1))
-    		  {
-		    	Get_Servo_Pos(&cm730, V, n, m_Phase);
-		    	P = 0;
-		  }
             int key = kbhit();
             usleep(20*1000);
             //mantem o key com valor da tecla f ou k para realizar o soft_starter-----
@@ -270,7 +232,7 @@ int main(int argc, char **argv)
 	    }
             //-------------------------------------------------------------------------
 
-           
+
 
             switch(key)
             {
@@ -281,7 +243,7 @@ int main(int argc, char **argv)
                 case 98: //b
                     actionMove.standupBack(stop_gait);
                 break;
-                
+
                 case 112: //p
                     actionMove.kick_right_strong(&cm730, stop_gait);
                 break;
@@ -365,7 +327,7 @@ int main(int argc, char **argv)
                 case 122: //z
                     actionMove.goodBye(stop_gait);
                  break;
-                
+
                 case 120: //z
                     gaitMove.walk_foward_fast_direct(stop_gait, same_moviment);
                 break;
@@ -395,22 +357,6 @@ int main(int argc, char **argv)
     logInit(); // save the time when start the control process
     while(1)
     {
-            m_Phase = Walking::GetInstance()->GetCurrentPhase(); 
-            if(m_Phase == 0 && Q == 0)
-            {
-            	P = 1;
-            	Q = 1;
-            }		
-            if(m_Phase == 2 && Q == 1)
-            {
-            	P = 1;
-            	Q = 0;
-            }	  
-        	  if((m_Phase == 0 || m_Phase == 2)&&(P == 1))
-    		  {
-		    	Get_Servo_Pos(&cm730, V, n, m_Phase);
-		    	P = 0;
-		  }
 //            Confere se o movimento atual e o mesmo do anterior----------
             if(buffer==read_int(mem, DECISION_ACTION_A))
                 same_moviment = true;
@@ -575,28 +521,12 @@ int Initialize_servo(char *string1)
 		    }
 			usleep(1000);
 		}
-           
+
     }
     printf("\e[0;31mConectou-se a placa USB/RS-485 mas não conseguiu se comunicar com nenhum servo.\e[0m\n");
     std::cout<<"Endereço: "<<"/dev/robot/body"<<std::endl;
     std::cout<<"\e[0;36mVerifique se a chave que liga os servos motores está na posição ligada.\n\n\e[0m"<<std::endl;
     return 1;
-}
-
-void Get_Servo_Pos(CM730 *cm730, int V[], int x, int m_Phase)
-{
-    static int j=0;
-    int Pos_Servo;
-    for(int i=0; (i<Num_Motor && j<x); i++, j++) // Varrendo e escrevendo na blackboard a quantidade de motores especificadas pelo define Num_Motor 
-    {
-	cm730->ReadWord((j+7), MX28::P_PRESENT_POSITION_L, &Pos_Servo, 0); // Read the servo position. (i+7):Coinicidir com os respectivos ids
-	write_int(mem, V[j], Pos_Servo); //Writing the servo position on the blackboard
-    }
-    if (j>(x-1))
-    {
-	j = 0;
-    }
-    write_int(mem, WALK_PHASE, m_Phase);
 }
 
 int check_servo(CM730 *cm730, int idServo, bool &stop_gait)
@@ -627,7 +557,7 @@ int check_servo(CM730 *cm730, int idServo, bool &stop_gait)
                 usleep(500000);
                 return 0;
             }
-            
+
             if(save>=LIMITE_TEMP)
             {
                 cout<<"Motor "<<i<<" aqueceu a " << save << ", motor desligado - Membro superior"<<endl;
@@ -657,7 +587,7 @@ int check_servo(CM730 *cm730, int idServo, bool &stop_gait)
                 usleep(500000);
                 return 0;
             }
-            
+
             if(save>=LIMITE_TEMP)
             {
                 cout<<"Motor "<<i<<" aqueceu a " << save << ", motor desligado - Membro inferior"<<endl;
@@ -692,9 +622,3 @@ void logInit()
         else
 	    printf("Erro ao Salvar o arquivo\n");
 }
-
-
-
-
-
-

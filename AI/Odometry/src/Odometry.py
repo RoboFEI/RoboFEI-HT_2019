@@ -28,21 +28,22 @@ class Odometry:
 
 		self.posx = 0
 		self.posy = 0
+		self.G = 0
+		self.Ang_Inic = 0
 		self.j = 0		#Se j for par, a perna direita está em movimento, se for ímpar, a perna esquerda está em movimento
 		self.Posx_i_R = 0
 		self.Posy_i_R = 0
 		self.Posx_i_L = 0
 		self.Posy_i_L = 0
-		self.Euler_i = 0
 		self.Euler_imu_z =0
 		self.th =  sy.Symbol('self.th')	# simbolico para o angulo em torno do eixo Z
-		self.Posxy_fix = sy.zeros((3, 1))	#Pos. refer. fixo (abs)
+		self.Posxy_fix = sy.Matrix([[0], [0], [0]])	#Pos. refer. fixo (abs)
 		self.Angulo = 0.0
-		
+
 		self.MT_xy = sy.Matrix([[ sy.cos(self.th), sy.sin(self.th), 0],#Matriz rotacao ao redor de Z
 					   	    [-sy.sin(self.th), sy.cos(self.th), 0],#Transf. de ref. movel para ref.fixo
 					   	    [  0             ,       0        , 1]])
-		 
+
 
 
 ##################Leitura dos valores da IMU###############################################
@@ -71,9 +72,7 @@ class Odometry:
 		Ltx = 0.50
 		Lty = 10.50
 		Ltz = 3.30
-		
-		#7, 15, 17
-		
+
 		s7 = np.sin(self.Mot[0])
 		s8 = np.sin(self.Mot[1])
 		s9 = np.sin(-self.Mot[4])
@@ -82,8 +81,8 @@ class Odometry:
 		sl12 = np.sin(-self.Mot[3])
 		s13 = np.sin(-self.Mot[6])
 		sl14 = np.sin(self.Mot[7])
-		s15 = np.sin(-self.Mot[10])
-		sl16 = np.sin(-self.Mot[11])
+		s15 = np.sin(self.Mot[10])	#Verificar se os motores 17 e 18 estão corretos em variação
+		sl16 = np.sin(self.Mot[11])	#se var + vai para lado -
 		s17 = np.sin(self.Mot[8])
 		s18 = np.sin(-self.Mot[9])
 		c7 = np.cos(self.Mot[0])
@@ -94,8 +93,8 @@ class Odometry:
 		cl12 = np.cos(-self.Mot[3])
 		c13 = np.cos(-self.Mot[6])
 		cl14 = np.cos(self.Mot[7])
-		c15 = np.cos(-self.Mot[10])
-		cl16 = np.cos(-self.Mot[11])
+		c15 = np.cos(self.Mot[10])
+		cl16 = np.cos(self.Mot[11])
 		c17 = np.cos(self.Mot[8])
 		c18 = np.cos(-self.Mot[9])
 		sabc = np.sin(-self.Mot[4]-self.Mot[6]+self.Mot[8])
@@ -117,7 +116,7 @@ class Odometry:
 		self.Prz = Lf*(-c11*c15*cabc + s11*s15) - Lty - c11*(L4*c9+L5*cab)
 		self.Pry = Lf*(-c11*c7*s15 + c15*(-c7*cabc*s11 + s7*sabc)) + ((L4*s9+L5*sab)*s7-(L4*c9+L5*cab)*c7*s11)
 
-########Cinemática_Perna_Esquerda#######		
+########Cinemática_Perna_Esquerda#######
 
 		l11 = -((-c8*slabc-s8*sl12*clabc)*cl16-s8*cl12*sl16)
 		l21 = -(-sl12*sl16+cl12*cl16*clabc)
@@ -131,52 +130,48 @@ class Odometry:
 
 	def Position_Calc(self):
 		if self.j%2: 	#Calculo de posição a partir do movimento da perna direita
-			print ("I = 2")
-#			self.posx = self.posx + (self.Prx - self.Posx_i_R)	#I = 2
-#			self.posy = self.posy + (self.Pry - self.Posy_i_R)
+			print ("I = 0")
 			self.Posx_i_L = self.Plx
 			self.Posy_i_L = self.Ply
-			
-			POSX = (self.Prx - self.Posx_i_R)
-			POSY = (self.Pry - self.Posy_i_R)
 
-			self.Angulo = np.float32(self.Rr)
-			
-			
+			POSX = (-self.Prx + self.Posx_i_R)
+			POSY = (-self.Pry + self.Posy_i_R)
+
+			if self.G == 0:	#Angulo inicial
+				self.Ang_Inic = np.float32(self.Rr)
+			self.G = 1
+
+			self.Angulo += (np.float32(self.Rr) - self.Ang_Inic)
+
 		else: 	#Calculo de posição a partir do movimento da perna esquerda
-			print ("I = 0")
-#			self.posx = self.posx + (self.Plx - self.Posx_i_L) 	#I = 0
-#			self.posy = self.posy + (self.Ply - self.Posy_i_L)
+			print ("I = 2")
 			self.Posx_i_R = self.Prx
 			self.Posy_i_R = self.Pry
-			
-			POSX = (self.Plx - self.Posx_i_L)
-			POSY = (self.Ply - self.Posy_i_L)
-			
-			self.Angulo = np.float32(self.Rl)
 
-#		px = Vec*np.sin(self.Euler_imu_z)	#Desmembra o vetor em x
-#		py = Vec*np.cos(self.Euler_imu_z)	#Desmembra o vetor em y
-		
-		if(self.IMU[0] > np.pi/2):
-			self.Euler_imu_z = np.pi - self.IMU[0] - self.Euler_imu_z
-		elif(self.IMU[0] < -np.pi/2):
-			self.Euler_imu_z = -np.pi - self.IMU[0] - self.Euler_imu_z
-		else:
-			self.Euler_imu_z = self.IMU[0] - self.Euler_imu_z
-		
-		self.Posxy_fix[0, 0] += POSX*np.cos(self.Euler_imu_z) - POSY*np.sin(self.Euler_imu_z)
-		self.Posxy_fix[1, 0] += POSX*np.sin(self.Euler_imu_z) + POSY*np.cos(self.Euler_imu_z)
+			POSX = (-self.Plx + self.Posx_i_L)
+			POSY = (-self.Ply + self.Posy_i_L)
+
+			self.Angulo += (np.float32(self.Rr) - self.Ang_Inic)
+
+		# if(self.IMU[0] > np.pi/2):
+		# 	self.Euler_imu_z = np.pi - self.IMU[0] - self.Euler_imu_z
+		# elif(self.IMU[0] < -np.pi/2):
+		# 	self.Euler_imu_z = -np.pi - self.IMU[0] - self.Euler_imu_z
+		# else:
+		# 	self.Euler_imu_z = self.IMU[0] - self.Euler_imu_z
+
+		self.Posxy_fix[0, 0] += POSX*np.cos(self.IMU[0]) + POSY*np.sin(self.IMU[0])
+		self.Posxy_fix[1, 0] += POSX*np.sin(self.IMU[0]) - POSY*np.cos(self.IMU[0])
 		self.posx = POSX*np.cos(self.Angulo) - POSY*np.sin(self.Angulo)
 		self.posy = POSX*np.sin(self.Angulo) + POSY*np.cos(self.Angulo)
 
 ##################Print_dos_valores########################################################
 
-	def Show_Position(self):
-		print ("\n%f, %f, %f, %f, %f"% (self.Prx, self.Pry, self.Prz, self.Rr, self.Angulo))
-		print ("%f, %f, %f, %f, %f"% (self.Plx, self.Ply, self.Plz, self.Rl, self.IMU[0]))
-		print("posx = %f \t posy = %f" % (self.Posxy_fix[0, 0], self.Posxy_fix[1, 0]))	#Apresenta os valores valores calculados
-		print("posx = %f \t posy = %f\n\n" % (self.posx, self.posy))
+	def Show_Position(self): #Apresentação dos valores calculados
+		print ("\n%f, %f, %f, %f"% (self.Prx, self.Pry, self.Prz, self.Rr))
+		print ("%f, %f, %f, %f"% (self.Plx, self.Ply, self.Plz, self.Rl))
+		print("posx = %f \t posy = %f \t Ang_Imu = %f" % (self.Posxy_fix[0, 0], self.Posxy_fix[1, 0], self.IMU[0]))
+		print("posx = %f \t posy = %f \t Ang_Mot = %f\n\n" % (self.posx, self.posy, self.Angulo))
 
 ###################Programa_principal#######################################################
 
@@ -200,22 +195,22 @@ Motores = ['Motor_Read_7',  #0
 IMU = [	'IMU_EULER_Z']
 
 #######verificacao de erro inicial da posicao dos motores###
-Odometry.Mot_Ini = []	
+Odometry.Mot_Ini = []
 for i in Motores:
 	Odometry.Mot_Ini.append(Odometry.bkb.read_int(Odometry.mem, i))
 	#Odometry.Mot_Ini.append(512)
-	
+
 ######Chamada dos calculos###########
 
 while(1):
 	RC = Odometry.bkb.read_int(Odometry.mem, 'IMU_STATE') #0: Robo em pe, 1: Robo caido
-	I = Odometry.bkb.read_int(Odometry.mem, 'WALK_PHASE')	
+	I = Odometry.bkb.read_int(Odometry.mem, 'WALK_PHASE')
 	if (I, k ) == (2, 0):	#Pe esquerdo em contato com o chao
-		Odometry.j = 1
+		Odometry.j = 0
 		k = 1
 		x = 1		#So executara o
-	if (I, k ) == (0, 1):	#Pe direito em contato com o chao 
-		Odometry.j = 0
+	if (I, k ) == (0, 1):	#Pe direito em contato com o chao
+		Odometry.j = 1
 		k = 0
 		x = 1
 	if (x, RC) == (1, 0):	#Execuao 1 vez por passo se o robo estiver em pe
@@ -224,5 +219,3 @@ while(1):
 		Odometry.Position_Calc()  #Calcula a posição do robô a pela variação da cinemática
 		Odometry.Show_Position()
 		x = 0
- 
- 
