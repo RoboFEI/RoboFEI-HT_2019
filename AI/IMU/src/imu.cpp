@@ -269,7 +269,7 @@ int main(int argc, char **argv)
     write_int(mem, IMU_RESET, 0);
 
   // Load parameters from private node handle.
-  std::string port("/dev/robot/imu");
+  std::string port("/dev/robot/servo0");
   int32_t baud = 115200;
 
   serial::Serial ser;

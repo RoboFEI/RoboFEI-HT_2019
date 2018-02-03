@@ -1,4 +1,5 @@
 import numpy as np
+import sympy as sy
 import time
 L4 = 9.30	#[cm]
 L5 = 9.30
@@ -16,8 +17,8 @@ Ltz = 3.30
 #tornozeloPitch -> Drobrar_P_Cima (+) ->	(-)
 #tornozeloRoll -> Abrir (-) ->	(-)
 
-Mot = [(0), (0), (0), (0), (0), (np.pi/2)]
-#Mot = [((576 - 577)*0.0051232757), ((451 - 445)*0.0051232757), ((418 - 571)*0.0051232757), ((693 - 423)*0.0051232757), ((605 - 454)*0.0051232757), ((512 - 531)*0.0051232757)]
+#Mot = [(0), (0), (0), (0), (0), (0)]
+Mot = [(0), ((437 - 413)*0.0051232757), ((459 - 536)*0.0051232757), ((699 - 435)*0.0051232757), ((620 - 660)*0.0051232757), ((524 - 531)*0.0051232757)]
 
 s7 = np.sin(Mot[0])
 s8 = np.sin(Mot[0])
@@ -92,20 +93,22 @@ sl12 = np.sin(-Mot[1])
 #clab = np.cos(Mot[2]+Mot[3])
 #slab = np.sin(Mot[2]+Mot[3])
 
-r33 = -c11*sabc
+r11 = c11*s15*s7 - c15*(-c7*sabc - cabc*s11*s7)
+r21 = c11*c15*s7 - s15*(c7*sabc + cabc*s11*s7)
+Rr = sy.atan2(r21, r11)
 
-Prx = Lf*(c11*s15*s7 - c15*(-c7*sabc - cabc*s11*s7)) - (-(L4*s9+L5*sab)*c7 + (L4*c9+L5*cab)*s7*s11)
+Prx = Lf*(c11*s15*s7 - c15*(-c7*sabc - cabc*s11*s7)) + Ltx - (-(L4*s9+L5*sab)*c7 + (L4*c9+L5*cab)*s7*s11)
 Prz = Lf*(-c11*c15*cabc + s11*s15) - Lty - c11*(L4*c9+L5*cab)
 Pry = Lf*(-c11*c7*s15 + c15*(-c7*cabc*s11 + s7*sabc)) + ((L4*s9+L5*sab)*s7-(L4*c9+L5*cab)*c7*s11)
 
 
-Plx = Lf*(cl12*sl16*s8 - cl16*(-c8*slabc - clabc*sl12*s8)) - (-(L4*s10+L5*slab)*c8 + (L4*c10+L5*clab)*s8*sl12)
+Plx = Lf*(cl12*sl16*s8 - cl16*(-c8*slabc - clabc*sl12*s8)) + Ltx - (-(L4*s10+L5*slab)*c8 + (L4*c10+L5*clab)*s8*sl12)
 Plz = Lf*(-cl12*cl16*clabc + sl12*sl16) - Lty - cl12*(L4*c10+L5*clab)
 Ply = Lf*(-cl12*c8*sl16 + cl16*(-c8*clabc*sl12 + s8*slabc)) + ((L4*s10+L5*slab)*s8-(L4*c10+L5*clab)*c8*sl12)
 
-print("%f, \t%f"% ( Prx, Plx))
-print("%f, \t%f"% ( Pry, Ply))
-print("%f, \t%f, \t%f"% ( Prz, Plz, r33))
+print("%f, \t%f, \t%f"% ( Prx, Plx, r11))
+print("%f, \t%f, \t%f"% ( Pry, Ply, r21))
+print("%f, \t%f, \t%f"% ( Prz, Plz, Rr))
 
 
 # [[c11*s15*s7 - c15*(-c7*sabc - cabc*s11*s7)

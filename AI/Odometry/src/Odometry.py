@@ -5,6 +5,7 @@ import sys
 import numpy as np
 import sympy as sy
 import time
+import math
 sys.path.append('../../Blackboard/src/')	#adicionando caminho para programa em outro diretório
 from SharedMemory import SharedMemory		#Importa a classe do arquivo SharedMemory
 from ConfigParser import ConfigParser		#Importando a classe ConfigParser
@@ -108,62 +109,66 @@ class Odometry:
 
 ########Cinemática_Perna_Direita#######
 
-		r11 = -((-c7*sabc-s7*s11*cabc)*c15-s7*c11*s15)
-		r21 = -(-s11*s15+c11*c15*cabc)
+		r11 = c11*s15*s7 - c15*(-c7*sabc - cabc*s11*s7)
+		r21 = c11*c15*s7 - s15*(c7*sabc + cabc*s11*s7)
 		self.Rr = sy.atan2(r21, r11)
+		
+		if math.isnan(self.Rr):
+			self.Rr = 0
 
-		self.Prx = Lf*(c11*s15*s7 - c15*(-c7*sabc - cabc*s11*s7)) - (-(L4*s9+L5*sab)*c7 + (L4*c9+L5*cab)*s7*s11)
+		self.Prx = Lf*(c11*s15*s7 - c15*(-c7*sabc - cabc*s11*s7)) + Ltx - (-(L4*s9+L5*sab)*c7 + (L4*c9+L5*cab)*s7*s11)
 		self.Prz = Lf*(-c11*c15*cabc + s11*s15) - Lty - c11*(L4*c9+L5*cab)
-		self.Pry = Lf*(-c11*c7*s15 + c15*(-c7*cabc*s11 + s7*sabc)) + ((L4*s9+L5*sab)*s7-(L4*c9+L5*cab)*c7*s11)
+		self.Pry = Lf*(-c11*c7*s15 + c15*(-c7*cabc*s11 + s7*sabc)) + Ltz + ((L4*s9+L5*sab)*s7-(L4*c9+L5*cab)*c7*s11)
 
 ########Cinemática_Perna_Esquerda#######
 
-		l11 = -((-c8*slabc-s8*sl12*clabc)*cl16-s8*cl12*sl16)
-		l21 = -(-sl12*sl16+cl12*cl16*clabc)
+		l11 = cl12*sl16*s8 - cl16*(-c8*slabc - clabc*sl12*s8)
+		l21 = cl12*cl16*s8 - sl16*(c8*slabc + clabc*sl12*s8)
 		self.Rl = sy.atan2(l21, l11)
+		
+		if math.isnan(self.Rl):
+			self.Rl = 0		
 
-		self.Plx = Lf*(cl12*sl16*s8 - cl16*(-c8*slabc - clabc*sl12*s8)) - (-(L4*s10+L5*slab)*c8 + (L4*c10+L5*clab)*s8*sl12)
+		self.Plx = Lf*(cl12*sl16*s8 - cl16*(-c8*slabc - clabc*sl12*s8)) + Ltx - (-(L4*s10+L5*slab)*c8 + (L4*c10+L5*clab)*s8*sl12)
 		self.Plz = Lf*(-cl12*cl16*clabc + sl12*sl16) - Lty - cl12*(L4*c10+L5*clab)
-		self.Ply = Lf*(-cl12*c8*sl16 + cl16*(-c8*clabc*sl12 + s8*slabc)) + ((L4*s10+L5*slab)*s8-(L4*c10+L5*clab)*c8*sl12)
+		self.Ply = Lf*(-cl12*c8*sl16 + cl16*(-c8*clabc*sl12 + s8*slabc)) - Ltz + ((L4*s10+L5*slab)*s8-(L4*c10+L5*clab)*c8*sl12)
 
 ##################Calculo_de_Posição########################################################
 
 	def Position_Calc(self):
+		inic = 0
+		
 		if self.j%2: 	#Calculo de posição a partir do movimento da perna direita
 			print ("I = 0")
 			self.Posx_i_L = self.Plx
 			self.Posy_i_L = self.Ply
 
-			POSX = (-self.Prx + self.Posx_i_R)
-			POSY = (-self.Pry + self.Posy_i_R)
-
-			if self.G == 0:	#Angulo inicial
-				self.Ang_Inic = np.float32(self.Rr)
-			self.G = 1
+			POSX = (-self.Prx + self.Posx_i_R) - 0.5
+			POSY = (-self.Pry + self.Posy_i_R)			
 
 			self.Angulo += (np.float32(self.Rr) - self.Ang_Inic)
 
 		else: 	#Calculo de posição a partir do movimento da perna esquerda
 			print ("I = 2")
+			
+			if self.G == 0:	#Angulo inicial
+				self.Ang_Inic = np.float32(self.Rr)
+				if self.Plx < -5:
+					inic = self.Plx
+				self.G = 1
+				
 			self.Posx_i_R = self.Prx
-			self.Posy_i_R = self.Pry
+			self.Posy_i_R = self.Pry	
 
-			POSX = (-self.Plx + self.Posx_i_L)
+			POSX = (-self.Plx + self.Posx_i_L) - 0.5 + inic
 			POSY = (-self.Ply + self.Posy_i_L)
 
-			self.Angulo += (np.float32(self.Rr) - self.Ang_Inic)
+			self.Angulo += (np.float32(self.Rl) - self.Ang_Inic)
 
-		# if(self.IMU[0] > np.pi/2):
-		# 	self.Euler_imu_z = np.pi - self.IMU[0] - self.Euler_imu_z
-		# elif(self.IMU[0] < -np.pi/2):
-		# 	self.Euler_imu_z = -np.pi - self.IMU[0] - self.Euler_imu_z
-		# else:
-		# 	self.Euler_imu_z = self.IMU[0] - self.Euler_imu_z
-
-		self.Posxy_fix[0, 0] += POSX*np.cos(self.IMU[0]) + POSY*np.sin(self.IMU[0])
-		self.Posxy_fix[1, 0] += POSX*np.sin(self.IMU[0]) - POSY*np.cos(self.IMU[0])
-		self.posx = POSX*np.cos(self.Angulo) - POSY*np.sin(self.Angulo)
-		self.posy = POSX*np.sin(self.Angulo) + POSY*np.cos(self.Angulo)
+		self.Posxy_fix[0, 0] += POSX*np.cos(self.IMU[0]) - POSY*np.sin(self.IMU[0])
+		self.Posxy_fix[1, 0] += POSX*np.sin(self.IMU[0]) + POSY*np.cos(self.IMU[0])
+		self.posx += POSX*np.cos(-self.Angulo) - POSY*np.sin(-self.Angulo)
+		self.posy += POSX*np.sin(-self.Angulo) + POSY*np.cos(-self.Angulo)
 
 ##################Print_dos_valores########################################################
 
