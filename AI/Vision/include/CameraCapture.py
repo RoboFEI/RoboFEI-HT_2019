@@ -140,11 +140,11 @@ class CameraCapture(BasicThread):
         while self._running:
             start = time.time()
             
+            self.__observation['time'] = time.time()
             __, self.__observation['frame'] = self.__camera.read()
             self.__observation['pos_tilt'] = self._bkb.read_float('VISION_TILT_DEG')
             self.__observation['pos_pan'] = self._bkb.read_float('VISION_PAN_DEG')
             self.__observation['mov'] = self._bkb.read_int('DECISION_ACTION_A')
-            self.__observation['time'] = time.time()
             self._resume()
             
             if self.__observation['frame'] is None:
@@ -162,8 +162,14 @@ class CameraCapture(BasicThread):
                 )
                 if cv2.waitKey(1) == ord('q'):
                     self._args.camera = 'off'
-            else:
+            elif self._args.video is None:
                 end = start + 1.0/self.__parameters['fps'] - time.time()
+                if end > 0:
+                    time.sleep( # Camera fps
+                        end
+                    )
+            else:
+                end = start + 1.0/30 - time.time()
                 if end > 0:
                     time.sleep( # Camera fps
                         end
