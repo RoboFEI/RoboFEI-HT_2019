@@ -4,6 +4,8 @@ import os
 import sys
 import numpy as np
 import sympy as sy
+import curses as curses
+import matplotlib.pyplot as plt
 import time
 import math
 sys.path.append('../../Blackboard/src/')	#adicionando caminho para programa em outro diretório
@@ -27,8 +29,8 @@ class Odometry:
 		self.bkb = SharedMemory()							#Instanciando o obj a classe de memória compartilhada
 		self.mem = self.bkb.shd_constructor(self.mem_key)
 
-		self.posx = 0
-		self.posy = 0
+		self.posx = [] 
+		self.posy = [] 
 		self.G = 0
 		self.Ang_Inic = 0
 		self.j = 0		#Se j for par, a perna direita está em movimento, se for ímpar, a perna esquerda está em movimento
@@ -57,7 +59,7 @@ class Odometry:
 
 		for i in Item1:		#Lê os valores dos motores, convertendo para graus e adiciona no vetor MOT
 			self.Mot.append((self.bkb.read_int(self.mem, i) - self.Mot_Ini[k])*0.0051232757)
-			print self.bkb.read_int(self.mem, i), self.Mot_Ini[k], self.Mot[k]
+#			print self.bkb.read_int(self.mem, i), self.Mot_Ini[k], self.Mot[k]
 			k += 1
 
 		for j in Item2:		#Lê valores da IMU e adiciona no vetor IMU
@@ -109,25 +111,11 @@ class Odometry:
 
 ########Cinemática_Perna_Direita#######
 
-		r11 = c11*s15*s7 - c15*(-c7*sabc - cabc*s11*s7)
-		r21 = c11*c15*s7 - s15*(c7*sabc + cabc*s11*s7)
-		self.Rr = sy.atan2(r21, r11)
-		
-		if math.isnan(self.Rr):
-			self.Rr = 0
-
 		self.Prx = Lf*(c11*s15*s7 - c15*(-c7*sabc - cabc*s11*s7)) + Ltx - (-(L4*s9+L5*sab)*c7 + (L4*c9+L5*cab)*s7*s11)
 		self.Prz = Lf*(-c11*c15*cabc + s11*s15) - Lty - c11*(L4*c9+L5*cab)
 		self.Pry = Lf*(-c11*c7*s15 + c15*(-c7*cabc*s11 + s7*sabc)) + Ltz + ((L4*s9+L5*sab)*s7-(L4*c9+L5*cab)*c7*s11)
 
-########Cinemática_Perna_Esquerda#######
-
-		l11 = cl12*sl16*s8 - cl16*(-c8*slabc - clabc*sl12*s8)
-		l21 = cl12*cl16*s8 - sl16*(c8*slabc + clabc*sl12*s8)
-		self.Rl = sy.atan2(l21, l11)
-		
-		if math.isnan(self.Rl):
-			self.Rl = 0		
+########Cinemática_Perna_Esquerda#######		
 
 		self.Plx = Lf*(cl12*sl16*s8 - cl16*(-c8*slabc - clabc*sl12*s8)) + Ltx - (-(L4*s10+L5*slab)*c8 + (L4*c10+L5*clab)*s8*sl12)
 		self.Plz = Lf*(-cl12*cl16*clabc + sl12*sl16) - Lty - cl12*(L4*c10+L5*clab)
@@ -139,44 +127,44 @@ class Odometry:
 		inic = 0
 		
 		if self.j%2: 	#Calculo de posição a partir do movimento da perna direita
-			print ("I = 0")
 			self.Posx_i_L = self.Plx
 			self.Posy_i_L = self.Ply
 
-			POSX = (-self.Prx + self.Posx_i_R) - 0.5
+			POSX = (-self.Prx + self.Posx_i_R) + 1.3 +inic
 			POSY = (-self.Pry + self.Posy_i_R)			
 
-			self.Angulo += (np.float32(self.Rr) - self.Ang_Inic)
-
 		else: 	#Calculo de posição a partir do movimento da perna esquerda
-			print ("I = 2")
-			
-			if self.G == 0:	#Angulo inicial
-				self.Ang_Inic = np.float32(self.Rr)
-				if self.Plx < -5:
-					inic = self.Plx
-				self.G = 1
+#			if self.G == 0:	#Angulo inicial
+#				self.Ang_Inic = np.float32(self.Rr)
+#				if self.Plx < -5:
+#					inic = self.Plx
+#				self.G = 1
 				
 			self.Posx_i_R = self.Prx
 			self.Posy_i_R = self.Pry	
 
-			POSX = (-self.Plx + self.Posx_i_L) - 0.5 + inic
+			POSX = (-self.Plx + self.Posx_i_L) + 1.3 + inic
 			POSY = (-self.Ply + self.Posy_i_L)
+		
+		IMU_Z = self.IMU[0] - self.IMU_ini[0] 
+		
+		self.Posxy_fix[0, 0] += POSX*np.cos(IMU_Z) - (-POSY*np.sin(IMU_Z))
+		self.Posxy_fix[1, 0] += POSX*np.sin(IMU_Z) + (-POSY*np.cos(IMU_Z))
 
-			self.Angulo += (np.float32(self.Rl) - self.Ang_Inic)
-
-		self.Posxy_fix[0, 0] += POSX*np.cos(self.IMU[0]) - POSY*np.sin(self.IMU[0])
-		self.Posxy_fix[1, 0] += POSX*np.sin(self.IMU[0]) + POSY*np.cos(self.IMU[0])
-		self.posx += POSX*np.cos(-self.Angulo) - POSY*np.sin(-self.Angulo)
-		self.posy += POSX*np.sin(-self.Angulo) + POSY*np.cos(-self.Angulo)
-
+		self.posx.append(self.Posxy_fix[0, 0])
+		self.posy.append(self.Posxy_fix[1, 0])
+		
+		print("IMU = %f\n" % (IMU_Z))
 ##################Print_dos_valores########################################################
 
 	def Show_Position(self): #Apresentação dos valores calculados
-		print ("\n%f, %f, %f, %f"% (self.Prx, self.Pry, self.Prz, self.Rr))
-		print ("%f, %f, %f, %f"% (self.Plx, self.Ply, self.Plz, self.Rl))
-		print("posx = %f \t posy = %f \t Ang_Imu = %f" % (self.Posxy_fix[0, 0], self.Posxy_fix[1, 0], self.IMU[0]))
-		print("posx = %f \t posy = %f \t Ang_Mot = %f\n\n" % (self.posx, self.posy, self.Angulo))
+		print("\nposx = %f" % (self.Posxy_fix[0, 0]))
+		print("posy = %f\n" % (self.Posxy_fix[1, 0]))
+		
+		plt.ion()
+		plt.plot(self.posx, self.posy)
+		plt.draw()
+		plt.pause(0.0001)
 
 ###################Programa_principal#######################################################
 
@@ -201,8 +189,10 @@ IMU = [	'IMU_EULER_Z']
 
 #######verificacao de erro inicial da posicao dos motores###
 Odometry.Mot_Ini = []
+Odometry.IMU_ini = []
 for i in Motores:
 	Odometry.Mot_Ini.append(Odometry.bkb.read_int(Odometry.mem, i))
+Odometry.IMU_ini.append(Odometry.bkb.read_float(Odometry.mem, 'IMU_EULER_Z'))
 	#Odometry.Mot_Ini.append(512)
 
 ######Chamada dos calculos###########
@@ -211,11 +201,11 @@ while(1):
 	RC = Odometry.bkb.read_int(Odometry.mem, 'IMU_STATE') #0: Robo em pe, 1: Robo caido
 	I = Odometry.bkb.read_int(Odometry.mem, 'WALK_PHASE')
 	if (I, k ) == (2, 0):	#Pe esquerdo em contato com o chao
-		Odometry.j = 0
+		Odometry.j = 1
 		k = 1
 		x = 1		#So executara o
 	if (I, k ) == (0, 1):	#Pe direito em contato com o chao
-		Odometry.j = 1
+		Odometry.j = 0
 		k = 0
 		x = 1
 	if (x, RC) == (1, 0):	#Execuao 1 vez por passo se o robo estiver em pe
