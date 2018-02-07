@@ -124,27 +124,23 @@ class Odometry:
 ##################Calculo_de_Posição########################################################
 
 	def Position_Calc(self):
-		inic = 0
+		Var_Ajuste_x = 0.5
+		Var_Ajuste_y = 0
 		
 		if self.j%2: 	#Calculo de posição a partir do movimento da perna direita
 			self.Posx_i_L = self.Plx
 			self.Posy_i_L = self.Ply
 
-			POSX = (-self.Prx + self.Posx_i_R) + 1.3 +inic
-			POSY = (-self.Pry + self.Posy_i_R)			
+			POSX = (-self.Prx + self.Posx_i_R) + Var_Ajuste_x
+			POSY = (-self.Pry + self.Posy_i_R)	+ Var_Ajuste_y		
 
 		else: 	#Calculo de posição a partir do movimento da perna esquerda
-#			if self.G == 0:	#Angulo inicial
-#				self.Ang_Inic = np.float32(self.Rr)
-#				if self.Plx < -5:
-#					inic = self.Plx
-#				self.G = 1
 				
 			self.Posx_i_R = self.Prx
 			self.Posy_i_R = self.Pry	
 
-			POSX = (-self.Plx + self.Posx_i_L) + 1.3 + inic
-			POSY = (-self.Ply + self.Posy_i_L)
+			POSX = (-self.Plx + self.Posx_i_L) + Var_Ajuste_x
+			POSY = (-self.Ply + self.Posy_i_L)	+ Var_Ajuste_y
 		
 		IMU_Z = self.IMU[0] - self.IMU_ini[0] 
 		
