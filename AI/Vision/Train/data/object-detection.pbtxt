@@ -1,5 +1,30 @@
 item {
   id: 1
-  name: 'robot'
+  name: 'L'
+}
+
+item {
+  id: 2
+  name: 'T'
+}
+
+item {
+  id: 3
+  name: 'X'
+}
+
+item {
+  id: 4
+  name: 'center'
+}
+
+item {
+  id: 5
+  name: 'center_circle'
+}
+
+item {
+  id: 6
+  name: 'penalty'
 }
 

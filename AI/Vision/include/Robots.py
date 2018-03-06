@@ -152,7 +152,7 @@ class Robots(BasicThread):
                 break
             
             self._bkb.write_float("VISION_RB" + str(number).zfill(2) + "_X", xdist)
-            self._bkb.write_float("VISION_RB" + str(number).zfill(2) + "_Y", ydist*1.5)
+            self._bkb.write_float("VISION_RB" + str(number).zfill(2) + "_Y", ydist*1.2)
             self._bkb.write_double("VISION_RB" + str(number).zfill(2) + "_TIME", data['time']),
             self._bkb.write_int("VISION_RB" + str(number).zfill(2) + "_MOV", data['mov']),
             self._bkb.write_int("VISION_RB" + str(number).zfill(2) + "_TAG", robot + 2)

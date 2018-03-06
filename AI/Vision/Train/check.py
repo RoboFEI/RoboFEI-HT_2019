@@ -23,8 +23,7 @@ sys.path.append('./src')
 
 # Abrindo programa de marcação
 os.system("clear")
-os.system("gnome-terminal -x sh -c '~/labelImg/labelImg.py $(pwd)/Train/imagens\ to\ check/ $(pwd)/Train/annotations\ DNN/'")
-
+os.system("screen -d -m -S test python ~/labelImg/labelImg.py $(pwd)/imagens to classify/ $(pwd)/annotations DNN/")
 key = "S"
 while key.upper() == "S":
     # Selecionando arquivos
