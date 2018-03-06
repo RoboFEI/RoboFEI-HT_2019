@@ -33,16 +33,6 @@ dnn = DNN(a)
 
 dicionario = {}
 os.system("mkdir ./Train/imagens\ to\ classify")
-for video in os.listdir("./Train/Videos"):
-    cap = cv2.VideoCapture("./Train/Videos/"+video)
-    while True:
-        for __ in xrange(0, 4):
-            __, dicionario["frame"] = cap.read()
-        if dicionario["frame"] is None:
-            break
-        dicionario["time"] = time.time()
-        dnn.detect(dicionario)
-    os.system("rm ./Train/Videos/"+video)
 
 try:
     imagens = [i.rsplit(".", 1)[0] for i in os.listdir("./Train/imagens to classify")]
@@ -56,3 +46,14 @@ try:
     cv2.destroyAllWindows()
 except:
     pass
+
+for video in os.listdir("./Train/Videos"):
+    cap = cv2.VideoCapture("./Train/Videos/"+video)
+    while True:
+        for __ in xrange(0, 4):
+            __, dicionario["frame"] = cap.read()
+        if dicionario["frame"] is None:
+            break
+        dicionario["time"] = time.time()
+        dnn.detect(dicionario)
+    os.system("rm ./Train/Videos/"+video)
