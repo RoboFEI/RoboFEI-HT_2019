@@ -1,30 +1,40 @@
 item {
   id: 1
-  name: 'L'
+  name: 'Ball'
 }
 
 item {
   id: 2
-  name: 'T'
+  name: 'L'
 }
 
 item {
   id: 3
-  name: 'X'
+  name: 'T'
 }
 
 item {
   id: 4
-  name: 'center'
+  name: 'X'
 }
 
 item {
   id: 5
-  name: 'center_circle'
+  name: 'ball'
 }
 
 item {
   id: 6
+  name: 'center'
+}
+
+item {
+  id: 7
+  name: 'center_circle'
+}
+
+item {
+  id: 8
   name: 'penalty'
 }
 
