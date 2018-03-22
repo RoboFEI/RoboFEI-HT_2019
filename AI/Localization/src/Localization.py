@@ -6,6 +6,7 @@ from Viewer import * # Imports the environment of the viewer
 from MCL import *
 import time
 
+
 # To pass arguments to the function
 import argparse
 # Import a shared memory
