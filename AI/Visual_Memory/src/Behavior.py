@@ -29,16 +29,19 @@ from Landmark import * # Class responsible for performing landmarks tracking.
 
 ## Class Behavior
 # Class responsible for managing the behavior of Visual Memory.
+
 class Behavior(Basic):
     
     # ---- Variables ----
     
     ## __posrobot
     # Variable used to instantiate class responsible for robot speed.
+    
     __posrobot = None
     
     ## parameters
     # Variable used to instantiate class responsible for robot speed.
+    
     parameters = None
     
     def signal_term_handler(self, signal, frame):
@@ -48,6 +51,7 @@ class Behavior(Basic):
         signal.signal(signal.SIGTERM, self.signal_term_handler)
     
     ## Constructor Class
+    
     def __init__(self, a):
         self.killedProcess( ) # Function to monitor external process kill.
         self.args = a # Input arguments.
@@ -91,6 +95,7 @@ class Behavior(Basic):
         
     ## readDataLandmarks
     # Responsible for reading the data coming from the vision system.
+    
     def readDataLandmarks(self, old):
         if self._bkb.read_int("VISION_LAND_TAG") == 1:
             data = [{
@@ -107,6 +112,7 @@ class Behavior(Basic):
     
     ## readDataRobots
     # .
+    
     def readDataRobots(self, old):
         data = []
         for number in xrange(1, 22):
@@ -130,6 +136,7 @@ class Behavior(Basic):
     
     ## distributeDataRobots
     # .
+    
     def distributeDataRobots(self, datarobots):
         if datarobots == [] or self.__newrobots + self.robots == []:
             return
@@ -207,6 +214,7 @@ class Behavior(Basic):
     
     ## readDataBall
     # Responsible for reading the data coming from the vision system.
+    
     def readDataBall(self):
         if self._bkb.read_float("VISION_BALL_TAG") == 1:
             data = [{
@@ -223,6 +231,7 @@ class Behavior(Basic):
     
     ## printPreviousLine
     # .
+    
     def printPreviousLine(self, text, lines=1, back=True):
         for i in xrange(lines):
             print "\033[F\r",
@@ -234,6 +243,7 @@ class Behavior(Basic):
     
     ## roundUI
     # .
+    
     def roundUI(self, x, digits = 4):
         try:
             return round(x, (digits - 1)-int(floor(log10(abs(x)))))
@@ -242,6 +252,7 @@ class Behavior(Basic):
     
     ## updatingScreen
     # .
+    
     def updatingScreen(self):
         # Update landmark
         if self._bkb.read_float("VISUAL_MEMORY_LAND_LOC") == 0:
@@ -291,6 +302,7 @@ class Behavior(Basic):
                 self.printPreviousLine(text, lines=i)
     
     ## run
+    
     def run(self):
         # Initiating variables
         datalandmarks = []
@@ -387,6 +399,7 @@ class Behavior(Basic):
     
     ## end
     # .
+    
     def end(self):
         self._end( )
         kill = self.robots + self.__newrobots

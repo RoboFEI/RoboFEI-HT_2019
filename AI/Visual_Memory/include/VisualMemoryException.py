@@ -17,10 +17,12 @@ import sys
 
 ## Class VisualMemoryException
 # Class used to handle system errors.
+
 class VisualMemoryException(Exception):
     
     ## Constructor Class
     # Displays the error message.
+    
     def __init__(self, numbererror, message):
         self.numbererror = numbererror
         if numbererror == 5: # Request to terminate processes by one of the threads.

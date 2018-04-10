@@ -28,6 +28,7 @@ from ConfigIni import * # Class used to read the ini file from the view.
 
 ## Class to Basic
 # Standard and abstract class.
+
 class Basic(object):
     __metaclass__ = ABCMeta
     
@@ -35,18 +36,22 @@ class Basic(object):
     
     ## _args
     # Input arguments.
+    
     _args = None
     
     ## _conf
     # Variable used to instantiate class ConfigIni.
+    
     _conf = None
     
     ## _bkb
     # Variable used to instantiate class Blackboard.
+    
     _bkb = None
     
     ## Constructor Class
     # Instantiating default classes.
+    
     @abstractmethod
     def __init__(self, a, obj, func):
         self._args = a
@@ -55,5 +60,6 @@ class Basic(object):
         
     ## _end
     # Finishing classes.
+    
     def _end(self):
         self._conf.end( )

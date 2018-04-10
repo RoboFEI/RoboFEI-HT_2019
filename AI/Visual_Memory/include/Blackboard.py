@@ -29,20 +29,24 @@ from SharedMemory import SharedMemory
 
 ## Class to Blackboard
 # Class used to manage blackboard writing and reading.
+
 class Blackboard(object):
     
     # ---- Variables ----
     
     ## mem
     # Number used to write to shared memory.
+    
     __mem = None
     
     ## bkb
     # C ++ libraries with shared memory functions.
+    
     __bkb = None
     
     ## Constructor Class
     # Instantiating objects and reading default values.
+    
     def __init__(self):
         self.__bkb = SharedMemory() # Instantiating blackboard functions in C ++.
         self.__mem = configparser.RawConfigParser() # Instantiating library to find robot number.
@@ -61,6 +65,7 @@ class Blackboard(object):
     # Used to do the writing of float variables on the blackboard.
     # @param variable Name of the variable that will be accessed in the blackboard.
     # @param value Value to be written.
+    
     def write_float(self, variable, value):
         self.__bkb.write_float(self.__mem, variable, value)
     
@@ -68,6 +73,7 @@ class Blackboard(object):
     # Used to read float values from the blackboard.
     # @param variable Variable that will be read from blackbord.
     # @return Read value of variable.
+    
     def read_float(self, variable):
         return self.__bkb.read_float(self.__mem, variable)
     
@@ -75,6 +81,7 @@ class Blackboard(object):
     # Used to do the writing of int variables on the blackboard.
     # @param variable Name of the variable that will be accessed in the blackboard.
     # @param value Value to be written.
+    
     def write_int(self, variable, value):
         self.__bkb.write_int(self.__mem, variable, value)
     
@@ -82,6 +89,7 @@ class Blackboard(object):
     # Used to read int values from the blackboard.
     # @param variable Variable that will be read from blackbord.
     # @return Read value of variable.
+    
     def read_int(self, variable):
         return self.__bkb.read_int(self.__mem, variable)
     
@@ -89,6 +97,7 @@ class Blackboard(object):
     # Used to do the writing of double variables on the blackboard.
     # @param variable Name of the variable that will be accessed in the blackboard.
     # @param value Value to be written.
+    
     def write_double(self, variable, value):
         self.__bkb.write_double(self.__mem, variable, value)
     
@@ -96,5 +105,6 @@ class Blackboard(object):
     # Used to read double values from the blackboard.
     # @param variable Variable that will be read from blackbord.
     # @return Read value of variable.
+    
     def read_double(self, variable):
         return self.__bkb.read_double(self.__mem, variable)

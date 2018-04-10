@@ -25,6 +25,7 @@ from KalmanFilter import * # Class responsible for implementing kalman filter me
 
 ## Class to BasicThread
 # Responsible for implementing the methods and variables responsible for managing the thread.
+
 class BasicThread(KalmanFilter, Thread):
     __metaclass__ = ABCMeta
     
@@ -32,17 +33,21 @@ class BasicThread(KalmanFilter, Thread):
     
     ## _running
     # Reports whether the thread is still running.
+    
     _running = False
     
     ## __pauseistrue
     # Variable responsible for managing thread pause and execution.
+    
     __pauseistrue = False
     
     ## _pausethread
     # Variable responsible for managing thread pause and execution.
+    
     _pausethread = None
     
     ## pause
+    
     def _pause(self):
         '''Function responsible for stopping thread execution.'''
         if not self.__pauseistrue:
@@ -50,6 +55,7 @@ class BasicThread(KalmanFilter, Thread):
             self.__pauseistrue = True
     
     ## resume
+    
     def _resume(self):
         '''Responsible function for releasing the thread for execution.'''
         if self.__pauseistrue:
@@ -58,6 +64,7 @@ class BasicThread(KalmanFilter, Thread):
             self.__pauseistrue = False
     
     ## Constructor Class
+    
     @abstractmethod
     def __init__(self, a, s, obj):
         # Starting parent classes
@@ -72,6 +79,7 @@ class BasicThread(KalmanFilter, Thread):
         self._pause( )
         
     ## run
+    
     @abstractmethod
     def run(self):
         '''Example of thread execution.'''
@@ -83,6 +91,7 @@ class BasicThread(KalmanFilter, Thread):
             self._pause( )
     
     ## finalize
+    
     def _finalize(self):
         '''Finish the object.'''
         self._running = False
@@ -90,6 +99,7 @@ class BasicThread(KalmanFilter, Thread):
         self.join( )
     
     ## threadPaused
+    
     def _threadPaused(self):
         '''Tests whether the object is still in the crawl tolerance.'''
         return self.__pauseistrue
