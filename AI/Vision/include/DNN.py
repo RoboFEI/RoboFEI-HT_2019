@@ -66,7 +66,7 @@ class DNN(BasicProcesses):
     __sess = None
 
     ## __label
-    # Dicionario com as strings das classes que seram detectadas pela rede.
+    # Dicionario com as strings das classes que serão detectadas pela rede.
     __label = None
 
     ## __parameters

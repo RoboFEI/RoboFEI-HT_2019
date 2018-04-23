@@ -87,7 +87,7 @@ class Orchestrator(BasicProcesses):
                 observation = self.camera.currentObservation()
                 observation['objects'] = self.dnn.detect(observation)
                 self.robots.classifyingRobots(observation)
-                self.landmark.run(observation)
+                self.landmark.classifyingLand(observation)
             except VisionException as e:
                 break
                     
