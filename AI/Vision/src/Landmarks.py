@@ -19,15 +19,14 @@ class Landmarks(BasicThread):
 
 ## __classification
     def __classification(self, data):
-        print "testeeeeeee"
+        print data['objects']# pandas
+        print data['objects'].loc[[0],['boxes']] #Selecionando os valores da tabela de dados "data"
+        raw_input()
 
     ## classifyingLand
     def classifyingLand(self, data):
         if self._running == False:
             raise VisionException(5, 'Robots') #raise: Force an exception.
-        print data['objects']# pandas
-        print data['objects'].loc[[0],['boxes']] #Selecionando os valores da tabela de dados "data"
-        raw_input()
         self.__listdata.append(data)
         self._resume()
 
@@ -45,4 +44,5 @@ class Landmarks(BasicThread):
         #Finalizing the thread
     def finalize(self):
         print 'Finalizing'
-        self._running = False
+        self._finalize()
+        cv2.destroyAllWindows()

@@ -26,17 +26,17 @@ from Landmarks import * # Class responsible for Localizing landmarks objects det
 ## Class Orchestrator
 # Class responsible for managing the vision process.
 class Orchestrator(BasicProcesses):
-    
+
     # ---- Variables ----
-    
+
     ## camera
     # Object responsible for reading the camera.
     camera = True
-    
+
     ## dnn
     # Object responsible for performing a classification use DNN.
     dnn = None
-    
+
     ## robots
     # Object responsible for robots classification.
     robots = None
@@ -44,24 +44,24 @@ class Orchestrator(BasicProcesses):
     ##Landmark
     # Object responsible for landmarks classification
     landmark = None
-    
+
     ## Constructor Class
     def __init__(self, a):
         super(Orchestrator, self).__init__(a, "Vision", "Parameters")
-        
+
         # Instantiating camera object
         try:
             self.camera = CameraCapture(a)
         except VisionException as e:
             sys.exit(1)
-        
+
         # Instantiating dnn object
         try:
             self.dnn = DNN(a)
         except VisionException as e:
             self.camera.finalize()
             sys.exit(1)
-        
+
         # Instantiating robots object
         try:
             self.robots = Robots(a)
@@ -78,7 +78,7 @@ class Orchestrator(BasicProcesses):
             self.dnn.finalize()
             self.robots.finalize()
             sys.exit(1)
-        
+
     ## run
     # .
     def run(self):
@@ -90,12 +90,12 @@ class Orchestrator(BasicProcesses):
                 self.landmark.classifyingLand(observation)
             except VisionException as e:
                 break
-                    
+
             except KeyboardInterrupt:
                 os.system("clear")
                 print "\33[1;31mDetect KeyboardInterrupt\33[0m\n"
                 break
-    
+
     ## end
     # .
     def end(self):
