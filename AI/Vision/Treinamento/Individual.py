@@ -42,6 +42,10 @@ class Individual():
     # .
     weight = None
 
+    ## Mutation network
+    # network architecture created by the mutation and cross over of network_architecture
+    new_network_architecture = []
+
     ## Constructor Class
     def __init__(self):
         # Generating network architecture
@@ -63,21 +67,25 @@ class Individual():
 
     # cross architecture
     def __cross(self):
+        self.new_network_architecture = self.network_architecture
         print "cross"
 
     # mutation algorithm
     def __mutation(self):
-        print "mut"
-
-    def __geneticAlgortithm():
-        print"oi"
+        self.new_network_architecture = 1 * self.network_architecture # lista da nova arquitetura. Assim, mantendo a arquitetura original.
+        n = max(np.random.randint(len(self.new_network_architecture)), 1) # quantas camadas serao afetadas
+        for __ in xrange(n):
+            m = np.random.randint(11)-5 # modifica a camada escolhida de -5 a 5.
+            p = np.random.randint((len(self.new_network_architecture)))# Qual camada sera modificada
+            self.new_network_architecture[p] = max(self.new_network_architecture[p]+m, 1)
+        return self.new_network_architecture
 
     ## calculateWeight
     # .
     def __calculateWeight(self, score):
         self.weight = score +\
         1./len(self.network_architecture) +\
-        1./sum(self.network_architecture)
+        1./max(sum(self.network_architecture), 1)
 
     ## performance
     # .
@@ -90,3 +98,10 @@ class Individual():
 
         # calculating weight
         self.__calculateWeight(score)
+
+    # creates new archtetures throught genetic algorithms
+    def geneticAlgorithm(self):
+        return self.__mutation()
+
+    def setArchitecture(self, arc):
+        self.network_architecture = arc

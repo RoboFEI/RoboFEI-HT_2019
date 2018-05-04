@@ -48,5 +48,9 @@ sed -i "s@PATH_TO_BE_CONFIGURED/pet_val.record@$(pwd)/models/research/train.reco
 sed -i "s@PATH_TO_BE_CONFIGURED/pet_label_map.pbtxt@$(pwd)/data/object-detection.pbtxt@g" ./models/model/ssd_mobilenet_v1.config
 
 echo -e "${Blue}Executando treinamento${NC}"
-gnome-terminal --title="Workspace treinamento" -x sh -c 'tensorboard --logdir="$(pwd)"' &
+####### Ubuntu 14.04 ##########
+#gnome-terminal --title="Workspace treinamento" -x sh -c 'tensorboard --logdir="$(pwd)"' &
+####### Ubuntu 16.04 ##########
+gnome-terminal set-title="Workspace treinamento" -x sh -c 'tensorboard --logdir="$(pwd)"' &
+##############################
 ./train.sh

@@ -28,7 +28,6 @@ Arquivo fonte contendo as funções que cria ou acopla a memória compartilhada
 
 int *mem ; //Variável que manipula memória compartilhada
 float *memf ; //Variável que manipula memória compartilhada
-double *memd ; //Variável que manipula memória compartilhada
 
 //Depois de criado a memória compartilhada, para verificar se ela realmente foi criada
 // e quantos processos estão utilizando, digite no terminal o comando $ipcs -m
@@ -47,13 +46,6 @@ void write_float(int *Mem, int index, float valor)
     *(Memf+index) = valor;
 }
 
-void write_double(int *Mem, int index, double valor)
-{
-    double* Memd;
-    Memd = (double*)(Mem+125*2);
-    *(Memd+index) = valor;
-}
-
 int read_int(int *Mem, int index)
 {
     return *(Mem + index);
@@ -64,13 +56,6 @@ float read_float(int *Mem, int index)
     float* Memf;
     Memf = (float*)(Mem+125);
     return *(Memf + index);
-}
-
-double read_double(int *Mem, int index)
-{
-    double* Memd;
-    Memd = (double*)(Mem+125*2);
-    return *(Memd + index);
 }
 
 int* using_shared_memory(int KEY)
@@ -113,7 +98,6 @@ int* using_shared_memory(int KEY)
      }
 
      memf = (float*)(mem+125);
-     memd = (double*)(mem+125*2);
      //---------------------------------------------------------------------
 
             /* destruicao do segmento */
@@ -121,7 +105,8 @@ int* using_shared_memory(int KEY)
             // perror("Erro shmctl()");
              // return(1) ;
             //}
-
+    
+    printf("%d\n",(*mem));
     return(mem); 
 
 }
