@@ -87,7 +87,9 @@ class BasicThread(BasicProcesses, Thread):
         '''Responsible for closing a thread.'''
         self._running = False
         self._resume( )
+        print "Passei por aqui!!!"
         self.join( )
+        print "Saiu de join()"
 
     ## printPreviousLine
     def printPreviousLine(self, text, lines=1, back=True):
