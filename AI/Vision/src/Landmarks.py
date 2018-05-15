@@ -22,7 +22,7 @@ class Landmarks(BasicThread):
     def __classification(self, data):
         # print data['objects'].loc[:, ['boxes']].values  # Return a list of the values from column boxes
         print data['objects']
-        
+
         #######  Calculate the center of the boxes  ##############################################
         # print len(data['objects'].loc[:, ['classes']])
         # for x in xrange(len(data['objects'].loc[:, ['classes']])):
@@ -30,7 +30,6 @@ class Landmarks(BasicThread):
         #     print self.__centerClass[2] -(self.__centerClass[2]-self.__centerClass[0])/2
         #     print self.__centerClass[3] -(self.__centerClass[3]-self.__centerClass[1])/2
         #######  Calculate the center of the boxes  ##############################################
-
 
         raw_input()
 

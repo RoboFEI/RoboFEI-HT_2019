@@ -99,8 +99,8 @@ class Orchestrator(BasicProcesses):
     ## end
     # .
     def end(self):
-        self.landmark.finalize()
         self.camera.finalize()
         self.dnn.finalize()
         self.robots.finalize()
+        self.landmark.finalize()
         #self._end( )
