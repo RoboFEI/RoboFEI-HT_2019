@@ -24,24 +24,29 @@ from Basic import * # Class with implementations and basic variables
 
 ## Class to Speeds
 # Class responsible for managing the robot's possible speeds (me).
+
 class Speeds(Basic):
     
     # ---- Variables ----
     
     ## __movementslist
     # Velocity list of robot movements.
+    
     __movementslist = []
     
     ## __u
     # Speed matrix $u_t$.
+    
     __u = None
     
     ## __R
     # Speed error matrix $R_t$.
+    
     __R = None
     
     ## Constructor Class
     # Initializes basic network parameters and creates standard speeds.
+    
     def __init__(self):
         self.__movementslist.append({
             "x_speed": sym.Matrix([
@@ -75,6 +80,7 @@ class Speeds(Basic):
     ## update
     # Adds average robot speeds or upgrades to speeds.
     # @param vector Observed speed.
+    
     def update(self, vector):
         if vector[0] == 0:
             return
@@ -100,6 +106,7 @@ class Speeds(Basic):
     # Returns the dictionary of motion vectors.
     # @param x Vector position to be accessed.
     # @return Returns the dictionary that will be used.
+    
     def __getitem__(self, x):
         if x + 1 > len(self.__movementslist):
             while x + 1 > len(self.__movementslist):

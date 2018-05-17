@@ -24,12 +24,14 @@ from KalmanFilter import * # Class responsible for implementing Kalman filter me
 
 ## Class to Landmark
 # Class responsible for performing landmarks tracking.
+
 class Landmark(KalmanFilter):
     
     # ---- Variables ----
     
     ## reset
     # .
+    
     def reset(self):
         super(Landmark, self)._reset( )
         
@@ -45,6 +47,7 @@ class Landmark(KalmanFilter):
         self._R = sym.zeros(6)
        
     ## Constructor Class
+    
     def __init__(self, a, s):
         # Instantiating constructor for inherited class.
         super(Landmark, self).__init__(a, s, "Landmarks")
@@ -61,6 +64,7 @@ class Landmark(KalmanFilter):
         
     ## update
     # .
+    
     def update(self, data):
         self._predictedstate["x"][2:, 0] = -self._speeds[data["movement"]]["x_speed"][:len(self._speeds[data["movement"]]["x_speed"])-1, 0]
         self._predictedstate["covariance"] = self._speeds[data["movement"]]["R"]
@@ -103,6 +107,7 @@ class Landmark(KalmanFilter):
     
     ## predict
     # .
+    
     def predict(self, tnow = None, movements = None):
         self._predictedstate["x"][2:, 0] = -self._speeds[movements]["x_speed"][:len(self._speeds[movements]["x_speed"])-1, 0]
         self._predictedstate["covariance"] = self._speeds[movements]["R"]
@@ -139,5 +144,6 @@ class Landmark(KalmanFilter):
     
     ## end
     # .
+    
     def end(self):
         self._end( )

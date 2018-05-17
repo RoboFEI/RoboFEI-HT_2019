@@ -5,11 +5,28 @@
 
 env/
 build/
+
+# In vision
+AI/Vision/Train/*
+!AI/Vision/Train/Videos
+!AI/Vision/Train/avell.sh
+!AI/Vision/Train/check.py
+!AI/Vision/Train/extratc.py
+!AI/Vision/Train/generate_label.py
+!AI/Vision/Train/generate_tfrecord.py
+!AI/Vision/Train/mobilenet_v1_1.0_224.tar.gz
+!AI/Vision/Train/README.md
+!AI/Vision/Train/rename.py
+!AI/Vision/Train/train.sh
+!AI/Vision/Train/treinando_rede.sh
+!AI/Vision/Train/xml_to_csv.py
+!AI/Vision/Train/zipNetwork.sh
+
 AI/Vision/Data/*
-!AI/Vision/Data/README.md
+
 AI/Control/Data/*.ini
 AI/Control/Data/*.bin
-AI/Vision/src/.thresholds
+
 develop-eggs/
 dist/
 downloads/
@@ -25,8 +42,6 @@ var/
 *.manifest
 *.spec
 *~
-AI/Vision/Train/annotations DNN
-AI/Vision/Train/images to classify
 
 pip-log.txt
 pip-delete-this-directory.txt

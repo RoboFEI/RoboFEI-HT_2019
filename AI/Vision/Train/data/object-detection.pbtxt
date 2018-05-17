@@ -1,0 +1,40 @@
+item {
+  id: 1
+  name: 'Ball'
+}
+
+item {
+  id: 2
+  name: 'L'
+}
+
+item {
+  id: 3
+  name: 'T'
+}
+
+item {
+  id: 4
+  name: 'X'
+}
+
+item {
+  id: 5
+  name: 'ball'
+}
+
+item {
+  id: 6
+  name: 'center'
+}
+
+item {
+  id: 7
+  name: 'center_circle'
+}
+
+item {
+  id: 8
+  name: 'penalty'
+}
+

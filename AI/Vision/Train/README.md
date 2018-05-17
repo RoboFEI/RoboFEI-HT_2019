@@ -20,5 +20,9 @@
 4. Run the program `treinando_rede.sh`, which can be executed by the command *./treinando_rede.sh*, in the console.
         Here is where the learning happens, based on the markings, the software will run a series of iterations which will converge for a better output.
         Due to high number of iterations its adviced to stop the process after due time.
+	If you already runned this program and whant to do a new training, it is importante to exclude the folder `Models`.
 
 5. Run the program `zipNetwork.sh`, which can be executed by the command *./zipNetwork.sh*, in the console.
+
+6. In order to test the trained network, it is important to exclude the `annotationsDNN` folder and run the `extract.py` again.
+	This way, the program will use new images and create the labels, after creating a new folder `annotationsDNN`.

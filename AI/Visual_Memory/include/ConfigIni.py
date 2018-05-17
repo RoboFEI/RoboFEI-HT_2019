@@ -25,31 +25,38 @@ from VisualMemoryException import * # Used to handle exceptions
 
 ## Class to config ini
 # Class used to read the ini file from the view.
+
 class ConfigIni(object):
     
     # ---- Variables ----
     
     ## Address
     # Path of the config.ini file.
+    
     __address = "./Data/config.ini"
     
     ## Dictionary
     # Dictionary to be used.
+    
     __dictionary = None
     
     ## myobject
     # Class requesting variable reading.
+    
     __myobject = None
     
     ## function
     # Function that requests the reading of variables.
+    
     __function = None
     
     ## __conf
     # Variable for instantiation of the configparser responsible for reading ini files.
+    
     __conf = None
     
     ## Constructor Class
+    
     def __init__(self, obj, func, address=None):
         # Testing new address
         if address != None:
@@ -73,6 +80,7 @@ class ConfigIni(object):
     ## readVariables
     # Function used to instantiate the dictionary that was used and update it with the config variables.
     # @ param base Used dictionary.
+    
     def readVariables(self, base):
         self.__dictionary = base # Saving class dictionary.
         
@@ -108,6 +116,7 @@ class ConfigIni(object):
     
     ## end
     # Responsible for saving the changes in config file.
+    
     def end(self):
         self.__conf.read(self.__address)
             

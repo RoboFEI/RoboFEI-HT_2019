@@ -24,40 +24,49 @@ from BasicThread import * # Responsible for implementing the methods and variabl
 
 ## Class to Robots
 # Class responsible for performing robots tracking.
+
 class Robots(BasicThread):
     
     # ---- Variables ----
     
     ## listfunction
     # .
+    
     __listfunction = None
     
     ## robotnumber
     # .
+    
     __robotnumber = None
     
     ## posdata
     # .
+    
     __posdata = None
     
     ## contreset
     # .
+    
     __contreset = 0
     
     ## __lastposdata
     # .
+    
     __lastposdata = None
     
     ## timenumber
     # .
+    
     timenumber = 0
     
     ## weight
     # .
+    
     weight = 0
     
     ## reset
     # .
+    
     def reset(self):
         self.__listfunction = [ ]
         
@@ -89,6 +98,7 @@ class Robots(BasicThread):
         self.timenumber = 0 
     
     ## Constructor Class
+    
     def __init__(self, a, s, pos, n):
         # Instantiating constructor for inherited class.
         super(Robots, self).__init__(a, s, "Robots")
@@ -109,6 +119,7 @@ class Robots(BasicThread):
         
     ## __predictVector
     # .
+    
     def __predictVector(self, vector):
         tnow, movements = vector    
         super(Robots, self)._predict(tnow, movements)
@@ -191,23 +202,27 @@ class Robots(BasicThread):
     
     ## predictThread
     # .
+    
     def predictThread(self, tnow = None, movements = None):
         self.__listfunction.append([self.__predictVector, [tnow, movements]])
         self._resume( )
     
     ## updateVector
     # .
+    
     def __updateVector(self, data):
         super(Robots, self)._update(data)
     
     ## updateThread
     # .
+    
     def updateThread(self, data):
         self.__listfunction.append([self.__updateVector, data])
         self._resume( )
     
     ## run
     # .
+    
     def run(self):
         self._running = True
         while self._running:
@@ -219,6 +234,7 @@ class Robots(BasicThread):
     
     ## end
     # .
+    
     def end(self):
         self.__listfunction = [ ]
         self._finalize( )
@@ -226,6 +242,7 @@ class Robots(BasicThread):
     
     ## calculatesDistance
     # .
+    
     def calculatesDistance(self):
         if self.__lastposdata == self.__posdata[:2]:
             return
@@ -234,16 +251,18 @@ class Robots(BasicThread):
         self.__lastposdata = copy(self.__posdata[:2])
         
         self.weight = sym.Matrix(self.__posdata[:2]) - self._predictedstate["x"][:2,:2]
-        self.weight = 1./(1+(self.weight[0]**2 + self.weight[1]**2)**0.5)
+        self.weight = 2**(10./(1+(self.weight[0]**2 + self.weight[1]**2)**0.5))
     
     ## __lt__
     # .
+    
     def __lt__(self, other):
         self.calculatesDistance( )
         other.calculatesDistance( )
         return self.weight < other.weight
        
     ## testReset
+    
     def testReset(self):
         if self._state["covariance"][0,0] + self._state["covariance"][1,1] > 3*self._parameters["vision_error"]:
             self.__contreset += 1

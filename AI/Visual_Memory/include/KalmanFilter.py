@@ -26,6 +26,7 @@ from Basic import * # Standard and abstract class.
 from Speeds import * # Class responsible for managing the robot"s possible speeds (me).
 
 ## Class to KalmanFilter
+
 class KalmanFilter(Basic):
     '''Class responsible for implementing kalman filter methods.'''
     
@@ -35,34 +36,43 @@ class KalmanFilter(Basic):
     
     ## _parameters
     # Variable used to instantiate class responsible for robot speed.
+    
     _parameters = None
     
     ## _speeds
     # Variable used to instantiate class responsible for robot speed.
+    
     _speeds = None
     
     ## _t
     # Time variable used in kalman filter.
+    
     _t = None
     
     ## _predictedstate
     # Variable used to make predictions from observations.
+    
     _predictedstate = None
     
     ## _state
     # Variable used to predict the position of the object at the current instant.
+    
     _state = None
     
     # Matrix used in kalman filter.
+    
     _A = None; _B = None; _R = None; _C = None; _Q = None
     
     # _Status variables.
+    
     _px = None; _py = None; _vx = None; _vy = None; _ax = None; _ay = None; _b_x = None; _b_y = None
     
     # _Support variables.
+    
     _sin = None; _cos = None
     
     ## _reset
+    
     def _reset(self):
         '''Function used to reset states.'''
         
@@ -102,6 +112,7 @@ class KalmanFilter(Basic):
         self._state = copy(self._predictedstate)
     
     ## Constructor Class
+    
     @abstractmethod
     def __init__(self, a, s, obj):
         '''Responsible for starting the matrices of kalman patterns.'''
@@ -113,7 +124,7 @@ class KalmanFilter(Basic):
         
         # Creating standard parameters and reading
         self._parameters = {
-            "vision_error": 0.1,
+            "vision_error": 50,
             "linear_acceleration": False,
         }
         
@@ -134,6 +145,7 @@ class KalmanFilter(Basic):
         
     ## __listVariables
     # .
+    
     def __listVariables(self, tnow, movements, data):
         '''Create list of variables that will be used in the formulas.'''
         
@@ -176,6 +188,7 @@ class KalmanFilter(Basic):
         return listsub
     
     ## __predictNow
+    
     def __predictNow(self, tnow = None, movements = None):
         '''Performs the prediction using the current instant in time to determine the new state.'''
         
@@ -238,7 +251,7 @@ class KalmanFilter(Basic):
         self._state["x"] = sym.Matrix(self._state["x"])
         for x in xrange(len(self._state["x"])):
             try:
-                if abs(self._state["x"][x, 0]) < self._parameters["vision_error"]/2:
+                if abs(self._state["x"][x, 0]) < self._parameters["precision"]:
                     self._state["x"][x, 0] = 0.0
             except TypeError:
                 self._state["x"][x, 0] = 0.0
@@ -254,6 +267,7 @@ class KalmanFilter(Basic):
         self._state["time"] = tnow
     
     ## __predictTime
+    
     def __predictTime(self, tnow = None, movements = None):
         '''Uses a current instant in time and updates the observation and the current state.'''
         
@@ -313,7 +327,7 @@ class KalmanFilter(Basic):
         self._predictedstate["x"] = sym.Matrix(self._predictedstate["x"])
         for x in xrange(len(self._predictedstate["x"])):
             try:
-                if abs(self._predictedstate["x"][x, 0]) < self._parameters["vision_error"]/2:
+                if abs(self._predictedstate["x"][x, 0]) < self._parameters["precision"]:
                     self._predictedstate["x"][x, 0] = 0.0
             except TypeError:
                 self._predictedstate["x"][x, 0] = 0.0
@@ -329,6 +343,7 @@ class KalmanFilter(Basic):
         self._predictedstate["time"] = tnow
     
     ## predict
+    
     def _predict(self, tnow = None, movements = None):
         '''Used to predict the object.'''
         
@@ -338,6 +353,7 @@ class KalmanFilter(Basic):
         }[(type(tnow), type(movements))](tnow, movements)
     
     ## update
+    
     def _update(self, data):
         '''Function used to perform the data update.'''
         
@@ -359,7 +375,7 @@ class KalmanFilter(Basic):
         self._predictedstate["x"] = sym.Matrix(self._predictedstate["x"])
         for x in xrange(len(self._predictedstate["x"])):
             try:
-                if abs(self._predictedstate["x"][x, 0]) < self._parameters["vision_error"]/2:
+                if abs(self._predictedstate["x"][x, 0]) < self._parameters["precision"]:
                     self._predictedstate["x"][x, 0] = 0.0
             except TypeError:
                 self._predictedstate["x"][x, 0] = 0.0

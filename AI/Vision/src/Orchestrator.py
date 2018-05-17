@@ -21,42 +21,47 @@ from BasicProcesses import * # Standard and abstract class.
 from CameraCapture import * # Class responsible for performing the observation of domain.
 from DNN import * # Class that implements object detection using a deep neural network (DNN).
 from Robots import * # Class responsible for detecting thefts and a time of classification they belong.
+from Landmarks import * # Class responsible for Localizing landmarks objects detected by the DNN.
 
 ## Class Orchestrator
 # Class responsible for managing the vision process.
 class Orchestrator(BasicProcesses):
-    
+
     # ---- Variables ----
-    
+
     ## camera
     # Object responsible for reading the camera.
     camera = True
-    
+
     ## dnn
     # Object responsible for performing a classification use DNN.
     dnn = None
-    
+
     ## robots
     # Object responsible for robots classification.
     robots = None
-    
+
+    ##Landmark
+    # Object responsible for landmarks classification
+    landmark = None
+
     ## Constructor Class
     def __init__(self, a):
         super(Orchestrator, self).__init__(a, "Vision", "Parameters")
-        
+
         # Instantiating camera object
         try:
             self.camera = CameraCapture(a)
         except VisionException as e:
             sys.exit(1)
-        
+
         # Instantiating dnn object
         try:
             self.dnn = DNN(a)
         except VisionException as e:
             self.camera.finalize()
             sys.exit(1)
-        
+
         # Instantiating robots object
         try:
             self.robots = Robots(a)
@@ -64,7 +69,16 @@ class Orchestrator(BasicProcesses):
             self.camera.finalize()
             self.dnn.finalize()
             sys.exit(1)
-        
+
+    # Instantiating landmarks object
+        try:
+            self.landmark = Landmarks(a)
+        except VisionException as e:
+            self.camera.finalize()
+            self.dnn.finalize()
+            self.robots.finalize()
+            sys.exit(1)
+
     ## run
     # .
     def run(self):
@@ -73,18 +87,20 @@ class Orchestrator(BasicProcesses):
                 observation = self.camera.currentObservation()
                 observation['objects'] = self.dnn.detect(observation)
                 self.robots.classifyingRobots(observation)
+                self.landmark.classifyingLand(observation)
             except VisionException as e:
                 break
-                    
+
             except KeyboardInterrupt:
                 os.system("clear")
                 print "\33[1;31mDetect KeyboardInterrupt\33[0m\n"
                 break
-    
+
     ## end
     # .
     def end(self):
         self.camera.finalize()
         self.dnn.finalize()
         self.robots.finalize()
+        self.landmark.finalize()
         #self._end( )
