@@ -29,8 +29,8 @@ class Odometry:
 		self.bkb = SharedMemory()							#Instanciando o obj a classe de memória compartilhada
 		self.mem = self.bkb.shd_constructor(self.mem_key)
 
-		self.posx = [] 
-		self.posy = [] 
+		self.posx = []
+		self.posy = []
 		self.G = 0
 		self.Ang_Inic = 0
 		self.j = 0		#Se j for par, a perna direita está em movimento, se for ímpar, a perna esquerda está em movimento
@@ -49,7 +49,7 @@ class Odometry:
 
 
 
-##################Leitura dos valores da IMU###############################################
+##################Leitura dos valores da BlackBoard###############################################
 
 	def Get_Bkb_Values(self, Item1, Item2):
 
@@ -115,7 +115,7 @@ class Odometry:
 		self.Prz = Lf*(-c11*c15*cabc + s11*s15) - Lty - c11*(L4*c9+L5*cab)
 		self.Pry = Lf*(-c11*c7*s15 + c15*(-c7*cabc*s11 + s7*sabc)) + Ltz + ((L4*s9+L5*sab)*s7-(L4*c9+L5*cab)*c7*s11)
 
-########Cinemática_Perna_Esquerda#######		
+########Cinemática_Perna_Esquerda#######
 
 		self.Plx = Lf*(cl12*sl16*s8 - cl16*(-c8*slabc - clabc*sl12*s8)) + Ltx - (-(L4*s10+L5*slab)*c8 + (L4*c10+L5*clab)*s8*sl12)
 		self.Plz = Lf*(-cl12*cl16*clabc + sl12*sl16) - Lty - cl12*(L4*c10+L5*clab)
@@ -126,41 +126,45 @@ class Odometry:
 	def Position_Calc(self):
 		Var_Ajuste_x = 0.5
 		Var_Ajuste_y = 0
-		
+
 		if self.j%2: 	#Calculo de posição a partir do movimento da perna direita
 			self.Posx_i_L = self.Plx
 			self.Posy_i_L = self.Ply
 
 			POSX = (-self.Prx + self.Posx_i_R) + Var_Ajuste_x
-			POSY = (-self.Pry + self.Posy_i_R)	+ Var_Ajuste_y		
+			POSY = (-self.Pry + self.Posy_i_R)	+ Var_Ajuste_y
 
 		else: 	#Calculo de posição a partir do movimento da perna esquerda
-				
+
 			self.Posx_i_R = self.Prx
-			self.Posy_i_R = self.Pry	
+			self.Posy_i_R = self.Pry
 
 			POSX = (-self.Plx + self.Posx_i_L) + Var_Ajuste_x
 			POSY = (-self.Ply + self.Posy_i_L)	+ Var_Ajuste_y
-		
-		IMU_Z = self.IMU[0] - self.IMU_ini[0] 
-		
+
+		IMU_Z = self.IMU[0] - self.IMU_ini[0]
+
 		self.Posxy_fix[0, 0] += POSX*np.cos(IMU_Z) - (-POSY*np.sin(IMU_Z))
 		self.Posxy_fix[1, 0] += POSX*np.sin(IMU_Z) + (-POSY*np.cos(IMU_Z))
 
 		self.posx.append(self.Posxy_fix[0, 0])
 		self.posy.append(self.Posxy_fix[1, 0])
-		
+
 		print("IMU = %f\n" % (IMU_Z))
 ##################Print_dos_valores########################################################
 
 	def Show_Position(self): #Apresentação dos valores calculados
-		print("\nposx = %f" % (self.Posxy_fix[0, 0]))
-		print("posy = %f\n" % (self.Posxy_fix[1, 0]))
-		
-		plt.ion()
-		plt.plot(self.posx, self.posy)
-		plt.draw()
-		plt.pause(0.0001)
+		# print("\nposx = %f" % (self.Posxy_fix[0, 0]))
+		# print("posy = %f\n" % (self.Posxy_fix[1, 0]))
+		#
+		# plt.ion()
+		# plt.plot(self.posx, self.posy)
+		# plt.draw()
+		# plt.pause(0.0001)
+
+		####Enviando valores para a BlackBoard###########
+		Odometry.bkb.write_float(Odometry.mem, 'ODOMETRY_POS_X', self.Posxy_fix[0, 0])
+		Odometry.bkb.write_float(Odometry.mem, 'ODOMETRY_POS_Y', self.Posxy_fix[1, 0])
 
 ###################Programa_principal#######################################################
 

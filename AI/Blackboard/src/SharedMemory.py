@@ -280,5 +280,7 @@ class SharedMemory(object):
     'VISION_BLUE_LANDMARK_DEG': 119,
     'VISION_RED_LANDMARK_DEG': 120,
     'VISION_YELLOW_LANDMARK_DEG': 121,
-    'VISION_PURPLE_LANDMARK_DEG': 122}
+    'VISION_PURPLE_LANDMARK_DEG': 122,
+    'ODOMETRY_POS_X': 123,
+    'ODOMETRY_POS_Y': 124}
 #------------------------------------------------------------------------------------------

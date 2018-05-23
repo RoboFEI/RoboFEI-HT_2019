@@ -237,6 +237,8 @@ Arquivo de cabeçalho contendo as funções e definições do black board
 #define VISION_RED_LANDMARK_DEG 120
 #define VISION_YELLOW_LANDMARK_DEG 121
 #define VISION_PURPLE_LANDMARK_DEG 122
+#define ODOMETRY_POS_X 123
+#define ODOMETRY_POS_Y 124
 
 
 
