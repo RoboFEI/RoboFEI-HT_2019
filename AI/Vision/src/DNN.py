@@ -190,20 +190,22 @@ class objectDetect():
         for cnt in contours:
             contador = contador + 1
             x,y,w,h = cv2.boundingRect(cnt)
-            #Passa para o classificador as imagens recortadas-----------------------
-            type_label, results = classify(cv2.cvtColor(frame[y:y+h,x:x+w], cv2.COLOR_BGR2RGB),
-                                                               self.net, self.transformer,
-                                                               mean_file=self.mean_file, labels=self.labels,
-                                                               batch_size=None)
-            #-----------------------------------------------------------------------
+            if((w*1.0)/h)>0.5 and ((w*1.0)/h)<2: #permite apenas imagens proximas de um quadrado
+#            	print h, w, "Entrouuuuuuuuuuu"
+                #Passa para o classificador as imagens recortadas-----------------------
+                type_label, results = classify(cv2.cvtColor(frame[y:y+h,x:x+w], cv2.COLOR_BGR2RGB),
+                                                                   self.net, self.transformer,
+                                                                   mean_file=self.mean_file, labels=self.labels,
+                                                                   batch_size=None)
+                #-----------------------------------------------------------------------
 
-#                print results, type_label
-#               cv2.imshow('janela',images[0])
-            cv2.imwrite("/home/fei/Documents/frames_extracted_by_DNN/"+str(rd.random()) +"image.png", frame[y:y+h,x:x+w])
-            if type_label == 'Ball':
+    #                print results, type_label
+    #               cv2.imshow('janela',images[0])
+    #            cv2.imwrite("/home/fei/Documents/frames_extracted_by_DNN/"+str(rd.random()) +"image.png", frame[y:y+h,x:x+w])
+                if type_label == 'Ball':
 
 
-                return frame, x+w/2, y+h/2, (w+h)/4, mask
+                    return frame, x+w/2, y+h/2, (w+h)/4, mask
             #=================================================================================================
     #    print "CONTOURS = ", time.time() - start3
         return frame, 0, 0, 0, mask

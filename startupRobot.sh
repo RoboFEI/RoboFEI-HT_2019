@@ -154,7 +154,7 @@ sudo rm  -r ~/OpenCV3
 mkdir ~/OpenCV3
 cd ~/OpenCV3
 git clone https://github.com/Itseez/opencv.git
-
+git checkout 3.4.0
 
 echo "${blue}Run CMake${NC}"
 cd opencv
@@ -193,6 +193,12 @@ sudo -H pip install scikit-image
 #Protobuth
 sudo -H pip install protobuf
 
+cd
+
+#Usado para o instalação no Ubuntu 16.04
+cd /usr/lib/x86_64-linux-gnu
+sudo ln -sf libhdf5_serial.so libhdf5.so
+sudo ln -sf libhdf5_serial_hl.so libhdf5_hl.so
 cd
 
 #Caffe

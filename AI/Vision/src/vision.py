@@ -190,9 +190,9 @@ if __name__ == '__main__':
 	vcap = WebcamVideoStream(src=0).start() #Abrindo camera
 #        cap.set(3,1280) #720 1280 1920
 #        cap.set(4,720) #480 720 1080
-#	os.system("v4l2-ctl -d /dev/video0 -c focus_auto=0 && v4l2-ctl -d /dev/video0 -c focus_absolute=0")
-#	os.system("v4l2-ctl -d /dev/video0 -c saturation=200")#manter 200 para nao estourar LARC
-#	os.system("v4l2-ctl -d /dev/video0 -c brightness=128")
+	os.system("v4l2-ctl -d /dev/video0 -c focus_auto=0 && v4l2-ctl -d /dev/video0 -c focus_absolute=0")
+	os.system("v4l2-ctl -d /dev/video0 -c saturation=200")#manter 200 para nao estourar LARC
+	os.system("v4l2-ctl -d /dev/video0 -c brightness=128")
 
 	cut_right = 1280-config.cut_edge_image
 
