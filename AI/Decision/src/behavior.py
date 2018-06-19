@@ -94,6 +94,8 @@ class TreatingRawData(object):
         time.sleep(0.1)
         return self.bkb.read_int(self.mem,'VISION_LOST')
 
+    def get_vision_status(self):
+        return self.bkb.read_int(self.mem,'VISION_STATE')
 
     def set_vision_search(self):
         return self.bkb.write_int(self.mem,'DECISION_SEARCH_ON', 1)
@@ -534,7 +536,7 @@ class NaiveIMUDecTurning(TreatingRawData):
             print 'walking forward in order to see anything'
             self.set_vision_ball()
             self.set_walk_forward_slow(10)
-            for i in range(0,20):
+            for i in range(0,5):   #### - Entra no campo se nao estiver ouvindo juiz - 20
                 time.sleep(1)
                 print "Counting...", i
             self.kickoff_ctrl = 1
@@ -567,7 +569,7 @@ class NaiveIMUDecTurning(TreatingRawData):
             if self.get_search_status() == 1: # 1 - vision lost
                 print 'vision lost'
                 self.set_stand_still()
-                self.set_walk_forward_slow((self.get_dist_ball() / 6))
+                #self.set_walk_forward_slow((self.get_dist_ball() / 6))
                 for __ in xrange(20):
                     time.sleep(1)
                     if self.get_search_status() == 0:
@@ -630,8 +632,8 @@ class NaiveIMUDecTurning(TreatingRawData):
                     else:
                         self.set_walk_forward_slow((self.get_dist_ball() / 6))
 
-                        # time.sleep(0.5)
-                        # self.set_stand_still()
+                         #time.sleep(0.2)
+                         #self.set_stand_still()
         else:
             print 'Invalid argument received from referee!'
             print referee
