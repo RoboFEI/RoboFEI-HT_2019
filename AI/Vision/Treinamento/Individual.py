@@ -45,6 +45,7 @@ class Individual():
     ## Mutation network
     # network architecture created by the mutation and cross over of network_architecture
     new_network_architecture = []
+    new_network_architecture1 = []
 
     ## Constructor Class
     def __init__(self):
@@ -65,21 +66,6 @@ class Individual():
             max_iter=10000
         )
 
-    # cross architecture
-    def __cross(self):
-        self.new_network_architecture = self.network_architecture
-        print "cross"
-
-    # mutation algorithm
-    def __mutation(self):
-        self.new_network_architecture = 1 * self.network_architecture # lista da nova arquitetura. Assim, mantendo a arquitetura original.
-        n = max(np.random.randint(len(self.new_network_architecture)), 1) # quantas camadas serao afetadas
-        for __ in xrange(n):
-            m = np.random.randint(11)-5 # modifica a camada escolhida de -5 a 5.
-            p = np.random.randint((len(self.new_network_architecture)))# Qual camada sera modificada
-            self.new_network_architecture[p] = max(self.new_network_architecture[p]+m, 1)
-        return self.new_network_architecture
-
     ## calculateWeight
     # .
     def __calculateWeight(self, score):
@@ -99,9 +85,34 @@ class Individual():
         # calculating weight
         self.__calculateWeight(score)
 
-    # creates new archtetures throught genetic algorithms
-    def geneticAlgorithm(self):
-        return self.__mutation()
-
     def setArchitecture(self, arc):
         self.network_architecture = arc
+
+    # creates new archtetures throught genetic algorithms
+
+    # cross architecture
+    def cross(self, arch2):
+        arc = None
+        if len(self.network_architecture)>len(arch2):
+            arc = 1*arch2
+        else: arc = 1*self.network_architecture
+
+        n = max(np.random.randint(len(arc)), 1) #Point of break on the list for crossing
+        if n==len(arc-1): n = n -1
+
+        if len(arc)!=1:
+            self.new_network_architecture = np.concatenate(arch2[n::], self.network_architecture[::n])
+            self.new_network_architecture1 = np.concatenate(self.network_architecture[n::], arch2[::n])
+
+        if len(arc)==1:
+            self.new_network_architecture = arch2 + self.network_architecture
+            self.new_network_architecture1 = self.network_architecture + arch2
+
+    # mutation algorithm
+    def mutation(self):
+        self.new_network_architecture = 1 * self.network_architecture # lista da nova arquitetura. Assim, mantendo a arquitetura original.
+        n = max(np.random.randint(len(self.new_network_architecture)), 1) # quantas camadas serao afetadas
+        for __ in xrange(n):
+            m = np.random.randint(11)-5 # modifica a camada escolhida de -5 a 5.
+            p = np.random.randint((len(self.new_network_architecture)))# Qual camada sera modificada
+            self.new_network_architecture[p] = max(self.new_network_architecture[p]+m, 1)

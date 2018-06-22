@@ -11,11 +11,12 @@ class Landmarks(BasicThread):
     ## listdata
     __listdata = [ ]
     __centerClass = [ ]
+    Parameters = {None}
 
     ## Constructor Class
     def __init__(self, arg):
-        super(Landmarks, self).__init__(arg, 'DNN', 'Parameters')
-        print 'Initializing'
+        super(Landmarks, self).__init__(arg, 'Landmark', 'Parameters')
+        # print 'Initializing'
         self.start()
 
 ## __classification

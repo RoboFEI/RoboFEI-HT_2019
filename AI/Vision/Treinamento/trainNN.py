@@ -88,13 +88,22 @@ outtest = intest*2 + 10  # função
 
 population = [ ]
 
-for __ in xrange(10):
+for __ in xrange(30):
     population.append(Individual( ))
 
+i = 1
 # ---- Run process ----
 for __ in xrange(20):
     weight = []
     architectures = []
+
+    ###############  DEBUG #################################################
+    print "\n*******************"
+    for individual in population:
+        print "weight:", individual.weight
+        print "architecture: ", individual.network_architecture
+    print "*******************\n"
+    ###############  DEBUG #################################################
 
     for individual in population:
         individual.performance(intrain, outtrain.ravel( ), intest, outtest.ravel( ))
@@ -104,10 +113,18 @@ for __ in xrange(20):
     # ordering architecture by the score Value
     weight, population = map(list, zip(*sorted(zip(weight, population), reverse=True)))
 
-    arc = len(population)/2 # initial index of substitution of the architectures
-    for individual in population[: (len(population)/2)]: # runs half of the population array
-        population[arc].setArchitecture(individual.geneticAlgorithm())# substitui na parte excluida uma nova arquitetura
+    arc = 10 # initial index of substitution of the architectures
+    #New archtetures using mutation algorithm
+    for individual in population[: (len(population)/3)]: # runs 1/3 of the population array
+        individual.mutation() #Aplying mutation
+        population[arc].setArchitecture(individual.new_network_architecture)# substitui na parte excluida uma nova arquitetura
         arc += 1
+    #New archtetures using crossover algorithm
+    for individual in population[: (len(population)/3)/2 - 1]: # runs 1/3 of the population array
+        individual.cross(population[population.index(individual)+1].network_architecture) #Aplying crossover
+        population[arc].setArchitecture(individual.new_network_architecture)# substitui na parte excluida uma nova arquitetura
+        population[arc+1].setArchitecture(individual.new_network_architecture1)
+        arc += 2
 
 #----Train and ordering the higthests architectures scores ----
 weight = [] # reseting the weight and architectures arrays

@@ -70,7 +70,7 @@ class Orchestrator(BasicProcesses):
             self.dnn.finalize()
             sys.exit(1)
 
-    # Instantiating landmarks object
+        # Instantiating landmarks object
         try:
             self.landmark = Landmarks(a)
         except VisionException as e:

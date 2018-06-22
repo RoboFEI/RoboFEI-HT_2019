@@ -1,7 +1,7 @@
 #!/bin/bash
 
 n="$(pwd)"
-cd ~/models
+cd ~/models/research
 
 # From the models/ directory
 python object_detection/train.py \
