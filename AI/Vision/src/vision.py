@@ -98,6 +98,7 @@ class ballStatus():
 				print ("Bola a Direita")
 
 
+
 	#	#CUIDADO AO ALTERAR OS VALORES ABAIXO!! O código abaixo possui inversão de eixos!
 	#	# O eixo em pixels é de cima para baixo ja as distancias são ao contrario.
 	#	# Quanto mais alto a bola na tela menor o valor em pixels 
