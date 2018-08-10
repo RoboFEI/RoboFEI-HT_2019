@@ -98,6 +98,7 @@ class ballStatus():
 				print ("Bola a Direita")
 
 
+
 	#	#CUIDADO AO ALTERAR OS VALORES ABAIXO!! O código abaixo possui inversão de eixos!
 	#	# O eixo em pixels é de cima para baixo ja as distancias são ao contrario.
 	#	# Quanto mais alto a bola na tela menor o valor em pixels 
@@ -124,11 +125,14 @@ def thread_DNN():
 	start1 = time.time()
 #===============================================================================
 	ball = False
-	frame_b, x, y, raio, ball, status= detectBall.searchball(frame, args2.visionMask, args2.visionMorph1, args2.visionMorph2, args2.visionMorph3, args2.visionMorph4)
+	frame_b, x, y, raio, ball, status, statusLost = detectBall.searchball(frame, args2.visionMask, args2.visionMorph1, args2.visionMorph2, args2.visionMorph3, args2.visionMorph4)
 	print "tempo de varredura = ", time.time() - start1
 	if ball ==False:
-		bkb.write_int(Mem,'VISION_LOST', 1)
+		bkb.write_int(Mem,'VISION_STATE', 0)
+		if statusLost == True:
+			bkb.write_int(Mem,'VISION_LOST', 1)
 	else:
+		bkb.write_int(Mem,'VISION_STATE', 1)
 		bkb.write_int(Mem,'VISION_LOST', 0)
 		ballS.BallStatus(x,y,status)
 	if args2.visionball:

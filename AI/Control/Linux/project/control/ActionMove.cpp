@@ -53,7 +53,7 @@ void ActionMove::pass_left(CM730 *cm730, bool &stop_gait)
     write_int(mem, CONTROL_ACTION, 12);
     write_int(mem, CONTROL_MOVING, 1);
     std::cout << " | \e[38;5;45mPasse forte Esquerda\e[0m" << std::endl;
-    move_action(1, 0, stop_gait);
+    move_action(9, 0, stop_gait);
     Action::GetInstance()->Start(70);
     while(Action::GetInstance()->IsRunning()) usleep(8*1000);
     Action::GetInstance()->Stop();
@@ -97,7 +97,7 @@ void ActionMove::pass_right(CM730 *cm730, bool &stop_gait)
     write_int(mem, CONTROL_ACTION, 13);
     write_int(mem, CONTROL_MOVING, 1);
     std::cout << " | \e[38;5;45mPasse forte Direita\e[0m" << std::endl;
-    move_action(1, 0, stop_gait);
+    move_action(9, 0, stop_gait);
     Action::GetInstance()->Start(71);
     while(Action::GetInstance()->IsRunning()) usleep(8*1000);
     Action::GetInstance()->Stop();
@@ -176,7 +176,7 @@ void ActionMove::kick_left_strong(CM730 *cm730, bool &stop_gait)
     write_int(mem, CONTROL_ACTION, 5);
     write_int(mem, CONTROL_MOVING, 1);
     std::cout << " | \e[38;5;45mChute forte esquerdo\e[0m" << std::endl;
-    move_action(1, 0, stop_gait);
+    move_action(9, 0, stop_gait);
     Action::GetInstance()->Start(62);
     while(Action::GetInstance()->IsRunning()) usleep(8*1000);
     Action::GetInstance()->Stop();
@@ -186,15 +186,23 @@ void ActionMove::kick_left_strong(CM730 *cm730, bool &stop_gait)
     //getchar();
 
     // Velocidades
-    cm730->WriteWord(12, 32, 985, &erro);
-    cm730->WriteWord(14, 32, 985, &erro);
+    cm730->WriteWord(12, 32, 1000, &erro);
+    cm730->WriteWord(14, 32, 1000, &erro);
     cm730->WriteWord(16, 32, 1023, &erro);
     cm730->WriteWord(18, 32, 150, &erro);
 
-    cm730->WriteWord(12, 30, MotionManager::GetInstance()->m_Offset[12]+790, &erro);
-    cm730->WriteWord(14, 30, MotionManager::GetInstance()->m_Offset[14]+600, &erro);
-    cm730->WriteWord(16, 30, MotionManager::GetInstance()->m_Offset[16]-200, &erro);
-    cm730->WriteWord(18, 30, MotionManager::GetInstance()->m_Offset[18]+545, &erro);
+    //CHUTAO FODA - MONTREAL
+    cm730->WriteWord(12, 30, MotionManager::GetInstance()->m_Offset[12]+900, &erro);
+    cm730->WriteWord(14, 30, MotionManager::GetInstance()->m_Offset[14]+400, &erro);
+    cm730->WriteWord(16, 30, MotionManager::GetInstance()->m_Offset[16]+555, &erro);
+    cm730->WriteWord(18, 30, MotionManager::GetInstance()->m_Offset[18]+420, &erro);
+
+    //ROBOCUP - MONTREAL
+
+//    cm730->WriteWord(12, 30, MotionManager::GetInstance()->m_Offset[12]+800, &erro);
+//    cm730->WriteWord(14, 30, MotionManager::GetInstance()->m_Offset[14]+312, &erro);
+//    cm730->WriteWord(16, 30, MotionManager::GetInstance()->m_Offset[16]+555, &erro);
+//    cm730->WriteWord(18, 30, MotionManager::GetInstance()->m_Offset[18]+420, &erro);
 
         //Esperando  completar o movimento
     unsigned int count_s = 0;
@@ -223,7 +231,7 @@ void ActionMove::kick_right_strong(CM730 *cm730, bool &stop_gait)
     write_int(mem, CONTROL_ACTION, 4);
     write_int(mem, CONTROL_MOVING, 1);
     std::cout << " | \e[38;5;45mChute forte direito\e[0m" << std::endl;
-    move_action(1, 0, stop_gait);
+    move_action(9, 0, stop_gait);
     while(Action::GetInstance()->IsRunning()) usleep(8*1000);
     Action::GetInstance()->Start(60);
     while(Action::GetInstance()->IsRunning()) usleep(8*1000);
@@ -234,16 +242,24 @@ void ActionMove::kick_right_strong(CM730 *cm730, bool &stop_gait)
     //getchar();
 
     // Velocidades
-    cm730->WriteWord(11, 32, 193, &erro);
-    cm730->WriteWord(13, 32, 772, &erro);
+    cm730->WriteWord(11, 32, 1000, &erro);
+    cm730->WriteWord(13, 32, 1000, &erro);
     cm730->WriteWord(15, 32, 1023, &erro);
     cm730->WriteWord(17, 32, 46, &erro);
 
-    cm730->WriteWord(11, 30, MotionManager::GetInstance()->m_Offset[11]+250, &erro);
+
+    //chutao fodao - montreal - ROBOCUP
+    cm730->WriteWord(11, 30, MotionManager::GetInstance()->m_Offset[11]+100, &erro);
     cm730->WriteWord(13, 30, MotionManager::GetInstance()->m_Offset[13]+500, &erro);
     cm730->WriteWord(15, 30, MotionManager::GetInstance()->m_Offset[15]+280, &erro);
     cm730->WriteWord(17, 30, MotionManager::GetInstance()->m_Offset[17]+545, &erro);
                     
+    //MONTREAL - ROBOCUP
+//    cm730->WriteWord(11, 30, MotionManager::GetInstance()->m_Offset[11]+250, &erro);
+//    cm730->WriteWord(13, 30, MotionManager::GetInstance()->m_Offset[13]+500, &erro);
+//    cm730->WriteWord(15, 30, MotionManager::GetInstance()->m_Offset[15]+280, &erro);
+//    cm730->WriteWord(17, 30, MotionManager::GetInstance()->m_Offset[17]+545, &erro);
+//                    
         //Esperando  completar o movimento
     unsigned int count_s = 0;
     cm730->ReadWord(15, 46, &value, 0);

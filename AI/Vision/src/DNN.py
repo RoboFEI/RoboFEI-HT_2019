@@ -37,6 +37,7 @@ class objectDetect():
     net = None
     transformer = None
     status =1
+    statusLost = 0
 
     def __init__(self, net, transformer, mean_file, labels, withoutservo, config, bkb, Mem):
         self.mean_file = mean_file
@@ -102,8 +103,10 @@ class objectDetect():
                             if not self.withoutservo:
                                 self.servo.writeWord(self.config.SERVO_TILT_ID, 30, self.config.POSITION_SERVO_TILT)
                                 self.status = self.SearchLostBall()
+				self.statusLost = True
 
         if (x!=0 and y!=0 and raio!=0):
+	    self.statusLost = False
             BallFound = True
             self.CountLostFrame = 0
             print('y ',y, 'x ',x ,'ball_up', self.config.when_ball_up, self.config.SERVO_TILT_ID, self.config.when_ball_down)
@@ -112,13 +115,24 @@ class objectDetect():
                     self.servo.writeWord(self.config.SERVO_TILT_ID,30, self.config.POSITION_SERVO_TILT + self.config.head_up)
                 if y>self.config.when_ball_down:
                     self.servo.writeWord(self.config.SERVO_TILT_ID, 30, self.config.POSITION_SERVO_TILT)
+#----central a bola quando ela esta na area sobreposta--------
+		if (self.status ==2 and x > 800):  
+			self.status = 1
+			self.servo.writeWord(self.config.SERVO_PAN_ID,30, self.config.CENTER_SERVO_PAN)
+			time.sleep(0.3)
+			self.Count =1
+		if (self.status ==0 and x < 150):
+			self.status = 1
+			self.servo.writeWord(self.config.SERVO_PAN_ID,30, self.config.CENTER_SERVO_PAN)
+			time.sleep(0.3)
+			self.Count =1
 #<<<<<<< HEAD
 #=======
 
 
 
 #>>>>>>> vision-UmpaLumpa
-        return frame, x, y, raio, BallFound, self.status
+        return frame, x, y, raio, BallFound, self.status, self.statusLost
 
     #Varredura
     def SearchLostBall(self):
