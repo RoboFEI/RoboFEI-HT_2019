@@ -472,7 +472,7 @@ class NaiveIMUDecTurning(TreatingRawData):
         print self.get_motor_tilt_degrees()
         print "referee", referee
         print 'search status ', self.get_search_status()
-
+    
         if referee == 1:  # stopped
             self.ready_walk = 0
             print 'stand'
@@ -518,9 +518,12 @@ class NaiveIMUDecTurning(TreatingRawData):
                     self.set_turn_left()
                 elif self.get_motor_pan_degrees() <= -60: #-30 ou -60
                     self.set_turn_right()
-            else: #a bola esta alinhada, fica parado.
-                self.set_stand_still()
-
+                else: #a bola esta alinhada, fica parado.
+                    self.set_stand_still()
+            else: 
+               
+                self.set_turn_right()
+                     
 
        # elif referee == 21 and self.kickoff_ctrl == 0:
        #     print 'walking forward for vision to see anything'
