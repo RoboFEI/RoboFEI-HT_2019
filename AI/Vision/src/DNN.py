@@ -1,6 +1,7 @@
 import argparse
 import time
 import cv2
+import pandas as pd
 
 # import the necessary packages
 import imutils
@@ -8,8 +9,6 @@ import imutils
 import os
 #import tarfile
 import time
-#import zipfile
-from classify import *
 import os
 import cv2
 import numpy as np
@@ -17,8 +16,12 @@ import sys
 
 from servo import Servo
 
-import Condensation
 import random as rd
+import tensorflow as tf
+
+from utils import label_map_util
+
+from utils import visualization_utils as vis_util
 
 #SERVO_PAN = 19
 #SERVO_TILT = 20
@@ -32,78 +35,82 @@ import random as rd
 class objectDetect():
     CountLostFrame = 0
     Count = 0
-    mean_file = None
-    labels = None
-    net = None
-    transformer = None
     status =1
     statusLost = 0
 
-    def __init__(self, net, transformer, mean_file, labels, withoutservo, config, bkb, Mem):
-        self.mean_file = mean_file
-        self.labels = labels
-        self.net = net
-        self.transformer = transformer
+    def __init__(self, withoutservo, config, bkb, Mem):
+
         self.withoutservo = withoutservo
         self.config = config
         self.bkb = bkb
         self.Mem = Mem
-        self.kernel_perto = np.ones((self.config.kernel_perto, self.config.kernel_perto), np.uint8)
-        self.kernel_perto2 = np.ones((self.config.kernel_perto2, self.config.kernel_perto2), np.uint8)
-        self.kernel_medio = np.ones((self.config.kernel_medio, self.config.kernel_medio), np.uint8)
-        self.kernel_medio2 = np.ones((self.config.kernel_medio2, self.config.kernel_medio2), np.uint8)
-        self.kernel_longe = np.ones((self.config.kernel_longe, self.config.kernel_longe), np.uint8)
-        self.kernel_longe2 = np.ones((self.config.kernel_longe2, self.config.kernel_longe2), np.uint8)
-        self.kernel_muito_longe = np.ones((self.config.kernel_muito_longe, self.config.kernel_muito_longe), np.uint8)
-        self.kernel_muito_longe2 = np.ones((self.config.kernel_muito_longe2, self.config.kernel_muito_longe2), np.uint8)
+
         if self.withoutservo==False:
             self.servo = Servo(self.config.CENTER_SERVO_PAN, self.config.POSITION_SERVO_TILT)
 
-    def searchball(self, image, visionMask, visionMorph1, visionMorph2, visionMorph3, visionMorph4): 
 
-        YUV_frame = cv2.cvtColor(image, cv2.COLOR_BGR2YUV)
-        white_mask = cv2.inRange(YUV_frame[:,:,0], self.config.white_threshould, 255)
+        # Path to frozen detection graph. This is the actual model that is used for the object detection.
+        PATH_TO_CKPT = './nets/'+self.config.DNN_type+'/frozen_inference_graph.pb'
 
-        if visionMask:
-            
-            cv2.imshow('Frame Mascara', cv2.resize(white_mask, (640, 360)) )
+        # List of the strings that is used to add correct label for each box.
+        PATH_TO_LABELS = os.path.join('./nets/'+self.config.DNN_type+'/object-detection.pbtxt')
 
+        NUM_CLASSES = 1
+
+        # Reading network file.
+        self.__detection_graph = tf.Graph()
+        with self.__detection_graph.as_default():
+            od_graph_def = tf.GraphDef()
+            with tf.gfile.GFile(PATH_TO_CKPT, 'rb') as fid:
+                serialized_graph = fid.read()
+                od_graph_def.ParseFromString(serialized_graph)
+                tf.import_graph_def(od_graph_def, name='')
+
+
+        label_map = label_map_util.load_labelmap(PATH_TO_LABELS)
+        categories = label_map_util.convert_label_map_to_categories(label_map, max_num_classes=NUM_CLASSES, use_display_name=True)
+        self.category_index = label_map_util.create_category_index(categories)
+
+        # Creating a section to run the detection.
+        with self.__detection_graph.as_default():
+            self.__sess = tf.Session(
+                graph=self.__detection_graph,
+                config=tf.ConfigProto(
+                    intra_op_parallelism_threads=1,
+                    inter_op_parallelism_threads=1
+                )
+            )
+
+            self.__imagetensor = self.__detection_graph.get_tensor_by_name('image_tensor:0')
+            self.__detectionboxes = self.__detection_graph.get_tensor_by_name('detection_boxes:0')
+            self.__detectionscores = self.__detection_graph.get_tensor_by_name('detection_scores:0')
+            self.__detectionclasses = self.__detection_graph.get_tensor_by_name('detection_classes:0')
+            self.__numdetections = self.__detection_graph.get_tensor_by_name('num_detections:0')
+
+
+    def searchball(self, image): 
 
 #        start2 = time.time()
         BallFound = False
-        frame, x, y, raio, maskM = self.Morphology(image , white_mask,self.kernel_perto, self.kernel_perto2,1)
-        if visionMorph1:
-            cv2.imshow('Morfologia 1',cv2.resize(maskM, (640, 360)))
-#        print "Search = ", time.time() - start2 
+        frame, x, y, raio = self.Morphology(image )
+
         if (x==0 and y==0 and raio==0):
-            frame, x, y, raio, maskM = self.Morphology(image, white_mask,self.kernel_medio ,self.kernel_medio2,2)
-            if visionMorph2:
-                cv2.imshow('Morfologia 2', cv2.resize(maskM, (640, 360)))
-            if (x==0 and y==0 and raio==0):
-                frame, x, y, raio, maskM = self.Morphology(image, white_mask,self.kernel_longe , self.kernel_longe2,3)
-                if visionMorph3:
-                    cv2.imshow('Morfologia 3', cv2.resize(maskM, (640, 360)))
-                if (x==0 and y==0 and raio==0):
-                    frame, x, y, raio, maskM = self.Morphology(image, white_mask,self.kernel_muito_longe, self.kernel_muito_longe2,4)
-                    if visionMorph4: 
-                        cv2.imshow('Morfologia 4', cv2.resize(maskM, (640, 360))) 
-                    if (x==0 and y==0 and raio==0):
-                        self.CountLostFrame +=1
-                        print("@@@@@@@@@@@@@@@@@@@",self.CountLostFrame, self.config.max_count_lost_frame)
-                        if self.CountLostFrame>=self.config.max_count_lost_frame: 
-                            BallFound = False
-                            self.CountLostFrame = 0
-                            print("----------------------------------------------------------------------")
-                            print("----------------------------------------------------------------------")
-                            print("----------------------------------------------------------------------")
-                            print("--------------------------------------------------------Ball not found")
-                            print("----------------------------------------------------------------------")
-                            print("----------------------------------------------------------------------")
-                            print("----------------------------------------------------------------------")
-                            if not self.withoutservo:
-                                self.servo.writeWord(self.config.SERVO_TILT_ID, 30, self.config.POSITION_SERVO_TILT)
-                                self.status = self.SearchLostBall()
-				self.statusLost = True
+            self.CountLostFrame +=1
+            print("@@@@@@@@@@@@@@@@@@@",self.CountLostFrame, self.config.max_count_lost_frame)
+            if self.CountLostFrame>=self.config.max_count_lost_frame: 
+                BallFound = False
+                self.CountLostFrame = 0
+                print("----------------------------------------------------------------------")
+                print("----------------------------------------------------------------------")
+                print("----------------------------------------------------------------------")
+                print("--------------------------------------------------------Ball not found")
+                print("----------------------------------------------------------------------")
+                print("----------------------------------------------------------------------")
+                print("----------------------------------------------------------------------")
+                if not self.withoutservo:
+                    self.servo.writeWord(self.config.SERVO_TILT_ID, 30, self.config.POSITION_SERVO_TILT)
+                    self.status = self.SearchLostBall()
+		    self.statusLost = True
 
         if (x!=0 and y!=0 and raio!=0):
 	    self.statusLost = False
@@ -161,68 +168,54 @@ class objectDetect():
                 return 1
 
 
-    def Morphology(self, frame, white_mask, kernel, kernel2, k):
+    def Morphology(self, frame):
 
         start3 = time.time()
         contador = 0
-    #   variavel com imagen completa
-        frametemp = white_mask
 
-        if k ==1 or k==4:
-    #    cv2.imshow('mask',white_mask)
-            kernel_teste = np.ones((35, 35), np.uint8)
-            mask = cv2.morphologyEx(white_mask, cv2.MORPH_DILATE, kernel_teste,1)
-            mask = cv2.morphologyEx(mask, cv2.MORPH_ERODE, kernel)
-            mask = cv2.morphologyEx(mask, cv2.MORPH_DILATE, kernel2,1)
-        else:
-            mask = cv2.morphologyEx(white_mask, cv2.MORPH_DILATE, kernel2,1)
-            mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+        image_np = np.asarray(frame)
 
-        
-    # Se a morfologia de perto k =1, recorta a parte de cima
-        if k ==1:
-            mask[0:300,:]=0
-    # Se a morfologia medio k =2, recorta a parte de baixo
-        if k ==2:
-            mask[0:180,:]=0
-#            mask[720:,:]=0
-    # Se a morfologia de longe k =3, recorta a parte de baixo
-        if k ==3:
-            mask[350:,:]=0
-    # Se a morfologia de muito longe k = 4, recorta a parte de baixo
-        if k ==4:
-            mask[300:,:]=0
+      # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
+        image_np_expanded = np.expand_dims(image_np, axis=0)
+        (boxes, scores, classes, num) = self.__sess.run(
+            [self.__detectionboxes, self.__detectionscores, self.__detectionclasses, self.__numdetections],
+            feed_dict={self.__imagetensor: image_np_expanded})
+      # Visualization of the results of a detection.
+
+        vis_util.visualize_boxes_and_labels_on_image_array(
+          image_np,
+          np.squeeze(boxes),
+          np.squeeze(classes).astype(np.int32),
+          np.squeeze(scores),
+          self.category_index,
+          use_normalized_coordinates=True,
+          line_thickness=8)
+#      plt.figure(figsize=IMAGE_SIZE)
+#      plt.imshow(image_np)
+
+        df = pd.DataFrame()
+        df['classes'] = classes[0]
+        df['scores'] = scores[0]
+        df['boxes'] = boxes[0].tolist()
 
 
-        ret,th1 = cv2.threshold(mask,25,255,cv2.THRESH_BINARY)
-        try:
-            _,contours,_ = cv2.findContours(th1, cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
-        except:
-            contours,_ = cv2.findContours(th1, cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
 
+        if(df['scores'][0]>0.95):
+            height, width = frame.shape[:2]
+            print df['boxes'][0][0]
+            #      print df.head()
 
-        for cnt in contours:
-            contador = contador + 1
-            x,y,w,h = cv2.boundingRect(cnt)
-            if((w*1.0)/h)>0.5 and ((w*1.0)/h)<2: #permite apenas imagens proximas de um quadrado
-#            	print h, w, "Entrouuuuuuuuuuu"
-                #Passa para o classificador as imagens recortadas-----------------------
-                type_label, results = classify(cv2.cvtColor(frame[y:y+h,x:x+w], cv2.COLOR_BGR2RGB),
-                                                                   self.net, self.transformer,
-                                                                   mean_file=self.mean_file, labels=self.labels,
-                                                                   batch_size=None)
-                #-----------------------------------------------------------------------
+            #      box_coords[ymin, xmin, ymax, xmax]
+            y1 = int(df['boxes'][0][0]*height)
+            x1 = int(df['boxes'][0][1]*width)
+            y2 = int(df['boxes'][0][2]*height)
+            x2 = int(df['boxes'][0][3]*width)
+            xmed = (x2-x1)/2
+            ymed = (y2-y1)/2
+            return frame, x2-xmed, y2-ymed, (xmed+ymed)/2
 
-    #                print results, type_label
-    #               cv2.imshow('janela',images[0])
-    #            cv2.imwrite("/home/fei/Documents/frames_extracted_by_DNN/"+str(rd.random()) +"image.png", frame[y:y+h,x:x+w])
-                if type_label == 'Ball':
-
-
-                    return frame, x+w/2, y+h/2, (w+h)/4, mask
-            #=================================================================================================
-    #    print "CONTOURS = ", time.time() - start3
-        return frame, 0, 0, 0, mask
+        #=================================================================================================
+        return frame, 0, 0, 0
 
 
 
