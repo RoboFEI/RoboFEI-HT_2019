@@ -93,7 +93,7 @@ for __ in xrange(30):
 
 i = 1
 # ---- Run process ----
-for __ in xrange(20):
+for __ in xrange(100):
     weight = []
     architectures = []
 
@@ -113,14 +113,14 @@ for __ in xrange(20):
     # ordering architecture by the score Value
     weight, population = map(list, zip(*sorted(zip(weight, population), reverse=True)))
 
-    arc = 10 # initial index of substitution of the architectures
+    arc = 2 # initial index of substitution of the architectures
     #New archtetures using mutation algorithm
     for individual in population[: (len(population)/3)]: # runs 1/3 of the population array
         individual.mutation() #Aplying mutation
         population[arc].setArchitecture(individual.new_network_architecture)# substitui na parte excluida uma nova arquitetura
         arc += 1
     #New archtetures using crossover algorithm
-    for individual in population[: (len(population)/3)/2 - 1]: # runs 1/3 of the population array
+    for individual in population[: (len(population)/3)/2-1]: # runs 1/3 of the population array
         individual.cross(population[population.index(individual)+1].network_architecture) #Aplying crossover
         population[arc].setArchitecture(individual.new_network_architecture)# substitui na parte excluida uma nova arquitetura
         population[arc+1].setArchitecture(individual.new_network_architecture1)

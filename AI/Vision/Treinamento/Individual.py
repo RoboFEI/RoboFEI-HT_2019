@@ -69,9 +69,10 @@ class Individual():
     ## calculateWeight
     # .
     def __calculateWeight(self, score):
-        self.weight = score +\
-        1./len(self.network_architecture) +\
-        1./max(sum(self.network_architecture), 1)
+        self.weight = score
+        #+\
+        # 1./len(self.network_architecture) +\
+        # 1./max(sum(self.network_architecture), 1)
 
     ## performance
     # .
