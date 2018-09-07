@@ -50,10 +50,10 @@ class objectDetect():
 
 
         # Path to frozen detection graph. This is the actual model that is used for the object detection.
-        PATH_TO_CKPT = './nets/'+self.config.DNN_type+'/frozen_inference_graph.pb'
+        PATH_TO_CKPT = './nets/rede/frozen_inference_graph.pb'
 
         # List of the strings that is used to add correct label for each box.
-        PATH_TO_LABELS = os.path.join('./nets/'+self.config.DNN_type+'/object-detection.pbtxt')
+        PATH_TO_LABELS = os.path.join('./nets/rede/object-detection.pbtxt')
 
         NUM_CLASSES = 1
 
