@@ -577,7 +577,7 @@ class NaiveIMUDecTurning(TreatingRawData):
                                    self.set_vision_ball()
                                    time.sleep(1)
                                    break
-                          if referee==2
+                          if referee==2:
                                    break
                 self.set_stand_still()    
              
@@ -606,8 +606,6 @@ class NaiveIMUDecTurning(TreatingRawData):
                     self.set_turn_right()
                     #self.set_stand_still()
                 else:
-                    if referee==2
-                        break
                     print self.get_orientation()
                     if self.get_motor_tilt_degrees() == 0 and self.get_motor_pan_degrees() == -30:
 			            #print 'entrei'
