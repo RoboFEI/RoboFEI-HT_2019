@@ -199,7 +199,7 @@ void ActionMove::kick_left_strong(CM730 *cm730, bool &stop_gait)
 
     //ROBOCUP - MONTREAL
 
-    cm730->WriteWord(12, 30, MotionManager::GetInstance()->m_Offset[12]+1000, &erro);
+    cm730->WriteWord(12, 30, MotionManager::GetInstance()->m_Offset[12]+800, &erro);
     cm730->WriteWord(14, 30, MotionManager::GetInstance()->m_Offset[14]+312, &erro);
     cm730->WriteWord(16, 30, MotionManager::GetInstance()->m_Offset[16]+555, &erro);
     cm730->WriteWord(18, 30, MotionManager::GetInstance()->m_Offset[18]+420, &erro);
@@ -249,17 +249,17 @@ void ActionMove::kick_right_strong(CM730 *cm730, bool &stop_gait)
 
 
     //chutao fodao - montreal - ROBOCUP
-    //cm730->WriteWord(11, 30, MotionManager::GetInstance()->m_Offset[11]+100, &erro);
-    //cm730->WriteWord(13, 30, MotionManager::GetInstance()->m_Offset[13]+500, &erro);
-    //cm730->WriteWord(15, 30, MotionManager::GetInstance()->m_Offset[15]+280, &erro);
-    //cm730->WriteWord(17, 30, MotionManager::GetInstance()->m_Offset[17]+545, &erro);
-                    
-    //MONTREAL - ROBOCUP
-    cm730->WriteWord(11, 30, MotionManager::GetInstance()->m_Offset[11]+250, &erro);
+    cm730->WriteWord(11, 30, MotionManager::GetInstance()->m_Offset[11]+100, &erro);
     cm730->WriteWord(13, 30, MotionManager::GetInstance()->m_Offset[13]+500, &erro);
     cm730->WriteWord(15, 30, MotionManager::GetInstance()->m_Offset[15]+280, &erro);
     cm730->WriteWord(17, 30, MotionManager::GetInstance()->m_Offset[17]+545, &erro);
                     
+    //MONTREAL - ROBOCUP
+//    cm730->WriteWord(11, 30, MotionManager::GetInstance()->m_Offset[11]+250, &erro);
+//    cm730->WriteWord(13, 30, MotionManager::GetInstance()->m_Offset[13]+500, &erro);
+//    cm730->WriteWord(15, 30, MotionManager::GetInstance()->m_Offset[15]+280, &erro);
+//    cm730->WriteWord(17, 30, MotionManager::GetInstance()->m_Offset[17]+545, &erro);
+//                    
         //Esperando  completar o movimento
     unsigned int count_s = 0;
     cm730->ReadWord(15, 46, &value, 0);
