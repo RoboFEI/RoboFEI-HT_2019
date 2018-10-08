@@ -86,6 +86,7 @@ class TreatingRawData(object):
 
     ''''def get_head_pan_initial(self):
         return self.config.getint('Offset', 'ID_19')
+
     def get_head_tilt_initial(self):
         return self.config.getint('Offset', 'ID_20')'''
 
@@ -463,7 +464,7 @@ class NaiveIMUDecTurning(TreatingRawData):
         print
         print 'Naive behavior called with IMU and turning'
         print
-        self.kickoff_ctrl = 0 #comecar em zero
+        self.kickoff_ctrl = 0
 
     def decision(self, referee):
 
@@ -471,7 +472,6 @@ class NaiveIMUDecTurning(TreatingRawData):
         print self.get_motor_tilt_degrees()
         print "referee", referee
         print 'search status ', self.get_search_status()
-        self.kickoff_ctrl = 1
 
         if referee == 1:  # stopped
             self.ready_walk = 0
@@ -535,6 +535,7 @@ class NaiveIMUDecTurning(TreatingRawData):
             self.ready_walk = 0
             print 'walking forward in order to see anything'
             self.set_vision_ball()
+            self.set_walk_forward_slow(10)
             for i in range(0,5):   #### - Entra no campo se nao estiver ouvindo juiz - 20
                 time.sleep(1)
                 print "Counting...", i
@@ -568,37 +569,24 @@ class NaiveIMUDecTurning(TreatingRawData):
             if self.get_search_status() == 1: # 1 - vision lost
                 print 'vision lost'
                 self.set_stand_still()
-                for __ in xrange(5):
-                          if self.get_search_status() == 1:
-                                   self.set_turn_right()
-                                   time.sleep(1)                                
-                          if self.get_search_status() == 0:
-                                   self.set_stand_still()
-                                   self.set_vision_ball()
-                                   time.sleep(1)
-                                   break
-                          if referee==2:
-                                   break
-                self.set_stand_still()    
-             
-                     
-                     
-                  
-                                   
-                            
+                self.set_walk_forward_slow((self.get_dist_ball() / 6))
+                for __ in xrange(7):
+                    time.sleep(1)
+                    if self.get_search_status() == 0:
+                        self.set_stand_still()
+                        break
                 
-               
-                # for __ in xrange(20):
-                #    time.sleep(1)
-                #    if self.get_search_status() == 0:
-                #        break
+                self.set_stand_still()
+                for __ in xrange(20):
+                    time.sleep(1)
+                    if self.get_search_status() == 0:
+                        break
                 #thiago decision
                 #self.set_vision_search()
                 #self.set_turn_right()
-            if self.get_search_status() == 0: # 0 - object found
+            elif self.get_search_status() == 0: # 0 - object found
 		#print 'entre found'
                 # align to the ball
-                self.set_vision_ball()
                 if self.get_motor_pan_degrees() == 60:
                     self.set_turn_left()
                     #self.set_stand_still()
@@ -606,6 +594,7 @@ class NaiveIMUDecTurning(TreatingRawData):
                     self.set_turn_right()
                     #self.set_stand_still()
                 else:
+
                     print self.get_orientation()
                     if self.get_motor_tilt_degrees() == 0 and self.get_motor_pan_degrees() == -30:
 			            #print 'entrei'
@@ -636,7 +625,8 @@ class NaiveIMUDecTurning(TreatingRawData):
                             #########
                     elif self.get_motor_tilt_degrees() == 70: #longe
                         self.set_walk_forward()
-                        #self.set_walk_forward_slow((self.get_dist_ball() / 5))
+                       
+                    #self.set_walk_forward_slow((self.get_dist_ball() / 5))
                     #elif self.get_dist_ball() <= 26:
                     #    self.set_stand_still()
                     #self.get_motor_tilt_degrees == 45: #meio longe
@@ -879,4 +869,3 @@ class Golie(Ordinary):
         else:
             print 'Invalid argument received from referee!'
             print referee
-
