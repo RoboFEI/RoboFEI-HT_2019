@@ -21,6 +21,7 @@ import tensorflow as tf
 
 from utils import label_map_util
 
+
 from utils import visualization_utils as vis_util
 
 #SERVO_PAN = 19
@@ -200,7 +201,7 @@ class objectDetect():
 
 
 
-        if(df['scores'][0]>0.95):
+        if(df['scores'][0]>0.80):
             height, width = frame.shape[:2]
             print df['boxes'][0][0]
             #      print df.head()
