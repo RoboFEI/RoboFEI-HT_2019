@@ -199,9 +199,9 @@ void ActionMove::kick_left_strong(CM730 *cm730, bool &stop_gait)
 
     //ROBOCUP - MONTREAL
 
-    cm730->WriteWord(12, 30, MotionManager::GetInstance()->m_Offset[12]+1000, &erro);
-    cm730->WriteWord(14, 30, MotionManager::GetInstance()->m_Offset[14]+312, &erro);
-    cm730->WriteWord(16, 30, MotionManager::GetInstance()->m_Offset[16]+555, &erro);
+    cm730->WriteWord(12, 30, MotionManager::GetInstance()->m_Offset[12]+750, &erro);
+    cm730->WriteWord(14, 30, MotionManager::GetInstance()->m_Offset[14]+400, &erro);
+    cm730->WriteWord(16, 30, MotionManager::GetInstance()->m_Offset[16]+550, &erro);
     cm730->WriteWord(18, 30, MotionManager::GetInstance()->m_Offset[18]+420, &erro);
 
         //Esperando  completar o movimento
