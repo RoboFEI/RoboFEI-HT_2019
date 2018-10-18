@@ -1,0 +1,3 @@
+#instalar tensorflow 1.10
+sudo pip install tensorflow==1.10 
+
