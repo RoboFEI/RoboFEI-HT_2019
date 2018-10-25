@@ -128,9 +128,14 @@ else
 	KERNEL=="ttyUSB?", SUBSYSTEMS=="usb", ATTRS{idVendor}=="0403",  ATTRS{idProduct}=="6001",ATTRS{serial}=="A9K3FL1T" MODE="0777", SYMLINK+="robot/imu"
 EOF
 	chmod +x 41-ftdi-imu.rules
-	sudo echo  -e "Copying file${blue} 41-ftdi-imu.rules${NC} to ${green}/etc/udev/rules.d${NC}"
+	cat <<EOF > 80-latency_USB.rules
+	ACTION=="add", SUBSYSTEM=="usb-serial", DRIVER=="ftdi_sio", ATTR{latency_timer}="1"
+EOF
+	sudo echo  -e "Copying file${blue} 41-ftdi-imu.rules 80-latency_USB.rules${NC} to ${green}/etc/udev/rules.d${NC}"
 	sudo cp  41-ftdi-imu.rules  /etc/udev/rules.d
+	sudo cp  80-latency_USB.rules  /etc/udev/rules.d
     rm 41-ftdi-imu.rules
+    rm 80-latency_USB.rules
 
 	sudo echo  -e "Creating rules for recognizing devices${red} Servo${NC}"
     sudo python ./AI/Control/Linux/device/renamePort.py
