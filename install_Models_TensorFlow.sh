@@ -87,6 +87,8 @@ git clone https://github.com/tensorflow/models.git
 
 ##############################
 
+cd ~/models/
+git checkout 3a05570f
 
 echo -e "${blue}Install Models${NC}";
 # From ~/models/research/
