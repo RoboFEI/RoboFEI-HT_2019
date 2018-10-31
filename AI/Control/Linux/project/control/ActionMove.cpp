@@ -189,7 +189,7 @@ void ActionMove::kick_left_strong(CM730 *cm730, bool &stop_gait)
     cm730->WriteWord(12, 32, 1000, &erro);
     cm730->WriteWord(14, 32, 1000, &erro);
     cm730->WriteWord(16, 32, 1023, &erro);
-    cm730->WriteWord(18, 32, 150, &erro);
+    cm730->WriteWord(18, 32, 46, &erro);
 
     //CHUTAO FODA - MONTREAL
     //cm730->WriteWord(12, 30, MotionManager::GetInstance()->m_Offset[12]+900, &erro);
