@@ -1,3 +1,5 @@
+# -*- coding: UTF8 -*-
+
 import argparse
 import time
 import cv2
@@ -49,12 +51,18 @@ class objectDetect():
         if self.withoutservo==False:
             self.servo = Servo(self.config.CENTER_SERVO_PAN, self.config.POSITION_SERVO_TILT)
 
-
+        
         # Path to frozen detection graph. This is the actual model that is used for the object detection.
-        PATH_TO_CKPT = './nets/rede/frozen_inference_graph.pb'
+        PATH_TO_CKPT = './nets/'+self.config.DNN_folder+'/frozen_inference_graph.pb'
 
         # List of the strings that is used to add correct label for each box.
-        PATH_TO_LABELS = os.path.join('./nets/rede/object-detection.pbtxt')
+        PATH_TO_LABELS = os.path.join('./nets/'+self.config.DNN_folder+'/object-detection.pbtxt')
+
+        if (not os.path.exists(PATH_TO_CKPT) or not os.path.exists(PATH_TO_LABELS)):
+            print("\x1b[1;31mNão encontrou a pasta da rede DNN descrita no \x1b[1;36mconfig.ini \x1b[1;31mda visão\x1b[0m")
+            print("\x1b[1;31mOu não encontrou o arquivo frozen ou pbtxt da DNN\x1b[0m")
+            quit()
+
 
         NUM_CLASSES = 1
 

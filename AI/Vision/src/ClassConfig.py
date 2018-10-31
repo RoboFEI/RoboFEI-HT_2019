@@ -61,7 +61,7 @@ class classConfig():
 				self.SERVO_PAN_ID    = 		self.Config.getint('Basic Settings', 'PAN_ID')
 				self.SERVO_TILT_ID   = 		self.Config.getint('Basic Settings', 'TILT_ID')
 
-				self.DNN_type = 		self.Config.get('Basic Settings', 'dnn_type')
+				self.DNN_folder = 		self.Config.get('Basic Settings', 'dnn_folder')
 
 
 				self.max_count_lost_frame =   self.Config.getint('Basic Settings', 'max_count_lost_frame')
@@ -93,7 +93,7 @@ class classConfig():
 				self.Config.set('Basic Settings', 'PAN_ID'                 , str(19)+'\t\t\t;Servo Identification number for PAN')
 				self.Config.set('Basic Settings', 'TILT_ID'                , str(20)+'\t;Servo Identification number for TILT')
 
-				self.Config.set('Basic Settings', 'dnn_type'                , "r_80_cv4_32_256.tar.gz"+'\t;Dnn type')
+				self.Config.set('Basic Settings', 'dnn_folder'                , "rede"+'\t;Dnn folder')
 
 				self.Config.set('Basic Settings', 'max_count_lost_frame'        , str(10)+'\t;Threshould')
 				self.Config.set('Basic Settings', 'max_count_lost_frame_far_ball'        , str(30)+'\t;Quanto que o robo espera apos achar a bola de longe')
