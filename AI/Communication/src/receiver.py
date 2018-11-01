@@ -222,14 +222,14 @@ class SampleGameStateReceiver(GameStateReceiver):
         elif state.kick_of_team != TEAM_OPPONENT  and state.secondary_state == "STATE_FREEKICK":
             print ("freekick to RoboFei")
             bkb.write_int(mem,'COM_REFEREE',1) #stop
-        elif state.kick_of_team != TEAM_OPPONENT  and state.secondary_state == "TATE_PENALTYKICK":
+        elif state.kick_of_team != TEAM_OPPONENT  and state.secondary_state == "STATE_PENALTYKICK":
             print ("penaltykick to RoboFei")
             bkb.write_int(mem,'COM_REFEREE',1) #stop
 
 #verificar pq penaltyshoot está com problema no protocolo.
 #        elif state.kick_of_team != TEAM_OPPONENT  and state.secondary_state == "STATE_PENALTYSHOOT":
 #            print ("penalty to RoboFei")
-#            bkb.write_int(mem,'COM_REFEREE',3)
+#            bkb.write_int(mem,'COM_REFEREE',3)                                  
 #        elif state.kick_of_team == TEAM_OPPONENT  and state.secondary_state == "STATE_PENALTYSHOOT":
 #            print ("penalty to opponent")
 #            bkb.write_int(mem,'COM_REFEREE',4)
@@ -244,4 +244,3 @@ class SampleGameStateReceiver(GameStateReceiver):
 if __name__ == '__main__':
     rec = SampleGameStateReceiver(team=TEAM_ROBOFEI, player=rbt_number)
     rec.receive_forever()
-
