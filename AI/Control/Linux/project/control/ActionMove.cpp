@@ -186,10 +186,10 @@ void ActionMove::kick_left_strong(CM730 *cm730, bool &stop_gait)
     //getchar();
 
     // Velocidades
-    cm730->WriteWord(12, 32, 1000, &erro);
-    cm730->WriteWord(14, 32, 1000, &erro);
-    cm730->WriteWord(16, 32, 1023, &erro);
-    cm730->WriteWord(18, 32, 46, &erro);
+    cm730->WriteWord(12, 32, 1023, &erro);
+    cm730->WriteWord(14, 32, 682, &erro);
+    cm730->WriteWord(16, 32, 887, &erro);
+    cm730->WriteWord(18, 32, 614, &erro);
 
     //CHUTAO FODA - MONTREAL
     //cm730->WriteWord(12, 30, MotionManager::GetInstance()->m_Offset[12]+900, &erro);
@@ -199,10 +199,10 @@ void ActionMove::kick_left_strong(CM730 *cm730, bool &stop_gait)
 
     //ROBOCUP - MONTREAL
 
-    cm730->WriteWord(12, 30, MotionManager::GetInstance()->m_Offset[12]+1000, &erro);
-    cm730->WriteWord(14, 30, MotionManager::GetInstance()->m_Offset[14]+312, &erro);
-    cm730->WriteWord(16, 30, MotionManager::GetInstance()->m_Offset[16]+555, &erro);
-    cm730->WriteWord(18, 30, MotionManager::GetInstance()->m_Offset[18]+420, &erro);
+    cm730->WriteWord(12, 30, MotionManager::GetInstance()->m_Offset[12]+750, &erro);
+    cm730->WriteWord(14, 30, MotionManager::GetInstance()->m_Offset[14]+500, &erro);
+    cm730->WriteWord(16, 30, MotionManager::GetInstance()->m_Offset[16]+650, &erro);
+    cm730->WriteWord(18, 30, MotionManager::GetInstance()->m_Offset[18]+450, &erro);
 
         //Esperando  completar o movimento
     unsigned int count_s = 0;
