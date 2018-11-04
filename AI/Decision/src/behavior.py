@@ -587,7 +587,7 @@ class NaiveIMUDecTurning(TreatingRawData):
             if self.get_search_status() == 1: # 1 - vision lost
                 print 'vision lost'
                 self.set_stand_still()
-                for __ in xrange(5):
+                for __ in xrange(10):
                           if self.get_search_status() == 1:
                                    self.set_turn_right()
                                    time.sleep(1)                              
