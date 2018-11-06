@@ -826,7 +826,6 @@ class GolieSimulator(Ordinary):
             print referee
 
 
-
 class Golie(Ordinary):
     " " " Golie class " " "
 
@@ -857,7 +856,7 @@ class Golie(Ordinary):
 
 
         elif referee == 2:  # play
-            
+          
             self.kickoff_ctrl = 1
             #print 'dist_ball', self.get_dist_ball()
             print 'orientation', self.get_orientation()
@@ -881,30 +880,19 @@ class Golie(Ordinary):
                     while self.get_motor_pan_degrees() == -60 and self.get_search_status() == 0:
                          self.set_sidle_right()
                     #self.set_stand_still()
-                           
+                         
                     self.set_stand_still()
                     if self.get_motor_tilt_degrees() == 0 and self.get_motor_pan_degrees() == -30:
                         if self.get_orientation() <= 40 and self.get_orientation() >= -40:
                             self.set_kick_right()
-                        elif self.get_orientation() > 40:
-                            #revolve_clockwise:
-                            self.set_pass_right()
+               
                             #########
-                        elif self.get_orientation() < -40:
-                            #revolve_anticlockwise:
-                            self.set_pass_left()
+                       
                             #########
                     elif self.get_motor_tilt_degrees() == 0  and self.get_motor_pan_degrees() == 30:
                         if self.get_orientation() <= 40 and self.get_orientation() >= -40:
                             self.set_kick_left()
-                        elif self.get_orientation() > 40:
-                            #revolve_clockwise:
-                            self.set_pass_right()
-                            #########
-                        elif self.get_orientation() < -40:
-                            #revolve_anticlockwise:
-                            self.set_pass_left()
-                            #########                       
+                            #########                     
                     elif self.get_motor_tilt_degrees() < 70:
                         #self.set_walk_forward_slow((self.get_dist_ball() / 6))
                         self.count_steps += 1
@@ -919,3 +907,4 @@ class Golie(Ordinary):
         else:
             print 'Invalid argument received from referee!'
             print referee
+
