@@ -469,7 +469,7 @@ class NaiveIMU(TreatingRawData):
                     print referee
 
 #############################################################################
-
+#essa e a decisao principal
 class NaiveIMUDecTurning(TreatingRawData):
     " " " Naive class " " "
 
@@ -479,7 +479,7 @@ class NaiveIMUDecTurning(TreatingRawData):
         print 'Naive behavior called with IMU and turning'
         print
         self.kickoff_ctrl = 0 #comecar em zero
-        self.larc_kickoff = 1 #larc nao pode chutar direto e isso e um controle para isso; 1 para larc e 0 para robocup
+        
         
     def decision(self, referee):
 
@@ -498,7 +498,7 @@ class NaiveIMUDecTurning(TreatingRawData):
             print 'ready'
             #new rule: the robot must to enter in the soccer field
             self.set_stand_still()
-            self.larc_kickoff = 1 #larc nao pode chutar direto e isso e um controle para isso; 1 para larc e 0 para robocup
+            
             
             #ele apenas anda, sem procurar a bola. no set ele começa a procurar.
             #talvez seja necessário retirar o if da linha 486, onde ele anda por 20 segundos.
@@ -506,16 +506,15 @@ class NaiveIMUDecTurning(TreatingRawData):
 
             #o ready é de 30s. Se ele estiver andando muito rápido, trocar por walkslow.
 
-          
-#o seguinte deve ser comentado apenas para o larc
-#            if self.ready_walk == 0:
-#                self.ready_walk = 1
-#                self.set_walk_forward()
-#                for __ in np.arange(0,15,0.5):
-#                    time.sleep(0.4)
-#                    if self.get_search_status() == 0:
-#                        break
-#                self.set_stand_still()
+         
+            if self.ready_walk == 0:
+                self.ready_walk = 1
+                self.set_walk_forward()
+                for __ in np.arange(0,15,0.5):
+                    time.sleep(0.4)
+                    if self.get_search_status() == 0:
+                        break
+                self.set_stand_still()
 
 
 
