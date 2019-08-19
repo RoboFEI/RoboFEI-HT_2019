@@ -127,6 +127,9 @@ sudo -H pip install scikit-image
 #Protobuth
 sudo -H pip install protobuf
 
+#Pandas to use in vision.py
+sudo apt -y install python-pandas
+
 #============================Install Opencv 3===================================================================
 light_Green='\e[1;32m'
 NC='\e[0m' # No Color
@@ -169,53 +172,88 @@ sudo make install
 echo "${light_Green}Finalizado${NC}"
 sudo rm  -r ~/OpenCV3
 sleep 1
+
+
+#============================Install Tensorflow================================================================================
+
+
+echo -e "${blue}Install TensorFlow${NC}";
+sudo pip install tensorflow==1.10.1      # for Python 2.7
+#if sudo pip install tensorflow-gpu; then  # Python 2.7;  GPU support
+#	echo -e "${red}TensorFlow succesfully installed";
+#fi
+#else
+#	sudo pip  install --upgrade https://storage.googleapis.com/tensorflow/linux/gpu/tensorflow_gpu-1.3.0-cp27-none-linux_x86_64.whl
+#    Python 2.7
+#fi
+echo -e"${red}Tensorflow succesfully installed"
+
+echo -e "${blue}Install Protoc_3.5.1${NC}";
+mkdir ~/protoc_3.5.1
+cd ~/protoc_3.5.1
+if wget https://github.com/google/protobuf/releases/download/v3.5.1/protoc-3.5.1-linux-x86_64.zip && sudo chmod 775 protoc-3.5.1-linux-x86_64.zip && unzip protoc-3.5.1-linux-x86_64.zip; then
+	echo -e"${red}Protocol buffers succesfully installed"
+fi
+
+#Or run 'sudo pip install protobuf==3.5.1'
+
+
+echo -e "${blue}Clone Models${NC}";
+cd ~/
+git clone https://github.com/tensorflow/models.git
+
+cd models/
+git checkout 3a05570f
+
+echo -e "${blue}Install Models${NC}";
+# From ~/models/research/
+cd ~/models/research/
+	~/protoc_3.5.1/bin/protoc object_detection/protos/*.proto --python_out=.
+echo "export PYTHONPATH=~/models/research/slim:~/models/research/object_detection/utils:~/models/research:\$PYTHONPATH" >> ~/.bashrc;
+
+#-------------------------------------------
+
+sudo apt-get install protobuf-compiler python-pil python-lxml python-tk
+
+#jupyter
+pip install --user jupyter
+
+#contextlib2
+pip install --user contextlib2
+
+#pandas 
+pip install pandas
+
+#matplotlib                   
+sudo python -mpip install matplotlib
+
+#=================================Install LabelImg========================================================================
+
+echo -e "${blue}Clone labelImg${NC}";
+cd ~/
+git clone https://github.com/tzutalin/labelImg
+
+echo -e "${blue}Install labelImg${NC}";
+cd ~/labelImg/
+if sudo -H apt install pyqt4-dev-tools && sudo -H pip install lxml && make qt4py2; then
+	echo -e"${red}labelImg succesfully installed"
+fi
+
+
 #=========================================================================================================================
 
 
 
-#============================Install Caffe================================================================================
-# General Dependencies
-sudo apt -y install --no-install-recommends libboost-all-dev
+#=============================Compile the Control Framework===============================================================
+cd AI/Control/Linux/build_Framework/
+make clean
+make
+#=========================================================================================================================
 
-sudo apt -y install libprotobuf-dev libleveldb-dev libsnappy-dev libhdf5-serial-dev #Retirei a biblioteca libopencv-dev devido a possibilidade de conflito com a versao do opencv instalado
-
-# Remaining dependencies
-sudo apt -y install libgflags-dev libgoogle-glog-dev liblmdb-dev protobuf-compiler
-
-#sudo apt install libopenblas-dev
-
-# BLAS -- for better CPU performance
-sudo apt -y install libatlas-base-dev
-
-#scikit-image
-sudo -H pip install scikit-image
-
-#Protobuth
-sudo -H pip install protobuf
-
-cd
-
-#Usado para o instalação no Ubuntu 16.04
-cd /usr/lib/x86_64-linux-gnu
-sudo ln -sf libhdf5_serial.so libhdf5.so
-sudo ln -sf libhdf5_serial_hl.so libhdf5_hl.so
-cd
-
-#Caffe
-#git clone https://github.com/NVIDIA/caffe.git
-git clone http://github.com/BVLC/caffe.git
-cd caffe
-cp Makefile.config.example Makefile.config
-sed -i 's/.*CPU_ONLY := 1/CPU_ONLY := 1/g' Makefile.config # CPU only
-sed -i 's/.*OPENCV_VERSION := 3/OPENCV_VERSION := 3/' Makefile.config # PENCV_VERSION 3
-#sed -i 's/.*WITH_PYTHON_LAYER := 1/WITH_PYTHON_LAYER := 1/' Makefile.config # WITH_PYTHON_LAYER
-#sed -i 's/.*USE_PKG_CONFIG := 1/USE_PKG_CONFIG := 1/' Makefile.config # USE_PKG_CONFIG
-make -j4
-make test
-make runtest
-make pycaffe
-echo 'export PYTHONPATH=~/caffe/python' >> ~/.bashrc
-echo 'export CAFFE_ROOT=~/caffe' >> ~/.bashrc
+#=============================Compile the Dynamixel Framework of Control process==========================================
+cd ../..
+cd Framework/Framework_Dynamixel/
+make
 #=========================================================================================================================
 
 
