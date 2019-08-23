@@ -83,7 +83,7 @@ class ballStatus():
 				bkb.write_float(Mem,'VISION_PAN_DEG', -60) # Variavel da telemetria
 				print ("Bola a Direita")
 
-		else: 
+		else:
 			if (status ==2):
 				bkb.write_float(Mem,'VISION_PAN_DEG', 60) # Posição da bola
 				print ("Bola a Esquerda")

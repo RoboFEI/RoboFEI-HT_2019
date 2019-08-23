@@ -63,11 +63,11 @@ elif args.naive_imu_dec_turning == True:
 else:
     robot = Ordinary()
 
-
+#time.sleep(30) - Caso não ouça game controller
 #loop
 while True:
-
-    if robot.get_referee_usage() == 'no':
+    print(robot.get_referee_usage())
+    if robot.get_referee_usage() == 'yes':
         robot.decision(robot.get_referee()) #will read the referee 
     else:
         robot.decision(2) #always on play
