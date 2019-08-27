@@ -922,5 +922,5 @@ class Golie(Ordinary):
 					#self.set_stand_still()
 
 		else:
-			print 'Invalid argument received from referee!'
+			print 'Invalid argument received from referee! Não consigo ler nada'
 			print referee
