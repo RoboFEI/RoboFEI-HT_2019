@@ -1,0 +1,34 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../IMU/include/um7/firmware_registers.h
+
+../IMU/include/um7/registers.h
+machine/endian.h
+-
+endian.h
+-
+endian.h
+-
+math.h
+-
+stdint.h
+-
+string.h
+-
+stdexcept
+-
+string
+-
+um7/firmware_registers.h
+../IMU/include/um7/um7/firmware_registers.h
+
+/home/fei/RoboFEI-HT_Debug/AI/IMU/src/registers.cpp
+um7/registers.h
+/home/fei/RoboFEI-HT_Debug/AI/IMU/src/um7/registers.h
+

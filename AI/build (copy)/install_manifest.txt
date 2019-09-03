@@ -1,0 +1,6 @@
+/home/fei/RoboFEI-HT_Debug/AI/build/lib/libblackboard.so
+/home/fei/RoboFEI-HT_Debug/AI/build/lib/libblackboardpy.so
+/home/fei/RoboFEI-HT_Debug/AI/build/lib/liblibcontrol.so
+/home/fei/RoboFEI-HT_Debug/AI/build/lib/libvision.so
+/home/fei/RoboFEI-HT_Debug/AI/build/lib/libcomms.so
+/home/fei/RoboFEI-HT_Debug/AI/build/lib/libregisters.so

@@ -1,0 +1,9 @@
+/home/fei/RoboFEI-HT_Debug/AI/build/Blackboard/CMakeFiles/blackboard.dir
+/home/fei/RoboFEI-HT_Debug/AI/build/Blackboard/CMakeFiles/blackboardpy.dir
+/home/fei/RoboFEI-HT_Debug/AI/build/IMU/CMakeFiles/comms.dir
+/home/fei/RoboFEI-HT_Debug/AI/build/Communication/CMakeFiles/communication.dir
+/home/fei/RoboFEI-HT_Debug/AI/build/Control/CMakeFiles/control.dir
+/home/fei/RoboFEI-HT_Debug/AI/build/IMU/CMakeFiles/imu.dir
+/home/fei/RoboFEI-HT_Debug/AI/build/Control/CMakeFiles/libcontrol.dir
+/home/fei/RoboFEI-HT_Debug/AI/build/IMU/CMakeFiles/registers.dir
+/home/fei/RoboFEI-HT_Debug/AI/build/Vision/CMakeFiles/vision.dir

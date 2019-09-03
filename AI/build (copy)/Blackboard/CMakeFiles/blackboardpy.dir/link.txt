@@ -1,0 +1,1 @@
+/usr/bin/cc  -fPIC    -shared -Wl,-soname,libblackboardpy.so -o libblackboardpy.so CMakeFiles/blackboardpy.dir/blackboard.c.o 

@@ -1,0 +1,42 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../Vision/./Dynamixel/include/dxl_hal.h
+
+../Vision/./Dynamixel/include/dynamixel.h
+stdio.h
+-
+
+/home/fei/RoboFEI-HT_Debug/AI/Vision/Dynamixel/src/dxl_hal.c
+stdio.h
+-
+stdio.h
+-
+string.h
+-
+unistd.h
+-
+fcntl.h
+-
+termios.h
+-
+linux/serial.h
+-
+sys/ioctl.h
+-
+sys/time.h
+-
+dxl_hal.h
+/home/fei/RoboFEI-HT_Debug/AI/Vision/Dynamixel/src/dxl_hal.h
+
+/home/fei/RoboFEI-HT_Debug/AI/Vision/Dynamixel/src/dynamixel.c
+dxl_hal.h
+/home/fei/RoboFEI-HT_Debug/AI/Vision/Dynamixel/src/dxl_hal.h
+dynamixel.h
+/home/fei/RoboFEI-HT_Debug/AI/Vision/Dynamixel/src/dynamixel.h
+

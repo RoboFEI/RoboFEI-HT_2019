@@ -314,7 +314,11 @@ int main(int argc, char **argv)
                 break;
 
                 case 117: //u
-                    actionMove.goalkeeper(stop_gait);
+                    actionMove.goalkeeper_left(stop_gait);
+                break;
+
+                case 121: //y
+                    actionMove.goalkeeper_right(stop_gait);
                 break;
 
                 case 104: //h
@@ -324,9 +328,9 @@ int main(int argc, char **argv)
                 case 122: //z
                     actionMove.goodBye(stop_gait);
                  break;
-                
-                case 120: //z
-                    gaitMove.walk_foward_fast_direct(stop_gait, same_moviment);
+
+                case 120: //w
+                    actionMove.goalkeeper(stop_gait);
                 break;
 
                 case 27: //ESC (stop)

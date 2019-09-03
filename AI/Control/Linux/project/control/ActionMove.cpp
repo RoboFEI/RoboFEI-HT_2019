@@ -136,14 +136,38 @@ void ActionMove::pass_right(CM730 *cm730, bool &stop_gait)
 }
 
 //========================================================================
-//Execute the move action-------------------------------------------------
+//Goleiro caindo para direita-------------------------------------------------
+void ActionMove::goalkeeper_right(bool &stop_gait)
+{
+    write_int(mem, CONTROL_ACTION, 10);
+    write_int(mem, CONTROL_MOVING, 1);
+    std::cout<<" | \e[38;5;45mDefender a bola direita\e[0m"<<std::endl;  //------------------------------TODO
+    move_action(1, 0, stop_gait);    /* Init(stand up) pose */
+    move_action(21, 0, stop_gait);    // colocar o action-script para cair e defender!!!
+    write_int(mem, CONTROL_MOVING, 0);
+}
+
+//========================================================================
+//Goleiro caindo para Esquerda-------------------------------------------------
+void ActionMove::goalkeeper_left(bool &stop_gait)
+{
+    write_int(mem, CONTROL_ACTION, 10);
+    write_int(mem, CONTROL_MOVING, 1);
+    std::cout<<" | \e[38;5;45mDefender a bola esquerda\e[0m"<<std::endl;  //------------------------------TODO
+    move_action(1, 0, stop_gait);    /* Init(stand up) pose */
+    move_action(20, 0, stop_gait);    // colocar o action-script para cair e defender!!!
+    write_int(mem, CONTROL_MOVING, 0);
+}
+
+//========================================================================
+//Goleiro agachando-------------------------------------------------
 void ActionMove::goalkeeper(bool &stop_gait)
 {
     write_int(mem, CONTROL_ACTION, 10);
     write_int(mem, CONTROL_MOVING, 1);
-    std::cout<<" | \e[38;5;45mDefender a bola\e[0m"<<std::endl;  //------------------------------TODO
+    std::cout<<" | \e[38;5;45mGoleiro\e[0m"<<std::endl;  //------------------------------TODO
     move_action(1, 0, stop_gait);    /* Init(stand up) pose */
-    move_action(20, 0, stop_gait);    // colocar o action-script para cair e defender!!!
+    move_action(22, 0, stop_gait);    // colocar o action-script para cair e defender!!!
     write_int(mem, CONTROL_MOVING, 0);
 }
 

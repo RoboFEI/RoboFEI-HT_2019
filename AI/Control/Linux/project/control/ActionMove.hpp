@@ -40,6 +40,10 @@ class ActionMove
 
         void pass_right(CM730 *cm730, bool &stop_gait);
 
+        void goalkeeper_right(bool &stop_gait);
+
+        void goalkeeper_left(bool &stop_gait);
+
         void goalkeeper(bool &stop_gait);
 
         void kick_right_weak(bool &stop_gait);

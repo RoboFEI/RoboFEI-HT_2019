@@ -1,0 +1,1 @@
+/usr/bin/c++       CMakeFiles/imu.dir/src/imu.cpp.o CMakeFiles/imu.dir/src/INIReader.cpp.o CMakeFiles/imu.dir/src/ini.c.o  -o imu -rdynamic ../Blackboard/libblackboard.so -lserial libcomms.so libregisters.so -lrt -lpthread -Wl,-rpath,/home/fei/RoboFEI-HT_Debug/AI/build/Blackboard:/home/fei/RoboFEI-HT_Debug/AI/build/IMU 

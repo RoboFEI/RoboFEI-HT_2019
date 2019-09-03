@@ -181,7 +181,7 @@ class objectDetect():
 
         start3 = time.time()
         contador = 0
-
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         image_np = np.asarray(frame)
 
       # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
@@ -207,7 +207,7 @@ class objectDetect():
         df['scores'] = scores[0]
         df['boxes'] = boxes[0].tolist()
 
-
+        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
 
         if(df['scores'][0]>0.80):
             height, width = frame.shape[:2]

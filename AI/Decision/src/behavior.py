@@ -909,7 +909,7 @@ class Golie(Ordinary):
 					elif self.get_orientation() < -30:
 						#revolve_anticlockwise:
 						#self.set_pass_left()
-						self.set_revolve_around_ball_anticlockwise()
+						self.set_revolve_around_ball_antic-lockwise()
 				elif self.get_motor_tilt_degrees() < 70 and self.get_motor_tilt_degrees() < 15:
 					#self.set_walk_forward_slow((self.get_dist_ball() / 6))
 					self.count_steps += 1

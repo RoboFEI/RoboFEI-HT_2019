@@ -1,0 +1,26 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../Blackboard/include/blackboard.h
+
+/home/fei/RoboFEI-HT_Debug/AI/Blackboard/src/blackboard.cpp
+stdio.h
+-
+unistd.h
+-
+errno.h
+-
+sys/ipc.h
+-
+sys/shm.h
+-
+stdint.h
+-
+blackboard.h
+/home/fei/RoboFEI-HT_Debug/AI/Blackboard/src/blackboard.h
+

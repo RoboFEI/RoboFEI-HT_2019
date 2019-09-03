@@ -1,0 +1,1 @@
+/usr/bin/c++  -fPIC    -shared -Wl,-soname,libvision.so -o libvision.so CMakeFiles/vision.dir/src/vision.cpp.o CMakeFiles/vision.dir/Dynamixel/src/dxl_hal.c.o CMakeFiles/vision.dir/Dynamixel/src/dynamixel.c.o 
