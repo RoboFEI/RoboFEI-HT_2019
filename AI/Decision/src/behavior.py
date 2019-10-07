@@ -156,6 +156,14 @@ class TreatingRawData(object):
         print 'goalkeeperposition'
         self.bkb.write_int(self.mem, 'DECISION_ACTION_A', 10)
 
+    def goalkeeper_left(self):
+        print 'tafarel l'
+        self.bkb.write_int(self.mem, 'DECISION_ACTION_A', 24)
+
+    def goalkeeper_right(self):
+        print 'tarafel r'
+        self.bkb.write_int(self.mem, 'DECISION_ACTION_A', 23)
+
     def set_revolve_around_ball_anticlockwise(self):
         print 'revolve around ball - anticlockwise'
         self.bkb.write_int(self.mem,'DECISION_ACTION_A', 14)
@@ -854,13 +862,13 @@ class Golie(Ordinary):
 			print 'ready'
 			#new rule: the robot must to enter in the soccer field
 			self.set_stand_still()
-			self.set_walk_forward()
-			time.sleep(15)
-			self.set_turn_left()
+			#self.set_walk_forward()
+			#time.sleep(15)
+			#self.set_turn_left()
 			#self.set_turn_right()
-			time.sleep(5)
-			self.set_stand_still()
-			time.sleep(25)
+			#time.sleep(5)
+			#self.set_stand_still()
+			#time.sleep(25)
 
 		elif referee == 12:  #set
 			print 'set'
@@ -874,7 +882,7 @@ class Golie(Ordinary):
 				self.bkb.write_int(self.mem, 'DECISION_ACTION_A', 0) #Writing in the memory
 				self.flag_move_ac=False
 			if self.get_search_status() == 1: #1 - vision lost
-				print 'vision lost'
+				print 'where r u ?'
 				#self.go_back_and_align()
 				self.goalkeeper()
 				#self.set_stand_still()
@@ -883,44 +891,60 @@ class Golie(Ordinary):
 				#self.set_turn_right()
 			elif self.get_search_status() == 0: #0 - object found
 				#align to the ball
-				while self.get_motor_pan_degrees() == 60 and self.get_search_status() == 0:
-					if self.get_motor_tilt_degrees() < 70 and self.get_motor_tilt_degrees() < 15:
-						self.set_sidle_left()
-					elif self.get_motor_tilt_degrees() < 15:
-						#put throw yourself here
-						delay(10)
-				while self.get_motor_pan_degrees() == -60 and self.get_search_status() == 0:
-					if self.get_motor_tilt_degrees() < 70 and self.get_motor_tilt_degrees() < 15:
-						self.set_sidle_right()
-					elif self.get_motor_tilt_degrees() < 15:
-						#put throw yourself here too
-						delay(10)
-				self.set_stand_still()
-				if self.get_motor_tilt_degrees() == 0 and self.get_motor_pan_degrees() == -30:
-					if self.get_orientation() <= 30 and self.get_orientation() >= -30:
-						self.set_kick_right()
-				elif self.get_motor_tilt_degrees() == 0  and self.get_motor_pan_degrees() == 30:
-					if self.get_orientation() <= 30 and self.get_orientation() >= -30:
-						self.set_kick_left()
-					elif self.get_orientation() > 30:
-						#revolve_clockwise:
-						#self.set_pass_right()
-						self.set_revolve_around_ball_clockwise()
-					elif self.get_orientation() < -30:
-						#revolve_anticlockwise:
-						#self.set_pass_left()
-						self.set_revolve_around_ball_antic-lockwise()
-				elif self.get_motor_tilt_degrees() < 70 and self.get_motor_tilt_degrees() < 15:
-					#self.set_walk_forward_slow((self.get_dist_ball() / 6))
-					self.count_steps += 1
-					print 'steps: ',self.count_steps
+				if self.get_motor_pan_degrees() == -60:
+					#if self.get_motor_tilt_degrees() == 70:
+						#self.set_sidle_left()
+					if self.get_motor_tilt_degrees() <= 45:
+						print 'ready to left tafarel'
+						self.goalkeeper_right()
+						time.sleep(6)
+				elif self.get_motor_pan_degrees() == -30:
+					if self.get_motor_tilt_degrees() <= 45:
+						print 'ready to tafarel'
+						self.goalkeeper()
+					elif self.get_motor_tilt_degrees() == 0:
+						if self.get_orientation() <= 30 and self.get_orientation() >= -30:
+							self.goalkeeper()
+							time.sleep(1)
+							self.set_kick_right()
+						elif self.get_orientation() > 30:
+							#revolve_clockwise:
+							#self.set_pass_right()
+							self.set_revolve_around_ball_clockwise()
+						elif self.get_orientation() < -30:
+							#revolve_anticlockwise:
+							#self.set_pass_left()
+							self.set_revolve_around_ball_anticlockwise()
+				elif self.get_motor_pan_degrees() == 60:
+					#if self.get_motor_tilt_degrees() == 70:
+						#self.set_sidle_left()
+					if self.get_motor_tilt_degrees() <= 45:
+						print 'ready to left tafarel'
+						self.goalkeeper_left()
+						time.sleep(6)
+				elif self.get_motor_pan_degrees() == 30:
+					if self.get_motor_tilt_degrees() <= 45:
+						print 'ready to tafarel'
+						self.goalkeeper()
+					elif self.get_motor_tilt_degrees() == 0:
+						if self.get_orientation() <= 30 and self.get_orientation() >= -30:
+							self.goalkeeper()
+							time.sleep(1)
+							self.set_kick_left()
+						elif self.get_orientation() > 30:
+							#revolve_clockwise:
+							#self.set_pass_right()
+							self.set_revolve_around_ball_clockwise()
+						elif self.get_orientation() < -30:
+							#revolve_anticlockwise:
+							#self.set_pass_left()
+							self.set_revolve_around_ball_anticlockwise()
 				else:
-					self.go_back_and_align()
+					#self.go_back_and_align()
 					#self.set_stand_still()
 					self.goalkeeper()
 					#time.sleep(0.5)
 					#self.set_stand_still()
-
 		else:
 			print 'Invalid argument received from referee! Não consigo ler nada'
 			print referee

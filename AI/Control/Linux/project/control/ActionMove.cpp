@@ -139,7 +139,7 @@ void ActionMove::pass_right(CM730 *cm730, bool &stop_gait)
 //Goleiro caindo para direita-------------------------------------------------
 void ActionMove::goalkeeper_right(bool &stop_gait)
 {
-    write_int(mem, CONTROL_ACTION, 10);
+    write_int(mem, CONTROL_ACTION, 23);
     write_int(mem, CONTROL_MOVING, 1);
     std::cout<<" | \e[38;5;45mDefender a bola direita\e[0m"<<std::endl;  //------------------------------TODO
     move_action(1, 0, stop_gait);    /* Init(stand up) pose */
@@ -151,7 +151,7 @@ void ActionMove::goalkeeper_right(bool &stop_gait)
 //Goleiro caindo para Esquerda-------------------------------------------------
 void ActionMove::goalkeeper_left(bool &stop_gait)
 {
-    write_int(mem, CONTROL_ACTION, 10);
+    write_int(mem, CONTROL_ACTION, 24);
     write_int(mem, CONTROL_MOVING, 1);
     std::cout<<" | \e[38;5;45mDefender a bola esquerda\e[0m"<<std::endl;  //------------------------------TODO
     move_action(1, 0, stop_gait);    /* Init(stand up) pose */

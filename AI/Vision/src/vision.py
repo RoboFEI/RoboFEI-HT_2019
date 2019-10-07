@@ -174,7 +174,7 @@ if __name__ == '__main__':
 		thread_DNN()
 		if cv2.waitKey(1) & 0xFF == ord('q'):
 			break
-#		time.sleep(0.01)
+		time.sleep(0.01)
 	vcap.stop()
 	cv2.destroyAllWindows()
 
